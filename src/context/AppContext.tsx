@@ -1,0 +1,909 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import confetti from 'canvas-confetti';
+import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
+import { CREDIT_PACKAGES } from '../data/mockData';
+import { supabase } from '../lib/supabaseClient';
+import { getSongCreditCost } from '../utils/formatters';
+
+const VENUE_STORAGE_KEY = 'muzikors_active_venue';
+
+interface AppContextType {
+  user: UserProfile | null;
+  activeModal: ModalType;
+  activeVenue: Venue | null;
+  kafeIdParam: string | null;
+  isVenueBound: boolean;
+  isVenueActive: boolean;
+  nowPlaying: Track | null;
+  queue: Track[];
+  cooldown: CooldownState;
+  toastMessage: string | null;
+  loginPromptReason: string | null;
+  audioProgress: number;
+  isPlayingAudio: boolean;
+  isSpotifyConnected: boolean;
+  spotifyToken: string | null;
+  connectSpotify: () => void;
+  disconnectSpotify: () => void;
+  openModal: (modal: ModalType) => void;
+  openProtectedModal: (modal: ModalType, reason?: string) => void;
+  closeModal: () => void;
+  loginWithProvider: (provider: 'google' | 'spotify') => Promise<void>;
+  logout: () => Promise<void>;
+  topUpCredits: (packageId: string) => void;
+  requestTrack: (track: Track) => Promise<boolean>;
+  voteTrack: (trackId: string) => void;
+  bindVenueById: (kafeId: string) => void;
+  deleteAccount: () => void;
+  showToast: (msg: string) => void;
+  toggleAudioPlay: () => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const COOLDOWN_DURATION_SECONDS = 180;
+const DEFAULT_CREDITS = 10;
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [activeModal, setActiveModal] = useState<ModalType>('none');
+  const [pendingModal, setPendingModal] = useState<ModalType | null>(null);
+  const [loginPromptReason, setLoginPromptReason] = useState<string | null>(null);
+  const [activeVenue, setActiveVenue] = useState<Venue | null>(null);
+  const [kafeIdParam, setKafeIdParam] = useState<string | null>(null);
+  const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
+  const [queue, setQueue] = useState<Track[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSpotifyConnected, setIsSpotifyConnected] = useState<boolean>(false);
+  const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
+  const [audioProgress, setAudioProgress] = useState<number>(0);
+  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  const [livePlaybackState, setLivePlaybackState] = useState<{
+    title: string;
+    artist: string;
+    album_art: string;
+    progress_ms: number;
+    duration_ms: number;
+    is_playing: boolean;
+    updated_at: number;
+  } | null>(null);
+  const [cooldown, setCooldown] = useState<CooldownState>({
+    active: false,
+    remainingSeconds: 0,
+    lastRequestedAt: null,
+  });
+
+  const userIdRef = useRef<string | null>(null);
+
+  // Derived venue state
+  const isVenueBound = activeVenue !== null;
+  const isVenueActive = activeVenue?.is_active !== false; // true if active or undefined
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  }, []);
+
+  // ── FETCH PROFILE STATS & CREDITS DIRECTLY FROM DB ─────────────────────────
+  const fetchProfileCredits = useCallback(async (userId: string): Promise<number> => {
+    if (!supabase) return DEFAULT_CREDITS;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits, lifetime_credits, total_songs_requested, is_spotify_connected')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('[Credits] DB fetch error:', error.message);
+        return DEFAULT_CREDITS;
+      }
+
+      if (data?.is_spotify_connected) {
+        setIsSpotifyConnected(true);
+        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
+      }
+
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              credits: typeof data?.credits === 'number' ? data.credits : prev.credits,
+              totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
+              lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits ?? data?.credits ?? 10,
+              isSpotifyConnected: data?.is_spotify_connected ?? prev.isSpotifyConnected,
+            }
+          : null
+      );
+
+      return typeof data?.credits === 'number' ? data.credits : DEFAULT_CREDITS;
+    } catch (err) {
+      console.error('[Credits] Unexpected error:', err);
+      return DEFAULT_CREDITS;
+    }
+  }, []);
+
+  // ── BIND VENUE: fetch from Supabase, persist to localStorage ─────────────
+  const bindVenueById = useCallback(async (kafeId: string | number) => {
+    if (!supabase) return;
+    try {
+      const rawStr = String(kafeId ?? '').trim();
+      const parsedVenueId = rawStr ? parseInt(rawStr, 10) : null;
+
+      if (!parsedVenueId || isNaN(parsedVenueId) || parsedVenueId <= 0) {
+        console.warn('[Venue] Invalid parsed venue ID:', kafeId);
+        setActiveVenue(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(VENUE_STORAGE_KEY);
+        }
+        showToast('Bir mekana bağlı değilsiniz.');
+        return;
+      }
+
+      // Query Supabase using maybeSingle() to safely handle no rows without throwing errors
+      const { data, error } = await supabase
+        .from('venues')
+        .select('*')
+        .eq('id', parsedVenueId)
+        .maybeSingle();
+
+      if (error || !data) {
+        console.error('[Venue] Not found in DB for parsed id:', parsedVenueId, error?.message);
+        setActiveVenue(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(VENUE_STORAGE_KEY);
+        }
+        showToast('Bir mekana bağlı değilsiniz.');
+        return;
+      }
+
+      // Safe property check for is_active
+      const isActive = data.is_active ?? true;
+
+      const venue: Venue = {
+        id: String(data.id),
+        name: data.venue_name || `Mekan #${data.id}`,
+        venue_name: data.venue_name,
+        address: data.full_address || data.district || '',
+        city: data.city || '',
+        district: data.district || '',
+        distance: '',
+        logo: 'bar',
+        coverImage: '',
+        activeListeners: 0,
+        currentSongTitle: '',
+        currentSongArtist: '',
+        slug: data.slug,
+        is_active: isActive,
+        is_paused: data.is_paused === true,
+        explicit_filter_enabled: data.explicit_filter_enabled === true,
+        full_address: data.full_address,
+        contact_phone: data.contact_phone,
+        total_earnings: data.total_earnings,
+      };
+
+      setActiveVenue(venue);
+
+      // Persist to localStorage for page refreshes
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(VENUE_STORAGE_KEY, JSON.stringify(venue));
+      }
+
+      if (isActive === false) {
+        showToast(`${data.venue_name} şu an hizmet vermemektedir.`);
+      } else {
+        showToast(`${data.venue_name} mekanına başarıyla bağlandınız!`);
+      }
+    } catch (err) {
+      console.error('[Venue] bindVenueById exception:', err);
+      setActiveVenue(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(VENUE_STORAGE_KEY);
+      }
+      showToast('Bir mekana bağlı değilsiniz.');
+    }
+  }, [showToast]);
+
+  // ── ONBOARDING ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const seen = sessionStorage.getItem('muzikors_onboarding_shown');
+    if (!seen && !user) {
+      setActiveModal('howitworks');
+      sessionStorage.setItem('muzikors_onboarding_shown', 'true');
+    }
+  }, [user]);
+
+  // ── URL PARAMS + LOCALSTORAGE VENUE RESTORE ───────────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const rawV = searchParams.get('v') || searchParams.get('venue') || searchParams.get('kafe_id') || searchParams.get('venue_id');
+    const spotifyConnected = searchParams.get('spotify_connected');
+    const authError = searchParams.get('error') || searchParams.get('spotify_error');
+
+    if (authError) {
+      showToast('Giriş yapılamadı. Lütfen tekrar deneyin.');
+      setUser(null);
+    }
+
+    if (rawV) {
+      const parsedVenueId = parseInt(rawV.trim(), 10);
+      if (parsedVenueId && !isNaN(parsedVenueId) && parsedVenueId > 0) {
+        setKafeIdParam(String(parsedVenueId));
+        bindVenueById(parsedVenueId);
+      } else {
+        showToast('Bir mekana bağlı değilsiniz.');
+        setActiveVenue(null);
+        localStorage.removeItem(VENUE_STORAGE_KEY);
+      }
+    } else {
+      // Restore venue from localStorage if no URL param
+      const stored = localStorage.getItem(VENUE_STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed: Venue = JSON.parse(stored);
+          if (parsed && parsed.id) {
+            setActiveVenue(parsed);
+          }
+        } catch {
+          localStorage.removeItem(VENUE_STORAGE_KEY);
+        }
+      }
+    }
+
+    const isConnected = spotifyConnected === 'true' || localStorage.getItem('is_spotify_connected') === 'true';
+    if (isConnected) {
+      setIsSpotifyConnected(true);
+      localStorage.setItem('is_spotify_connected', 'true');
+      if (spotifyConnected === 'true') showToast('Spotify Hesabınız Başarıyla Bağlandı!');
+      const match = document.cookie.match(/(^| )spotify_user_token=([^;]+)/);
+      if (match) setSpotifyToken(match[2]);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── AUTH SESSION HANDLER ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!supabase) return;
+
+    const handleSession = async (session: any) => {
+      if (!session?.user) { setUser(null); userIdRef.current = null; return; }
+
+      const authUser = session.user;
+      const fullName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Kullanici';
+      const avatarUrl = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || '';
+      const emailStr = authUser.email || '';
+      const provider: 'google' | 'spotify' = authUser.app_metadata?.provider === 'spotify' ? 'spotify' : 'google';
+
+      userIdRef.current = authUser.id;
+
+      if (supabase) {
+        await supabase.from('profiles').upsert(
+          {
+            id: authUser.id,
+            full_name: fullName,
+            avatar_url: avatarUrl,
+            email: emailStr,
+            is_spotify_connected: provider === 'spotify',
+          },
+          { onConflict: 'id', ignoreDuplicates: true }
+        );
+      }
+
+      const liveCredits = await fetchProfileCredits(authUser.id);
+
+      setUser((prev) => ({
+        id: authUser.id,
+        name: fullName,
+        username: '@' + (emailStr.split('@')[0] || 'kullanici'),
+        email: emailStr,
+        avatar: avatarUrl,
+        credits: liveCredits,
+        totalSongsRequested: prev?.totalSongsRequested ?? 0,
+        lifetimeCredits: prev?.lifetimeCredits ?? liveCredits,
+        isSpotifyConnected: provider === 'spotify' || prev?.isSpotifyConnected,
+        loginMethod: provider,
+      }));
+
+      if (provider === 'spotify') {
+        setIsSpotifyConnected(true);
+        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
+      }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => handleSession(session));
+    return () => subscription.unsubscribe();
+  }, [fetchProfileCredits]);
+
+  // ── SUPABASE REALTIME: PROFILES ───────────────────────────────────────────
+  useEffect(() => {
+    if (!supabase || !user?.id) return;
+    const channel = supabase
+      .channel(`profiles:${user.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
+        const row = payload.new as any;
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                credits: typeof row?.credits === 'number' ? row.credits : prev.credits,
+                totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
+                lifetimeCredits: typeof row?.lifetime_credits === 'number' ? row.lifetime_credits : prev.lifetimeCredits,
+                isSpotifyConnected: row?.is_spotify_connected === true ? true : prev.isSpotifyConnected,
+              }
+            : null
+        );
+        if (row?.is_spotify_connected === true) {
+          setIsSpotifyConnected(true);
+          if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
+  // ── SUPABASE REALTIME: SONG QUEUE (venue-isolated) ────────────────────────
+  useEffect(() => {
+    if (!supabase) return;
+
+    // Helper: get target integer venue_id from activeVenue or localStorage
+    const getActiveVenueIntId = (): number | null => {
+      if (activeVenue?.id) {
+        const p = parseInt(activeVenue.id, 10);
+        if (!isNaN(p)) return p;
+      }
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(VENUE_STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed?.id) {
+              const pid = parseInt(parsed.id, 10);
+              if (!isNaN(pid)) return pid;
+            }
+          } catch {}
+        }
+      }
+      return null;
+    };
+
+    const targetVenueId = getActiveVenueIntId();
+
+    // If user is not bound to a cafe, clear queue state and DO NOT query global queue
+    if (!targetVenueId) {
+      setNowPlaying(null);
+      setQueue([]);
+      return;
+    }
+
+    const fetchQueue = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('queue')
+          .select('*')
+          .eq('venue_id', targetVenueId)
+          .in('status', ['playing', 'pending', 'queued'])
+          .order('votes', { ascending: false })
+          .order('created_at', { ascending: true });
+
+        if (error) { console.error('[Queue fetch error]', error.message); return; }
+        if (!data || data.length === 0) { setNowPlaying(null); setQueue([]); return; }
+
+        // Filter finished songs or zombie tracks
+        const validRows: any[] = [];
+        for (const r of data) {
+          if (r.status === 'playing' && r.started_at) {
+            const elapsedMs = Date.now() - new Date(r.started_at).getTime();
+            const durationMs = r.duration_ms ?? 210000;
+            if (elapsedMs >= durationMs) {
+              console.log('[Queue] Updating finished song to played status in DB:', r.id);
+              await supabase.from('queue').update({ status: 'played' }).eq('id', r.id);
+              continue;
+            }
+          }
+          validRows.push(r);
+        }
+
+        if (validRows.length === 0) {
+          setNowPlaying(null);
+          setQueue([]);
+          return;
+        }
+
+        let playingRow = validRows.find((r) => r.status === 'playing');
+        let upcomingRows = validRows.filter((r) => r.id !== playingRow?.id && (r.status === 'queued' || r.status === 'pending'));
+
+        // Promote top queued song if no song is playing
+        if (!playingRow && upcomingRows.length > 0) {
+          playingRow = upcomingRows[0];
+          upcomingRows = upcomingRows.slice(1);
+          const nowIso = new Date().toISOString();
+          playingRow.status = 'playing';
+          playingRow.started_at = nowIso;
+          await supabase.from('queue').update({ status: 'playing', started_at: nowIso }).eq('id', playingRow.id);
+        } else if (playingRow && !playingRow.started_at) {
+          const nowIso = new Date().toISOString();
+          playingRow.started_at = nowIso;
+          await supabase.from('queue').update({ started_at: nowIso }).eq('id', playingRow.id);
+        }
+
+        const toTrack = (r: any): Track => {
+          const cover = r.album_cover || '';
+          return {
+            id: r.id,
+            title: r.song_name || r.song_title || '',
+            artist: r.artist_name || r.artist || '',
+            album: '',
+            albumCover: cover,
+            coverUrl: cover,
+            album_art: cover,
+            spotifyUri: r.spotify_uri,
+            durationMs: r.duration_ms ?? 210000,
+            duration: Math.round((r.duration_ms ?? 210000) / 1000),
+            creditCost: r.credits_spent ?? 10,
+            votes: r.votes ?? 1,
+            requestedBy: r.requested_by_name || 'Misafir',
+            requestedAt: 'Sirada',
+            startedAt: r.started_at,
+            isPlaying: r.status === 'playing',
+          };
+        };
+
+        if (playingRow) {
+          setNowPlaying({ ...toTrack(playingRow), requestedAt: 'Canli' });
+          setIsPlayingAudio(true);
+        } else {
+          setNowPlaying(null);
+          setIsPlayingAudio(false);
+        }
+
+        setQueue(upcomingRows.map(toTrack));
+      } catch (err) {
+        console.error('[Queue fetch exception]', err);
+        setNowPlaying(null); setQueue([]);
+      }
+    };
+
+    fetchQueue();
+
+    // Unified zero-latency realtime channel for venue state, queue events, and playback broadcast
+    const venueChannel = supabase
+      .channel(`realtime_venue_${targetVenueId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'venues',
+          filter: `id=eq.${targetVenueId}`,
+        },
+        (payload) => {
+          if (payload.new) {
+            const row = payload.new as any;
+            setActiveVenue((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    is_active: row.is_active ?? prev.is_active,
+                    is_paused: row.is_paused === true,
+                    explicit_filter_enabled: row.explicit_filter_enabled === true,
+                  }
+                : null
+            );
+          }
+        }
+      )
+      .on('broadcast', { event: 'playback_state' }, ({ payload }) => {
+        if (payload) {
+          setLivePlaybackState(payload);
+        }
+      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'queue',
+          filter: `venue_id=eq.${targetVenueId}`,
+        },
+        () => {
+          fetchQueue(); // Instant refresh on skip, pause, or new song request
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(venueChannel);
+    };
+  }, [activeVenue?.id]); // Re-subscribe when venue changes
+
+  // Update nowPlaying when livePlaybackState changes if no Muzikors queue song is active
+  useEffect(() => {
+    if (!livePlaybackState) return;
+    if (!nowPlaying || nowPlaying.id === 'spotify-bg') {
+      setNowPlaying({
+        id: 'spotify-bg',
+        title: livePlaybackState.title || 'Mekan Fon Müziği',
+        artist: livePlaybackState.artist || 'Muzikors Yayın',
+        album: '',
+        albumCover: livePlaybackState.album_art || '',
+        coverUrl: livePlaybackState.album_art || '',
+        album_art: livePlaybackState.album_art || '',
+        durationMs: livePlaybackState.duration_ms || 210000,
+        duration: Math.round((livePlaybackState.duration_ms || 210000) / 1000),
+        creditCost: 0,
+        votes: 0,
+        requestedBy: 'Mekan Fon Müziği',
+        requestedAt: 'Canli',
+        isPlaying: livePlaybackState.is_playing,
+      });
+      setIsPlayingAudio(livePlaybackState.is_playing);
+    }
+  }, [livePlaybackState]);
+
+  // ── AUDIO PROGRESS TIMER & HARD DELETE FINISHED SONGS ────────────────────
+  useEffect(() => {
+    if (!isPlayingAudio || !nowPlaying) return;
+
+    const timer = setInterval(() => {
+      let elapsedSec = 0;
+
+      if (nowPlaying.id === 'spotify-bg' && livePlaybackState) {
+        const elapsedMs = livePlaybackState.progress_ms + (livePlaybackState.is_playing ? Date.now() - livePlaybackState.updated_at : 0);
+        elapsedSec = Math.min(Math.round(livePlaybackState.duration_ms / 1000), Math.floor(elapsedMs / 1000));
+      } else if (nowPlaying.startedAt) {
+        const elapsedMs = Math.max(0, Date.now() - new Date(nowPlaying.startedAt).getTime());
+        elapsedSec = Math.floor(elapsedMs / 1000);
+      } else {
+        setAudioProgress((prev) => prev + 1);
+        return;
+      }
+
+      setAudioProgress(elapsedSec);
+      const trackDurationSec = nowPlaying.duration ?? 180;
+
+      if (nowPlaying.id !== 'spotify-bg' && elapsedSec >= trackDurationSec) {
+        if (supabase && nowPlaying.id && !nowPlaying.id.startsWith('req-')) {
+          console.log('[Playback] Hard deleting finished song from Supabase:', nowPlaying.id);
+          supabase.from('queue').delete().eq('id', nowPlaying.id);
+        }
+
+        if (queue.length > 0) {
+          const next = queue[0];
+          const nowIso = new Date().toISOString();
+          if (supabase && next.id && !next.id.startsWith('req-')) {
+            supabase.from('queue').update({ status: 'playing', started_at: nowIso }).eq('id', next.id);
+          }
+          setNowPlaying({ ...next, startedAt: nowIso, isPlaying: true });
+          setQueue((q) => q.slice(1));
+          setAudioProgress(0);
+        } else {
+          setNowPlaying(null);
+          setIsPlayingAudio(false);
+          setAudioProgress(0);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isPlayingAudio, nowPlaying, queue, livePlaybackState]);
+
+  // ── COOLDOWN TIMER ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!cooldown.active || cooldown.remainingSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev.remainingSeconds <= 1) return { active: false, remainingSeconds: 0, lastRequestedAt: prev.lastRequestedAt };
+        return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown.active, cooldown.remainingSeconds]);
+
+  const openModal = useCallback((modal: ModalType) => { setLoginPromptReason(null); setActiveModal(modal); }, []);
+  const openProtectedModal = useCallback((modal: ModalType, reason?: string) => {
+    if (!user) { setPendingModal(modal); setLoginPromptReason(reason || 'Devam etmek icin giris yapin'); setActiveModal('login'); return; }
+    setActiveModal(modal);
+  }, [user]);
+  const closeModal = useCallback(() => { setActiveModal('none'); setPendingModal(null); setLoginPromptReason(null); }, []);
+
+  const connectSpotify = useCallback(() => {
+    if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
+    setIsSpotifyConnected(true);
+    if (user?.id && supabase) supabase.from('profiles').update({ is_spotify_connected: true }).eq('id', user.id);
+    window.location.href = '/api/spotify/user-login';
+  }, [user?.id]);
+
+  const disconnectSpotify = useCallback(() => {
+    setIsSpotifyConnected(false); setSpotifyToken(null);
+    if (typeof window !== 'undefined') localStorage.removeItem('is_spotify_connected');
+    if (user?.id && supabase) supabase.from('profiles').update({ is_spotify_connected: false }).eq('id', user.id);
+    document.cookie = 'spotify_user_token=; Max-Age=0; path=/;';
+    showToast('Spotify hesabi baglantisi kesildi.');
+  }, [user?.id, showToast]);
+
+  const loginWithProvider = useCallback(async (provider: 'google' | 'spotify') => {
+    if (!supabase) return;
+    const redirectUrl = 'https://muzikors.com.tr/auth/callback';
+    try {
+      if (provider === 'spotify') {
+        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'spotify',
+          options: {
+            redirectTo: redirectUrl,
+            scopes: 'user-read-private user-read-email streaming user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-read',
+          },
+        });
+        if (error) { console.error('[OAuth Spotify]', error); showToast('Giris yapilamadi.'); }
+      } else {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: redirectUrl },
+        });
+        if (error) { console.error('[OAuth Google]', error); showToast('Giris yapilamadi.'); }
+      }
+    } catch (err) { console.error('[OAuth]', err); showToast('Giris yapilamadi.'); }
+  }, [showToast]);
+
+  const logout = useCallback(async () => {
+    if (supabase) await supabase.auth.signOut();
+    setUser(null); userIdRef.current = null; setIsSpotifyConnected(false);
+    if (typeof window !== 'undefined') localStorage.removeItem('is_spotify_connected');
+    showToast('Cikis yapildi.'); closeModal();
+  }, [showToast, closeModal]);
+
+  const topUpCredits = useCallback(async (packageId: string) => {
+    if (!user) { openProtectedModal('topup'); return; }
+    const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
+    if (!pkg) return;
+    const totalAdded = pkg.credits + pkg.bonusCredits;
+    const liveCredits = await fetchProfileCredits(user.id);
+    const newBalance = liveCredits + totalAdded;
+    const newLifetime = (user.lifetimeCredits || liveCredits) + totalAdded;
+
+    if (supabase) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ credits: newBalance, lifetime_credits: newLifetime })
+        .eq('id', user.id);
+      if (error) { console.error('[TopUp]', error); showToast('Kredi yuklenemedi.'); return; }
+    }
+
+    setUser((prev) => prev ? { ...prev, credits: newBalance, lifetimeCredits: newLifetime } : null);
+    confetti({ particleCount: 100, spread: 80, origin: { y: 0.7 }, colors: ['#D4AF37', '#E5A93B', '#FFFFFF'] });
+    showToast(`+${totalAdded} Kredi hesabiniza eklendi.`);
+    closeModal();
+  }, [user, fetchProfileCredits, openProtectedModal, showToast, closeModal]);
+
+  // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
+  const requestTrack = useCallback(async (track: Track): Promise<boolean> => {
+    if (!user) { openProtectedModal('search', 'Sarki eklemek icin giris yapin'); return false; }
+
+    // Venue guard
+    if (!activeVenue) {
+      showToast('Şarkı istemek için önce bir QR kod okutun!');
+      return false;
+    }
+    if (activeVenue.is_active === false) {
+      showToast('Bu mekan şu an hizmet vermemektedir.');
+      return false;
+    }
+
+    if (activeVenue.explicit_filter_enabled === true && (track.explicit === true || (track as any).is_explicit === true)) {
+      showToast('Bu mekanda küfürlü / sansürsüz şarkı talebi engellenmiştir.');
+      return false;
+    }
+
+    const trackDurationMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 210000);
+    const requiredCredits = getSongCreditCost(trackDurationMs);
+
+    if (requiredCredits === null) {
+      showToast('7 dakikadan uzun sarkilar mekan akisi icin eklenemez!');
+      return false;
+    }
+
+    if (cooldown.active) {
+      const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
+      showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
+    }
+
+    const liveCredits = await fetchProfileCredits(user.id);
+    if (liveCredits < requiredCredits) {
+      showToast(`Bu sarki icin ${requiredCredits} kredi gerekiyor. Yetersiz bakiye!`);
+      openModal('topup'); return false;
+    }
+
+    // ── FINANCIAL SPLIT CALCULATION ──────────────────────────────────────
+    const taxAmount = Math.round(requiredCredits * 0.20 * 100) / 100;       // %20 vergi
+    const remaining = requiredCredits - taxAmount;                            // %80 net
+    const venueAmount = Math.round(remaining * 0.50 * 100) / 100;            // %40 kafe payı
+    const adminAmount = Math.round(remaining * 0.50 * 100) / 100;            // %40 platform payı
+    // ─────────────────────────────────────────────────────────────────────
+
+    const venueId = parseInt(activeVenue.id, 10);
+    const targetSpotifyUri = track.spotifyUri || `spotify:track:${track.id}`;
+
+    // ── DUPLICATE TRACK CHECK ────────────────────────────────────────────
+    if (supabase) {
+      const { data: existingTrack } = await supabase
+        .from('queue')
+        .select('id, status')
+        .eq('venue_id', venueId)
+        .eq('spotify_uri', targetSpotifyUri)
+        .in('status', ['pending', 'queued', 'playing'])
+        .maybeSingle();
+
+      if (existingTrack) {
+        showToast('Bu şarkı zaten sırada veya çalıyor!');
+        return false;
+      }
+    }
+
+    const newCredits = liveCredits - requiredCredits;
+    const newTotalRequested = (user.totalSongsRequested || 0) + 1;
+
+    // Deduct credits from profile
+    if (supabase) {
+      const { error: creditErr } = await supabase
+        .from('profiles')
+        .update({ credits: newCredits, total_songs_requested: newTotalRequested })
+        .eq('id', user.id);
+      if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi guncellenemedi.'); return false; }
+    }
+
+    setUser((prev) => prev ? { ...prev, credits: newCredits, totalSongsRequested: newTotalRequested } : null);
+
+    if (supabase) {
+      // Immutable log record
+      await supabase.from('song_requests_log').insert([{ user_id: user.id }]);
+
+      // Insert into venue-isolated queue (status = pending/queued, started_at = null, let Kafe Paneli master clock trigger)
+      const { error: queueErr } = await supabase.from('queue').insert({
+        song_name: track.title,
+        artist_name: track.artist,
+        album_cover: track.albumCover || track.coverUrl || track.album_art || '',
+        spotify_uri: targetSpotifyUri,
+        duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
+        requested_by_user_id: user.id,
+        requested_by_name: user.name,
+        status: 'pending',
+        started_at: null,
+        votes: 1,
+        credits_spent: requiredCredits,
+        venue_id: venueId,
+      });
+
+      if (queueErr) {
+        console.error('[requestTrack queue]', queueErr.message);
+        // Refund credits
+        if (supabase) await supabase.from('profiles').update({ credits: liveCredits }).eq('id', user.id);
+        setUser((prev) => prev ? { ...prev, credits: liveCredits } : null);
+        showToast('Sarki eklenemedi.'); return false;
+      }
+
+      // Insert financial record into song_payments
+      const { error: paymentErr } = await supabase.from('song_payments').insert({
+        song_name: track.title,
+        artist_name: track.artist,
+        venue_id: venueId,
+        total_credits: requiredCredits,
+        tax_amount: taxAmount,
+        venue_amount: venueAmount,
+        admin_amount: adminAmount,
+      });
+      if (paymentErr) {
+        console.error('[requestTrack payment]', paymentErr.message);
+      }
+
+      // Increment venue total_earnings
+      if (venueId) {
+        await supabase.rpc('increment_venue_earnings', {
+          venue_id_param: venueId,
+          amount_param: venueAmount,
+        }).then(({ error }) => {
+          if (error) {
+            // Fallback: manual increment
+            supabase
+              .from('venues')
+              .select('total_earnings')
+              .eq('id', venueId)
+              .single()
+              .then(({ data }) => {
+                const current = Number(data?.total_earnings || 0);
+                supabase.from('venues').update({ total_earnings: current + venueAmount }).eq('id', venueId);
+              });
+          }
+        });
+      }
+    }
+
+    const newTrack: Track = {
+      ...track,
+      id: `req-${Date.now()}`,
+      votes: 1,
+      requestedBy: user.name,
+      requestedByAvatar: user.avatar,
+      requestedAt: 'Simdi',
+      startedAt: undefined,
+    };
+
+    setQueue((prev) => [...prev, newTrack]);
+    setCooldown({ active: true, remainingSeconds: COOLDOWN_DURATION_SECONDS, lastRequestedAt: Date.now() });
+    confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
+    showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
+  }, [user, cooldown, nowPlaying, activeVenue, fetchProfileCredits, openProtectedModal, openModal, showToast, closeModal]);
+
+  const voteTrack = useCallback(async (trackId: string) => {
+    if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
+
+    let currentVotesForUser = 0;
+    if (supabase) {
+      const { data: userVoteRow } = await supabase
+        .from('song_user_votes')
+        .select('vote_count')
+        .eq('user_id', user.id)
+        .eq('song_id', trackId)
+        .maybeSingle();
+
+      currentVotesForUser = userVoteRow?.vote_count ?? 0;
+    }
+
+    if (currentVotesForUser >= 5) {
+      showToast('Bu sarkiyi en fazla 5 kez meganebilirsiniz.');
+      return;
+    }
+
+    const liveCredits = await fetchProfileCredits(user.id);
+    if (liveCredits < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
+
+    const newCredits = liveCredits - 1;
+    const newVotesForUser = currentVotesForUser + 1;
+
+    if (supabase) {
+      await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+      await supabase.from('song_user_votes').upsert(
+        { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
+        { onConflict: 'user_id,song_id' }
+      );
+      const { data: voteData } = await supabase.from('queue').select('votes').eq('id', trackId).single();
+      if (voteData) {
+        await supabase.from('queue').update({ votes: (voteData.votes ?? 1) + 1 }).eq('id', trackId);
+      }
+    }
+
+    setUser((prev) => prev ? { ...prev, credits: newCredits } : null);
+    setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
+    showToast(`Sarki meganildi! (Oy hakkiniz: ${newVotesForUser}/5)`);
+  }, [user, fetchProfileCredits, openProtectedModal, openModal, showToast]);
+
+  const deleteAccount = useCallback(async () => {
+    if (supabase && user) { await supabase.from('profiles').delete().eq('id', user.id); await supabase.auth.signOut(); }
+    setUser(null); showToast('Hesabiniz silindi.'); closeModal();
+  }, [user, showToast, closeModal]);
+
+  const toggleAudioPlay = useCallback(() => setIsPlayingAudio((p) => !p), []);
+
+  return (
+    <AppContext.Provider value={{
+      user, activeModal, activeVenue, kafeIdParam,
+      isVenueBound, isVenueActive,
+      nowPlaying, queue,
+      cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
+      isSpotifyConnected, spotifyToken, connectSpotify, disconnectSpotify,
+      openModal, openProtectedModal, closeModal, loginWithProvider, logout,
+      topUpCredits, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used within AppProvider');
+  return ctx;
+};

@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #120C08;
+    --foreground: #FCEFD5;
+    --gold: #D4AF37;
+    --gold-light: #E5A93B;
+    --gold-dark: #B8860B;
+    --espresso-dark: #0B0704;
+    --espresso-card: #1C130D;
+  }
+
+  body {
+    background-color: #120C08;
+    color: #FCEFD5;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+}
+
+/* Custom Glassmorphism & Gold Aesthetics */
+.glass-panel {
+  background: rgba(28, 19, 13, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass-panel-gold {
+  background: linear-gradient(135deg, rgba(229, 169, 59, 0.15) 0%, rgba(28, 19, 13, 0.85) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.15);
+}
+
+.glass-modal-backdrop {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background-color: rgba(18, 12, 8, 0.65);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FFF0C7 0%, #D4AF37 50%, #E5A93B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #E5A93B 0%, #D4AF37 50%, #B8860B 100%);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* Custom Scrollbar for Mobile Queue */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(28, 19, 13, 0.5);
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+}
+
+/* Audio Wave Visualizer Animation */
+@keyframes barPulse {
+  0%, 100% { height: 6px; }
+  50% { height: 22px; }
+}
+
+.animate-bar-1 { animation: barPulse 1.2s infinite ease-in-out 0.1s; }
+.animate-bar-2 { animation: barPulse 1.2s infinite ease-in-out 0.4s; }
+.animate-bar-3 { animation: barPulse 1.2s infinite ease-in-out 0.2s; }
+.animate-bar-4 { animation: barPulse 1.2s infinite ease-in-out 0.5s; }
+
+/* Pulse Animation for Sticky Button */
+@keyframes pulseGold {
+  0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+.pulse-gold {
+  animation: pulseGold 2s infinite;
+}
