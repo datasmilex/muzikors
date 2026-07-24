@@ -21,7 +21,7 @@ export const MusicSearchModal: React.FC = () => {
   } = useApp();
 
   const [modeTab, setModeTab] = useState<'search' | 'liked'>('search');
-  const [searchQuery, setSearchQuery] = useState('Trend');
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [likedSongs, setLikedSongs] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
@@ -34,7 +34,11 @@ export const MusicSearchModal: React.FC = () => {
   useEffect(() => {
     if (modeTab !== 'search') return;
 
-    const queryToFetch = searchQuery.trim() || 'Trend';
+    const queryToFetch = searchQuery.trim();
+    if (!queryToFetch) {
+      setSearchResults([]);
+      return;
+    }
 
     setIsLoading(true);
     const timer = setTimeout(async () => {
@@ -139,11 +143,19 @@ export const MusicSearchModal: React.FC = () => {
           {/* Top Header & Mode Tab Switcher */}
           <div className="shrink-0 space-y-3">
             <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto" />
-
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Music className="w-5 h-5 text-[#D4AF37]" />
+              <div>
                 <h2 className="text-base font-bold text-white tracking-wide">Spotify Müzik Arama</h2>
+                {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    <span className="text-[10px] text-gray-400 font-semibold mr-1">Mekân Tarzı:</span>
+                    {activeVenue.allowed_genres.map(g => (
+                      <span key={g} className="px-2 py-0.5 rounded-full bg-[#E5A93C]/20 text-[#E5A93C] text-[9px] font-bold border border-[#E5A93C]/30 capitalize">
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button
@@ -272,7 +284,13 @@ export const MusicSearchModal: React.FC = () => {
                   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
                   const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
-                  const isBlocked = cost === null || isExplicitBlocked;
+                  
+                  const allowedGenres = activeVenue?.allowed_genres || [];
+                  const hasAllowedGenres = allowedGenres.length > 0;
+                  const trackGenres = track.genres || [];
+                  const isVibeBlocked = hasAllowedGenres && trackGenres.length > 0 && !trackGenres.some((g: string) => allowedGenres.includes(g));
+
+                  const isBlocked = cost === null || isExplicitBlocked || isVibeBlocked;
                   const canAfford = (user?.credits ?? 0) >= (cost ?? 0);
 
                   return (
@@ -304,6 +322,11 @@ export const MusicSearchModal: React.FC = () => {
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
                                 <AlertTriangle className="w-3 h-3 text-red-400" />
                                 Sansürlü Şarkı (Engellendi)
+                              </span>
+                            ) : isVibeBlocked ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold shrink-0">
+                                <AlertTriangle className="w-3 h-3 text-orange-400" />
+                                Mekân Konseptine Uymuyor
                               </span>
                             ) : cost === null ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
@@ -432,7 +455,15 @@ export const MusicSearchModal: React.FC = () => {
                     const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
                     const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                     const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
-                    const isBlocked = cost === null || isExplicitBlocked;
+
+                    const allowedGenres = activeVenue?.allowed_genres || [];
+                    const hasAllowedGenres = allowedGenres.length > 0;
+                    const trackGenres = track.genres || [];
+                    // Vibe Guard block: If venue has genres, and track has genres, but they don't intersect.
+                    // If track has no genres (e.g. obscure), we allow it to avoid false positives, OR we block it. Let's block if no intersection.
+                    const isVibeBlocked = hasAllowedGenres && trackGenres.length > 0 && !trackGenres.some(g => allowedGenres.includes(g));
+
+                    const isBlocked = cost === null || isExplicitBlocked || isVibeBlocked;
                     const canAfford = (user?.credits ?? 0) >= (cost ?? 0);
 
                     return (
@@ -464,6 +495,11 @@ export const MusicSearchModal: React.FC = () => {
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
                                   <AlertTriangle className="w-3 h-3 text-red-400" />
                                   Sansürlü Şarkı (Engellendi)
+                                </span>
+                              ) : isVibeBlocked ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold shrink-0">
+                                  <AlertTriangle className="w-3 h-3 text-orange-400" />
+                                  Mekân Konseptine Uymuyor
                                 </span>
                               ) : cost === null ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">

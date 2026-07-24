@@ -31,18 +31,44 @@ export async function GET(request: NextRequest) {
   const session = data.session;
   const userId = session.user.id;
   const provider = session.user.app_metadata?.provider ?? 'google';
+  // ─ Fetch Spotify Profile if token exists ───────────────────────────────────
+  let spotifyId = null;
+  let spotifyEmail = null;
+  let spotifyName = null;
+  let spotifyAvatar = null;
   const isSpotify = provider === 'spotify';
+  const hasSpotifyToken = !!session.provider_token;
 
-  console.log(`[Auth Callback] ✅ Session exchanged for user ${userId} via provider "${provider}"`);
+  if (hasSpotifyToken) {
+    try {
+      const spRes = await fetch('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${session.provider_token}` },
+      });
+      if (spRes.ok) {
+        const spData = await spRes.json();
+        spotifyId = spData.id;
+        spotifyEmail = spData.email;
+        spotifyName = spData.display_name;
+        const spImages = spData.images || [];
+        if (spImages.length > 0) {
+          spotifyAvatar = spImages[0].url;
+        }
+      }
+    } catch (err) {
+      console.warn('[Auth Callback] Could not fetch Spotify profile:', err);
+    }
+  }
 
   // ─ Upsert profile row (creates on first login, updates on subsequent) ────
   const fullName =
+    spotifyName ||
     session.user.user_metadata?.full_name ||
     session.user.user_metadata?.name ||
     session.user.email?.split('@')[0] ||
     'Kullanıcı';
 
   const avatarUrl =
+    spotifyAvatar ||
     session.user.user_metadata?.avatar_url ||
     session.user.user_metadata?.picture ||
     '';
@@ -54,9 +80,15 @@ export async function GET(request: NextRequest) {
         id: userId,
         full_name: fullName,
         avatar_url: avatarUrl,
-        email: session.user.email ?? '',
-        // Mark Spotify connected only when that is the login provider
-        ...(isSpotify ? { is_spotify_connected: true } : {}),
+        email: session.user.email || spotifyEmail || '',
+        // Mark Spotify connected if login was Spotify OR if we got a Spotify token
+        ...(isSpotify || hasSpotifyToken ? { is_spotify_connected: true } : {}),
+        ...(hasSpotifyToken ? {
+          spotify_id: spotifyId,
+          spotify_email: spotifyEmail,
+          spotify_access_token: session.provider_token,
+          spotify_refresh_token: session.provider_refresh_token,
+        } : {}),
       },
       { onConflict: 'id' }
     );

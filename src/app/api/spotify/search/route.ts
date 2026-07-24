@@ -105,10 +105,53 @@ export async function GET(request: NextRequest) {
     const data = await searchRes.json();
     const items: any[] = data.tracks?.items ?? [];
 
+    // --- VIBE GUARD: Fetch artist genres ---
+    const artistIds = new Set<string>();
+    items.forEach((item: any) => {
+      item.artists?.forEach((a: any) => {
+        if (a.id) artistIds.add(a.id);
+      });
+    });
+
+    const artistGenresMap: Record<string, string[]> = {};
+    const artistIdArray = Array.from(artistIds).slice(0, 50); // API limit is 50
+    
+    if (artistIdArray.length > 0) {
+      try {
+        const artistsRes = await fetch(`https://api.spotify.com/v1/artists?ids=${artistIdArray.join(',')}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+          },
+          cache: 'no-store',
+        });
+        if (artistsRes.ok) {
+          const artistsData = await artistsRes.json();
+          artistsData.artists?.forEach((artist: any) => {
+            if (artist && artist.id) {
+              artistGenresMap[artist.id] = artist.genres || [];
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('[Vibe Guard] Failed to fetch artist genres:', err);
+      }
+    }
+    // ---------------------------------------
+
     const tracks = items.map((item: any) => {
       const images: any[] = item.album?.images ?? [];
       const cover = images[1]?.url ?? images[0]?.url ?? images[2]?.url ?? '';
       const durMs = item.duration_ms ?? 180000;
+      
+      // Merge genres from all artists of this track
+      const trackGenres = new Set<string>();
+      (item.artists ?? []).forEach((a: any) => {
+        if (a.id && artistGenresMap[a.id]) {
+          artistGenresMap[a.id].forEach(g => trackGenres.add(g.toLowerCase()));
+        }
+      });
+
       return {
         id: item.id,
         title: item.name,
@@ -129,6 +172,7 @@ export async function GET(request: NextRequest) {
         requestedBy: '',
         requestedAt: '',
         spotifyUrl: item.external_urls?.spotify ?? '',
+        genres: Array.from(trackGenres),
       };
     });
 

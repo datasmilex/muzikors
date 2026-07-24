@@ -152,29 +152,6 @@ export const DrawerMenu: React.FC = () => {
               </div>
             )}
 
-            {/* Audio Output Hardware Selector */}
-            <div className="my-3 p-3 rounded-xl bg-[#1C130D] border border-[#D4AF37]/20 space-y-1.5">
-              <label className="text-[10px] font-bold text-amber-200/80 uppercase tracking-wider block">
-                Ses Çıkış Cihazı (Hoparlör / Kulaklık / HDMI)
-              </label>
-              <select
-                onChange={async (e) => {
-                  const deviceId = e.target.value;
-                  if (!deviceId) return;
-                  const elements = Array.from(document.querySelectorAll('audio, video')) as (HTMLMediaElement & { setSinkId?: (id: string) => Promise<void> })[];
-                  for (const el of elements) {
-                    if (typeof el.setSinkId === 'function') {
-                      try { await el.setSinkId(deviceId); } catch (err) { console.error('setSinkId error:', err); }
-                    }
-                  }
-                }}
-                className="w-full bg-[#120C08] border border-[#D4AF37]/30 rounded-lg p-2 text-xs text-amber-100 focus:outline-none focus:border-[#D4AF37]"
-              >
-                <option value="">Varsayılan Cihaz Hoparlörü</option>
-                <option value="default">Kulaklık / Hoparlör (Varsayılan)</option>
-                <option value="hdmi">Harici Bluetooth / HDMI Çıkışı</option>
-              </select>
-            </div>
 
             <nav className="space-y-1 mt-2">
               {navItems.map((item) => (

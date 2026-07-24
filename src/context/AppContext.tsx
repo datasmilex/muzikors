@@ -179,6 +179,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         is_active: isActive,
         is_paused: data.is_paused === true,
         explicit_filter_enabled: data.explicit_filter_enabled === true,
+        allowed_genres: data.allowed_genres || [],
         full_address: data.full_address,
         contact_phone: data.contact_phone,
         total_earnings: data.total_earnings,
@@ -342,7 +343,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   // ── SUPABASE REALTIME: SONG QUEUE (venue-isolated) ────────────────────────
@@ -381,6 +385,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const fetchQueue = async () => {
       try {
+        const { data: venueData } = await supabase
+          .from('venues')
+          .select('id, venue_name, explicit_filter_enabled, allowed_genres')
+          .eq('id', targetVenueId)
+          .single();
+
         const { data, error } = await supabase
           .from('queue')
           .select('*')
@@ -610,12 +620,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [user]);
   const closeModal = useCallback(() => { setActiveModal('none'); setPendingModal(null); setLoginPromptReason(null); }, []);
 
-  const connectSpotify = useCallback(() => {
+  const connectSpotify = useCallback(async () => {
     if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
     setIsSpotifyConnected(true);
-    if (user?.id && supabase) supabase.from('profiles').update({ is_spotify_connected: true }).eq('id', user.id);
-    window.location.href = '/api/spotify/user-login';
-  }, [user?.id]);
+    if (!supabase) return;
+
+    if (user?.id) {
+      const { error } = await supabase.auth.linkIdentity({
+        provider: 'spotify',
+        options: {
+          redirectTo: 'https://muzikors.com.tr/auth/callback',
+          scopes: 'user-read-private user-read-email streaming user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-read',
+        },
+      });
+      if (error) { console.error('[Spotify Link Error]', error); showToast('Spotify bağlanamadı.'); }
+    } else {
+      window.location.href = '/api/spotify/user-login';
+    }
+  }, [user?.id, supabase, showToast]);
 
   const disconnectSpotify = useCallback(() => {
     setIsSpotifyConnected(false); setSpotifyToken(null);

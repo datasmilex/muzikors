@@ -1,14 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 /**
  * GET /api/spotify/liked-songs
  *
- * Soft-handles user's liked songs fetch from Spotify without throwing 401 status.
+ * Fetches user's liked songs fetch from Spotify using their profile's access token.
  */
 export async function GET(request: NextRequest) {
-  const tokenFromCookie = request.cookies.get('spotify_user_token')?.value;
+  let token = request.cookies.get('spotify_user_token')?.value;
   const tokenFromHeader = request.headers.get('Authorization')?.replace('Bearer ', '');
-  const token = tokenFromCookie || tokenFromHeader;
+  if (tokenFromHeader) token = tokenFromHeader;
+
+  // Try to read unified profile token if Supabase auth exists
+  const authCookie = request.cookies.get('sb-pjcepgehqhuunnzqpmxf-auth-token')?.value;
+  if (authCookie) {
+    try {
+      const parsed = JSON.parse(authCookie);
+      const supabaseAccessToken = Array.isArray(parsed) ? parsed[0] : parsed;
+      const { data: { user } } = await supabaseAdmin.auth.getUser(supabaseAccessToken);
+      if (user) {
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('spotify_access_token')
+          .eq('id', user.id)
+          .single();
+        if (profile?.spotify_access_token) {
+          token = profile.spotify_access_token;
+        }
+      }
+    } catch (e) {
+      console.warn('[Liked Songs] Could not resolve Supabase user token');
+    }
+  }
 
   if (!token) {
     return NextResponse.json(

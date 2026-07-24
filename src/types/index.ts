@@ -19,6 +19,7 @@ export interface Track {
   spotifyUrl?: string;
   explicit?: boolean;
   is_explicit?: boolean;
+  genres?: string[];
 }
 
 export interface Venue {
@@ -38,6 +39,7 @@ export interface Venue {
   is_active?: boolean;
   is_paused?: boolean;
   explicit_filter_enabled?: boolean;
+  allowed_genres?: string[];
   full_address?: string;
   contact_phone?: string;
   contact_email?: string;

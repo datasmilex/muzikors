@@ -24,7 +24,7 @@ export const QrScannerModal: React.FC = () => {
     // Helper: Select optimal standard back camera to prevent macro/wide-angle lens issues
     const getOptimalConstraints = async (): Promise<MediaStreamConstraints> => {
       if (!navigator?.mediaDevices?.enumerateDevices) {
-        return { video: { facingMode: { exact: 'environment' } } };
+        return { video: { facingMode: { exact: 'environment' } }, audio: false };
       }
 
       try {
@@ -51,13 +51,13 @@ export const QrScannerModal: React.FC = () => {
         });
 
         if (standardBackCamera && standardBackCamera.deviceId) {
-          return { video: { deviceId: { exact: standardBackCamera.deviceId } } };
+          return { video: { deviceId: { exact: standardBackCamera.deviceId } }, audio: false };
         }
       } catch (err) {
         console.warn('[Camera Enumeration Warning]', err);
       }
 
-      return { video: { facingMode: { exact: 'environment' } } };
+      return { video: { facingMode: { exact: 'environment' } }, audio: false };
     };
 
     const startCameraAndScan = async () => {
@@ -77,6 +77,7 @@ export const QrScannerModal: React.FC = () => {
           try {
             stream = await navigator.mediaDevices.getUserMedia({
               video: { facingMode: 'environment' },
+              audio: false
             });
           } catch (fallbackErr) {
             console.error('[Rear Camera Fallback Error]', fallbackErr);
