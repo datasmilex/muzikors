@@ -8,6 +8,7 @@ import { GpsBanner } from '../components/GpsBanner';
 import { NowPlayingSection } from '../components/NowPlayingSection';
 import { UpNextQueueSection } from '../components/UpNextQueueSection';
 import { StickyAddMusicButton } from '../components/StickyAddMusicButton';
+import { VenueGuard } from '../components/VenueGuard';
 import { DrawerMenu } from '../components/DrawerMenu';
 import { CreditTopUpModal } from '../components/CreditTopUpModal';
 import { MusicSearchModal } from '../components/MusicSearchModal';
@@ -27,20 +28,22 @@ export default function Home() {
           {/* 1. Top Navigation Bar (Header - Wireframe 2) */}
           <Header />
 
-          {/* 2. Top Row Cards: Credit Balance & QR Okut Trigger (Wireframe 2) */}
-          <TopRowCards />
+          <VenueGuard>
+            {/* 2. Top Row Cards: Credit Balance & QR Okut Trigger (Wireframe 2) */}
+            <TopRowCards />
 
-          {/* 3. GPS Banner: Location Icon + Muzikors Haritası Trigger (Wireframe 2) */}
-          <GpsBanner />
+            {/* 3. GPS Banner: Location Icon + Muzikors Haritası Trigger (Wireframe 2) */}
+            <GpsBanner />
 
-          {/* 4. Now Playing Hero Section: Song Artwork, Title, Artist, Live Progress Bar & Audio Equalizer (Wireframe 2) */}
-          <NowPlayingSection />
+            {/* 4. Now Playing Hero Section: Song Artwork, Title, Artist, Live Progress Bar & Audio Equalizer (Wireframe 2) */}
+            <NowPlayingSection />
 
-          {/* 5. Up Next Queue: Scrollable List of Upcoming Tracks with Upvoting & Requester Avatars (Wireframe 2) */}
-          <UpNextQueueSection />
+            {/* 5. Up Next Queue: Scrollable List of Upcoming Tracks with Upvoting & Requester Avatars (Wireframe 2) */}
+            <UpNextQueueSection />
 
-          {/* 6. Sticky Action: Massive Floating "+ Müzik Ekle" Button with Cooldown Timer (Wireframe 2) */}
-          <StickyAddMusicButton />
+            {/* 6. Sticky Action: Massive Floating "+ Müzik Ekle" Button with Cooldown Timer (Wireframe 2) */}
+            <StickyAddMusicButton />
+          </VenueGuard>
 
           {/* Modals & Overlays matching wireframes */}
           <DrawerMenu />
