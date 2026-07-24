@@ -824,8 +824,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Increment venue total_earnings
       if (venueId) {
         await supabase.rpc('increment_venue_earnings', {
-          venue_id_param: venueId,
-          amount_param: venueAmount,
+          venue_id: venueId,
+          amount: venueAmount,
         }).then(({ error }) => {
           if (error) {
             // Fallback: manual increment
@@ -862,44 +862,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const voteTrack = useCallback(async (trackId: string) => {
     if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
 
-    let currentVotesForUser = 0;
-    if (supabase) {
-      const { data: userVoteRow } = await supabase
-        .from('song_user_votes')
-        .select('vote_count')
-        .eq('user_id', user.id)
-        .eq('song_id', trackId)
-        .maybeSingle();
+    try {
+      let currentVotesForUser = 0;
+      if (supabase) {
+        const { data: userVoteRow, error: voteFetchErr } = await supabase
+          .from('song_user_votes')
+          .select('vote_count')
+          .eq('user_id', user.id)
+          .eq('song_id', trackId)
+          .maybeSingle();
+        
+        if (voteFetchErr) {
+          console.error('[voteTrack fetch]', voteFetchErr.message);
+        }
 
-      currentVotesForUser = userVoteRow?.vote_count ?? 0;
-    }
-
-    if (currentVotesForUser >= 5) {
-      showToast('Bu sarkiyi en fazla 5 kez meganebilirsiniz.');
-      return;
-    }
-
-    const liveCredits = await fetchProfileCredits(user.id);
-    if (liveCredits < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
-
-    const newCredits = liveCredits - 1;
-    const newVotesForUser = currentVotesForUser + 1;
-
-    if (supabase) {
-      await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
-      await supabase.from('song_user_votes').upsert(
-        { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
-        { onConflict: 'user_id,song_id' }
-      );
-      const { data: voteData } = await supabase.from('queue').select('votes').eq('id', trackId).single();
-      if (voteData) {
-        await supabase.from('queue').update({ votes: (voteData.votes ?? 1) + 1 }).eq('id', trackId);
+        currentVotesForUser = userVoteRow?.vote_count ?? 0;
       }
-    }
 
-    setUser((prev) => prev ? { ...prev, credits: newCredits } : null);
-    setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
-    showToast(`Sarki meganildi! (Oy hakkiniz: ${newVotesForUser}/5)`);
+      if (currentVotesForUser >= 5) {
+        showToast('Bu sarkiyi en fazla 5 kez meganebilirsiniz.');
+        return;
+      }
+
+      const liveCredits = await fetchProfileCredits(user.id);
+      if (liveCredits < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
+
+      const newCredits = liveCredits - 1;
+      const newVotesForUser = currentVotesForUser + 1;
+
+      if (supabase) {
+        await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+        const { error: upsertErr } = await supabase.from('song_user_votes').upsert(
+          { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
+          { onConflict: 'user_id,song_id' }
+        );
+        if (upsertErr) {
+          console.error('[voteTrack upsert]', upsertErr.message);
+        }
+        
+        const { data: voteData } = await supabase.from('queue').select('votes').eq('id', trackId).single();
+        if (voteData) {
+          await supabase.from('queue').update({ votes: (voteData.votes ?? 1) + 1 }).eq('id', trackId);
+        }
+      }
+
+      setUser((prev) => prev ? { ...prev, credits: newCredits } : null);
+      setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
+      showToast(`Sarki meganildi! (Oy hakkiniz: ${newVotesForUser}/5)`);
+    } catch (err) {
+      console.error('[voteTrack exception]', err);
+      showToast('Oylama sirasinda bir hata olustu.');
+    }
   }, [user, fetchProfileCredits, openProtectedModal, openModal, showToast]);
 
   const deleteAccount = useCallback(async () => {
