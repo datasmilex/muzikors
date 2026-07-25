@@ -259,27 +259,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!supabase) return;
 
-    const handleSession = async (session: any) => {
-      if (!session?.user) { setUser(null); userIdRef.current = null; return; }
+    const handleSession = async (session: any, event?: string) => {
+      if (!session?.user || !session.user.id) { setUser(null); userIdRef.current = null; return; }
 
       const authUser = session.user;
-      const fullName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Kullanici';
-      const avatarUrl = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || '';
+      const metadata = authUser.user_metadata || {};
+      const fullName = metadata.full_name || metadata.name || authUser.email?.split('@')[0] || 'Kullanıcı';
+      const avatarUrl = metadata.avatar_url || metadata.picture || '';
       const emailStr = authUser.email || '';
 
       userIdRef.current = authUser.id;
 
-      if (supabase) {
-        await supabase.from('profiles').upsert(
-          {
-            id: authUser.id,
-            full_name: fullName,
-            avatar_url: avatarUrl,
-            email: emailStr,
-            is_admin: false,
-          },
-          { onConflict: 'id', ignoreDuplicates: true }
-        );
+      if (supabase && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        const profileData = {
+          id: authUser.id,
+          full_name: fullName,
+          avatar_url: avatarUrl,
+          email: emailStr,
+          updated_at: new Date().toISOString()
+        };
+
+        try {
+          const { error } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' });
+          if (error) console.error('[Muzikors Profile Sync Error]:', error.message);
+        } catch (err) {
+          console.error('[Muzikors Profile Catch Error]:', err);
+        }
       }
 
       const liveCredits = await fetchProfileCredits(authUser.id);
@@ -299,8 +304,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => handleSession(session));
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session, 'INITIAL_SESSION'));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        userIdRef.current = null;
+      } else {
+        handleSession(session, event);
+      }
+    });
+
     return () => subscription.unsubscribe();
   }, [fetchProfileCredits]);
 
@@ -667,10 +681,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     closeModal();
   }, [user, fetchProfileCredits, openProtectedModal, showToast, closeModal]);
 
+  const getGuestDeviceId = () => {
+    let guestId = localStorage.getItem('muzikors_guest_id');
+    if (!guestId) {
+      guestId = 'guest_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('muzikors_guest_id', guestId);
+    }
+    return guestId;
+  };
+
   // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
   const requestTrack = useCallback(async (track: Track): Promise<boolean> => {
-    if (!user) { openProtectedModal('search', 'Sarki eklemek icin giris yapin'); return false; }
-
     // Venue guard
     if (!activeVenue) {
       showToast('Şarkı istemek için önce bir QR kod okutun!');
@@ -699,8 +720,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
     }
 
-    const liveCredits = await fetchProfileCredits(user.id);
-    if (liveCredits < requiredCredits) {
+    let liveCredits = 0;
+    if (user) {
+      liveCredits = await fetchProfileCredits(user.id);
+    }
+
+    if (requiredCredits > 0 && liveCredits < requiredCredits) {
+      if (!user) {
+        openProtectedModal('search', 'Şarkı eklemek için giriş yapın (Ücretli Şarkı)');
+        return false;
+      }
       showToast(`Bu sarki icin ${requiredCredits} kredi gerekiyor. Yetersiz bakiye!`);
       openModal('topup'); return false;
     }
@@ -732,22 +761,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const newCredits = liveCredits - requiredCredits;
-    const newTotalRequested = (user.totalSongsRequested || 0) + 1;
+    const newTotalRequested = (user?.totalSongsRequested || 0) + 1;
 
-    // Deduct credits from profile
-    if (supabase) {
+    // Deduct credits from profile if user exists
+    if (user && supabase && requiredCredits > 0) {
       const { error: creditErr } = await supabase
         .from('profiles')
         .update({ credits: newCredits, total_songs_requested: newTotalRequested })
         .eq('id', user.id);
       if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi guncellenemedi.'); return false; }
+      setUser((prev) => prev ? { ...prev, credits: newCredits, totalSongsRequested: newTotalRequested } : null);
     }
-
-    setUser((prev) => prev ? { ...prev, credits: newCredits, totalSongsRequested: newTotalRequested } : null);
 
     if (supabase) {
       // Immutable log record
-      await supabase.from('song_requests_log').insert([{ user_id: user.id }]);
+      if (user) {
+        await supabase.from('song_requests_log').insert([{ user_id: user.id }]);
+      }
+
+      const requestedByName = user?.name || 'Müşteri';
+      const requestUserId = user?.id || null;
 
       // Insert into venue-isolated queue (status = pending/queued, started_at = null, let Kafe Paneli master clock trigger)
       const { error: queueErr } = await supabase.from('queue').insert({
@@ -756,8 +789,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         album_cover: track.albumCover || track.coverUrl || track.album_art || '',
         spotify_uri: targetSpotifyUri,
         duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
-        requested_by_user_id: user.id,
-        requested_by_name: user.name,
+        requested_by_user_id: requestUserId,
+        requested_by_name: requestedByName,
         status: 'pending',
         started_at: null,
         votes: 1,
@@ -768,13 +801,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (queueErr) {
         console.error('[requestTrack queue]', queueErr.message);
         // Refund credits
-        if (supabase) await supabase.from('profiles').update({ credits: liveCredits }).eq('id', user.id);
-        setUser((prev) => prev ? { ...prev, credits: liveCredits } : null);
+        if (user && supabase && requiredCredits > 0) {
+          await supabase.from('profiles').update({ credits: liveCredits }).eq('id', user.id);
+          setUser((prev) => prev ? { ...prev, credits: liveCredits } : null);
+        }
         showToast('Sarki eklenemedi.'); return false;
       }
 
-      // Insert financial record into song_payments
-      const { error: paymentErr } = await supabase.from('song_payments').insert({
+      // Insert financial record into song_payments (only if user paid)
+      if (user && requiredCredits > 0) {
+        const { error: paymentErr } = await supabase.from('song_payments').insert({
         song_name: track.title,
         artist_name: track.artist,
         venue_id: venueId,
@@ -808,22 +844,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     }
+    }
 
     const newTrack: Track = {
       ...track,
       id: `req-${Date.now()}`,
       votes: 1,
-      requestedBy: user.name,
-      requestedByAvatar: user.avatar,
+      requestedBy: user?.name || 'Müşteri',
+      requestedByAvatar: user?.avatar || '',
       requestedAt: 'Simdi',
       startedAt: undefined,
     };
 
     setQueue((prev) => [...prev, newTrack]);
-    setCooldown({ active: true, remainingSeconds: COOLDOWN_DURATION_SECONDS, lastRequestedAt: Date.now() });
+    setCooldown({ active: true, remainingSeconds: 30, lastRequestedAt: Date.now() });
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
     showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
-  }, [user, cooldown, nowPlaying, activeVenue, fetchProfileCredits, openProtectedModal, openModal, showToast, closeModal]);
+  }, [user, cooldown, nowPlaying, activeVenue, fetchProfileCredits, openProtectedModal, openModal, showToast, closeModal, supabase]);
 
   const voteTrack = useCallback(async (trackId: string) => {
     if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
