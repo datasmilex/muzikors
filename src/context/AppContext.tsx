@@ -559,7 +559,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
       .subscribe();
 
+    const fallbackInterval = setInterval(() => {
+      fetchQueue();
+    }, 3000);
+
     return () => {
+      clearInterval(fallbackInterval);
       supabase.removeChannel(venueChannel);
     };
   }, [activeVenue?.id]); // Re-subscribe when venue changes
