@@ -1,14 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, X, Sparkles, AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const LoginModal: React.FC = () => {
-  const { activeModal, closeModal, loginWithProvider, loginPromptReason } = useApp();
+  const { activeModal, closeModal, loginWithProvider, loginPromptReason, showToast, openModal } = useApp();
+  const [legalConsent, setLegalConsent] = useState(false);
 
   if (activeModal !== 'login') return null;
+
+  const handleLoginClick = (provider: 'google' | 'spotify') => {
+    if (!legalConsent) {
+      showToast('Devam etmek için lütfen KVKK ve Açık Rıza metinlerini onaylayın.');
+      return;
+    }
+    loginWithProvider(provider);
+  };
 
   return (
     <AnimatePresence>
@@ -78,9 +87,24 @@ export const LoginModal: React.FC = () => {
               Giriş Yap
             </h2>
 
+            {/* Mandatory Legal Consent */}
+            <label className="flex items-start gap-2.5 cursor-pointer bg-black/40 p-3 rounded-xl border border-white/5 mb-2 group">
+              <div className="mt-0.5 shrink-0">
+                <input
+                  type="checkbox"
+                  checked={legalConsent}
+                  onChange={(e) => setLegalConsent(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-600 bg-black/50 text-[#E5A93C] focus:ring-[#E5A93C] focus:ring-offset-0 focus:ring-1 cursor-pointer"
+                />
+              </div>
+              <span className="text-[10px] leading-relaxed font-medium text-gray-300 group-hover:text-white transition-colors">
+                <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#E5A93C] hover:underline">KVKK Aydınlatma Metni</button>'ni, <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#E5A93C] hover:underline">Açık Rıza Metni</button>'ni ve <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#E5A93C] hover:underline">Çerez Politikası</button>'nı okudum, kabul ediyorum.
+              </span>
+            </label>
+
             {/* Google Sign-In Button */}
             <button
-              onClick={() => loginWithProvider('google')}
+              onClick={() => handleLoginClick('google')}
               className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-md ring-2 ring-[#D4AF37]/40"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -106,7 +130,7 @@ export const LoginModal: React.FC = () => {
 
             {/* Spotify Sign-In Button */}
             <button
-              onClick={() => loginWithProvider('spotify')}
+              onClick={() => handleLoginClick('spotify')}
               className="w-full py-3.5 px-4 rounded-xl bg-[#1DB954] hover:bg-[#1ed760] text-black font-extrabold text-xs flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-md"
             >
               <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 496 512">
@@ -116,13 +140,7 @@ export const LoginModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Legal Info Text */}
-          <div className="mt-4 pt-3 border-t border-[#D4AF37]/20 text-center">
-            <p className="text-[10px] text-amber-200/50 leading-tight">
-              Giriş yaparak <span className="underline text-amber-200/70">Kullanım Koşulları</span> ve{' '}
-              <span className="underline text-amber-200/70">Gizlilik Politikası</span>&apos;nı kabul etmiş olursunuz.
-            </p>
-          </div>
+          {/* Legacy Legal Info Text Removed in favor of mandatory checkbox */}
         </motion.div>
       </div>
     </AnimatePresence>

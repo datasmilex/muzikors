@@ -15,6 +15,7 @@ export const InfoModals: React.FC = () => {
     email: '',
   });
   const [partnerSubmitted, setPartnerSubmitted] = useState(false);
+  const [activeLegalTab, setActiveLegalTab] = useState<'kvkk' | 'consent' | 'cookie' | 'terms'>('kvkk');
 
   const isInfoModal = [
     'campaigns',
@@ -237,29 +238,77 @@ export const InfoModals: React.FC = () => {
             )}
 
             {activeModal === 'terms' && (
-              <div className="space-y-5">
-                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2">
-                  <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">
-                    <Info className="w-4 h-4" />
-                    Öncelikli İstek Hizmeti
-                  </h4>
-                  <p className="text-amber-200/60 text-xs leading-relaxed">
-                    Kredi/Bakiye harcamaları telifli müzik yayını satın alımı değil, mekân içi sıra önceliği yazılım hizmet bedelidir. 
-                    Muzikors sistemi üzerinden alınan krediler veya yapılan istek işlemleri, kamuya açık lisanslanmış bir eserin satışını teşkil etmez.
-                    Bu hizmet dijital sıra yönetiminden ibaret olup iade edilemez.
-                  </p>
+              <div className="space-y-4">
+                {/* 4-Tab Switcher */}
+                <div className="flex bg-black/40 p-1 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth snap-x">
+                  <button 
+                    onClick={() => setActiveLegalTab('kvkk')} 
+                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    KVKK
+                  </button>
+                  <button 
+                    onClick={() => setActiveLegalTab('consent')} 
+                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Açık Rıza
+                  </button>
+                  <button 
+                    onClick={() => setActiveLegalTab('cookie')} 
+                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Çerez Politikası
+                  </button>
+                  <button 
+                    onClick={() => setActiveLegalTab('terms')} 
+                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Hizmet Koşulları
+                  </button>
                 </div>
-                
-                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2">
-                  <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                    KVKK / Gizlilik
-                  </h4>
-                  <p className="text-amber-200/60 text-xs leading-relaxed">
-                    Kullanıcı verileri (Spotify ID, istek geçmişi, cihaz IP'si) yalnızca aktif oturum ve şarkı sıralama yönetimi için işlenir.
-                    Verileriniz kesinlikle üçüncü taraflara satılmaz veya dış sistemlerle paylaşılmaz. Onayınız dahilinde işlenen veriler, 
-                    hesabınız kapatıldığında veya anonimleştirme talep edildiğinde sistemden tamamen silinir.
-                  </p>
+
+                {/* Tab Content */}
+                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-3 min-h-[220px]">
+                  {activeLegalTab === 'kvkk' && (
+                    <>
+                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">KVKK Aydınlatma Metni</h4>
+                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
+                        <strong className="text-white">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.<br /><br />
+                        <strong className="text-white">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, Spotify hesabı kamuya açık kullanıcı kimliği, mekân içi şarkı istek geçmişi.<br /><br />
+                        <strong className="text-white">Veri İşleme Amacı:</strong> İnteraktif müzik kuyruğu yönetimi, güvenli oturum doğrulama ve mekân içi sıralama hizmeti sunulması.<br /><br />
+                        <strong className="text-white">Haklar (KVKK Madde 11):</strong> Kullanıcı profili ayarlarından "Hesabı Sil" özelliğini kullanarak tüm verilerini dilediği an silme hakkına sahiptir.
+                      </p>
+                    </>
+                  )}
+
+                  {activeLegalTab === 'consent' && (
+                    <>
+                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Açık Rıza Metni</h4>
+                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
+                        Kullanıcı, Muzikors platformunda hesabını oluştururken ve hizmeti kullanırken; kişisel verilerinin ve oturum bilgilerinin yüksek güvenlik standartlarına sahip bulut veritabanı altyapısında (Supabase) saklanmasına, işlenmesine ve yurt dışı sunucu aktarımlarına özgür iradesiyle açık rıza göstermektedir.
+                      </p>
+                    </>
+                  )}
+
+                  {activeLegalTab === 'cookie' && (
+                    <>
+                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Çerez Politikası</h4>
+                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
+                        Muzikors, oturum durumunun korunması, Spotify API erişim jetonlarının (tokens) güvenliği ve kullanıcı tercihlerinin hatırlanması amacıyla zorunlu teknik çerezler ve localStorage (yerel depolama) teknolojileri kullanmaktadır.<br /><br />
+                        Bu çerezler reklam/pazarlama amacıyla kullanılmaz ve üçüncü şahıslara satılmaz.
+                      </p>
+                    </>
+                  )}
+
+                  {activeLegalTab === 'terms' && (
+                    <>
+                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Hizmet Koşulları & İade Politikası</h4>
+                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
+                        Yüklenen krediler telifli içerik satın alma ücreti değil, mekân içi müzik kuyruğundaki "Sıralama Önceliği Yazılım Bedeli"dir.<br /><br />
+                        Dijital hizmet anında ifa edildiğinden bakiye ve kredi harcamaları iade edilemez.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             )}

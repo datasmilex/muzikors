@@ -919,9 +919,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [user, fetchProfileCredits, openProtectedModal, openModal, showToast]);
 
   const deleteAccount = useCallback(async () => {
-    if (supabase && user) { await supabase.from('profiles').delete().eq('id', user.id); await supabase.auth.signOut(); }
-    setUser(null); showToast('Hesabiniz silindi.'); closeModal();
-  }, [user, showToast, closeModal]);
+    if (!supabase || !user) return;
+    try {
+      await supabase.from('users').delete().eq('id', user.id);
+      await supabase.auth.signOut();
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      setUser(null);
+      showToast('Hesabınız ve tüm verileriniz Supabase veritabanından kalıcı olarak silindi.');
+      setHasEnteredGateway(false);
+      closeModal();
+    } catch (error) {
+      console.error('[deleteAccount error]', error);
+      showToast('Hesap silinirken bir hata oluştu.');
+    }
+  }, [user, showToast, closeModal, setHasEnteredGateway]);
 
   const toggleAudioPlay = useCallback(() => setIsPlayingAudio((p) => !p), []);
 
