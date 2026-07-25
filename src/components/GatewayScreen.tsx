@@ -17,8 +17,12 @@ export const GatewayScreen: React.FC = () => {
     }
   };
 
-  const hasWifi = Boolean(activeVenue.wifi_name?.trim()) || Boolean(activeVenue.wifi_password?.trim());
-  const hasMenu = Boolean(activeVenue.menu_link?.trim());
+  const wifiName = activeVenue.wifi_name || (activeVenue as any).wifi_ssid;
+  const wifiPass = activeVenue.wifi_password || (activeVenue as any).wifi_pass;
+  const menuUrl = activeVenue.menu_link || (activeVenue as any).menu_url;
+
+  const hasWifi = Boolean(wifiName?.trim()) || Boolean(wifiPass?.trim());
+  const hasMenu = Boolean(menuUrl?.trim());
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#120C08] p-6 relative overflow-hidden items-center">
@@ -70,55 +74,59 @@ export const GatewayScreen: React.FC = () => {
             Muzikors Müzik Kutusu
           </button>
 
+          {/* Wi-Fi Info Card (CONDITIONAL) */}
+          {hasWifi && (
+            <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 text-center mt-4 shadow-xl">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Wifi className="w-5 h-5 text-gray-300" />
+                <h3 className="text-sm font-bold text-gray-200">Mekân Wi-Fi Bilgileri</h3>
+              </div>
+              
+              <div className="space-y-3">
+                {wifiName?.trim() && (
+                  <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
+                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Ağ Adı</span>
+                    <span className="text-sm text-white font-bold">{wifiName}</span>
+                  </div>
+                )}
+                
+                {wifiPass?.trim() && (
+                  <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5 group">
+                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Şifre</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-white font-mono font-bold tracking-wider">{wifiPass}</span>
+                      <button 
+                        onClick={() => {
+                          if (wifiPass) {
+                            navigator.clipboard.writeText(wifiPass);
+                            setCopied(true);
+                            showToast('Wi-Fi Şifresi Kopyalandı!');
+                            setTimeout(() => setCopied(false), 2000);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+                        title="Şifreyi Kopyala"
+                      >
+                        {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {hasMenu && (
             <a
-              href={activeVenue.menu_link}
+              href={menuUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full h-14 rounded-2xl bg-[#1A1A1A] border border-[#D4AF37]/20 text-white font-bold flex items-center justify-center gap-3 hover:bg-[#222] active:scale-[0.98] transition-all"
             >
-              <Menu className="w-5 h-5 text-[#D4AF37]" />
-              Menüyü İncele
+              📖 Dijital Menü
             </a>
           )}
         </div>
-
-        {/* Wi-Fi Info Card (CONDITIONAL) */}
-        {hasWifi && (
-          <div className="w-full bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/5 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
-                <Wifi className="w-4 h-4 text-[#D4AF37]" />
-              </div>
-              <h3 className="text-sm font-bold text-gray-200">Mekân Wi-Fi Bilgileri</h3>
-            </div>
-            
-            <div className="space-y-3">
-              {activeVenue.wifi_name?.trim() && (
-                <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Ağ Adı (SSID)</span>
-                  <span className="text-sm text-white font-bold">{activeVenue.wifi_name}</span>
-                </div>
-              )}
-              
-              {activeVenue.wifi_password?.trim() && (
-                <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5 group">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Şifre</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-white font-mono font-bold tracking-wider">{activeVenue.wifi_password}</span>
-                    <button 
-                      onClick={handleCopyPassword}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
-                      title="Şifreyi Kopyala"
-                    >
-                      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer KVKK */}

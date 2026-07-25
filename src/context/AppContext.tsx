@@ -189,6 +189,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         full_address: data.full_address,
         contact_phone: data.contact_phone,
         total_earnings: data.total_earnings,
+        wifi_name: data.wifi_name || data.wifi_ssid || '',
+        wifi_password: data.wifi_password || data.wifi_pass || '',
+        menu_link: data.menu_link || data.menu_url || '',
+        logo_url: data.logo_url || data.logo || '',
       };
 
       setActiveVenue(venue);
