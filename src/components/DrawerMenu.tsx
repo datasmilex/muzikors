@@ -19,6 +19,7 @@ import {
   PlaySquare
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
 
 export const DrawerMenu: React.FC = () => {
@@ -27,8 +28,7 @@ export const DrawerMenu: React.FC = () => {
   if (activeModal !== 'drawer') return null;
 
   // Calculate daily reward dot
-  const todayStr = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0];
-  const hasClaimedToday = user?.lastDailyClaim ? new Date(user.lastDailyClaim).toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0] === todayStr : false;
+  const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
   const showRewardDot = !!user && !hasClaimedToday;
 
   const navItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [

@@ -1,29 +1,60 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, X, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
+import { isClaimedTodayTR, getSecondsUntilTRMidnight } from '../lib/timeHelpers';
 
 export const DailyRewardModal: React.FC = () => {
-  const { activeModal, closeModal, user, showToast } = useApp();
+  const { activeModal, closeModal, user, setUser, showToast } = useApp();
   const [isClaiming, setIsClaiming] = useState(false);
+  
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
+
+  // Handle countdown when claimed
+  useEffect(() => {
+    if (!hasClaimedToday) {
+      setTimeLeft(null);
+      return;
+    }
+
+    // Initialize time left
+    setTimeLeft(getSecondsUntilTRMidnight());
+
+    const interval = setInterval(() => {
+      const seconds = getSecondsUntilTRMidnight();
+      if (seconds <= 0) {
+        clearInterval(interval);
+        setTimeLeft(null); // Enables button again by trickling down to hasClaimedToday=false if we refresh state or just wait for midnight
+        // Normally, the component re-renders or we might want to reload state, but if seconds <= 0, we can clear interval.
+      } else {
+        setTimeLeft(seconds);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [hasClaimedToday]);
 
   if (activeModal !== 'daily_reward') return null;
 
   // Ensure user is logged in
   if (!user) return null;
 
-  const todayStr = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0];
-  const lastClaimStr = user.lastDailyClaim 
-    ? new Date(user.lastDailyClaim).toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0] 
-    : null;
-    
-  const hasClaimedToday = lastClaimStr === todayStr;
+  // Real-time calculation if time left hits 0 while modal is open, we can let user claim
+  const isButtonDisabled = hasClaimedToday && (timeLeft === null || timeLeft > 0);
+
+  const formatTime = (totalSeconds: number) => {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handleClaimReward = async () => {
-    if (hasClaimedToday || isClaiming) return;
+    if (isButtonDisabled || isClaiming) return;
     setIsClaiming(true);
 
     try {
@@ -33,6 +64,14 @@ export const DailyRewardModal: React.FC = () => {
       
       if (data?.success) {
         showToast(data.message || '+2 Kredi hesabına eklendi!');
+        
+        // Update user state immediately with new lastDailyClaim
+        setUser(prev => prev ? {
+          ...prev,
+          credits: prev.credits + 2,
+          lastDailyClaim: new Date().toISOString()
+        } : prev);
+        
       } else {
         showToast(data?.message || 'Ödül alınamadı.');
       }
@@ -48,7 +87,7 @@ export const DailyRewardModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -72,7 +111,7 @@ export const DailyRewardModal: React.FC = () => {
 
           <div className="flex justify-center mb-4 mt-2">
             <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] bg-[#D4AF37]/10 flex items-center justify-center relative shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-              {hasClaimedToday ? (
+              {isButtonDisabled ? (
                 <CheckCircle2 className="w-8 h-8 text-[#D4AF37]" />
               ) : (
                 <Gift className="w-8 h-8 text-[#D4AF37] animate-bounce" />
@@ -85,32 +124,32 @@ export const DailyRewardModal: React.FC = () => {
           </h2>
 
           <p className="text-xs text-amber-200/70 font-medium mb-6">
-            {hasClaimedToday
-              ? "Yeni günlük ödülün bu gece 00:00'da yenilenecektir."
+            {isButtonDisabled
+              ? "Bugünkü ödülünü aldın! Yarın tekrar bekleriz."
               : "Her gün giriş yap, bedava kredileri topla! Hemen +2 Kredini al."}
           </p>
 
           <button
-            disabled={hasClaimedToday || isClaiming}
+            disabled={isButtonDisabled || isClaiming}
             onClick={handleClaimReward}
             className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md
-              ${hasClaimedToday
-                ? 'bg-black/40 border border-white/5 text-gray-500 cursor-not-allowed'
+              ${isButtonDisabled
+                ? 'bg-black/40 border border-white/5 text-gray-400 cursor-not-allowed'
                 : 'gold-gradient-bg text-black hover:scale-[1.02] active:scale-[0.98]'
               }
             `}
           >
-            {hasClaimedToday ? (
+            {isClaiming ? (
+              <span className="animate-pulse">Bekleniyor...</span>
+            ) : isButtonDisabled && timeLeft !== null ? (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Bugünkü Ödül Alındı ✨</span>
+                <span>Yarınki Ödül İçin: {formatTime(timeLeft)}</span>
               </>
-            ) : isClaiming ? (
-              <span className="animate-pulse">Bekleniyor...</span>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                <span>2 Kredini Al 🎉</span>
+                <span>🎁 Günlük Ödülünü Al</span>
               </>
             )}
           </button>
