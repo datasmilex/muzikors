@@ -46,6 +46,11 @@ export const TvShoutoutModal: React.FC = () => {
       return;
     }
 
+    if (!activeVenue.is_tv_active) {
+      showToast('Bu mekanda TV Ekran Modu şu an aktif değil.');
+      return;
+    }
+
     if (user.credits < 20) {
       showToast('TV mesajı için yeterli krediniz (20) bulunmuyor.');
       return;
