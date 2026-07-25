@@ -54,10 +54,11 @@ export const TvShoutoutModal: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      const venueIdInt = parseInt(String(activeVenue.id), 10);
       const { error } = await supabase.rpc('send_tv_shoutout', { 
-        p_venue_id: parseInt(activeVenue.id, 10), 
+        p_venue_id: venueIdInt, 
         p_message: text.trim(), 
-        p_user_name: user.name, 
+        p_user_name: user.name || 'Müşteri', 
         p_user_id: user.id 
       });
 
