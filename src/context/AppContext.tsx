@@ -923,21 +923,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteAccount = useCallback(async () => {
     if (!supabase || !user) return;
     try {
-      await supabase.from('users').delete().eq('id', user.id);
+      const { error } = await supabase.rpc('delete_user_account');
+      if (error) {
+        console.error('Hesap silme hatası:', error);
+        showToast('Hesap silinirken bir hata oluştu: ' + error.message);
+        return;
+      }
+      
+      // 2. Clear all local state, storage, and Supabase auth session
       await supabase.auth.signOut();
       if (typeof window !== 'undefined') {
         localStorage.clear();
         sessionStorage.clear();
       }
       setUser(null);
-      showToast('Hesabınız ve tüm verileriniz Supabase veritabanından kalıcı olarak silindi.');
-      setHasEnteredGateway(false);
-      closeModal();
+      showToast('Hesabınız ve tüm verileriniz başarıyla silindi.');
+      
+      // 3. Force hard redirect to home page so state resets completely
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('[deleteAccount error]', error);
-      showToast('Hesap silinirken bir hata oluştu.');
+      showToast('Beklenmeyen bir hata oluştu.');
     }
-  }, [user, showToast, closeModal, setHasEnteredGateway]);
+  }, [user, showToast, supabase]);
 
   const toggleAudioPlay = useCallback(() => setIsPlayingAudio((p) => !p), []);
 
