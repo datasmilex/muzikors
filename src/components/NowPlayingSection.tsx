@@ -48,9 +48,6 @@ export const NowPlayingSection: React.FC = () => {
             <Music className="w-8 h-8 animate-pulse" />
           </div>
           <div>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold uppercase tracking-wider inline-block mb-1">
-              ● Mekânda Fon Müziği Çalıyor
-            </span>
             <h3 className="text-sm font-bold text-white">Şu an mekânda fon müziği çalıyor</h3>
             <p className="text-xs text-amber-200/60 mt-0.5 max-w-[240px] mx-auto">
               Sıraya ilk şarkıyı sen ekle ve tüm salonda müziğin sesini duyur!
