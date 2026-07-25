@@ -55,7 +55,7 @@ export const TopRowCards: React.FC = () => {
         disabled={!activeVenue?.is_tv_active}
         className={`w-full rounded-xl p-3 flex flex-row items-center justify-center gap-2 font-bold transition-all border ${
           activeVenue?.is_tv_active 
-            ? 'glass-panel-gold bg-gradient-to-r from-[#D4AF37] to-[#FCEFD5] text-stone-950 border-[#D4AF37]/50 hover:brightness-110 active:scale-95 shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
+            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-purple-500/20 border border-purple-500/30 active:scale-95' 
             : 'bg-black/40 border-white/10 text-white/40 cursor-not-allowed'
         }`}
       >
