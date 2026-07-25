@@ -49,6 +49,9 @@ export interface Venue {
   wifi_password?: string;
   terms_accepted?: boolean;
   total_earnings?: number;
+  latitude?: number;
+  longitude?: number;
+  computedDistance?: number;
 }
 
 export interface UserProfile {
