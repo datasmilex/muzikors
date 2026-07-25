@@ -473,27 +473,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         };
 
-        if (playingRow) {
-          setNowPlaying({ ...toTrack(playingRow), requestedAt: 'Canli' });
-          setIsPlayingAudio(true);
-        } else if (venueData?.current_track_info) {
-          const fallbackInfo = venueData.current_track_info;
+        // PRIMARY SOURCE OF TRUTH FOR NOW PLAYING: venues.current_track_info
+        if (venueData?.current_track_info) {
+          const trackInfo = venueData.current_track_info;
           setNowPlaying({
-            id: fallbackInfo.spotify_track_id || 'fallback',
-            title: fallbackInfo.song_title || 'Bilinmeyen Şarkı',
-            artist: fallbackInfo.artist || 'Bilinmeyen Sanatçı',
-            albumCover: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            coverUrl: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            album_art: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            spotifyUri: fallbackInfo.spotify_track_id ? `spotify:track:${fallbackInfo.spotify_track_id}` : '',
+            id: trackInfo.spotify_track_id || playingRow?.id || 'live-track',
+            title: trackInfo.song_title || 'Bilinmeyen Şarkı',
+            artist: trackInfo.artist || 'Bilinmeyen Sanatçı',
+            albumCover: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            coverUrl: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            album_art: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
             durationMs: 210000,
             duration: 210,
-            creditCost: 0,
-            votes: 0,
-            requestedBy: fallbackInfo.requested_by_name || 'Mekan Listesi',
+            creditCost: playingRow?.credits_spent ?? 0,
+            votes: playingRow?.votes ?? 0,
+            requestedBy: trackInfo.requested_by_name || 'Mekan Listesi',
             requestedAt: 'Canli',
             isPlaying: true,
           });
+          setIsPlayingAudio(true);
+        } else if (playingRow) {
+          // Fallback if current_track_info is not yet available but we have a playing queue item
+          setNowPlaying({ ...toTrack(playingRow), requestedAt: 'Canli' });
           setIsPlayingAudio(true);
         } else {
           setNowPlaying(null);
