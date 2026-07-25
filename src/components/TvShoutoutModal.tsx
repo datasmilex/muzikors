@@ -54,16 +54,22 @@ export const TvShoutoutModal: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const venueIdInt = parseInt(String(activeVenue.id), 10);
-      const { error } = await supabase.rpc('send_tv_shoutout', { 
-        p_venue_id: venueIdInt, 
-        p_message: text.trim(), 
-        p_user_name: user.name || 'Müşteri', 
-        p_user_id: user.id 
+      const numericVenueId = Number(activeVenue.id);
+      if (isNaN(numericVenueId) || numericVenueId <= 0) {
+        showToast("Geçersiz mekan kimliği.");
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('send_tv_shoutout', {
+        p_venue_id: numericVenueId,
+        p_message: text.trim(),
+        p_user_name: user.name || 'Müşteri'
       });
 
       if (error) {
-        throw error;
+        console.error('RPC Error details:', error);
+        showToast(error.message || 'Mesaj gönderilemedi.');
+        return;
       }
 
       setUser(prev => prev ? { ...prev, credits: prev.credits - 20 } : prev);
