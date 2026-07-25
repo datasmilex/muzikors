@@ -146,9 +146,15 @@ export const NowPlayingSection: React.FC = () => {
             </span>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold tracking-wider shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>MEKÂNDA CANLI YAYINDA</span>
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold tracking-wider shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>CANLI</span>
+            </div>
+            <div className="flex items-center gap-1 opacity-70">
+              <span className="text-[8px] text-gray-400 font-medium tracking-wide">Powered by</span>
+              <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify" className="h-3 object-contain brightness-0 invert" />
+            </div>
           </div>
         </div>
       </div>

@@ -19,43 +19,59 @@ import { GpsMapModal } from '../components/GpsMapModal';
 import { InfoModals } from '../components/InfoModals';
 import { ToastNotification } from '../components/ToastNotification';
 
+import { GatewayScreen } from '../components/GatewayScreen';
+import { useApp } from '../context/AppContext';
+
+const AppContent = () => {
+  const { isVenueBound, hasEnteredGateway, openModal } = useApp();
+  const showGateway = isVenueBound && !hasEnteredGateway;
+
+  return (
+    <div className="w-full max-w-md min-h-screen bg-[#120C08] flex flex-col relative shadow-[0_0_50px_rgba(212,175,55,0.15)] border-x border-[#D4AF37]/15">
+      {showGateway ? (
+        <GatewayScreen />
+      ) : (
+        <>
+          <Header />
+          <VenueGuard>
+            <TopRowCards />
+            <GpsBanner />
+            <NowPlayingSection />
+            <UpNextQueueSection />
+            
+            {/* Footer KVKK */}
+            <div className="w-full text-center pb-24 pt-4 z-10 relative">
+              <button
+                onClick={() => openModal('terms')}
+                className="text-[10px] text-gray-500 hover:text-[#E5A93C] underline underline-offset-2 transition-colors"
+              >
+                Kullanım Koşulları & KVKK Aydınlatma Metni
+              </button>
+            </div>
+
+            <StickyAddMusicButton />
+          </VenueGuard>
+        </>
+      )}
+
+      <DrawerMenu />
+      <CreditTopUpModal />
+      <MusicSearchModal />
+      <ProfileView />
+      <LoginModal />
+      <QrScannerModal />
+      <GpsMapModal />
+      <InfoModals />
+      <ToastNotification />
+    </div>
+  );
+};
+
 export default function Home() {
   return (
     <AppProvider>
       <main className="min-h-screen bg-[#120C08] text-[#FCEFD5] flex justify-center selection:bg-[#D4AF37] selection:text-black">
-        {/* Smartphone Container Viewport Wrapper */}
-        <div className="w-full max-w-md min-h-screen bg-[#120C08] flex flex-col relative shadow-[0_0_50px_rgba(212,175,55,0.15)] border-x border-[#D4AF37]/15">
-          {/* 1. Top Navigation Bar (Header - Wireframe 2) */}
-          <Header />
-
-          <VenueGuard>
-            {/* 2. Top Row Cards: Credit Balance & QR Okut Trigger (Wireframe 2) */}
-            <TopRowCards />
-
-            {/* 3. GPS Banner: Location Icon + Muzikors Haritası Trigger (Wireframe 2) */}
-            <GpsBanner />
-
-            {/* 4. Now Playing Hero Section: Song Artwork, Title, Artist, Live Progress Bar & Audio Equalizer (Wireframe 2) */}
-            <NowPlayingSection />
-
-            {/* 5. Up Next Queue: Scrollable List of Upcoming Tracks with Upvoting & Requester Avatars (Wireframe 2) */}
-            <UpNextQueueSection />
-
-            {/* 6. Sticky Action: Massive Floating "+ Müzik Ekle" Button with Cooldown Timer (Wireframe 2) */}
-            <StickyAddMusicButton />
-          </VenueGuard>
-
-          {/* Modals & Overlays matching wireframes */}
-          <DrawerMenu />
-          <CreditTopUpModal />
-          <MusicSearchModal />
-          <ProfileView />
-          <LoginModal />
-          <QrScannerModal />
-          <GpsMapModal />
-          <InfoModals />
-          <ToastNotification />
-        </div>
+        <AppContent />
       </main>
     </AppProvider>
   );

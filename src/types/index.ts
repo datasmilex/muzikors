@@ -43,6 +43,11 @@ export interface Venue {
   full_address?: string;
   contact_phone?: string;
   contact_email?: string;
+  logo_url?: string;
+  menu_link?: string;
+  wifi_name?: string;
+  wifi_password?: string;
+  terms_accepted?: boolean;
   total_earnings?: number;
 }
 
@@ -82,7 +87,8 @@ export type ModalType =
   | 'about' 
   | 'partners' 
   | 'contact' 
-  | 'campaigns';
+  | 'campaigns'
+  | 'terms';
 
 export interface CooldownState {
   active: boolean;

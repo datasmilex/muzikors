@@ -22,6 +22,7 @@ export const InfoModals: React.FC = () => {
     'partners',
     'contact',
     'howitworks',
+    'terms',
   ].includes(activeModal);
 
   if (!isInfoModal) return null;
@@ -67,9 +68,11 @@ export const InfoModals: React.FC = () => {
               {activeModal === 'partners' && <Handshake className="w-5 h-5" />}
               {activeModal === 'contact' && <MessageCircle className="w-5 h-5" />}
               {activeModal === 'howitworks' && <HelpCircle className="w-5 h-5" />}
+              {activeModal === 'terms' && <Info className="w-5 h-5" />}
 
               <h2 className="text-base font-bold text-white capitalize">
-                {activeModal === 'campaigns' && 'Özel Kampanyalar'}
+                {activeModal === 'campaigns' && 'Mevcut Kampanyalar'}
+                {activeModal === 'terms' && 'Kullanım Koşulları & KVKK'}
                 {activeModal === 'about' && 'Muzikors Hakkında'}
                 {activeModal === 'partners' && 'Mekan Ortaklığı'}
                 {activeModal === 'contact' && 'İletişim & Destek'}
@@ -229,6 +232,34 @@ export const InfoModals: React.FC = () => {
                     <h4 className="font-bold text-white">Şarkını Çaldır</h4>
                     <p className="text-amber-200/60">Sıraya gir, diğer dinleyicilerden oy alarak sıranı öne geçir ve şarkının keyfini çıkar.</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeModal === 'terms' && (
+              <div className="space-y-5">
+                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2">
+                  <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">
+                    <Info className="w-4 h-4" />
+                    Öncelikli İstek Hizmeti
+                  </h4>
+                  <p className="text-amber-200/60 text-xs leading-relaxed">
+                    Kredi/Bakiye harcamaları telifli müzik yayını satın alımı değil, mekân içi sıra önceliği yazılım hizmet bedelidir. 
+                    Muzikors sistemi üzerinden alınan krediler veya yapılan istek işlemleri, kamuya açık lisanslanmış bir eserin satışını teşkil etmez.
+                    Bu hizmet dijital sıra yönetiminden ibaret olup iade edilemez.
+                  </p>
+                </div>
+                
+                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2">
+                  <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    KVKK / Gizlilik
+                  </h4>
+                  <p className="text-amber-200/60 text-xs leading-relaxed">
+                    Kullanıcı verileri (Spotify ID, istek geçmişi, cihaz IP'si) yalnızca aktif oturum ve şarkı sıralama yönetimi için işlenir.
+                    Verileriniz kesinlikle üçüncü taraflara satılmaz veya dış sistemlerle paylaşılmaz. Onayınız dahilinde işlenen veriler, 
+                    hesabınız kapatıldığında veya anonimleştirme talep edildiğinde sistemden tamamen silinir.
+                  </p>
                 </div>
               </div>
             )}

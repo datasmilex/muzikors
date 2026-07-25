@@ -611,6 +611,12 @@ export const MusicSearchModal: React.FC = () => {
                   : `Seçili Şarkıyı İste (${getSongCreditCost(selectedTrack ? ((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) : 0) ?? 10} Kredi)`}
               </span>
             </button>
+
+            {/* Spotify Branding Compliance */}
+            <div className="flex items-center justify-center gap-1.5 pt-2 pb-1 opacity-60">
+              <span className="text-[10px] text-gray-400 font-medium tracking-wide">Powered by</span>
+              <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify" className="h-4 object-contain brightness-0 invert" />
+            </div>
           </div>
         </motion.div>
       </div>
