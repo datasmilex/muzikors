@@ -53,6 +53,13 @@ export interface Venue {
   latitude?: number;
   longitude?: number;
   computedDistance?: number;
+  current_track_info?: {
+    song_title: string;
+    artist: string;
+    album_cover: string;
+    spotify_track_id: string;
+    requested_by_name: string;
+  };
 }
 
 export interface UserProfile {

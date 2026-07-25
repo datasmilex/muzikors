@@ -396,9 +396,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const fetchQueue = async () => {
       try {
-        const { data: venueData } = await supabase
+        const { data: venueData, error: venueError } = await supabase
           .from('venues')
-          .select('id, venue_name, explicit_filter_enabled, allowed_genres')
+          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info')
           .eq('id', targetVenueId)
           .single();
 
@@ -476,6 +476,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (playingRow) {
           setNowPlaying({ ...toTrack(playingRow), requestedAt: 'Canli' });
           setIsPlayingAudio(true);
+        } else if (venueData?.current_track_info) {
+          const fallbackInfo = venueData.current_track_info;
+          setNowPlaying({
+            id: fallbackInfo.spotify_track_id || 'fallback',
+            title: fallbackInfo.song_title || 'Bilinmeyen Şarkı',
+            artist: fallbackInfo.artist || 'Bilinmeyen Sanatçı',
+            albumCover: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            coverUrl: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            album_art: fallbackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+            spotifyUri: fallbackInfo.spotify_track_id ? `spotify:track:${fallbackInfo.spotify_track_id}` : '',
+            durationMs: 210000,
+            duration: 210,
+            creditCost: 0,
+            votes: 0,
+            requestedBy: fallbackInfo.requested_by_name || 'Mekan Listesi',
+            requestedAt: 'Canli',
+            isPlaying: true,
+          });
+          setIsPlayingAudio(true);
         } else {
           setNowPlaying(null);
           setIsPlayingAudio(false);
@@ -512,9 +531,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     is_tv_active: row.is_tv_active ?? prev.is_tv_active,
                     is_paused: row.is_paused === true,
                     explicit_filter_enabled: row.explicit_filter_enabled === true,
+                    current_track_info: row.current_track_info,
                   }
                 : null
             );
+            // Auto re-sync player state if the venue track info changes
+            fetchQueue();
           }
         }
       )
