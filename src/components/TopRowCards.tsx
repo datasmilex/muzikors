@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Coins, QrCode, PlusCircle, Sparkles } from 'lucide-react';
+import { Coins, QrCode, PlusCircle, Sparkles, Tv } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const TopRowCards: React.FC = () => {
-  const { user, openModal, openProtectedModal } = useApp();
+  const { user, openModal, openProtectedModal, activeVenue } = useApp();
 
   return (
-    <div className="grid grid-cols-2 gap-3 px-4 pt-3 pb-1">
+    <div className="flex flex-col gap-3 px-4 pt-3 pb-1">
+      <div className="grid grid-cols-2 gap-3">
       <div className="glass-panel-gold rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden border border-[#D4AF37]/30 group hover:border-[#D4AF37]/60 transition-all">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5 text-xs text-amber-200/80 font-medium">
@@ -46,6 +47,20 @@ export const TopRowCards: React.FC = () => {
         <span className="text-[10px] text-amber-200/60 mt-0.5">
           Masa QR&apos;ı Tara
         </span>
+      </button>
+      </div>
+
+      <button
+        onClick={() => activeVenue?.is_tv_active && openProtectedModal('tvShoutout', 'TV mesajı göndermek için giriş yapın')}
+        disabled={!activeVenue?.is_tv_active}
+        className={`w-full rounded-xl p-3 flex flex-row items-center justify-center gap-2 font-bold transition-all border ${
+          activeVenue?.is_tv_active 
+            ? 'glass-panel-gold bg-gradient-to-r from-[#D4AF37] to-[#FCEFD5] text-stone-950 border-[#D4AF37]/50 hover:brightness-110 active:scale-95 shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
+            : 'bg-black/40 border-white/10 text-white/40 cursor-not-allowed'
+        }`}
+      >
+        <Tv className={`w-5 h-5 ${activeVenue?.is_tv_active ? 'stroke-[2.5]' : ''}`} />
+        <span>{activeVenue?.is_tv_active ? "TV'ye Mesaj Gönder (20 🪙)" : "TV Ekranı Kapalı"}</span>
       </button>
     </div>
   );

@@ -37,6 +37,7 @@ export interface Venue {
   currentSongArtist: string;
   slug?: string;
   is_active?: boolean;
+  is_tv_active?: boolean;
   is_paused?: boolean;
   explicit_filter_enabled?: boolean;
   allowed_genres?: string[];
@@ -93,7 +94,8 @@ export type ModalType =
   | 'contact' 
   | 'campaigns'
   | 'terms'
-  | 'daily_reward';
+  | 'daily_reward'
+  | 'tvShoutout';
 
 export interface CooldownState {
   active: boolean;

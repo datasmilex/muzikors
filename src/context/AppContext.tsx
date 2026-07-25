@@ -41,6 +41,7 @@ interface AppContextType {
   deleteAccount: () => void;
   showToast: (msg: string) => void;
   toggleAudioPlay: () => void;
+  setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -181,6 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentSongArtist: '',
         slug: data.slug,
         is_active: isActive,
+        is_tv_active: data.is_tv_active === true,
         is_paused: data.is_paused === true,
         explicit_filter_enabled: data.explicit_filter_enabled === true,
         allowed_genres: data.allowed_genres || [],
@@ -503,6 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ? {
                     ...prev,
                     is_active: row.is_active ?? prev.is_active,
+                    is_tv_active: row.is_tv_active ?? prev.is_tv_active,
                     is_paused: row.is_paused === true,
                     explicit_filter_enabled: row.explicit_filter_enabled === true,
                   }
@@ -624,6 +627,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveModal(modal);
   }, [user]);
   const closeModal = useCallback(() => { setActiveModal('none'); setPendingModal(null); setLoginPromptReason(null); }, []);
+
 
   const connectSpotify = useCallback(async () => {
     if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
@@ -953,7 +957,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, activeModal, activeVenue, kafeIdParam,
+      user, setUser, activeModal, activeVenue, kafeIdParam,
       isVenueBound, isVenueActive,
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,

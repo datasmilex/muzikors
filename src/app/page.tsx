@@ -19,6 +19,7 @@ import { GpsMapModal } from '../components/GpsMapModal';
 import { InfoModals } from '../components/InfoModals';
 import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
+import { TvShoutoutModal } from '../components/TvShoutoutModal';
 
 import { GatewayScreen } from '../components/GatewayScreen';
 import { useApp } from '../context/AppContext';
@@ -64,6 +65,7 @@ const AppContent = () => {
       <GpsMapModal />
       <InfoModals />
       <DailyRewardModal />
+      <TvShoutoutModal />
       <ToastNotification />
     </div>
   );
