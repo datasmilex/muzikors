@@ -410,12 +410,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .order('votes', { ascending: false })
           .order('created_at', { ascending: true });
 
-        if (error) { console.error('[Queue fetch error]', error.message); return; }
-        if (!data || data.length === 0) { setNowPlaying(null); setQueue([]); return; }
+        if (error) { console.error('[Queue fetch error]', error.message); }
+        const rawData = data || [];
 
         // Filter finished songs or zombie tracks
         const validRows: any[] = [];
-        for (const r of data) {
+        for (const r of rawData) {
           if (r.status === 'playing' && r.started_at) {
             const elapsedMs = Date.now() - new Date(r.started_at).getTime();
             const durationMs = r.duration_ms ?? 210000;
@@ -426,12 +426,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }
           validRows.push(r);
-        }
-
-        if (validRows.length === 0) {
-          setNowPlaying(null);
-          setQueue([]);
-          return;
         }
 
         let playingRow = validRows.find((r) => r.status === 'playing');
