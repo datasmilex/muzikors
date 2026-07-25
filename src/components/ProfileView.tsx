@@ -14,7 +14,7 @@ interface LeaderboardUser {
 }
 
 export const ProfileView: React.FC = () => {
-  const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider, isSpotifyConnected } = useApp();
+  const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
@@ -156,18 +156,6 @@ export const ProfileView: React.FC = () => {
             <h3 className="text-base font-black text-white">{user ? user.name : 'Misafir Kullanıcı'}</h3>
             <span className="text-xs text-[#D4AF37] font-semibold mt-0.5">{user ? user.username : '@misafir'}</span>
 
-            {/* ITEM 1: Visible Spotify Status Badge */}
-            <div className="mt-2">
-              {isSpotifyConnected ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-extrabold shadow-sm">
-                  Spotify Hesabı Bağlı
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-extrabold shadow-sm">
-                  Spotify Hesabı Bağlı Değil
-                </span>
-              )}
-            </div>
           </div>
 
           {/* ITEM 4: Profile Stats Persistence (3 Stat Cards) */}
@@ -296,18 +284,6 @@ export const ProfileView: React.FC = () => {
                   <span>Google ile Giriş Yap</span>
                 </button>
 
-                <button
-                  onClick={() => {
-                    closeModal();
-                    loginWithProvider('spotify');
-                  }}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#1DB954] hover:bg-[#1ed760] text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
-                >
-                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 496 512">
-                    <path d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8zm100.7 364.9c-4.2 0-6.8-1.3-10.7-3.6-35.9-22-81.1-26.8-134.2-14.7-9.5 2.2-19.4-3.8-21.6-13.3-2.2-9.5 3.8-19.4 13.3-21.6 59-13.4 109.4-7.7 149.9 17.1 7.4 4.5 9.7 14.3 5.3 21.7-2.4 4.1-7.1 6.8-11.7 6.8zm28.9-64.4c-5.3 0-8.6-1.6-13.5-4.5-43.2-26.5-109.1-34.2-160.3-18.7-11.8 3.6-24.1-3.2-27.7-15-3.6-11.8 3.2-24.1 15-27.7 58.7-17.7 131.7-8.9 181.7 21.8 9.5 5.8 12.5 18.2 6.7 27.7-3.1 5.3-9.1 8.7-15 8.7zm2.7-67.6C321.4 186.8 238 184 181.4 201.2c-14.3 4.3-29.2-3.8-33.5-18.1-4.3-14.3 3.8-29.2 18.1-33.5 63.7-19.4 156.1-16.1 220.1 21.9 12.9 7.7 17.2 24.4 9.5 37.3-5 8.2-13.9 12.1-22.3 12.1z" />
-                  </svg>
-                  <span>Spotify ile Giriş Yap</span>
-                </button>
               </div>
             ) : showConfirmDelete ? (
               <div className="bg-red-950/60 border border-red-500/40 rounded-2xl p-3 space-y-2">

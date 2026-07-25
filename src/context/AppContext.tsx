@@ -25,14 +25,11 @@ interface AppContextType {
   loginPromptReason: string | null;
   audioProgress: number;
   isPlayingAudio: boolean;
-  isSpotifyConnected: boolean;
-  spotifyToken: string | null;
-  connectSpotify: () => void;
-  disconnectSpotify: () => void;
+  loginWithProvider: (provider: 'google') => Promise<void>;
   openModal: (modal: ModalType) => void;
   openProtectedModal: (modal: ModalType, reason?: string) => void;
   closeModal: () => void;
-  loginWithProvider: (provider: 'google' | 'spotify') => Promise<void>;
+
   logout: () => Promise<void>;
   topUpCredits: (packageId: string) => void;
   requestTrack: (track: Track) => Promise<boolean>;
@@ -59,8 +56,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isSpotifyConnected, setIsSpotifyConnected] = useState<boolean>(false);
-  const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
+
   const [hasEnteredGateway, setHasEnteredGateway] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
@@ -105,19 +101,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return DEFAULT_CREDITS;
       }
 
-      if (data?.is_spotify_connected) {
-        setIsSpotifyConnected(true);
-        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
-      }
-
       setUser((prev) =>
         prev
           ? {
               ...prev,
-              credits: typeof data?.credits === 'number' ? data.credits : prev.credits,
+              credits: data?.credits ?? prev.credits,
+              lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits,
               totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
-              lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits ?? data?.credits ?? 10,
-              isSpotifyConnected: data?.is_spotify_connected ?? prev.isSpotifyConnected,
               lastDailyClaim: data?.last_daily_claim ?? prev.lastDailyClaim,
             }
           : null
@@ -232,8 +222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const searchParams = new URLSearchParams(window.location.search);
     const rawV = searchParams.get('v') || searchParams.get('venue') || searchParams.get('kafe_id') || searchParams.get('venue_id');
-    const spotifyConnected = searchParams.get('spotify_connected');
-    const authError = searchParams.get('error') || searchParams.get('spotify_error');
+    const authError = searchParams.get('error');
 
     if (authError) {
       showToast('Giriş yapılamadı. Lütfen tekrar deneyin.');
@@ -264,15 +253,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     }
-
-    const isConnected = spotifyConnected === 'true' || localStorage.getItem('is_spotify_connected') === 'true';
-    if (isConnected) {
-      setIsSpotifyConnected(true);
-      localStorage.setItem('is_spotify_connected', 'true');
-      if (spotifyConnected === 'true') showToast('Spotify Hesabınız Başarıyla Bağlandı!');
-      const match = document.cookie.match(/(^| )spotify_user_token=([^;]+)/);
-      if (match) setSpotifyToken(match[2]);
-    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── AUTH SESSION HANDLER ──────────────────────────────────────────────────
@@ -286,7 +266,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const fullName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Kullanici';
       const avatarUrl = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || '';
       const emailStr = authUser.email || '';
-      const provider: 'google' | 'spotify' = authUser.app_metadata?.provider === 'spotify' ? 'spotify' : 'google';
 
       userIdRef.current = authUser.id;
 
@@ -297,7 +276,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             full_name: fullName,
             avatar_url: avatarUrl,
             email: emailStr,
-            is_spotify_connected: provider === 'spotify',
+            is_admin: false,
           },
           { onConflict: 'id', ignoreDuplicates: true }
         );
@@ -310,18 +289,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         name: fullName,
         username: '@' + (emailStr.split('@')[0] || 'kullanici'),
         email: emailStr,
-        avatar: avatarUrl,
+        avatar: authUser.user_metadata?.avatar_url || prev?.avatar || avatarUrl,
         credits: liveCredits,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
         lifetimeCredits: prev?.lifetimeCredits ?? liveCredits,
-        isSpotifyConnected: provider === 'spotify' || prev?.isSpotifyConnected,
-        loginMethod: provider,
+        loginMethod: 'google',
       }));
 
-      if (provider === 'spotify') {
-        setIsSpotifyConnected(true);
-        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
-      }
+
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
@@ -343,15 +318,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 credits: typeof row?.credits === 'number' ? row.credits : prev.credits,
                 totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
                 lifetimeCredits: typeof row?.lifetime_credits === 'number' ? row.lifetime_credits : prev.lifetimeCredits,
-                isSpotifyConnected: row?.is_spotify_connected === true ? true : prev.isSpotifyConnected,
                 lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
               }
             : null
         );
-        if (row?.is_spotify_connected === true) {
-          setIsSpotifyConnected(true);
-          if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
-        }
+
       })
       .subscribe();
 
@@ -655,62 +626,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [user]);
   const closeModal = useCallback(() => { setActiveModal('none'); setPendingModal(null); setLoginPromptReason(null); }, []);
 
-
-  const connectSpotify = useCallback(async () => {
-    if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
-    setIsSpotifyConnected(true);
-    if (!supabase) return;
-
-    if (user?.id) {
-      const { error } = await supabase.auth.linkIdentity({
-        provider: 'spotify',
-        options: {
-          redirectTo: 'https://muzikors.com.tr/auth/callback',
-          scopes: 'user-read-private user-read-email streaming user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-read',
-        },
-      });
-      if (error) { console.error('[Spotify Link Error]', error); showToast('Spotify bağlanamadı.'); }
-    } else {
-      window.location.href = '/api/spotify/user-login';
-    }
-  }, [user?.id, supabase, showToast]);
-
-  const disconnectSpotify = useCallback(() => {
-    setIsSpotifyConnected(false); setSpotifyToken(null);
-    if (typeof window !== 'undefined') localStorage.removeItem('is_spotify_connected');
-    if (user?.id && supabase) supabase.from('profiles').update({ is_spotify_connected: false }).eq('id', user.id);
-    document.cookie = 'spotify_user_token=; Max-Age=0; path=/;';
-    showToast('Spotify hesabi baglantisi kesildi.');
-  }, [user?.id, showToast]);
-
-  const loginWithProvider = useCallback(async (provider: 'google' | 'spotify') => {
+  const loginWithProvider = useCallback(async (provider: 'google') => {
     if (!supabase) return;
     const redirectUrl = 'https://muzikors.com.tr/auth/callback';
     try {
-      if (provider === 'spotify') {
-        if (typeof window !== 'undefined') localStorage.setItem('is_spotify_connected', 'true');
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'spotify',
-          options: {
-            redirectTo: redirectUrl,
-            scopes: 'user-read-private user-read-email streaming user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-read',
-          },
-        });
-        if (error) { console.error('[OAuth Spotify]', error); showToast('Giris yapilamadi.'); }
-      } else {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: { redirectTo: redirectUrl },
         });
         if (error) { console.error('[OAuth Google]', error); showToast('Giris yapilamadi.'); }
-      }
     } catch (err) { console.error('[OAuth]', err); showToast('Giris yapilamadi.'); }
   }, [showToast]);
 
   const logout = useCallback(async () => {
     if (supabase) await supabase.auth.signOut();
-    setUser(null); userIdRef.current = null; setIsSpotifyConnected(false);
-    if (typeof window !== 'undefined') localStorage.removeItem('is_spotify_connected');
+    setUser(null); userIdRef.current = null;
     showToast('Cikis yapildi.'); closeModal();
   }, [showToast, closeModal]);
 
@@ -988,7 +918,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVenueBound, isVenueActive,
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
-      isSpotifyConnected, spotifyToken, connectSpotify, disconnectSpotify,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
       topUpCredits, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway

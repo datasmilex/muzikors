@@ -15,25 +15,17 @@ export const MusicSearchModal: React.FC = () => {
     user,
     activeVenue,
     cooldown,
-    isSpotifyConnected,
-    connectSpotify,
-    disconnectSpotify,
   } = useApp();
 
-  const [modeTab, setModeTab] = useState<'search' | 'liked'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
-  const [likedSongs, setLikedSongs] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global'>('all');
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingLiked, setIsLoadingLiked] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
-    if (modeTab !== 'search') return;
-
     const queryToFetch = searchQuery.trim();
     if (!queryToFetch) {
       setSearchResults([]);
@@ -71,28 +63,8 @@ export const MusicSearchModal: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, modeTab]);
+  }, [searchQuery]);
 
-  // Fetch Liked Songs when Tab 2 is active & Spotify is connected
-  useEffect(() => {
-    if (modeTab === 'liked' && isSpotifyConnected) {
-      setIsLoadingLiked(true);
-      fetch('/api/spotify/liked-songs')
-        .then(async (res) => {
-          const data = await res.json();
-          if (data.isConnected === false) {
-            disconnectSpotify();
-            return;
-          }
-          if (data.tracks) {
-            setLikedSongs(data.tracks);
-            if (data.tracks.length > 0) setSelectedTrack(data.tracks[0]);
-          }
-        })
-        .catch((err) => console.error('[MusicSearch] Liked songs error:', err))
-        .finally(() => setIsLoadingLiked(false));
-    }
-  }, [modeTab, isSpotifyConnected, disconnectSpotify]);
 
   if (activeModal !== 'search') return null;
 
@@ -167,37 +139,9 @@ export const MusicSearchModal: React.FC = () => {
               </button>
             </div>
 
-            {/* Main Mode Tabs Switcher */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[#1C130D] rounded-2xl border border-[#D4AF37]/25">
-              <button
-                onClick={() => setModeTab('search')}
-                className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                  modeTab === 'search'
-                    ? 'gold-gradient-bg text-stone-950 shadow-md'
-                    : 'text-amber-200/70 hover:text-white'
-                }`}
-              >
-                <Search className="w-4 h-4" />
-                <span>Spotify Ara</span>
-              </button>
-
-              <button
-                onClick={() => setModeTab('liked')}
-                className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                  modeTab === 'liked'
-                    ? 'gold-gradient-bg text-stone-950 shadow-md'
-                    : 'text-amber-200/70 hover:text-white'
-                }`}
-              >
-                <Heart className="w-4 h-4 text-red-500 fill-current" />
-                <span>Beğenilen Şarkılarım</span>
-              </button>
-            </div>
-
-            {/* TAB 1: Real Spotify Search Controls */}
-            {modeTab === 'search' && (
-              <div className="space-y-2">
-                <div className="relative">
+            {/* Main Search Controls */}
+            <div className="space-y-2 mt-2">
+              <div className="relative">
                   <Search className="w-5 h-5 text-[#D4AF37] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
@@ -260,12 +204,10 @@ export const MusicSearchModal: React.FC = () => {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* TAB 1: Search Track Results List */}
-          {modeTab === 'search' && (
-            <div className="flex-1 overflow-y-auto my-3 space-y-2 pr-1 scrollbar-thin">
+          {/* Search Track Results List */}
+          <div className="flex-1 overflow-y-auto my-3 space-y-2 pr-1 scrollbar-thin">
               {isLoading ? (
                 <div className="text-center py-16 text-amber-200/60 flex flex-col items-center justify-center space-y-2">
                   <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin" />
@@ -384,177 +326,6 @@ export const MusicSearchModal: React.FC = () => {
                 })
               )}
             </div>
-          )}
-
-          {/* TAB 2: Beğenilen Şarkılarım (Liked Songs) */}
-          {modeTab === 'liked' && (
-            <div className="flex-1 overflow-y-auto my-3 space-y-3 pr-1 scrollbar-thin">
-              {!isSpotifyConnected ? (
-                <div className="glass-panel-gold rounded-3xl p-6 text-center border-2 border-[#D4AF37]/40 flex flex-col items-center justify-center space-y-4 my-6 shadow-2xl">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-extrabold">
-                    ⚡ Spotify Hesabı Bağlı Değil
-                  </div>
-
-                  <div className="w-16 h-16 rounded-full bg-[#1DB954]/20 border-2 border-[#1DB954] flex items-center justify-center text-[#1DB954] shadow-lg">
-                    <Heart className="w-8 h-8 fill-current animate-pulse" />
-                  </div>
-
-                  <div className="space-y-1">
-                    <h3 className="text-base font-black text-white">Beğenilen Şarkıları görmek için Spotify ile giriş yapın</h3>
-                    <p className="text-xs text-amber-200/70 leading-relaxed max-w-[260px] mx-auto">
-                      Kendi Spotify kütüphanenizdeki beğendiğiniz şarkılardan mekana tek tıkla istek göndermek için hesabınızı yetkilendirin.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={connectSpotify}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#1DB954] hover:bg-[#1ed760] text-black font-black text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Spotify Hesabını Bağla</span>
-                  </button>
-
-                  <span className="text-[10px] text-amber-200/50">
-                    Sadece `user-library-read` okuma izni istenir. Şifreniz asla saklanmaz.
-                  </span>
-                </div>
-              ) : isLoadingLiked ? (
-                <div className="text-center py-12 text-amber-200/60">
-                  <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin mx-auto mb-2" />
-                  <p className="text-xs font-semibold">Beğenilen Şarkılarınız Yükleniyor...</p>
-                </div>
-              ) : likedSongs.length === 0 ? (
-                <div className="glass-panel rounded-2xl p-6 text-center border border-[#D4AF37]/20">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-extrabold mb-3">
-                    ✓ Spotify Hesabı Bağlı
-                  </div>
-                  <Heart className="w-8 h-8 text-amber-200/40 mx-auto mb-2" />
-                  <p className="text-xs font-bold text-white">Beğenilen Şarkı Bulunamadı</p>
-                  <p className="text-[11px] text-amber-200/60 mt-1">
-                    Spotify hesabınızda henüz beğenilmiş şarkınız bulunmuyor.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1 text-[11px] text-amber-200/70">
-                    <span className="font-extrabold flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      ✓ Spotify Hesabı Bağlı ({likedSongs.length} Şarkı)
-                    </span>
-                    <button
-                      onClick={disconnectSpotify}
-                      className="text-red-400 hover:text-red-300 font-semibold underline text-[10px]"
-                    >
-                      Bağlantıyı Kes
-                    </button>
-                  </div>
-
-                  {likedSongs.map((track) => {
-                    const isSelected = selectedTrack?.id === track.id;
-                    const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                    const cost = getSongCreditCost(durMs);
-                    const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
-                    const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
-                    const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
-
-                    const allowedGenres = activeVenue?.allowed_genres || [];
-                    const hasAllowedGenres = allowedGenres.length > 0;
-                    const trackGenres = track.genres || [];
-                    // Vibe Guard block: If venue has genres, and track has genres, but they don't intersect.
-                    // If track has no genres (e.g. obscure), we allow it to avoid false positives, OR we block it. Let's block if no intersection.
-                    const isVibeBlocked = hasAllowedGenres && trackGenres.length > 0 && !trackGenres.some(g => allowedGenres.includes(g));
-
-                    const isBlocked = cost === null || isExplicitBlocked || isVibeBlocked;
-                    const canAfford = (user?.credits ?? 0) >= (cost ?? 0);
-
-                    return (
-                      <div
-                        key={track.id}
-                        onClick={() => !isBlocked && setSelectedTrack(track)}
-                        className={`rounded-2xl p-3 flex items-center justify-between border transition-all duration-200 ${
-                          isBlocked
-                            ? 'glass-panel opacity-60 border-red-500/30'
-                            : isSelected
-                            ? 'glass-panel-gold border-[#D4AF37] ring-1 ring-[#D4AF37]/50 cursor-pointer'
-                            : 'glass-panel border-[#D4AF37]/15 hover:border-[#D4AF37]/35 cursor-pointer'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <img
-                            src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                            alt={track.title}
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = '/logo.png';
-                            }}
-                            className="w-12 h-12 rounded-xl object-cover border border-[#D4AF37]/30 shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h4 className="text-sm font-bold text-white truncate">{track.title}</h4>
-                              {isExplicitBlocked ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
-                                  <AlertTriangle className="w-3 h-3 text-red-400" />
-                                  Sansürlü Şarkı (Engellendi)
-                                </span>
-                              ) : isVibeBlocked ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold shrink-0">
-                                  <AlertTriangle className="w-3 h-3 text-orange-400" />
-                                  Mekân Konseptine Uymuyor
-                                </span>
-                              ) : cost === null ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
-                                  <AlertTriangle className="w-3 h-3 text-red-400" />
-                                  7+ Dk (Eklenemez)
-                                </span>
-                              ) : null}
-                            </div>
-                            <p className="text-xs text-amber-200/60 truncate mt-0.5 flex items-center gap-1.5">
-                              <span>{track.artist}</span>
-                              {durMs > 0 && (
-                                <>
-                                  <span>•</span>
-                                  <span className="font-semibold text-amber-200/80">⏱️ {formatDuration(durMs)}</span>
-                                </>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 pl-2">
-                          {isExplicitBlocked ? (
-                            <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[10px] font-bold border border-red-500/20">
-                              Sansürlü
-                            </span>
-                          ) : cost === null ? (
-                            <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[11px] font-bold border border-red-500/20">
-                              {">7 Dk"}
-                            </span>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTrack(track);
-                                handleConfirmRequest(track);
-                              }}
-                              disabled={cooldown.active || !canAfford}
-                              className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 shadow-md transition-all ${
-                                !canAfford
-                                  ? 'bg-stone-900/80 text-amber-200/40 border border-amber-500/20 cursor-not-allowed'
-                                  : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-95'
-                              }`}
-                            >
-                              <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                              <span>İste ({cost} Kredi)</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Bottom Action Bar */}
           <div className="shrink-0 pt-3 border-t border-[#D4AF37]/20 space-y-2">
