@@ -46,7 +46,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const COOLDOWN_DURATION_SECONDS = 180;
+const COOLDOWN_DURATION_SECONDS = 30;
 const DEFAULT_CREDITS = 10;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
