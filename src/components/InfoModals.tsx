@@ -93,6 +93,12 @@ export const InfoModals: React.FC = () => {
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin text-xs text-amber-200/80 leading-relaxed">
             {activeModal === 'campaigns' && (
               <div className="space-y-3">
+                <div className="glass-panel rounded-2xl p-4 border border-[#D4AF37]/40 bg-[#D4AF37]/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-[9px] font-bold px-2 py-1 rounded-bl-xl">Kazanıldı / Aktif</div>
+                  <h4 className="font-bold text-white mb-1.5 mt-2">Google ile Giriş Ödülü 🎁</h4>
+                  <p>Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
+                </div>
+
                 <div className="glass-panel rounded-2xl p-4 border border-[#D4AF37]/20">
                   <h4 className="font-bold text-white mb-1">VIP Kredi Bonusu</h4>
                   <p>100 Kredi alımlarınızda +15, 200 Kredi alımlarınızda +40 Hediye Kredi otomatik hesabınıza tanımlanır.</p>

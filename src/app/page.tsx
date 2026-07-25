@@ -17,6 +17,7 @@ import { LoginModal } from '../components/LoginModal';
 import { QrScannerModal } from '../components/QrScannerModal';
 import { GpsMapModal } from '../components/GpsMapModal';
 import { InfoModals } from '../components/InfoModals';
+import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
 
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -62,6 +63,7 @@ const AppContent = () => {
       <QrScannerModal />
       <GpsMapModal />
       <InfoModals />
+      <DailyRewardModal />
       <ToastNotification />
     </div>
   );

@@ -62,6 +62,7 @@ export interface UserProfile {
   lifetimeCredits?: number;
   isSpotifyConnected?: boolean;
   loginMethod: 'google' | 'spotify';
+  lastDailyClaim?: string;
 }
 
 export interface CreditPackage {
@@ -88,7 +89,8 @@ export type ModalType =
   | 'partners' 
   | 'contact' 
   | 'campaigns'
-  | 'terms';
+  | 'terms'
+  | 'daily_reward';
 
 export interface CooldownState {
   active: boolean;

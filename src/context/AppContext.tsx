@@ -95,7 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, lifetime_credits, total_songs_requested, is_spotify_connected')
+        .select('credits, lifetime_credits, total_songs_requested, is_spotify_connected, last_daily_claim')
         .eq('id', userId)
         .single();
 
@@ -117,6 +117,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
               lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits ?? data?.credits ?? 10,
               isSpotifyConnected: data?.is_spotify_connected ?? prev.isSpotifyConnected,
+              lastDailyClaim: data?.last_daily_claim ?? prev.lastDailyClaim,
             }
           : null
       );
@@ -337,6 +338,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
                 lifetimeCredits: typeof row?.lifetime_credits === 'number' ? row.lifetime_credits : prev.lifetimeCredits,
                 isSpotifyConnected: row?.is_spotify_connected === true ? true : prev.isSpotifyConnected,
+                lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
               }
             : null
         );

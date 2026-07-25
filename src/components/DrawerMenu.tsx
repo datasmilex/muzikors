@@ -15,19 +15,26 @@ import {
   LogOut,
   Sparkles,
   Music,
-  LogIn
+  LogIn,
+  PlaySquare
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ModalType } from '../types';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, user, logout, loginWithProvider } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast } = useApp();
 
   if (activeModal !== 'drawer') return null;
 
-  const navItems: { label: string; icon: React.ReactNode; modal: ModalType }[] = [
-    { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile' },
-    { label: 'Kampanyalar', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
+  // Calculate daily reward dot
+  const todayStr = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0];
+  const hasClaimedToday = user?.lastDailyClaim ? new Date(user.lastDailyClaim).toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }).split(',')[0] === todayStr : false;
+  const showRewardDot = !!user && !hasClaimedToday;
+
+  const navItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
+    { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
+    { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
+    { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
     { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
     { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
     { label: 'İletişim', icon: <MessageCircle className="w-5 h-5 text-[#D4AF37]" />, modal: 'contact' },
@@ -159,19 +166,44 @@ export const DrawerMenu: React.FC = () => {
                   key={item.label}
                   onClick={() => {
                     closeModal();
-                    openModal(item.modal);
+                    if (item.isProtected && !user) {
+                      openProtectedModal(item.modal, 'Bu bölümü görüntülemek için giriş yapmalısınız.');
+                    } else {
+                      openModal(item.modal);
+                    }
                   }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#1C130D] border border-transparent hover:border-[#D4AF37]/20 text-amber-100/90 font-medium text-sm transition-all group"
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#1C130D] border border-transparent hover:border-[#D4AF37]/20 text-amber-100/90 font-medium text-sm transition-all group relative"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#1C130D] border border-[#D4AF37]/20 flex items-center justify-center group-hover:border-[#D4AF37]/50 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-[#1C130D] border border-[#D4AF37]/20 flex items-center justify-center group-hover:border-[#D4AF37]/50 transition-colors relative">
                       {item.icon}
+                      {item.showBadge && (
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black shadow-sm animate-pulse" />
+                      )}
                     </div>
                     <span>{item.label}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-amber-200/40 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" />
                 </button>
               ))}
+
+              {/* Disabled Watch Ads Button */}
+              <button
+                disabled={true}
+                onClick={() => showToast('Bu özellik çok yakında mobil uygulamamızla birlikte yayında olacaktır!')}
+                className="w-full flex items-center justify-between p-3 mt-2 rounded-xl bg-black/30 border border-white/5 opacity-60 cursor-not-allowed group relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-500">
+                    <PlaySquare className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-gray-400">Reklam İzle & Kredi Kazan</span>
+                    <span className="text-[10px] text-gray-500">Uygulamayı indirerek kredi kazan.</span>
+                  </div>
+                </div>
+                <div className="text-[9px] font-bold bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full shrink-0">Pek Yakında</div>
+              </button>
             </nav>
           </div>
 
