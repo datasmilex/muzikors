@@ -16,6 +16,8 @@ interface AppContextType {
   kafeIdParam: string | null;
   isVenueBound: boolean;
   isVenueActive: boolean;
+  hasEnteredGateway: boolean;
+  setHasEnteredGateway: (val: boolean) => void;
   nowPlaying: Track | null;
   queue: Track[];
   cooldown: CooldownState;
@@ -58,6 +60,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSpotifyConnected, setIsSpotifyConnected] = useState<boolean>(false);
   const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
+  const [hasEnteredGateway, setHasEnteredGateway] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const [livePlaybackState, setLivePlaybackState] = useState<{
@@ -931,6 +934,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isSpotifyConnected, spotifyToken, connectSpotify, disconnectSpotify,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
       topUpCredits, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+      hasEnteredGateway, setHasEnteredGateway
     }}>
       {children}
     </AppContext.Provider>
