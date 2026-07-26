@@ -12,6 +12,7 @@ interface IyzicoRetrieveResponse {
   status:         string;
   paymentStatus?: string;
   errorMessage?:  string;
+  conversationId?: string; // venueId|userId|creditAmount
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -19,23 +20,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const baseUrl    = process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr';
 
   try {
-    const token        = (req.body?.token || req.query?.token) as string | undefined;
-    const venueId      = req.query.venueId      as string | undefined;
-    const creditAmount = parseInt((req.query.creditAmount as string) || '0', 10);
-    const userId       = req.query.userId        as string | undefined;
-
-    // venueId varsa mekan bağlamını koru: /?v=2&...
-    const venueParam = venueId ? `?v=${venueId}` : '';
-    const successUrl = (amount: number) => `${baseUrl}/${venueParam}&payment=success&amount=${amount}`;
-    const errorUrl   = `${baseUrl}/${venueParam}&payment=error`;
-
-    console.log('[iyzico callback] token:', token, '| venueId:', venueId, '| credit:', creditAmount);
+    const token = (req.body?.token || req.query?.token) as string | undefined;
 
     if (!token) {
-      return res.redirect(302, errorUrl);
+      console.error('[iyzico callback] Token yok.');
+      return res.redirect(302, `${baseUrl}/?payment=error`);
     }
 
     const apiKey = process.env.IYZICO_API_KEY;
@@ -44,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!apiKey || !secretKey) {
       console.error('[iyzico] IYZICO_API_KEY veya IYZICO_SECRET_KEY eksik!');
-      return res.redirect(302, errorUrl);
+      return res.redirect(302, `${baseUrl}/?payment=error`);
     }
     
     const randomKey = Date.now().toString() + Math.floor(Math.random() * 1000000).toString();
@@ -78,13 +70,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       result = JSON.parse(responseText);
     } catch {
       console.error('[iyzico callback] parse hatası:', responseText);
-      return res.redirect(302, errorUrl);
+      return res.redirect(302, `${baseUrl}/?payment=error`);
     }
 
-    console.log('[iyzico callback] result:', result);
+    console.log('[iyzico callback] result status:', result.status, 'paymentStatus:', result.paymentStatus);
+
+    // conversationId parse (venueId|userId|creditAmount)
+    let venueId = '';
+    let userId = '';
+    let creditAmount = 0;
+    
+    if (result.conversationId && result.conversationId.includes('|')) {
+      const parts = result.conversationId.split('|');
+      venueId = parts[0] || '';
+      userId = parts[1] || '';
+      creditAmount = parseInt(parts[2] || '0', 10);
+    }
+
+    const venueParam = venueId ? `?v=${venueId}` : '';
+    const successUrl = (amount: number) => `${baseUrl}/${venueParam}&payment=success&amount=${amount}`;
+    const errorUrl   = `${baseUrl}/${venueParam}&payment=error`;
 
     if (result.status !== 'success' || result.paymentStatus !== 'SUCCESS') {
-      console.error('[iyzico callback] Ödeme doğrulanamadı:', result);
+      console.error('[iyzico callback] Ödeme doğrulanamadı:', result.errorMessage);
       return res.redirect(302, errorUrl);
     }
 
@@ -126,6 +134,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error: any) {
     console.error('[iyzico callback exception]', error);
-    return res.redirect(302, `${baseUrl}/?payment=error`);
+    return res.redirect(302, `${process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr'}/?payment=error`);
   }
 }

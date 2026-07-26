@@ -40,26 +40,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const formattedPrice = Number(amount).toFixed(2);
     const baseUrl        = process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr';
 
-    const callbackUrl = new URL('/api/payment/callback', baseUrl);
-    callbackUrl.searchParams.set('venueId',      venueId);
-    callbackUrl.searchParams.set('creditAmount', String(creditAmount));
-    if (userId) callbackUrl.searchParams.set('userId', userId);
-
-    const clientIp = ((req.headers['x-forwarded-for'] as string) || '').split(',')[0]?.trim() || '85.34.78.112';
-    const now      = new Date();
-    const dateStr  = now.toISOString().replace('T', ' ').substring(0, 19);
-    
-    const randomKey = Date.now().toString() + Math.floor(Math.random() * 1000000).toString();
+    const customData = `${venueId}|${userId}|${creditAmount}`;
 
     const requestBody: Record<string, any> = {
       locale:              'tr',
-      conversationId:      randomKey,
-      price:               formattedPrice,
-      paidPrice:           formattedPrice,
+      conversationId:      customData,
+      price:               Number(amount).toFixed(2),
+      paidPrice:           Number(amount).toFixed(2),
       currency:            'TRY',
-      basketId:            'B_' + randomKey,
+      basketId:            customData,
       paymentGroup:        'PRODUCT',
-      callbackUrl:         callbackUrl.toString(),
+      callbackUrl:         'https://muzikors.com.tr/api/payment/callback',
       buyer: {
         id:                  userId || 'GUEST',
         name:                'Muzikors',
@@ -67,10 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         gsmNumber:           '+905555555555',
         email:               'info@muzikors.com.tr',
         identityNumber:      '11111111111',
-        lastLoginDate:       dateStr,
-        registrationDate:    dateStr,
-        registrationAddress: 'Muzikors Istanbul Merkezi, No:1',
-        ip:                  clientIp,
+        lastLoginDate:       '2026-07-26 16:07:03',
+        registrationDate:    '2026-07-26 16:07:03',
+        registrationAddress: 'Muzikors Istanbul Merkezi No 1',
+        ip:                  '78.163.170.64',
         city:                'Istanbul',
         country:             'Turkey',
         zipCode:             '34000',
@@ -79,24 +70,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactName: 'Muzikors Kullanicisi',
         city:        'Istanbul',
         country:     'Turkey',
-        address:     'Muzikors Istanbul Merkezi, No:1',
+        address:     'Muzikors Istanbul Merkezi No 1',
         zipCode:     '34000',
       },
       billingAddress: {
         contactName: 'Muzikors Kullanicisi',
         city:        'Istanbul',
         country:     'Turkey',
-        address:     'Muzikors Istanbul Merkezi, No:1',
+        address:     'Muzikors Istanbul Merkezi No 1',
         zipCode:     '34000',
       },
       basketItems: [
         {
-          id:        'BI_1',
-          name:      `Muzikors Kredi Paketi (+${creditAmount} Kredi)`,
+          id:        packageId,
+          name:      'Muzikors Kredi Paketi',
           category1: 'Kredi',
           category2: 'Digital',
           itemType:  'VIRTUAL',
-          price:     formattedPrice,
+          price:     Number(amount).toFixed(2),
         },
       ],
     };
