@@ -97,6 +97,7 @@ export const MusicSearchModal: React.FC = () => {
         const success = await requestTrack(confirmingTrack, isAnonymous);
         if (success) {
           setConfirmingTrack(null);
+          closeModal();
         }
       } finally {
         setSubmittingTrackId(null);
@@ -179,7 +180,7 @@ export const MusicSearchModal: React.FC = () => {
                   <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
                 </button>
                 <button
-                  onClick={() => setConfirmingTrack(null)}
+                  onClick={() => { setConfirmingTrack(null); closeModal(); }}
                   disabled={submittingTrackId === confirmingTrack.id}
                   className="w-full py-4 px-6 rounded-2xl bg-transparent border border-gray-600 text-gray-300 font-bold text-sm flex items-center justify-center hover:bg-white/5 active:scale-[0.98] transition-all"
                 >

@@ -828,6 +828,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
         requested_by_user_id: requestUserId,
         requested_by_name: requestedByName,
+        display_name: requestedByName,
         is_anonymous: isAnonymous || false,
         status: 'pending',
         started_at: null,
