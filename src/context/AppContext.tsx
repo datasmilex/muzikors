@@ -758,12 +758,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openModal('topup'); return false;
     }
 
-    // ── FINANCIAL SPLIT CALCULATION ──────────────────────────────────────
-    const taxAmount = Math.round(requiredCredits * 0.20 * 100) / 100;       // %20 vergi
-    const remaining = requiredCredits - taxAmount;                            // %80 net
-    const venueAmount = Math.round(remaining * 0.50 * 100) / 100;            // %40 kafe payı
-    const adminAmount = Math.round(remaining * 0.50 * 100) / 100;            // %40 platform payı
-    // ─────────────────────────────────────────────────────────────────────
+
 
     const venueId = parseInt(activeVenue.id, 10);
     const targetSpotifyUri = track.spotifyUri || `spotify:track:${track.id}`;
@@ -846,43 +841,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         showToast('Sarki eklenemedi.'); return false;
       }
-
-      // Insert financial record into song_payments (only if user paid)
-      if (user && requiredCredits > 0) {
-        const { error: paymentErr } = await supabase.from('song_payments').insert({
-        song_name: track.title,
-        artist_name: track.artist,
-        venue_id: venueId,
-        total_credits: requiredCredits,
-        tax_amount: taxAmount,
-        venue_amount: venueAmount,
-        admin_amount: adminAmount,
-      });
-      if (paymentErr) {
-        console.error('[requestTrack payment]', paymentErr.message);
-      }
-
-      // Increment venue total_earnings
-      if (venueId) {
-        await supabase.rpc('increment_venue_earnings', {
-          venue_id: venueId,
-          amount: venueAmount,
-        }).then(({ error }) => {
-          if (error) {
-            // Fallback: manual increment
-            supabase
-              .from('venues')
-              .select('total_earnings')
-              .eq('id', venueId)
-              .single()
-              .then(({ data }) => {
-                const current = Number(data?.total_earnings || 0);
-                supabase.from('venues').update({ total_earnings: current + venueAmount }).eq('id', venueId);
-              });
-          }
-        });
-      }
-    }
     }
 
     const newTrack: Track = {

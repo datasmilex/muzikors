@@ -8,9 +8,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const iyzipay = getIyzipayClient();
-
     const { venueId, packageId, amount, creditAmount, userId } = req.body;
+    console.log("IYZICO INIT REQUEST:", req.body);
+
+    const iyzipay = getIyzipayClient();
 
     if (!amount || !packageId || !creditAmount || !venueId) {
       console.error('[iyzico init error] Missing parameters:', { amount, packageId, creditAmount, venueId });
@@ -87,20 +88,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('[iyzico init request payload]:', JSON.stringify(request, null, 2));
 
-    iyzipay.checkoutFormInitialize.create(request, (err: any, result: any) => {
-      if (err) {
-        console.error('[iyzico init err]', err);
-        return res.status(500).json({ error: 'Payment initialization failed', details: err });
-      } else if (result.status === 'failure') {
-        console.error('[iyzico init failure]', result);
-        return res.status(400).json({ error: result.errorMessage || 'Payment failed' });
-      } else {
-        return res.status(200).json({ paymentPageUrl: result.paymentPageUrl, token: result.token });
-      }
+    const result = await new Promise<any>((resolve, reject) => {
+      iyzipay.checkoutFormInitialize.create(request, (err: any, resData: any) => {
+        if (err) {
+          reject(err);
+        } else if (resData?.status === 'failure') {
+          reject(new Error(resData.errorMessage || 'Payment failed'));
+        } else {
+          resolve(resData);
+        }
+      });
     });
+
+    return res.status(200).json({ paymentPageUrl: result.paymentPageUrl, token: result.token });
 
   } catch (error: any) {
     console.error('[iyzico exception]', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: error.message || 'Ödeme başlatılamadı' });
   }
 }
