@@ -6,6 +6,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import type { NextApiRequest, NextApiResponse } from 'next';
+import crypto from 'crypto';
 import { iyzicoPost } from '@/lib/iyzipay';
 
 interface IyzicoInitResponse {
@@ -41,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const formattedPrice  = Number(amount).toFixed(2);   // "50.00"
 
     const baseUrl         = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const conversationId  = `mzk_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
+    const conversationId  = 'mzk_' + crypto.randomBytes(8).toString('hex');
 
     const callbackUrl = new URL('/api/payment/callback', baseUrl);
     callbackUrl.searchParams.set('venueId',      venueId);
@@ -127,6 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error: any) {
     console.error('[iyzico exception]', error);
+    // iyzico'dan gelen errorMessage'ı frontend'e ilet
     return res.status(500).json({ error: error.message || 'Ödeme başlatılamadı' });
   }
 }
