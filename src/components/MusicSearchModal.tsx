@@ -23,6 +23,8 @@ export const MusicSearchModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
+  const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
@@ -80,12 +82,22 @@ export const MusicSearchModal: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handleConfirmRequest = async (trackToRequest?: Track) => {
+  const handleConfirmRequest = (trackToRequest?: Track) => {
     const target = trackToRequest || selectedTrack;
-    if (target && !submittingTrackId) {
-      setSubmittingTrackId(target.id);
+    if (target) {
+      setConfirmingTrack(target);
+      setIsAnonymous(false);
+    }
+  };
+
+  const handleFinalRequest = async () => {
+    if (confirmingTrack && !submittingTrackId) {
+      setSubmittingTrackId(confirmingTrack.id);
       try {
-        await requestTrack(target);
+        const success = await requestTrack(confirmingTrack, isAnonymous);
+        if (success) {
+          setConfirmingTrack(null);
+        }
       } finally {
         setSubmittingTrackId(null);
       }
@@ -112,6 +124,71 @@ export const MusicSearchModal: React.FC = () => {
           transition={{ type: 'spring', damping: 26, stiffness: 260 }}
           className="relative w-full max-w-md h-[92vh] bg-[#120C08] border-t-2 border-[#D4AF37]/40 rounded-t-[32px] p-5 z-10 shadow-2xl flex flex-col justify-between overflow-hidden"
         >
+          {confirmingTrack ? (
+            <div className="flex flex-col h-full justify-between pb-4">
+              <div className="space-y-6 pt-4">
+                <div className="text-center space-y-2">
+                  <AlertTriangle className="w-12 h-12 text-[#E5A93C] mx-auto opacity-90" />
+                  <h2 className="text-xl font-bold text-white tracking-wide">Şarkı İsteğini Onayla</h2>
+                  <p className="text-sm text-gray-400 px-4">
+                    Şarkı isteğinizi onaylamadan önce lütfen aşağıdaki KVKK aydınlatmasını okuyun.
+                  </p>
+                </div>
+
+                {/* Track Info Box */}
+                <div className="flex items-center gap-3 bg-[#1A1A1A] rounded-2xl p-4 border border-[#D4AF37]/20">
+                  <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-12 h-12 rounded-lg object-cover" />
+                  <div className="truncate">
+                    <p className="text-sm font-bold text-white truncate">{confirmingTrack.title}</p>
+                    <p className="text-xs text-amber-200/60 truncate">{confirmingTrack.artist}</p>
+                  </div>
+                </div>
+
+                {/* Anonymous Toggle */}
+                <div className="flex items-center justify-between bg-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/10">
+                  <div>
+                    <p className="text-sm font-bold text-white">İsmimi Ekranda Gizle</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Sadece "Anonim Müşteri" olarak görünür.</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsAnonymous(!isAnonymous)}
+                    className={`w-12 h-6 rounded-full p-1 transition-colors flex items-center ${isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isAnonymous ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* Consent Text */}
+                <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80">
+                  {isAnonymous ? (
+                    <p>"Şarkı isteğin TV ekranında ve panellerde <b>'Anonim Müşteri'</b> olarak görünecektir. Onaylıyor musun?"</p>
+                  ) : (
+                    <p>"Şarkı isteğinle birlikte ismin <b>{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak TV ekranında ve uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3 mt-6">
+                <button
+                  onClick={handleFinalRequest}
+                  disabled={submittingTrackId === confirmingTrack.id}
+                  className="w-full py-4 px-6 rounded-2xl gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-center gap-2 shadow-xl hover:brightness-110 active:scale-[0.98] transition-all"
+                >
+                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5 stroke-[3]" />}
+                  <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
+                </button>
+                <button
+                  onClick={() => setConfirmingTrack(null)}
+                  disabled={submittingTrackId === confirmingTrack.id}
+                  className="w-full py-4 px-6 rounded-2xl bg-transparent border border-gray-600 text-gray-300 font-bold text-sm flex items-center justify-center hover:bg-white/5 active:scale-[0.98] transition-all"
+                >
+                  İptal / Vazgeç
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* Top Header & Mode Tab Switcher */}
           <div className="shrink-0 space-y-3">
             <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto" />
@@ -389,6 +466,8 @@ export const MusicSearchModal: React.FC = () => {
               <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify" className="h-4 object-contain brightness-0 invert" />
             </div>
           </div>
+            </>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>

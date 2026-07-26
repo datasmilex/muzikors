@@ -32,7 +32,7 @@ interface AppContextType {
 
   logout: () => Promise<void>;
   topUpCredits: (packageId: string) => void;
-  requestTrack: (track: Track) => Promise<boolean>;
+  requestTrack: (track: Track, isAnonymous?: boolean) => Promise<boolean>;
   voteTrack: (trackId: string) => void;
   bindVenueById: (kafeId: string) => void;
   deleteAccount: () => void;
@@ -691,7 +691,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
-  const requestTrack = useCallback(async (track: Track): Promise<boolean> => {
+  const requestTrack = useCallback(async (track: Track, isAnonymous?: boolean): Promise<boolean> => {
     // Venue guard
     if (!activeVenue) {
       showToast('Şarkı istemek için önce bir QR kod okutun!');
@@ -779,7 +779,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await supabase.from('song_requests_log').insert([{ user_id: user.id }]);
       }
 
-      const requestedByName = user?.name || 'Müşteri';
+      // Name Masking Logic
+      let requestedByName = 'Müşteri';
+      if (isAnonymous) {
+        requestedByName = 'Anonim Müşteri';
+      } else if (user?.name) {
+        const parts = user.name.trim().split(' ');
+        if (parts.length > 1) {
+          const lastName = parts.pop();
+          requestedByName = `${parts.join(' ')} ${lastName?.charAt(0)}.***`;
+        } else {
+          requestedByName = `${user.name.charAt(0)}.***`;
+        }
+      }
+
       const requestUserId = user?.id || null;
 
       // Insert into venue-isolated queue (status = pending/queued, started_at = null, let Kafe Paneli master clock trigger)
@@ -791,6 +804,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
         requested_by_user_id: requestUserId,
         requested_by_name: requestedByName,
+        is_anonymous: isAnonymous || false,
         status: 'pending',
         started_at: null,
         votes: 1,
@@ -850,8 +864,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...track,
       id: `req-${Date.now()}`,
       votes: 1,
-      requestedBy: user?.name || 'Müşteri',
-      requestedByAvatar: user?.avatar || '',
+      requestedBy: isAnonymous ? 'Anonim Müşteri' : (user?.name || 'Müşteri'),
+      requestedByAvatar: isAnonymous ? '' : (user?.avatar || ''),
       requestedAt: 'Simdi',
       startedAt: undefined,
     };

@@ -9,6 +9,7 @@ import { CREDIT_PACKAGES } from '../data/mockData';
 export const CreditTopUpModal: React.FC = () => {
   const { activeModal, closeModal, topUpCredits } = useApp();
   const [selectedPackId, setSelectedPackId] = useState<string>('pack-100');
+  const [isLegalAccepted, setIsLegalAccepted] = useState(false);
 
   if (activeModal !== 'topup') return null;
 
@@ -113,18 +114,37 @@ export const CreditTopUpModal: React.FC = () => {
           </div>
 
           {/* Secure Payment Info */}
-          <div className="flex items-center justify-center gap-2 text-[11px] text-amber-200/50 mb-5">
+          <div className="flex items-center justify-center gap-2 text-[11px] text-amber-200/50 mb-4">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-Bit SSL ile %100 Güvenli Ödeme (Apple Pay / Credit Card)</span>
+            <span>256-Bit SSL ile %100 Güvenli Ödeme (Paycell / Kredi Kartı)</span>
+          </div>
+
+          {/* Legal Checkbox */}
+          <div className="flex items-start gap-3 mb-6 px-2">
+            <input
+              type="checkbox"
+              id="legal-checkbox"
+              checked={isLegalAccepted}
+              onChange={(e) => setIsLegalAccepted(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-gray-600 bg-[#1A1A1A] text-[#D4AF37] focus:ring-[#D4AF37]"
+            />
+            <label htmlFor="legal-checkbox" className="text-[11px] text-gray-400 leading-tight">
+              <a href="/legal/sales" className="text-[#E5A93C] underline underline-offset-2">Mesafeli Satış Sözleşmesi</a>'ni ve <a href="/legal/refund" className="text-[#E5A93C] underline underline-offset-2">İptal/İade Koşulları</a>'nı okudum, onaylıyorum.
+            </label>
           </div>
 
           {/* Wireframe 4 Action Button: "Ödemeyi Onayla" */}
           <button
             onClick={() => topUpCredits(selectedPack.id)}
-            className="w-full py-4 px-6 rounded-2xl gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-center gap-2 shadow-xl hover:brightness-110 active:scale-[0.98] transition-all"
+            disabled={!isLegalAccepted}
+            className={`w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl transition-all ${
+              isLegalAccepted 
+                ? 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-[0.98]' 
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            }`}
           >
-            <CreditCard className="w-5 h-5 text-stone-950" />
-            <span>Ödemeyi Onayla (₺{selectedPack.priceTL})</span>
+            <CreditCard className={`w-5 h-5 ${isLegalAccepted ? 'text-stone-950' : 'text-gray-500'}`} />
+            <span>Paycell ile Öde (₺{selectedPack.priceTL})</span>
           </button>
         </motion.div>
       </div>

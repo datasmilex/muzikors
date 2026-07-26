@@ -42,13 +42,13 @@ const AppContent = () => {
             <UpNextQueueSection />
             
             {/* Footer KVKK */}
-            <div className="w-full text-center pb-24 pt-4 z-10 relative">
-              <button
-                onClick={() => openModal('terms')}
-                className="text-[10px] text-gray-500 hover:text-[#E5A93C] underline underline-offset-2 transition-colors"
-              >
-                Kullanım Koşulları & KVKK Aydınlatma Metni
-              </button>
+            <div className="w-full text-center pb-24 pt-4 z-10 relative px-4">
+              <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-[10px] text-gray-500">
+                <a href="/legal/terms" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Hizmet Sözleşmesi</a>
+                <a href="/legal/privacy" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Gizlilik & KVKK</a>
+                <a href="/legal/refund" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">İptal & İade</a>
+                <a href="/legal/sales" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Mesafeli Satış</a>
+              </div>
             </div>
 
             <StickyAddMusicButton />
