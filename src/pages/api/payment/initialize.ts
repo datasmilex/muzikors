@@ -108,6 +108,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       pkiString
     );
 
+    console.log("=== IYZICO DEBUG START ===");
+    console.log("API_KEY Exists:", !!apiKey, "Length:", apiKey?.length, "Prefix:", apiKey?.substring(0, 10));
+    console.log("SECRET_KEY Exists:", !!secretKey, "Length:", secretKey?.length);
+    console.log("BASE_URL:", iyzicoBaseUrl);
+    console.log("PKI_STRING:", pkiString);
+    console.log("AUTH_HEADER:", headers.Authorization);
+    console.log("X-IYZI-RND:", headers['x-iyzi-rnd']);
+    console.log("=== IYZICO DEBUG END ===");
+
     console.log('[iyzico] POST →', `${iyzicoBaseUrl}/payment/iyzipos/checkoutform/initialize/auth/ecom`);
 
     const response = await fetch(`${iyzicoBaseUrl}/payment/iyzipos/checkoutform/initialize/auth/ecom`, {
