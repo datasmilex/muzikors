@@ -53,6 +53,8 @@ export interface Venue {
   latitude?: number;
   longitude?: number;
   computedDistance?: number;
+  spotify_client_id?: string | null;
+  has_spotify?: boolean;
   current_track_info?: {
     song_title: string;
     artist: string;

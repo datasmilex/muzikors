@@ -183,6 +183,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         wifi_password: data.wifi_password || data.wifi_pass || '',
         menu_link: data.menu_link || data.menu_url || '',
         logo_url: data.logo_url || data.logo || '',
+        spotify_client_id: data.spotify_client_id || null,
+        has_spotify: !!(data.spotify_refresh_token),
       };
 
       setActiveVenue(venue);
@@ -723,6 +725,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     if (activeVenue.is_active === false) {
       showToast('Bu mekan şu an hizmet vermemektedir.');
+      return false;
+    }
+
+    // Spotify guard: venue must have a connected Spotify account
+    if (activeVenue.has_spotify === false) {
+      showToast('Bu mekan henüz Spotify hesabını bağlamamış. Şarkı eklenemiyor.');
       return false;
     }
 

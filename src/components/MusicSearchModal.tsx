@@ -34,11 +34,18 @@ export const MusicSearchModal: React.FC = () => {
       return;
     }
 
+    // Venue guard: if no spotify connection, block search
+    if (!activeVenue?.id) {
+      setSearchResults([]);
+      return;
+    }
+
     setIsLoading(true);
     const timer = setTimeout(async () => {
       try {
-        console.log(`[MusicSearch] Fetching /api/spotify/search?q=${encodeURIComponent(queryToFetch)}`);
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(queryToFetch)}`);
+        const url = `/api/spotify/search?q=${encodeURIComponent(queryToFetch)}&venueId=${encodeURIComponent(activeVenue.id)}`;
+        console.log(`[MusicSearch] Fetching ${url}`);
+        const res = await fetch(url);
 
         // Always parse JSON so we can see the error body even on non-ok responses
         let data: any = {};
@@ -65,7 +72,7 @@ export const MusicSearchModal: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, activeVenue?.id]);
 
 
   if (activeModal !== 'search') return null;
