@@ -1,47 +1,37 @@
 /**
  * /api/payment/callback
- * ─────────────────────────────────────────────────────────────────────────────
- * iyzico Checkout Form ödeme geri dönüş endpointi.
- * iyzipay npm paketi KULLANILMIYOR — pure fetch() + Node.js crypto ile REST API.
- * ─────────────────────────────────────────────────────────────────────────────
+ * iyzipay npm paketi KULLANILMIYOR — pure fetch() + Node.js crypto.
  */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { iyzicoPost } from '@/lib/iyzipay';
 
 interface IyzicoRetrieveResponse {
-  status:        string;
-  paymentStatus: string;
-  errorMessage?: string;
-  price?:        string;
-  paidPrice?:    string;
+  status:         string;
+  paymentStatus?: string;
+  errorMessage?:  string;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // iyzico hem POST hem GET ile callback yapabilir
   if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    // token: POST body'den (form-urlencoded) ya da query'den alınır
-    const token = (req.body?.token || req.query?.token) as string | undefined;
-
+    const token        = (req.body?.token || req.query?.token) as string | undefined;
     const venueId      = req.query.venueId      as string | undefined;
     const creditAmount = parseInt((req.query.creditAmount as string) || '0', 10);
     const userId       = req.query.userId        as string | undefined;
 
-    console.log('[iyzico callback] token:', token, 'venueId:', venueId, 'creditAmount:', creditAmount, 'userId:', userId);
+    console.log('[iyzico callback] token:', token, '| venueId:', venueId, '| credit:', creditAmount);
 
     if (!token) {
-      console.error('[iyzico callback] token yok, ödeme başarısız.');
       return res.redirect(302, '/?payment=failed');
     }
 
-    // ── Token'ı doğrula ────────────────────────────────────────────────────────
-    const retrieveBody = {
+    const retrieveBody: Record<string, unknown> = {
       locale:         'tr',
-      conversationId: `retrieve_${Date.now()}`,
+      conversationId: 'retrieve_' + Date.now(),
       token,
     };
 
@@ -50,14 +40,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       retrieveBody
     );
 
-    console.log('[iyzico callback] retrieve result:', result);
+    console.log('[iyzico callback] result:', result);
 
     if (result.status !== 'success' || result.paymentStatus !== 'SUCCESS') {
       console.error('[iyzico callback] Ödeme doğrulanamadı:', result);
       return res.redirect(302, '/?payment=failed');
     }
 
-    // ── Kredi bakiyesi güncelle ────────────────────────────────────────────────
+    // Kredi bakiyesi güncelle
     if (userId && creditAmount > 0) {
       const supabaseAdmin = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -72,7 +62,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (profileErr || !profile) {
         console.error('[iyzico callback] Profil bulunamadı:', profileErr);
-        // Ödeme başarılı ama db hatası: yine de success'e yönlendir ve logla
         return res.redirect(302, `/?payment=success&amount=${creditAmount}&db_warn=1`);
       }
 

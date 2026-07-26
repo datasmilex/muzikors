@@ -1,98 +1,91 @@
 /**
- * iyzico Pure REST API Helper
+ * iyzico Pure REST API Helper — SIFIR 3rd-party bağımlılık
  * ─────────────────────────────────────────────────────────────────────────────
- * iyzipay npm paketi KULLANILMIYOR.
- * Node.js built-in `crypto` + `fetch()` ile doğrudan REST API çağrısı.
+ * Node.js built-in `crypto` + `fetch()` kullanır.
+ * `iyzipay` npm paketi HİÇBİR YERDE import edilmez.
  *
- * Resmi IYZWS İmza Algoritması (iyzipay SDK kaynak kodundan birebir):
- *   1. pkiString  = request body'nin [key=value] formatına dönüştürülmesi (özyinelemeli)
- *   2. signature  = hex( HMAC-SHA256( pkiString, secretKey ) )
- *   3. authHash   = base64( SHA1( apiKey + randomKey + signature ) )
- *   4. header     = "IYZWS {apiKey}:{randomKey}:{authHash}"
- *   5. x-iyzi-rnd: randomKey  (zorunlu ek header)
+ * IYZWS İmza Algoritması (iyzico Resmi):
+ *   1. randomKey   = timestamp + random
+ *   2. pkiString   = [key=val,key=val,...] formatında body
+ *   3. dataToHash  = apiKey + randomKey + secretKey + pkiString
+ *   4. signature   = base64( SHA1( dataToHash ) )
+ *   5. header      = "IYZWS {apiKey}:{randomKey}:{signature}"
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import crypto from 'crypto';
 
 function getEnv(key: string): string {
   const val = process.env[key];
-  if (!val) throw new Error(`Eksik env değişkeni: ${key}`);
+  if (!val) throw new Error(`Eksik ortam değişkeni: ${key}`);
   return val;
 }
 
 /** İstek başına benzersiz rastgele string üretir */
-export function generateRandomKey(): string {
+function generateRandomKey(): string {
   return Date.now().toString() + Math.random().toString(36).substring(2, 10);
 }
 
 /**
- * Request body'sini iyzico'nun PKI formatına çevirir.
- * Format: [key=value][key=value]... (iç içe objeler ve diziler özyinelemeli işlenir)
- *
- * iyzipay SDK kaynak: lib/utils/PKI.js#generatePKIString
+ * iyzico resmi PKI String formatı: [key=val,key=val,...]
+ * Diziler ve iç içe objeler özyinelemeli işlenir.
  */
-function generatePKIString(obj: Record<string, unknown>): string {
-  let str = '';
-  for (const key of Object.keys(obj)) {
-    const val = obj[key];
-    if (val === null || val === undefined) continue;
+function generatePkiString(request: Record<string, unknown>): string {
+  let pki = '[';
+  const parts: string[] = [];
+
+  for (const key of Object.keys(request)) {
+    const val = request[key];
+    if (val === undefined || val === null) continue;
 
     if (Array.isArray(val)) {
-      let inner = '';
-      for (const item of val) {
-        if (item !== null && typeof item === 'object') {
-          inner += generatePKIString(item as Record<string, unknown>);
-        } else {
-          inner += String(item);
-        }
-      }
-      str += `[${key}=${inner}]`;
+      const inner = val
+        .map((item) =>
+          typeof item === 'object' && item !== null
+            ? generatePkiString(item as Record<string, unknown>)
+            : String(item)
+        )
+        .join(',');
+      parts.push(`${key}=[${inner}]`);
     } else if (typeof val === 'object') {
-      str += `[${key}=${generatePKIString(val as Record<string, unknown>)}]`;
+      parts.push(`${key}=${generatePkiString(val as Record<string, unknown>)}`);
     } else {
-      str += `[${key}=${val}]`;
+      parts.push(`${key}=${val}`);
     }
   }
-  return str;
+
+  pki += parts.join(',');
+  pki += ']';
+  return pki;
 }
 
 /**
- * Verilen request body ve randomKey için IYZWS Authorization header'ı üretir.
- * randomKey dışarıdan geçilmeli — hem header'a hem x-iyzi-rnd'ye aynı değer girmeli.
+ * IYZWS Authorization header'ı üretir.
  */
-export function generateIyzicoAuthHeader(
+function generateAuthHeader(
   requestBody: Record<string, unknown>,
   randomKey: string
 ): string {
   const apiKey    = getEnv('IYZICO_API_KEY');
   const secretKey = getEnv('IYZICO_SECRET_KEY');
 
-  // Adım 1: [key=value] PKI string
-  const pkiString = generatePKIString(requestBody);
+  const pkiString  = generatePkiString(requestBody);
+  const dataToHash = apiKey + randomKey + secretKey + pkiString;
 
-  // Adım 2: HMAC-SHA256(pkiString, secretKey) → hex
   const signature = crypto
-    .createHmac('sha256', secretKey)
-    .update(pkiString)
-    .digest('hex');
-
-  // Adım 3: base64(SHA1(apiKey + randomKey + signature))
-  const authHash = crypto
     .createHash('sha1')
-    .update(apiKey + randomKey + signature)
+    .update(dataToHash, 'utf8')
     .digest('base64');
 
-  console.log('[iyzico auth] randomKey     :', randomKey);
-  console.log('[iyzico auth] pkiString     :', pkiString.substring(0, 120) + '...');
-  console.log('[iyzico auth] signature(hex):', signature.substring(0, 30) + '...');
-  console.log('[iyzico auth] authHash      :', authHash);
+  console.log('[iyzico] randomKey :', randomKey);
+  console.log('[iyzico] pkiString :', pkiString.substring(0, 150));
+  console.log('[iyzico] signature :', signature);
 
-  return `IYZWS ${apiKey}:${randomKey}:${authHash}`;
+  return `IYZWS ${apiKey}:${randomKey}:${signature}`;
 }
 
 /**
- * iyzico REST API'ına authenticated JSON POST isteği atar.
- * Body olduğu gibi JSON'a çevrilir; PKI string sadece imza için kullanılır.
+ * iyzico REST API'ına authenticated POST isteği atar.
+ * Hata durumunda iyzico'nun errorMessage'ını fırlatır.
  */
 export async function iyzicoPost<T = unknown>(
   path: string,
@@ -101,25 +94,25 @@ export async function iyzicoPost<T = unknown>(
   const baseUrl   = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
   const randomKey = generateRandomKey();
 
-  const authorization = generateIyzicoAuthHeader(body, randomKey);
+  // conversationId olarak randomKey kullan (iyzico bunu body'de de bekler)
+  const enrichedBody = { ...body, conversationId: body.conversationId ?? randomKey };
+  const authorization = generateAuthHeader(enrichedBody, randomKey);
 
-  console.log('[iyzico] POST', `${baseUrl}${path}`);
+  console.log('[iyzico] POST →', `${baseUrl}${path}`);
 
   const response = await fetch(`${baseUrl}${path}`, {
     method: 'POST',
     headers: {
-      'Content-Type'          : 'application/json',
-      'Accept'                : 'application/json',
-      Authorization           : authorization,
-      'x-iyzi-rnd'            : randomKey,           // iyzico bu header'ı zorunlu kılar
-      'x-iyzi-client-version' : 'iyzipay-node-2.0.50',
+      'Content-Type': 'application/json',
+      'Accept'      : 'application/json',
+      Authorization : authorization,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(enrichedBody),
   });
 
   const responseText = await response.text();
-  console.log('[iyzico] HTTP Status:', response.status);
-  console.log('[iyzico] Response   :', responseText.substring(0, 600));
+  console.log('[iyzico] HTTP Status :', response.status);
+  console.log('[iyzico] Response    :', responseText.substring(0, 600));
 
   let parsed: Record<string, unknown>;
   try {
@@ -128,20 +121,13 @@ export async function iyzicoPost<T = unknown>(
     throw new Error(`iyzico yanıt parse hatası: ${responseText.substring(0, 200)}`);
   }
 
-  // iyzico 200 döndürse bile status:'failure' gelebilir
-  if (parsed.status === 'failure') {
-    throw new Error(
-      (parsed.errorMessage as string) ||
-      (parsed.errorCode    as string) ||
-      `iyzico failure (HTTP ${response.status})`
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      (parsed.errorMessage as string) ||
-      `iyzico HTTP ${response.status}`
-    );
+  // iyzico 200 döndürse bile status:'failure' içerebilir
+  if (parsed['status'] === 'failure' || !response.ok) {
+    const msg =
+      (parsed['errorMessage'] as string) ||
+      (parsed['errorCode']    as string) ||
+      `iyzico HTTP ${response.status}`;
+    throw new Error(msg);
   }
 
   return parsed as T;
