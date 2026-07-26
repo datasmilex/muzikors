@@ -1,6 +1,22 @@
+/**
+ * /api/payment/initialize
+ * ─────────────────────────────────────────────────────────────────────────────
+ * iyzico Checkout Form başlatma endpointi.
+ * iyzipay npm paketi KULLANILMIYOR — pure fetch() + Node.js crypto ile REST API.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getIyzipayClient } from '@/lib/iyzipay';
-import Iyzipay from 'iyzipay';
+import { iyzicoPost } from '@/lib/iyzipay';
+
+interface IyzicoInitResponse {
+  status: string;
+  errorCode?: string;
+  errorMessage?: string;
+  paymentPageUrl?: string;
+  checkoutFormContent?: string;
+  token?: string;
+  tokenExpireTime?: number;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,98 +25,105 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { venueId, packageId, amount, creditAmount, userId } = req.body;
-    console.log("IYZICO INIT REQUEST:", req.body);
+    console.log('IYZICO INIT REQUEST:', req.body);
 
-    const iyzipay = getIyzipayClient();
-
+    // ── Validasyon ────────────────────────────────────────────────────────────
     if (!amount || !packageId || !creditAmount || !venueId) {
-      console.error('[iyzico init error] Missing parameters:', { amount, packageId, creditAmount, venueId });
-      return res.status(400).json({ error: 'Missing parameters' });
+      return res.status(400).json({ error: 'Eksik parametreler: amount, packageId, creditAmount, venueId zorunludur.' });
     }
 
-    if (!process.env.IYZICO_API_KEY || !process.env.IYZICO_SECRET_KEY || !process.env.NEXT_PUBLIC_BASE_URL) {
-      console.error('[iyzico init error] Missing environment variables. Please check .env.local');
+    if (!process.env.IYZICO_API_KEY || !process.env.IYZICO_SECRET_KEY) {
+      console.error('[iyzico] IYZICO_API_KEY veya IYZICO_SECRET_KEY eksik!');
+      return res.status(500).json({ error: 'Sunucu yapılandırma hatası.' });
     }
 
-    // Ensure price is a string with 2 decimal places (e.g. "25.00")
-    const formattedPrice = Number(amount).toFixed(2);
+    // ── Fiyat formatlaması (iyzico: 2 basamaklı string zorunlu) ───────────────
+    const formattedPrice  = Number(amount).toFixed(2);   // "50.00"
 
-    const conversationId = `muzikors_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    
+    const baseUrl         = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const conversationId  = `mzk_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
+
     const callbackUrl = new URL('/api/payment/callback', baseUrl);
-    callbackUrl.searchParams.set('venueId', venueId);
-    callbackUrl.searchParams.set('creditAmount', creditAmount.toString());
-    if (userId) {
-      callbackUrl.searchParams.set('userId', userId);
-    }
+    callbackUrl.searchParams.set('venueId',      venueId);
+    callbackUrl.searchParams.set('creditAmount', String(creditAmount));
+    if (userId) callbackUrl.searchParams.set('userId', userId);
 
-    const request = {
-      locale: Iyzipay.LOCALE.TR,
-      conversationId: conversationId,
-      price: formattedPrice,
-      paidPrice: formattedPrice,
-      currency: Iyzipay.CURRENCY.TRY,
-      basketId: packageId,
-      paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
-      callbackUrl: callbackUrl.toString(),
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    const requestBody = {
+      locale:             'tr',
+      conversationId,
+      price:              formattedPrice,
+      paidPrice:          formattedPrice,
+      currency:           'TRY',
+      basketId:           packageId,
+      paymentGroup:       'PRODUCT',
+      callbackUrl:        callbackUrl.toString(),
       enabledInstallments: [1],
       buyer: {
-        id: userId || 'GUEST',
-        name: 'Muzikors',
-        surname: 'Kullanicisi',
-        gsmNumber: '+905555555555',
-        email: 'info@muzikors.com.tr',
-        identityNumber: '11111111111',
-        lastLoginDate: '2026-07-26 12:00:00',
-        registrationDate: '2026-07-26 12:00:00',
+        id:                  userId || 'GUEST',
+        name:                'Muzikors',
+        surname:             'Kullanicisi',
+        gsmNumber:           '+905555555555',
+        email:               'info@muzikors.com.tr',
+        identityNumber:      '11111111111',
+        lastLoginDate:       dateStr,
+        registrationDate:    dateStr,
         registrationAddress: 'Istanbul',
-        ip: '85.34.78.112',
-        city: 'Istanbul',
-        country: 'Turkey',
-        zipCode: '34000',
+        ip:                  (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || '85.34.78.112',
+        city:                'Istanbul',
+        country:             'Turkey',
+        zipCode:             '34000',
       },
       shippingAddress: {
         contactName: 'Muzikors Kullanicisi',
-        city: 'Istanbul',
-        country: 'Turkey',
-        address: 'Istanbul',
-        zipCode: '34000',
+        city:        'Istanbul',
+        country:     'Turkey',
+        address:     'Istanbul',
+        zipCode:     '34000',
       },
       billingAddress: {
         contactName: 'Muzikors Kullanicisi',
-        city: 'Istanbul',
-        country: 'Turkey',
-        address: 'Istanbul',
-        zipCode: '34000',
+        city:        'Istanbul',
+        country:     'Turkey',
+        address:     'Istanbul',
+        zipCode:     '34000',
       },
       basketItems: [
         {
-          id: packageId,
-          name: `Muzikors Kredi Paketi (+${creditAmount} Kredi)`,
+          id:        packageId,
+          name:      `Muzikors Kredi Paketi (+${creditAmount} Kredi)`,
           category1: 'Digital',
           category2: 'Credits',
-          itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
-          price: formattedPrice,
+          itemType:  'VIRTUAL',
+          price:     formattedPrice,
         },
       ],
     };
 
-    console.log('[iyzico init request payload]:', JSON.stringify(request, null, 2));
+    console.log('[iyzico] Sending request to iyzico REST API...');
 
-    const result = await new Promise<any>((resolve, reject) => {
-      iyzipay.checkoutFormInitialize.create(request, (err: any, resData: any) => {
-        if (err) {
-          reject(err);
-        } else if (resData?.status === 'failure') {
-          reject(new Error(resData.errorMessage || 'Payment failed'));
-        } else {
-          resolve(resData);
-        }
+    const result = await iyzicoPost<IyzicoInitResponse>(
+      '/payment/iyzipos/checkoutform/initialize/auth/ecom',
+      requestBody
+    );
+
+    console.log('[iyzico] Response:', result);
+
+    if (result.status !== 'success') {
+      console.error('[iyzico] Failure response:', result);
+      return res.status(400).json({
+        error:     result.errorMessage || 'Ödeme başlatılamadı',
+        errorCode: result.errorCode,
       });
-    });
+    }
 
-    return res.status(200).json({ paymentPageUrl: result.paymentPageUrl, token: result.token });
+    return res.status(200).json({
+      paymentPageUrl:       result.paymentPageUrl,
+      checkoutFormContent:  result.checkoutFormContent,
+      token:                result.token,
+    });
 
   } catch (error: any) {
     console.error('[iyzico exception]', error);
