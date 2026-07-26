@@ -10,13 +10,13 @@ import crypto from 'crypto';
 import { iyzicoPost } from '@/lib/iyzipay';
 
 interface IyzicoInitResponse {
-  status: string;
-  errorCode?: string;
-  errorMessage?: string;
-  paymentPageUrl?: string;
+  status:               string;
+  errorCode?:           string;
+  errorMessage?:        string;
+  paymentPageUrl?:      string;
   checkoutFormContent?: string;
-  token?: string;
-  tokenExpireTime?: number;
+  token?:               string;
+  tokenExpireTime?:     number;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -30,7 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // ── Validasyon ────────────────────────────────────────────────────────────
     if (!amount || !packageId || !creditAmount || !venueId) {
-      return res.status(400).json({ error: 'Eksik parametreler: amount, packageId, creditAmount, venueId zorunludur.' });
+      return res.status(400).json({
+        error: 'Eksik parametreler: amount, packageId, creditAmount, venueId zorunludur.',
+      });
     }
 
     if (!process.env.IYZICO_API_KEY || !process.env.IYZICO_SECRET_KEY) {
@@ -39,28 +41,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // ── Fiyat formatlaması (iyzico: 2 basamaklı string zorunlu) ───────────────
-    const formattedPrice  = Number(amount).toFixed(2);   // "50.00"
+    const formattedPrice = Number(amount).toFixed(2); // "50.00"
 
-    const baseUrl         = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const conversationId  = 'mzk_' + crypto.randomBytes(8).toString('hex');
+    const baseUrl        = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const conversationId = 'mzk_' + crypto.randomBytes(8).toString('hex');
 
     const callbackUrl = new URL('/api/payment/callback', baseUrl);
     callbackUrl.searchParams.set('venueId',      venueId);
     callbackUrl.searchParams.set('creditAmount', String(creditAmount));
     if (userId) callbackUrl.searchParams.set('userId', userId);
 
-    const now = new Date();
+    const now     = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const clientIp = ((req.headers['x-forwarded-for'] as string) || '').split(',')[0]?.trim() || '85.34.78.112';
 
-    const requestBody = {
-      locale:             'tr',
+    // ── iyzico CheckoutForm request body ──────────────────────────────────────
+    const requestBody: Record<string, unknown> = {
+      locale:              'tr',
       conversationId,
-      price:              formattedPrice,
-      paidPrice:          formattedPrice,
-      currency:           'TRY',
-      basketId:           packageId,
-      paymentGroup:       'PRODUCT',
-      callbackUrl:        callbackUrl.toString(),
+      price:               formattedPrice,
+      paidPrice:           formattedPrice,
+      currency:            'TRY',
+      basketId:            'B_' + conversationId,
+      paymentGroup:        'PRODUCT',
+      callbackUrl:         callbackUrl.toString(),
       enabledInstallments: [1],
       buyer: {
         id:                  userId || 'GUEST',
@@ -72,7 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         lastLoginDate:       dateStr,
         registrationDate:    dateStr,
         registrationAddress: 'Istanbul',
-        ip:                  (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || '85.34.78.112',
+        ip:                  clientIp,
         city:                'Istanbul',
         country:             'Turkey',
         zipCode:             '34000',
@@ -103,32 +107,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
     };
 
-    console.log('[iyzico] Sending request to iyzico REST API...');
+    console.log('[iyzico] conversationId:', conversationId);
+    console.log('[iyzico] formattedPrice:', formattedPrice);
 
     const result = await iyzicoPost<IyzicoInitResponse>(
       '/payment/iyzipos/checkoutform/initialize/auth/ecom',
       requestBody
     );
 
-    console.log('[iyzico] Response:', result);
+    console.log('[iyzico] Init result status:', result.status);
 
+    // iyzicoPost zaten failure'ı throw eder; bu sadece ek güvence
     if (result.status !== 'success') {
-      console.error('[iyzico] Failure response:', result);
       return res.status(400).json({
-        error:     result.errorMessage || 'Ödeme başlatılamadı',
+        error:     result.errorMessage || 'iyzico ödeme başlatılamadı',
         errorCode: result.errorCode,
       });
     }
 
     return res.status(200).json({
-      paymentPageUrl:       result.paymentPageUrl,
-      checkoutFormContent:  result.checkoutFormContent,
-      token:                result.token,
+      paymentPageUrl:      result.paymentPageUrl,
+      checkoutFormContent: result.checkoutFormContent,
+      token:               result.token,
     });
 
   } catch (error: any) {
     console.error('[iyzico exception]', error);
-    // iyzico'dan gelen errorMessage'ı frontend'e ilet
+    // iyzico'dan gelen errorMessage'ı frontend'e birebir ilet
     return res.status(500).json({ error: error.message || 'Ödeme başlatılamadı' });
   }
 }
