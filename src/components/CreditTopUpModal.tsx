@@ -10,6 +10,7 @@ export const CreditTopUpModal: React.FC = () => {
   const { activeModal, closeModal, topUpCredits } = useApp();
   const [selectedPackId, setSelectedPackId] = useState<string>('pack-100');
   const [isLegalAccepted, setIsLegalAccepted] = useState(false);
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
   if (activeModal !== 'topup') return null;
 
@@ -116,7 +117,7 @@ export const CreditTopUpModal: React.FC = () => {
           {/* Secure Payment Info */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-amber-200/50 mb-4">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-Bit SSL ile %100 Güvenli Ödeme (Paycell / Kredi Kartı)</span>
+            <span>256-Bit SSL ile %100 Güvenli Ödeme (iyzico / Kredi Kartı)</span>
           </div>
 
           {/* Legal Checkbox */}
@@ -133,18 +134,22 @@ export const CreditTopUpModal: React.FC = () => {
             </label>
           </div>
 
-          {/* Wireframe 4 Action Button: "Ödemeyi Onayla" */}
+          {/* Action Button */}
           <button
-            onClick={() => topUpCredits(selectedPack.id)}
-            disabled={!isLegalAccepted}
+            onClick={async () => {
+              setIsLoadingPayment(true);
+              await topUpCredits(selectedPack.id);
+              setIsLoadingPayment(false);
+            }}
+            disabled={!isLegalAccepted || isLoadingPayment}
             className={`w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl transition-all ${
-              isLegalAccepted 
+              isLegalAccepted && !isLoadingPayment
                 ? 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-[0.98]' 
                 : 'bg-gray-800 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <CreditCard className={`w-5 h-5 ${isLegalAccepted ? 'text-stone-950' : 'text-gray-500'}`} />
-            <span>Paycell ile Öde (₺{selectedPack.priceTL})</span>
+            <CreditCard className={`w-5 h-5 ${isLegalAccepted && !isLoadingPayment ? 'text-stone-950' : 'text-gray-500'}`} />
+            <span>{isLoadingPayment ? 'Yönlendiriliyor...' : `iyzico ile Öde (₺${selectedPack.priceTL})`}</span>
           </button>
         </motion.div>
       </div>

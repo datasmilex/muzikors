@@ -229,6 +229,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser(null);
     }
 
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      const amount = searchParams.get('amount') || '';
+      showToast(`Ödeme başarılı! +${amount} Kredi hesabınıza eklendi.`);
+      confetti({ particleCount: 100, spread: 80, origin: { y: 0.7 }, colors: ['#D4AF37', '#E5A93B', '#FFFFFF'] });
+      // Remove params to prevent re-triggering on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'failed') {
+      showToast('Ödeme işlemi başarısız oldu veya iptal edildi.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     if (rawV) {
       const parsedVenueId = parseInt(rawV.trim(), 10);
       if (parsedVenueId && !isNaN(parsedVenueId) && parsedVenueId > 0) {
@@ -663,23 +675,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
     if (!pkg) return;
     const totalAdded = pkg.credits + pkg.bonusCredits;
-    const liveCredits = await fetchProfileCredits(user.id);
-    const newBalance = liveCredits + totalAdded;
-    const newLifetime = (user.lifetimeCredits || liveCredits) + totalAdded;
-
-    if (supabase) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ credits: newBalance, lifetime_credits: newLifetime })
-        .eq('id', user.id);
-      if (error) { console.error('[TopUp]', error); showToast('Kredi yuklenemedi.'); return; }
+    
+    if (!activeVenue) {
+      showToast('Kredi yüklemek için önce bir mekânın QR kodunu okutmalısınız.');
+      return;
     }
 
-    setUser((prev) => prev ? { ...prev, credits: newBalance, lifetimeCredits: newLifetime } : null);
-    confetti({ particleCount: 100, spread: 80, origin: { y: 0.7 }, colors: ['#D4AF37', '#E5A93B', '#FFFFFF'] });
-    showToast(`+${totalAdded} Kredi hesabiniza eklendi.`);
-    closeModal();
-  }, [user, fetchProfileCredits, openProtectedModal, showToast, closeModal]);
+    try {
+      showToast('Güvenli ödeme sayfasına yönlendiriliyorsunuz...');
+      const response = await fetch('/api/payment/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          venueId: activeVenue.id,
+          packageId: pkg.id,
+          amount: pkg.priceTL,
+          creditAmount: totalAdded,
+          userId: user.id
+        })
+      });
+      const data = await response.json();
+      if (data.paymentPageUrl) {
+        window.location.href = data.paymentPageUrl; // Redirect to iyzico
+      } else {
+        showToast('Ödeme başlatılamadı: ' + (data.error || 'Bilinmeyen hata'));
+      }
+    } catch (err) {
+      showToast('Ödeme sistemiyle bağlantı kurulamadı.');
+    }
+  }, [user, activeVenue, openProtectedModal, showToast]);
 
   const getGuestDeviceId = () => {
     let guestId = localStorage.getItem('muzikors_guest_id');
