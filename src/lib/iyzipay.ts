@@ -22,7 +22,7 @@ function getEnv(key: string): string {
 
 /** İstek başına benzersiz rastgele string üretir */
 function generateRandomKey(): string {
-  return Date.now().toString() + Math.random().toString(36).substring(2, 10);
+  return String(Date.now()) + Math.random().toString(36).substring(2, 10);
 }
 
 /**
@@ -94,10 +94,15 @@ export async function iyzicoPost<T = unknown>(
   const baseUrl   = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
   const randomKey = generateRandomKey();
 
-  // conversationId olarak randomKey kullan (iyzico bunu body'de de bekler)
-  const enrichedBody = { ...body, conversationId: body.conversationId ?? randomKey };
+  // conversationId: body'den geldiyse onu kullan, yoksa randomKey
+  const enrichedBody = {
+    conversationId: randomKey,   // EN BAŞA koy — iyzico sırayı kontrol ediyor olabilir
+    ...body,
+    // body'de conversationId varsa o geçerli olsun (spread sonrası override eder)
+  };
   const authorization = generateAuthHeader(enrichedBody, randomKey);
 
+  console.log('IYZICO PAYLOAD:', JSON.stringify(enrichedBody));
   console.log('[iyzico] POST →', `${baseUrl}${path}`);
 
   const response = await fetch(`${baseUrl}${path}`, {
@@ -106,6 +111,7 @@ export async function iyzicoPost<T = unknown>(
       'Content-Type': 'application/json',
       'Accept'      : 'application/json',
       Authorization : authorization,
+      'x-iyzi-rnd'  : randomKey,   // iyzico bu header’ı zorunlu kılıyor
     },
     body: JSON.stringify(enrichedBody),
   });
