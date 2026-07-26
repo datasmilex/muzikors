@@ -117,9 +117,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("X-IYZI-RND:", headers['x-iyzi-rnd']);
     console.log("=== IYZICO DEBUG END ===");
 
-    console.log('[iyzico] POST →', `${iyzicoBaseUrl}/payment/iyzipos/checkoutform/initialize/auth/ecom`);
+    console.log('[iyzico] POST →', `${iyzicoBaseUrl}/payment/iyzipay-checkoutform/initialize`);
 
-    const response = await fetch(`${iyzicoBaseUrl}/payment/iyzipos/checkoutform/initialize/auth/ecom`, {
+    const response = await fetch(`${iyzicoBaseUrl}/payment/iyzipay-checkoutform/initialize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
