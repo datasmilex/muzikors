@@ -1,10 +1,12 @@
+export const runtime = 'nodejs';
+
 /**
  * /api/payment/callback
  * iyzipay npm paketi KULLANILMIYOR — pure fetch() + Node.js crypto.
  */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import { iyzicoPost } from '@/lib/iyzipay';
+import { generateIyzwsV1Headers, generatePKIString } from '@/lib/iyzipay';
 
 interface IyzicoRetrieveResponse {
   status:         string;
@@ -36,16 +38,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.redirect(302, errorUrl);
     }
 
-    const retrieveBody: Record<string, unknown> = {
+    const apiKey = process.env.IYZICO_API_KEY;
+    const secretKey = process.env.IYZICO_SECRET_KEY;
+    const iyzicoBaseUrl = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
+
+    if (!apiKey || !secretKey) {
+      console.error('[iyzico] IYZICO_API_KEY veya IYZICO_SECRET_KEY eksik!');
+      return res.redirect(302, errorUrl);
+    }
+    
+    const randomKey = Date.now().toString() + Math.floor(Math.random() * 1000000).toString();
+
+    const retrieveBody: Record<string, any> = {
       locale:         'tr',
-      conversationId: 'retrieve_' + Date.now(),
+      conversationId: randomKey,
       token,
     };
 
-    const result = await iyzicoPost<IyzicoRetrieveResponse>(
-      '/payment/iyzipos/checkoutform/auth/ecom/detail',
-      retrieveBody
+    const pkiString = generatePKIString(retrieveBody);
+    const headers = generateIyzwsV1Headers(
+      { apiKey, secretKey, baseUrl: iyzicoBaseUrl },
+      pkiString
     );
+
+    const response = await fetch(`${iyzicoBaseUrl}/payment/iyzipos/checkoutform/auth/ecom/detail`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': headers.Authorization,
+        'x-iyzi-rnd': headers['x-iyzi-rnd'],
+      },
+      body: JSON.stringify(retrieveBody),
+    });
+
+    const responseText = await response.text();
+    let result: IyzicoRetrieveResponse;
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      console.error('[iyzico callback] parse hatası:', responseText);
+      return res.redirect(302, errorUrl);
+    }
 
     console.log('[iyzico callback] result:', result);
 

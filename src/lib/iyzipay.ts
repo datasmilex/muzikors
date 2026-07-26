@@ -1,140 +1,69 @@
-/**
- * iyzico Pure REST API Helper — SIFIR 3rd-party bağımlılık
- * ─────────────────────────────────────────────────────────────────────────────
- * Node.js built-in `crypto` + `fetch()` kullanır.
- * `iyzipay` npm paketi HİÇBİR YERDE import edilmez.
- *
- * IYZWS İmza Algoritması (iyzico Resmi):
- *   1. randomKey   = timestamp + random
- *   2. pkiString   = [key=val,key=val,...] formatında body
- *   3. dataToHash  = apiKey + randomKey + secretKey + pkiString
- *   4. signature   = base64( SHA1( dataToHash ) )
- *   5. header      = "IYZWS {apiKey}:{randomKey}:{signature}"
- * ─────────────────────────────────────────────────────────────────────────────
- */
 import crypto from 'crypto';
 
-function getEnv(key: string): string {
-  const val = process.env[key];
-  if (!val) throw new Error(`Eksik ortam değişkeni: ${key}`);
-  return val;
-}
-
-/** İstek başına benzersiz rastgele string üretir */
-function generateRandomKey(): string {
-  return String(Date.now()) + Math.random().toString(36).substring(2, 10);
+export interface IyzicoConfig {
+  apiKey: string;
+  secretKey: string;
+  baseUrl: string;
 }
 
 /**
- * iyzico resmi PKI String formatı: [key=val,key=val,...]
- * Diziler ve iç içe objeler özyinelemeli işlenir.
+ * iyzico resmi kütüphanesindeki özyinelemeli PKI String üretim algoritması
  */
-function generatePkiString(request: Record<string, unknown>): string {
-  let pki = '[';
-  const parts: string[] = [];
+export function generatePKIString(data: Record<string, any>): string {
+  let pkiString = '[';
 
-  for (const key of Object.keys(request)) {
-    const val = request[key];
-    if (val === undefined || val === null) continue;
+  for (const key of Object.keys(data)) {
+    const value = data[key];
 
-    if (Array.isArray(val)) {
-      const inner = val
-        .map((item) =>
-          typeof item === 'object' && item !== null
-            ? generatePkiString(item as Record<string, unknown>)
-            : String(item)
-        )
-        .join(',');
-      parts.push(`${key}=[${inner}]`);
-    } else if (typeof val === 'object') {
-      parts.push(`${key}=${generatePkiString(val as Record<string, unknown>)}`);
-    } else {
-      parts.push(`${key}=${val}`);
+    if (value !== null && value !== undefined) {
+      if (Array.isArray(value)) {
+        pkiString += `${key}=[`;
+        for (let i = 0; i < value.length; i++) {
+          pkiString +=
+            typeof value[i] === 'object' && value[i] !== null
+              ? generatePKIString(value[i])
+              : value[i];
+          if (i < value.length - 1) {
+            pkiString += ',';
+          }
+        }
+        pkiString += '],';
+      } else if (typeof value === 'object') {
+        pkiString += `${key}=${generatePKIString(value)},`;
+      } else {
+        pkiString += `${key}=${value},`;
+      }
     }
   }
 
-  pki += parts.join(',');
-  pki += ']';
-  return pki;
+  if (pkiString.endsWith(',')) {
+    pkiString = pkiString.slice(0, -1);
+  }
+
+  pkiString += ']';
+  return pkiString;
 }
 
 /**
- * IYZWS Authorization header'ı üretir.
+ * IYZWS v1 İmzası ve HTTP Başlıklarını Oluşturur
  */
-function generateAuthHeader(
-  requestBody: Record<string, unknown>,
-  randomKey: string
-): string {
-  const apiKey    = getEnv('IYZICO_API_KEY');
-  const secretKey = getEnv('IYZICO_SECRET_KEY');
+export function generateIyzwsV1Headers(
+  config: IyzicoConfig,
+  pkiString: string
+): { Authorization: string; 'x-iyzi-rnd': string } {
+  const apiKey = config.apiKey.trim();
+  const secretKey = config.secretKey.trim();
 
-  const pkiString  = generatePkiString(requestBody);
+  const randomKey = Date.now().toString() + Math.floor(Math.random() * 1000000).toString();
   const dataToHash = apiKey + randomKey + secretKey + pkiString;
 
   const signature = crypto
     .createHash('sha1')
-    .update(dataToHash, 'utf8')
+    .update(Buffer.from(dataToHash, 'utf-8'))
     .digest('base64');
 
-  console.log('[iyzico] randomKey :', randomKey);
-  console.log('[iyzico] pkiString :', pkiString.substring(0, 150));
-  console.log('[iyzico] signature :', signature);
-
-  return `IYZWS ${apiKey}:${randomKey}:${signature}`;
-}
-
-/**
- * iyzico REST API'ına authenticated POST isteği atar.
- * Hata durumunda iyzico'nun errorMessage'ını fırlatır.
- */
-export async function iyzicoPost<T = unknown>(
-  path: string,
-  body: Record<string, unknown>
-): Promise<T> {
-  const baseUrl   = process.env.IYZICO_BASE_URL || 'https://sandbox-api.iyzipay.com';
-  const randomKey = generateRandomKey();
-
-  // conversationId: body'den geldiyse onu kullan, yoksa randomKey
-  const enrichedBody = {
-    conversationId: randomKey,   // EN BAŞA koy — iyzico sırayı kontrol ediyor olabilir
-    ...body,
-    // body'de conversationId varsa o geçerli olsun (spread sonrası override eder)
+  return {
+    Authorization: `IYZWS ${apiKey}:${signature}`,
+    'x-iyzi-rnd': randomKey,
   };
-  const authorization = generateAuthHeader(enrichedBody, randomKey);
-
-  console.log('IYZICO PAYLOAD:', JSON.stringify(enrichedBody));
-  console.log('[iyzico] POST →', `${baseUrl}${path}`);
-
-  const response = await fetch(`${baseUrl}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept'      : 'application/json',
-      Authorization : authorization,
-      'x-iyzi-rnd'  : randomKey,   // iyzico bu header’ı zorunlu kılıyor
-    },
-    body: JSON.stringify(enrichedBody),
-  });
-
-  const responseText = await response.text();
-  console.log('[iyzico] HTTP Status :', response.status);
-  console.log('[iyzico] Response    :', responseText.substring(0, 600));
-
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(responseText);
-  } catch {
-    throw new Error(`iyzico yanıt parse hatası: ${responseText.substring(0, 200)}`);
-  }
-
-  // iyzico 200 döndürse bile status:'failure' içerebilir
-  if (parsed['status'] === 'failure' || !response.ok) {
-    const msg =
-      (parsed['errorMessage'] as string) ||
-      (parsed['errorCode']    as string) ||
-      `iyzico HTTP ${response.status}`;
-    throw new Error(msg);
-  }
-
-  return parsed as T;
 }
