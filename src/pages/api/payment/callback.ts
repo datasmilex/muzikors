@@ -17,16 +17,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  const baseUrl    = process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr';
+
   try {
     const token        = (req.body?.token || req.query?.token) as string | undefined;
     const venueId      = req.query.venueId      as string | undefined;
     const creditAmount = parseInt((req.query.creditAmount as string) || '0', 10);
     const userId       = req.query.userId        as string | undefined;
 
+    // venueId varsa mekan bağlamını koru: /?v=2&...
+    const venueParam = venueId ? `?v=${venueId}` : '';
+    const successUrl = (amount: number) => `${baseUrl}/${venueParam}&payment=success&amount=${amount}`;
+    const errorUrl   = `${baseUrl}/${venueParam}&payment=error`;
+
     console.log('[iyzico callback] token:', token, '| venueId:', venueId, '| credit:', creditAmount);
 
     if (!token) {
-      return res.redirect(302, '/?payment=failed');
+      return res.redirect(302, errorUrl);
     }
 
     const retrieveBody: Record<string, unknown> = {
@@ -44,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (result.status !== 'success' || result.paymentStatus !== 'SUCCESS') {
       console.error('[iyzico callback] Ödeme doğrulanamadı:', result);
-      return res.redirect(302, '/?payment=failed');
+      return res.redirect(302, errorUrl);
     }
 
     // Kredi bakiyesi güncelle
@@ -62,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (profileErr || !profile) {
         console.error('[iyzico callback] Profil bulunamadı:', profileErr);
-        return res.redirect(302, `/?payment=success&amount=${creditAmount}&db_warn=1`);
+        return res.redirect(302, successUrl(creditAmount));
       }
 
       const { error: updateErr } = await supabaseAdmin
@@ -75,16 +82,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (updateErr) {
         console.error('[iyzico callback] Kredi güncelleme hatası:', updateErr);
-        return res.redirect(302, `/?payment=success&amount=${creditAmount}&db_warn=1`);
+        return res.redirect(302, successUrl(creditAmount));
       }
 
       console.log(`[iyzico callback] ✅ ${creditAmount} kredi kullanıcı ${userId}'e eklendi.`);
     }
 
-    return res.redirect(302, `/?payment=success&amount=${creditAmount}`);
+    return res.redirect(302, successUrl(creditAmount));
 
   } catch (error: any) {
     console.error('[iyzico callback exception]', error);
-    return res.redirect(302, '/?payment=failed');
+    return res.redirect(302, `${baseUrl}/?payment=error`);
   }
 }
