@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 // Per-venue token cache: venueId -> { token, expiresAt }
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
@@ -11,10 +13,11 @@ async function getAccessTokenForVenue(venueId: string): Promise<string> {
     return cached.token;
   }
 
-  // Fetch venue credentials from Supabase (server-side only)
+  // Fetch venue credentials from Supabase
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    supabaseKey
   );
 
   const { data: venue, error } = await supabaseAdmin
@@ -30,11 +33,15 @@ async function getAccessTokenForVenue(venueId: string): Promise<string> {
   const { spotify_client_id, spotify_client_secret, spotify_refresh_token } = venue;
 
   if (!spotify_client_id || !spotify_client_secret) {
-    throw new Error('Bu mekan için Spotify API anahtarları tanımlanmamış. Lütfen admin panelinden Client ID ve Secret girin.');
+    const error = new Error('Mekan Spotify bağlantısını henüz kurmamış');
+    (error as any).status = 400;
+    throw error;
   }
 
   if (!spotify_refresh_token) {
-    throw new Error('Bu mekan Spotify hesabına bağlanmamış. Lütfen admin panelinden "Spotify\'a Bağlan" adımını tamamlayın.');
+    const error = new Error('Mekan Spotify bağlantısını henüz kurmamış');
+    (error as any).status = 400;
+    throw error;
   }
 
   // Exchange refresh_token for access_token
@@ -102,14 +109,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Validate required env vars
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json(
-      { error: 'Sunucu yapılandırma hatası (service role key eksik)' },
-      { status: 500 }
-    );
-  }
-
   let accessToken: string;
   try {
     accessToken = await getAccessTokenForVenue(venueId);
@@ -117,7 +116,7 @@ export async function GET(request: NextRequest) {
     console.error('[Spotify Search] Token hatası:', err.message);
     return NextResponse.json(
       { error: err.message || 'Spotify bağlantısı kurulamadı' },
-      { status: 503 }
+      { status: err.status || 400 }
     );
   }
 
