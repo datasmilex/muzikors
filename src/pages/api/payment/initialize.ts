@@ -60,7 +60,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       basketId:            'B_' + randomKey,
       paymentGroup:        'PRODUCT',
       callbackUrl:         callbackUrl.toString(),
-      enabledInstallments: [1],
       buyer: {
         id:                  userId || 'GUEST',
         name:                'Muzikors',
@@ -70,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         identityNumber:      '11111111111',
         lastLoginDate:       dateStr,
         registrationDate:    dateStr,
-        registrationAddress: 'Istanbul',
+        registrationAddress: 'Muzikors Istanbul Merkezi, No:1',
         ip:                  clientIp,
         city:                'Istanbul',
         country:             'Turkey',
@@ -80,14 +79,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactName: 'Muzikors Kullanicisi',
         city:        'Istanbul',
         country:     'Turkey',
-        address:     'Istanbul',
+        address:     'Muzikors Istanbul Merkezi, No:1',
         zipCode:     '34000',
       },
       billingAddress: {
         contactName: 'Muzikors Kullanicisi',
         city:        'Istanbul',
         country:     'Turkey',
-        address:     'Istanbul',
+        address:     'Muzikors Istanbul Merkezi, No:1',
         zipCode:     '34000',
       },
       basketItems: [
@@ -139,6 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (result.status !== 'success') {
+      console.error("🔥 IYZICO HATA DETAYI:", result.errorMessage);
       return res.status(400).json({
         error:     result.errorMessage || 'iyzico ödeme başlatılamadı',
         errorCode: result.errorCode,
