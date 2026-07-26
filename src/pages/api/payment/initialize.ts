@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import iyzipay from '@/lib/iyzipay';
+import { getIyzipayClient } from '@/lib/iyzipay';
 import Iyzipay from 'iyzipay';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -8,6 +8,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const iyzipay = getIyzipayClient();
+
     const { venueId, packageId, amount, creditAmount, userId } = req.body;
 
     if (!amount || !packageId || !creditAmount || !venueId) {

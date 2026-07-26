@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import iyzipay from '@/lib/iyzipay';
+import { getIyzipayClient } from '@/lib/iyzipay';
 import Iyzipay from 'iyzipay';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -9,6 +9,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const iyzipay = getIyzipayClient();
+
     const token = req.body.token;
     
     // We appended query params to callbackUrl in initialize
