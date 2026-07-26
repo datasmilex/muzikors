@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const formattedPrice = Number(amount).toFixed(2);
-    const baseUrl        = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl        = process.env.NEXT_PUBLIC_BASE_URL || 'https://muzikors.com.tr';
     const conversationId = 'mzk_' + crypto.randomBytes(8).toString('hex');
 
     const callbackUrl = new URL('/api/payment/callback', baseUrl);
