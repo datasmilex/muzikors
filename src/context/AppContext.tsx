@@ -552,7 +552,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           fetchQueue(); // Instant refresh on skip, pause, or new song request
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('[Realtime] Venue and Queue channel active.');
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          console.warn(`[Realtime] Connection issue: ${status}. Fallback interval will keep syncing.`);
+        }
+      });
 
     const fallbackInterval = setInterval(() => {
       fetchQueue();
