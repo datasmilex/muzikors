@@ -77,10 +77,10 @@ export const MusicSearchModal: React.FC = () => {
 
   if (activeModal !== 'search') return null;
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const formatDuration = (duration_ms: number) => {
+    const minutes = Math.floor(duration_ms / 60000);
+    const seconds = Math.floor((duration_ms % 60000) / 1000);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
   const formatCooldown = (seconds: number) => {
@@ -418,7 +418,7 @@ export const MusicSearchModal: React.FC = () => {
               <div className="bg-amber-500/15 border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between text-xs text-amber-200">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
-                  <span>3-Dakika Anti-Spam Bekleme Süresi</span>
+                  <span>30 Saniye Anti-Spam Bekleme Süresi</span>
                 </div>
                 <span className="font-mono font-bold text-amber-400">
                   {formatCooldown(cooldown.remainingSeconds)}
