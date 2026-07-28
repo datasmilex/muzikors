@@ -855,6 +855,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         showToast('Sarki eklenemedi.'); return false;
       }
+
+      // Notify Kafe Paneli to enqueue the track in Spotify
+      try {
+        const kafePanelUrl = process.env.NEXT_PUBLIC_KAFE_PANEL_URL || 'https://kafe.muzikors.com.tr';
+        await fetch(`${kafePanelUrl}/api/spotify/enqueue-track`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            venueId: venueId,
+            uri: targetSpotifyUri
+          })
+        });
+      } catch (err) {
+        console.error('[requestTrack] enqueue-track API error:', err);
+      }
     }
 
     const newTrack: Track = {
