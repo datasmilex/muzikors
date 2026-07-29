@@ -17,6 +17,7 @@ import { LoginModal } from '../components/LoginModal';
 import { QrScannerModal } from '../components/QrScannerModal';
 import { GpsMapModal } from '../components/GpsMapModal';
 import { InfoModals } from '../components/InfoModals';
+import { VenueInfoModal } from '../components/VenueInfoModal';
 import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
 import { TvShoutoutModal } from '../components/TvShoutoutModal';
@@ -63,6 +64,7 @@ const AppContent = () => {
       <LoginModal />
       <QrScannerModal />
       <GpsMapModal />
+      <VenueInfoModal />
       <InfoModals />
       <DailyRewardModal />
       <TvShoutoutModal />

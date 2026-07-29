@@ -104,7 +104,8 @@ export type ModalType =
   | 'campaigns'
   | 'terms'
   | 'daily_reward'
-  | 'tvShoutout';
+  | 'tvShoutout'
+  | 'venue_info';
 
 export interface CooldownState {
   active: boolean;
