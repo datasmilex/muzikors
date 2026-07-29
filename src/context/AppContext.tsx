@@ -92,7 +92,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, promo_credits, lifetime_credits, total_songs_requested, is_spotify_connected, last_daily_claim')
+        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim')
         .eq('id', userId)
         .single();
 
@@ -800,90 +800,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    const newTotalRequested = (user?.totalSongsRequested || 0) + 1;
-    let usedPromo = false;
-
-    // Deduct credits from profile if user exists
-    if (user && supabase && requiredCredits > 0) {
-      if (livePromo >= requiredCredits) {
-        // Use promo credits
-        usedPromo = true;
-        const newPromo = livePromo - requiredCredits;
-        const { error: creditErr } = await supabase
-          .from('profiles')
-          .update({ promo_credits: newPromo, total_songs_requested: newTotalRequested })
-          .eq('id', user.id);
-        if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi güncellenemedi.'); return false; }
-        setUser((prev) => prev ? { ...prev, promo_credits: newPromo, totalSongsRequested: newTotalRequested } : null);
+    const requestUserId = user?.id || null;
+    
+    // Name Masking Logic
+    let requestedByName = 'Müşteri';
+    if (isAnonymous) {
+      requestedByName = 'Anonim Müşteri';
+    } else if (user?.name) {
+      const parts = user.name.trim().split(' ');
+      if (parts.length > 1) {
+        const lastName = parts.pop();
+        requestedByName = `${parts.join(' ')} ${lastName?.charAt(0)}.***`;
       } else {
-        // Use real credits
-        usedPromo = false;
-        const newReal = liveReal - requiredCredits;
-        const { error: creditErr } = await supabase
-          .from('profiles')
-          .update({ credits: newReal, total_songs_requested: newTotalRequested })
-          .eq('id', user.id);
-        if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi güncellenemedi.'); return false; }
-        setUser((prev) => prev ? { ...prev, credits: newReal, totalSongsRequested: newTotalRequested } : null);
+        requestedByName = `${user.name.charAt(0)}.***`;
       }
     }
 
-    if (supabase) {
-      // Immutable log record
-      if (user) {
-        await supabase.from('song_requests_log').insert([{ user_id: user.id, is_promo: usedPromo }]);
-      }
+    try {
+      if (supabase) {
+        const { data, error: rpcErr } = await supabase.rpc('request_track_acid', {
+          p_venue_id: Number(venueId),
+          p_song_name: track.title,
+          p_artist_name: track.artist,
+          p_album_cover: track.albumCover || track.coverUrl || track.album_art || '',
+          p_spotify_uri: targetSpotifyUri,
+          p_duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
+          p_credits_spent: requiredCredits,
+          p_requested_by_name: requestedByName,
+          p_is_anonymous: isAnonymous || false
+        });
 
-      // Name Masking Logic
-      let requestedByName = 'Müşteri';
-      if (isAnonymous) {
-        requestedByName = 'Anonim Müşteri';
-      } else if (user?.name) {
-        const parts = user.name.trim().split(' ');
-        if (parts.length > 1) {
-          const lastName = parts.pop();
-          requestedByName = `${parts.join(' ')} ${lastName?.charAt(0)}.***`;
-        } else {
-          requestedByName = `${user.name.charAt(0)}.***`;
+        if (rpcErr) {
+          console.error('[requestTrack RPC Error]', rpcErr.message);
+          showToast(rpcErr.message || 'Şarkı eklenemedi.');
+          return false;
+        }
+
+        // Fetch fresh credits after successful ACID transaction
+        if (user) {
+          await fetchProfileCredits(user.id);
         }
       }
-
-      const requestUserId = user?.id || null;
-
-      // Insert into venue-isolated queue (status = pending/queued, started_at = null, let Kafe Paneli master clock trigger)
-      const { error: queueErr } = await supabase.from('queue').insert({
-        song_name: track.title,
-        artist_name: track.artist,
-        album_cover: track.albumCover || track.coverUrl || track.album_art || '',
-        spotify_uri: targetSpotifyUri,
-        duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
-        requested_by_user_id: requestUserId,
-        requested_by_name: requestedByName,
-        display_name: requestedByName,
-        is_anonymous: isAnonymous || false,
-        status: 'pending',
-        started_at: null,
-        votes: 0,
-        credits_spent: requiredCredits,
-        venue_id: venueId,
-        is_promo: usedPromo,
-      });
-
-      if (queueErr) {
-        console.error('[requestTrack queue]', queueErr.message);
-        // Refund credits
-        if (user && supabase && requiredCredits > 0) {
-          if (usedPromo) {
-            await supabase.from('profiles').update({ promo_credits: livePromo }).eq('id', user.id);
-            setUser((prev) => prev ? { ...prev, promo_credits: livePromo } : null);
-          } else {
-            await supabase.from('profiles').update({ credits: liveReal }).eq('id', user.id);
-            setUser((prev) => prev ? { ...prev, credits: liveReal } : null);
-          }
-        }
-        showToast('Sarki eklenemedi.'); return false;
-      }
-
+    } catch (err: any) {
+      console.error('[requestTrack Catch Error]', err);
+      showToast(err?.message || 'Bir hata oluştu.');
+      return false;
     }
 
     const newTrack: Track = {
