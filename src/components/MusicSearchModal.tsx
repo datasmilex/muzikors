@@ -187,6 +187,15 @@ export const MusicSearchModal: React.FC = () => {
                     <p>"Şarkı isteğinle birlikte ismin <b>{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak TV ekranında ve uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
                   )}
                 </div>
+
+                {/* Vibe Guard Warning */}
+                {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
+                  <div className="bg-orange-500/10 rounded-2xl p-4 border border-orange-500/20 text-[11px] leading-relaxed text-orange-200/90 mt-4">
+                    <p>
+                      <b>⚠️ Bilgilendirme:</b> Mekân sadece şu tarzlara öncelik vermektedir: <span className="font-bold text-orange-300">{activeVenue.allowed_genres.join(', ')}</span>. Eğer mekanın tarzına tamamen zıt bir şarkı eklerseniz, mekan sahibi şarkıyı atlama (skip) hakkına sahiptir. Sorumluluk size aittir.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -332,12 +341,7 @@ export const MusicSearchModal: React.FC = () => {
                   const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
                   
-                  const allowedGenres = activeVenue?.allowed_genres || [];
-                  const hasAllowedGenres = allowedGenres.length > 0;
-                  const trackGenres = track.genres || [];
-                  const isVibeBlocked = hasAllowedGenres && trackGenres.length > 0 && !trackGenres.some((g: string) => allowedGenres.includes(g));
-
-                  const isBlocked = cost === null || isExplicitBlocked || isVibeBlocked;
+                  const isBlocked = cost === null || isExplicitBlocked;
                   const canAfford = (user?.credits ?? 0) >= (cost ?? 0);
 
                   return (
@@ -369,11 +373,6 @@ export const MusicSearchModal: React.FC = () => {
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
                                 <AlertTriangle className="w-3 h-3 text-red-400" />
                                 🔞 Küfürlü Şarkı (Mekân Filtresi Aktif)
-                              </span>
-                            ) : isVibeBlocked ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold shrink-0">
-                                <AlertTriangle className="w-3 h-3 text-orange-400" />
-                                Mekân Konseptine Uymuyor
                               </span>
                             ) : cost === null ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
