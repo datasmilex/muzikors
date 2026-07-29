@@ -17,6 +17,7 @@ export const TvShoutoutModal: React.FC = () => {
   
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   if (activeModal !== 'tvShoutout') return null;
 
@@ -68,7 +69,8 @@ export const TvShoutoutModal: React.FC = () => {
       const { data, error } = await supabase.rpc('send_tv_shoutout', {
         p_venue_id: numericVenueId,
         p_message: text.trim(),
-        p_user_name: user.name || 'Müşteri'
+        p_user_name: user.name || 'Müşteri',
+        p_is_anonymous: isAnonymous
       });
 
       if (error) {
@@ -125,6 +127,19 @@ export const TvShoutoutModal: React.FC = () => {
                 {text.length}/{maxLength}
               </div>
             </div>
+
+            <label className="flex items-center gap-3 cursor-pointer p-3 bg-black/20 rounded-xl border border-white/5 hover:bg-black/30 transition-colors">
+              <div className="relative flex items-center">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                />
+                <div className="w-10 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"></div>
+              </div>
+              <span className="text-sm font-medium text-white/80">İsmim ekranda gizlensin (Anonim)</span>
+            </label>
 
             <button
               type="submit"
