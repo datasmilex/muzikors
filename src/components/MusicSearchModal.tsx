@@ -20,7 +20,13 @@ export const MusicSearchModal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global' | null>('all');
+  
+  const hasVibeGuard = activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0;
+  
+  const [activeTab, setActiveTab] = useState<string | null>(
+    hasVibeGuard ? activeVenue!.allowed_genres![0] : 'all'
+  );
+  
   const [isLoading, setIsLoading] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
@@ -32,12 +38,18 @@ export const MusicSearchModal: React.FC = () => {
     
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
-      if (activeTab === 'turkish') {
-        queryToFetch = 'year:2024-2026 genre:acoustic market:TR';
-      } else if (activeTab === 'global') {
-        queryToFetch = 'year:2025-2026 genre:pop market:TR';
+      if (hasVibeGuard && activeTab) {
+        // Dinamik Vibe Guard Genre sorgusu
+        queryToFetch = `year:2024-2026 genre:${activeTab.replace(/ /g, '-')} market:TR`;
       } else {
-        queryToFetch = 'year:2025-2026 genre:pop'; // all / default
+        // Eski varsayılan mantık (Vibe Guard Yoksa)
+        if (activeTab === 'turkish') {
+          queryToFetch = 'year:2024-2026 genre:acoustic market:TR';
+        } else if (activeTab === 'global') {
+          queryToFetch = 'year:2025-2026 genre:pop market:TR';
+        } else {
+          queryToFetch = 'year:2025-2026 genre:pop'; // all / default
+        }
       }
     }
 
@@ -266,45 +278,68 @@ export const MusicSearchModal: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  <button
-                    onClick={() => {
-                      setActiveTab('all');
-                      setSearchQuery('');
-                    }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
-                      activeTab === 'all'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
-                    }`}
-                  >
-                    Trendler
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('turkish');
-                      setSearchQuery('');
-                    }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
-                      activeTab === 'turkish'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
-                    }`}
-                  >
-                    Akustik
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('global');
-                      setSearchQuery('');
-                    }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
-                      activeTab === 'global'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
-                    }`}
-                  >
-                    Global Hits
-                  </button>
+                  {hasVibeGuard ? (
+                    // VIBE GUARD (Mekan Kısıtlaması) VARSA
+                    activeVenue!.allowed_genres!.map((genre) => (
+                      <button
+                        key={genre}
+                        onClick={() => {
+                          setActiveTab(genre);
+                          setSearchQuery('');
+                        }}
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all capitalize ${
+                          activeTab === genre
+                            ? 'gold-gradient-bg text-stone-950 shadow-md'
+                            : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        }`}
+                      >
+                        {genre.replace(/-/g, ' ')}
+                      </button>
+                    ))
+                  ) : (
+                    // VIBE GUARD YOKSA (Eski Varsayılan Menü)
+                    <>
+                      <button
+                        onClick={() => {
+                          setActiveTab('all');
+                          setSearchQuery('');
+                        }}
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                          activeTab === 'all'
+                            ? 'gold-gradient-bg text-stone-950 shadow-md'
+                            : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        }`}
+                      >
+                        Trendler
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveTab('turkish');
+                          setSearchQuery('');
+                        }}
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                          activeTab === 'turkish'
+                            ? 'gold-gradient-bg text-stone-950 shadow-md'
+                            : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        }`}
+                      >
+                        Akustik
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveTab('global');
+                          setSearchQuery('');
+                        }}
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                          activeTab === 'global'
+                            ? 'gold-gradient-bg text-stone-950 shadow-md'
+                            : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        }`}
+                      >
+                        Global Hits
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
