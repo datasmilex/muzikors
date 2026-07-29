@@ -85,6 +85,7 @@ export interface CreditPackage {
   credits: number;
   bonusCredits: number;
   priceTL: number;
+  oldPriceTL?: number;
   isPopular?: boolean;
   badge?: string;
   description: string;

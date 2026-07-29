@@ -8,7 +8,7 @@ import { CREDIT_PACKAGES } from '../data/mockData';
 
 export const CreditTopUpModal: React.FC = () => {
   const { activeModal, closeModal, topUpCredits } = useApp();
-  const [selectedPackId, setSelectedPackId] = useState<string>('pack-100');
+  const [selectedPackId, setSelectedPackId] = useState<string>('pack-120');
   const [isLegalAccepted, setIsLegalAccepted] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
@@ -106,7 +106,10 @@ export const CreditTopUpModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end justify-center">
+                    {pkg.oldPriceTL && (
+                      <span className="text-[10px] text-gray-500 line-through mb-0.5">₺{pkg.oldPriceTL}</span>
+                    )}
                     <span className="text-lg font-extrabold text-amber-100">₺{pkg.priceTL}</span>
                   </div>
                 </button>
