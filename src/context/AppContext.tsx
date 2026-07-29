@@ -768,6 +768,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    // ── CLOSING TIME & QUEUE LIMIT CHECK ─────────────────────────────────
+    if (supabase) {
+      const songDurationMs = track.durationMs ?? (track.duration ? track.duration * 1000 : 210000);
+      const { data: limitCheck, error: limitErr } = await supabase.rpc('check_queue_availability', {
+        p_venue_id: venueId,
+        p_new_song_duration_ms: songDurationMs
+      });
+
+      if (!limitErr && limitCheck) {
+        if (!limitCheck.allowed) {
+          if (limitCheck.reason === 'closing_soon') {
+            showToast('Mekan kapanmak üzere, yarın görüşürüz.');
+          } else if (limitCheck.reason === 'queue_full') {
+            showToast('Sıra çok dolu, şarkınız kapanıştan önce çalınamayacağı için alınamadı.');
+          } else {
+            showToast('Mekan şu an istek kabul etmiyor.');
+          }
+          return false;
+        }
+      }
+    }
+
     const newCredits = liveCredits - requiredCredits;
     const newTotalRequested = (user?.totalSongsRequested || 0) + 1;
 
