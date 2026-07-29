@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Gift, X, Sparkles, CheckCircle2, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { isClaimedTodayTR, getSecondsUntilTRMidnight } from '../lib/timeHelpers';
@@ -12,11 +12,15 @@ export const DailyRewardModal: React.FC = () => {
   const [isClaiming, setIsClaiming] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
+  const [localClaimed, setLocalClaimed] = useState(false);
+
+  useEffect(() => {
+    setLocalClaimed(isClaimedTodayTR(user?.lastDailyClaim || null));
+  }, [user?.lastDailyClaim]);
 
   // Handle countdown when claimed
   useEffect(() => {
-    if (!hasClaimedToday) {
+    if (!localClaimed) {
       setTimeLeft(null);
       return;
     }
@@ -28,23 +32,26 @@ export const DailyRewardModal: React.FC = () => {
       const seconds = getSecondsUntilTRMidnight();
       if (seconds <= 0) {
         clearInterval(interval);
-        setTimeLeft(null); // Enables button again by trickling down to hasClaimedToday=false if we refresh state or just wait for midnight
-        // Normally, the component re-renders or we might want to reload state, but if seconds <= 0, we can clear interval.
+        setTimeLeft(null); 
+        setLocalClaimed(false); // 00:00:00'da butonu otomatik aktifleştir
+        
+        // Supabase tarafında ödül her halükarda geceyarısı sıfırlanıyor (veya 24h),
+        // Biz sadece client-side'da UI'ı açıyoruz. Müşteri F5 atarsa veya tekrar tıklarsa sorun olmaz.
       } else {
         setTimeLeft(seconds);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [hasClaimedToday]);
+  }, [localClaimed]);
 
   if (activeModal !== 'daily_reward') return null;
 
   // Ensure user is logged in
   if (!user) return null;
 
-  // Real-time calculation if time left hits 0 while modal is open, we can let user claim
-  const isButtonDisabled = hasClaimedToday && (timeLeft === null || timeLeft > 0);
+  // Real-time calculation
+  const isButtonDisabled = localClaimed;
 
   const formatTime = (totalSeconds: number) => {
     const h = Math.floor(totalSeconds / 3600);
@@ -80,8 +87,8 @@ export const DailyRewardModal: React.FC = () => {
       showToast('Ödül alınırken bir hata oluştu.');
     } finally {
       setIsClaiming(false);
-      // Wait a moment before closing to show success state if needed
-      setTimeout(closeModal, 1500);
+      // Let user see the timer starting instead of closing instantly
+      // setTimeout(closeModal, 1500); 
     }
   };
 
@@ -134,17 +141,19 @@ export const DailyRewardModal: React.FC = () => {
             onClick={handleClaimReward}
             className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md
               ${isButtonDisabled
-                ? 'bg-black/40 border border-white/5 text-gray-400 cursor-not-allowed'
+                ? 'bg-black/40 border border-[#D4AF37]/30 text-[#D4AF37]/80 cursor-not-allowed'
                 : 'gold-gradient-bg text-black hover:scale-[1.02] active:scale-[0.98]'
               }
             `}
           >
             {isClaiming ? (
               <span className="animate-pulse">Bekleniyor...</span>
-            ) : isButtonDisabled && timeLeft !== null ? (
+            ) : isButtonDisabled ? (
               <>
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Yarınki Ödül İçin: {formatTime(timeLeft)}</span>
+                <Clock className="w-4 h-4" />
+                <span className="font-mono tracking-wider">
+                  Yeni Ödüle: {timeLeft !== null ? formatTime(timeLeft) : '00:00:00'}
+                </span>
               </>
             ) : (
               <>
