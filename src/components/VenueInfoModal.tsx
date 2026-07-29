@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Store, BookOpen, Wifi, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Store, BookOpen, Wifi, Copy, Check, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const VenueInfoModal: React.FC = () => {
@@ -16,6 +16,15 @@ export const VenueInfoModal: React.FC = () => {
   const menuUrl = activeVenue.menu_link || (activeVenue as any).menu_url;
   const hasWifi = Boolean(wifiName?.trim()) || Boolean(wifiPass?.trim());
   const hasMenu = Boolean(menuUrl?.trim());
+
+  const formatTime = (t?: string) => {
+    if (!t) return null;
+    return t.slice(0, 5); // "09:00:00" -> "09:00"
+  };
+
+  const openingTime = formatTime((activeVenue as any).opening_time);
+  const closingTime = formatTime((activeVenue as any).closing_time);
+  const hasWorkingHours = Boolean(openingTime) && Boolean(closingTime);
 
   return (
     <AnimatePresence>
@@ -51,6 +60,12 @@ export const VenueInfoModal: React.FC = () => {
             </div>
             <div className="text-center space-y-1">
               <h1 className="text-2xl font-black text-white tracking-tight">{activeVenue.venue_name || activeVenue.name}</h1>
+              {hasWorkingHours && (
+                <div className="flex items-center justify-center gap-1.5 text-gray-400 text-sm font-medium mt-1">
+                  <Clock className="w-4 h-4 text-[#D4AF37]" />
+                  <span>Çalışma Saatleri: {openingTime} - {closingTime}</span>
+                </div>
+              )}
             </div>
           </div>
 
