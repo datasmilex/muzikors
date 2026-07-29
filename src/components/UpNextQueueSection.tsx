@@ -1,12 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ListMusic, ThumbsUp, Flame, User, QrCode, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
   const { queue, nowPlaying, voteTrack, openProtectedModal } = useApp();
+  const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
+
+  const handleVoteTrack = (trackId: string) => {
+    if (votingCooldowns[trackId]) return;
+
+    setVotingCooldowns(prev => ({ ...prev, [trackId]: true }));
+    voteTrack(trackId);
+    
+    setTimeout(() => {
+      setVotingCooldowns(prev => ({ ...prev, [trackId]: false }));
+    }, 2000);
+  };
 
   // Strict visual filtering: only show pending/queued tracks
   const filteredQueue = queue.filter(track => {
@@ -132,12 +144,19 @@ export const UpNextQueueSection: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => voteTrack(track.id)}
-                  className="px-3 py-1.5 rounded-xl bg-[#D4AF37]/15 hover:bg-[#D4AF37]/30 border border-[#D4AF37]/30 text-[#D4AF37] active:scale-95 transition-all flex items-center gap-1.5 group"
+                  onClick={() => handleVoteTrack(track.id)}
+                  disabled={votingCooldowns[track.id]}
+                  className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all group ${
+                    votingCooldowns[track.id] 
+                      ? 'bg-[#1C130D] border-gray-600 text-gray-500 cursor-not-allowed'
+                      : 'bg-[#D4AF37]/15 hover:bg-[#D4AF37]/30 border-[#D4AF37]/30 text-[#D4AF37] active:scale-95'
+                  }`}
                   title="Şarkıyı Beğen"
                 >
-                  <ThumbsUp className="w-4 h-4 group-hover:scale-110 transition-transform fill-[#D4AF37]/20" />
-                  <span className="text-xs font-bold text-amber-200">Beğen</span>
+                  <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:scale-110 fill-[#D4AF37]/20'}`} />
+                  <span className={`text-xs font-bold ${votingCooldowns[track.id] ? 'text-gray-500' : 'text-amber-200'}`}>
+                    {votingCooldowns[track.id] ? 'Bekleyin' : 'Beğen'}
+                  </span>
                 </button>
               </div>
             </div>
