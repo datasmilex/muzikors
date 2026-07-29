@@ -6,7 +6,21 @@ import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, voteTrack, openProtectedModal } = useApp();
+  const { queue, nowPlaying, voteTrack, openProtectedModal } = useApp();
+
+  // Strict visual filtering: only show pending/queued tracks
+  const filteredQueue = queue.filter(track => {
+    if (track.isPlaying) return false;
+    if ((track as any).status === 'playing') return false;
+    
+    // Hide if it matches the Currently Playing track
+    if (nowPlaying) {
+      if (track.id === nowPlaying.id) return false;
+      if (track.spotifyUri && track.spotifyUri === nowPlaying.spotifyUri) return false;
+    }
+    
+    return true;
+  });
 
   return (
     <div className="px-4 py-2 pb-28">
@@ -18,7 +32,7 @@ export const UpNextQueueSection: React.FC = () => {
             Sıradaki Şarkılar
           </h3>
           <span className="bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full">
-            {queue.length}
+            {filteredQueue.length}
           </span>
         </div>
 
@@ -28,7 +42,7 @@ export const UpNextQueueSection: React.FC = () => {
       </div>
 
       {/* Requirement 1: Sleek Empty Queue State Message */}
-      {queue.length === 0 ? (
+      {filteredQueue.length === 0 ? (
         <div className="glass-panel rounded-2xl p-6 text-center border border-[#D4AF37]/25 flex flex-col items-center justify-center space-y-3 my-1 bg-gradient-to-b from-[#1C130D]/90 to-[#120C08]/90">
           <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
             <QrCode className="w-6 h-6 animate-pulse" />
@@ -48,7 +62,7 @@ export const UpNextQueueSection: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
-          {queue.map((track, index) => (
+          {filteredQueue.map((track, index) => (
             <div
               key={track.id}
               className={`glass-panel rounded-2xl p-3 flex items-center justify-between border transition-all duration-300 ${
