@@ -87,18 +87,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // ── FETCH PROFILE STATS & CREDITS DIRECTLY FROM DB ─────────────────────────
-  const fetchProfileCredits = useCallback(async (userId: string): Promise<number> => {
-    if (!supabase) return DEFAULT_CREDITS;
+  const fetchProfileCredits = useCallback(async (userId: string): Promise<{ real: number, promo: number }> => {
+    if (!supabase) return { real: 0, promo: 0 };
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, lifetime_credits, total_songs_requested, is_spotify_connected, last_daily_claim')
+        .select('credits, promo_credits, lifetime_credits, total_songs_requested, is_spotify_connected, last_daily_claim')
         .eq('id', userId)
         .single();
 
       if (error) {
         console.error('[Credits] DB fetch error:', error.message);
-        return DEFAULT_CREDITS;
+        return { real: 0, promo: 0 };
       }
 
       setUser((prev) =>
@@ -106,6 +106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ? {
               ...prev,
               credits: data?.credits ?? prev.credits,
+              promo_credits: data?.promo_credits ?? prev.promo_credits,
               lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits,
               totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
               lastDailyClaim: data?.last_daily_claim ?? prev.lastDailyClaim,
@@ -113,10 +114,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : null
       );
 
-      return typeof data?.credits === 'number' ? data.credits : DEFAULT_CREDITS;
+      return {
+        real: typeof data?.credits === 'number' ? data.credits : 0,
+        promo: typeof data?.promo_credits === 'number' ? data.promo_credits : 0
+      };
     } catch (err) {
       console.error('[Credits] Unexpected error:', err);
-      return DEFAULT_CREDITS;
+      return { real: 0, promo: 0 };
     }
   }, []);
 
@@ -313,9 +317,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         username: '@' + (emailStr.split('@')[0] || 'kullanici'),
         email: emailStr,
         avatar: authUser.user_metadata?.avatar_url || prev?.avatar || avatarUrl,
-        credits: liveCredits,
+        credits: liveCredits.real,
+        promo_credits: liveCredits.promo,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
-        lifetimeCredits: prev?.lifetimeCredits ?? liveCredits,
+        lifetimeCredits: prev?.lifetimeCredits ?? liveCredits.real,
         loginMethod: 'google',
       }));
 
@@ -735,17 +740,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
     }
 
-    let liveCredits = 0;
+    let liveReal = 0;
+    let livePromo = 0;
     if (user) {
-      liveCredits = await fetchProfileCredits(user.id);
+      const balances = await fetchProfileCredits(user.id);
+      liveReal = balances.real;
+      livePromo = balances.promo;
     }
 
-    if (requiredCredits > 0 && liveCredits < requiredCredits) {
+    if (requiredCredits > 0 && liveReal < requiredCredits && livePromo < requiredCredits) {
       if (!user) {
         openProtectedModal('search', 'Şarkı eklemek için giriş yapın (Ücretli Şarkı)');
         return false;
       }
-      showToast(`Bu sarki icin ${requiredCredits} kredi gerekiyor. Yetersiz bakiye!`);
+      showToast(`Bu şarkı için ${requiredCredits} kredi gerekiyor. Yetersiz bakiye!`);
       openModal('topup'); return false;
     }
 
@@ -792,23 +800,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    const newCredits = liveCredits - requiredCredits;
     const newTotalRequested = (user?.totalSongsRequested || 0) + 1;
+    let usedPromo = false;
 
     // Deduct credits from profile if user exists
     if (user && supabase && requiredCredits > 0) {
-      const { error: creditErr } = await supabase
-        .from('profiles')
-        .update({ credits: newCredits, total_songs_requested: newTotalRequested })
-        .eq('id', user.id);
-      if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi guncellenemedi.'); return false; }
-      setUser((prev) => prev ? { ...prev, credits: newCredits, totalSongsRequested: newTotalRequested } : null);
+      if (livePromo >= requiredCredits) {
+        // Use promo credits
+        usedPromo = true;
+        const newPromo = livePromo - requiredCredits;
+        const { error: creditErr } = await supabase
+          .from('profiles')
+          .update({ promo_credits: newPromo, total_songs_requested: newTotalRequested })
+          .eq('id', user.id);
+        if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi güncellenemedi.'); return false; }
+        setUser((prev) => prev ? { ...prev, promo_credits: newPromo, totalSongsRequested: newTotalRequested } : null);
+      } else {
+        // Use real credits
+        usedPromo = false;
+        const newReal = liveReal - requiredCredits;
+        const { error: creditErr } = await supabase
+          .from('profiles')
+          .update({ credits: newReal, total_songs_requested: newTotalRequested })
+          .eq('id', user.id);
+        if (creditErr) { console.error('[requestTrack credit]', creditErr.message); showToast('Kredi güncellenemedi.'); return false; }
+        setUser((prev) => prev ? { ...prev, credits: newReal, totalSongsRequested: newTotalRequested } : null);
+      }
     }
 
     if (supabase) {
       // Immutable log record
       if (user) {
-        await supabase.from('song_requests_log').insert([{ user_id: user.id }]);
+        await supabase.from('song_requests_log').insert([{ user_id: user.id, is_promo: usedPromo }]);
       }
 
       // Name Masking Logic
@@ -843,14 +866,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         votes: 0,
         credits_spent: requiredCredits,
         venue_id: venueId,
+        is_promo: usedPromo,
       });
 
       if (queueErr) {
         console.error('[requestTrack queue]', queueErr.message);
         // Refund credits
         if (user && supabase && requiredCredits > 0) {
-          await supabase.from('profiles').update({ credits: liveCredits }).eq('id', user.id);
-          setUser((prev) => prev ? { ...prev, credits: liveCredits } : null);
+          if (usedPromo) {
+            await supabase.from('profiles').update({ promo_credits: livePromo }).eq('id', user.id);
+            setUser((prev) => prev ? { ...prev, promo_credits: livePromo } : null);
+          } else {
+            await supabase.from('profiles').update({ credits: liveReal }).eq('id', user.id);
+            setUser((prev) => prev ? { ...prev, credits: liveReal } : null);
+          }
         }
         showToast('Sarki eklenemedi.'); return false;
       }
@@ -898,14 +927,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
 
-      const liveCredits = await fetchProfileCredits(user.id);
-      if (liveCredits < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
+      const balances = await fetchProfileCredits(user.id);
+      if (balances.real < 1 && balances.promo < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
 
-      const newCredits = liveCredits - 1;
+      let newReal = balances.real;
+      let newPromo = balances.promo;
+      let usedPromo = false;
+
+      if (balances.promo >= 1) {
+        newPromo -= 1;
+        usedPromo = true;
+      } else {
+        newReal -= 1;
+        usedPromo = false;
+      }
+
       const newVotesForUser = currentVotesForUser + 1;
 
       if (supabase) {
-        await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+        if (usedPromo) {
+          await supabase.from('profiles').update({ promo_credits: newPromo }).eq('id', user.id);
+          setUser(prev => prev ? { ...prev, promo_credits: newPromo } : null);
+        } else {
+          await supabase.from('profiles').update({ credits: newReal }).eq('id', user.id);
+          setUser(prev => prev ? { ...prev, credits: newReal } : null);
+        }
+        
         const { error: upsertErr } = await supabase.from('song_user_votes').upsert(
           { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
           { onConflict: 'user_id,song_id' }
@@ -920,7 +967,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      setUser((prev) => prev ? { ...prev, credits: newCredits } : null);
+
       setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
       showToast(`Şarkı beğenildi! (Oy hakkınız: ${newVotesForUser}/5)`);
     } catch (err) {

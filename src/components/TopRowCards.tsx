@@ -21,7 +21,7 @@ export const TopRowCards: React.FC = () => {
 
         <div className="my-1">
           <span className="text-2xl font-black tracking-tight text-white flex items-baseline gap-1">
-            {user ? user.credits : 0} <span className="text-xs font-semibold text-[#D4AF37]">KREDİ</span>
+            {user ? user.credits + (user.promo_credits || 0) : 0} <span className="text-xs font-semibold text-[#D4AF37]">KREDİ</span>
           </span>
         </div>
 

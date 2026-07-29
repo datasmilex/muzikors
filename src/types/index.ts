@@ -73,6 +73,7 @@ export interface UserProfile {
   email: string;
   avatar: string;
   credits: number;
+  promo_credits?: number;
   totalSongsRequested: number;
   lifetimeCredits?: number;
   isSpotifyConnected?: boolean;
