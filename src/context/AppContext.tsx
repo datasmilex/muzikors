@@ -870,7 +870,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       if (currentVotesForUser >= 5) {
-        showToast('Bu sarkiyi en fazla 5 kez meganebilirsiniz.');
+        showToast('Bu şarkıyı en fazla 5 kez beğenebilirsiniz.');
         return;
       }
 
