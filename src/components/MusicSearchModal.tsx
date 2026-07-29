@@ -35,7 +35,7 @@ export const MusicSearchModal: React.FC = () => {
       if (activeTab === 'turkish') {
         queryToFetch = 'year:2023-2024 genre:turkish';
       } else if (activeTab === 'global') {
-        queryToFetch = 'year:2023-2024 genre:pop market:US';
+        queryToFetch = 'year:2023-2025 genre:pop';
       } else {
         queryToFetch = 'year:2023-2024 genre:pop market:TR'; // all / default
       }
