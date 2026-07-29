@@ -53,6 +53,16 @@ export const UpNextQueueSection: React.FC = () => {
         </span>
       </div>
 
+      {/* Info Micro-copy */}
+      <div className="px-1.5 mb-4">
+        <p className="text-[11px] text-gray-400/80 leading-snug flex items-start gap-1.5">
+          <span className="text-[13px] opacity-90">💡</span>
+          <span>
+            <strong className="text-gray-300 font-medium">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşımak için destek verin!
+          </span>
+        </p>
+      </div>
+
       {/* Requirement 1: Sleek Empty Queue State Message */}
       {filteredQueue.length === 0 ? (
         <div className="glass-panel rounded-2xl p-6 text-center border border-[#D4AF37]/25 flex flex-col items-center justify-center space-y-3 my-1 bg-gradient-to-b from-[#1C130D]/90 to-[#120C08]/90">
