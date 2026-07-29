@@ -33,7 +33,7 @@ export const MusicSearchModal: React.FC = () => {
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
       if (activeTab === 'turkish') {
-        queryToFetch = 'year:2024-2025 genre:pop market:TR';
+        queryToFetch = 'year:2024-2026 genre:acoustic market:TR';
       } else if (activeTab === 'global') {
         queryToFetch = 'year:2025-2026 genre:pop market:TR';
       } else {
@@ -290,7 +290,7 @@ export const MusicSearchModal: React.FC = () => {
                         : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
                     }`}
                   >
-                    Türkçe Pop
+                    Akustik
                   </button>
                   <button
                     onClick={() => {
