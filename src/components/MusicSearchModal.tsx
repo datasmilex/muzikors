@@ -225,16 +225,6 @@ export const MusicSearchModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-white tracking-wide">Spotify Müzik Arama</h2>
-                {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    <span className="text-[10px] text-gray-400 font-semibold mr-1">Mekân Tarzı:</span>
-                    {activeVenue.allowed_genres.map(g => (
-                      <span key={g} className="px-2 py-0.5 rounded-full bg-[#E5A93C]/20 text-[#E5A93C] text-[9px] font-bold border border-[#E5A93C]/30 capitalize">
-                        {g}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <button
