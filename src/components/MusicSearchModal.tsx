@@ -33,11 +33,11 @@ export const MusicSearchModal: React.FC = () => {
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
       if (activeTab === 'turkish') {
-        queryToFetch = 'year:2023-2024 genre:turkish';
+        queryToFetch = 'year:2025-2026 genre:turkish';
       } else if (activeTab === 'global') {
-        queryToFetch = 'year:2023-2025 genre:pop';
+        queryToFetch = 'year:2025-2026 genre:pop';
       } else {
-        queryToFetch = 'year:2023-2024 genre:pop market:TR'; // all / default
+        queryToFetch = 'year:2025-2026 genre:pop market:TR'; // all / default
       }
     }
 
