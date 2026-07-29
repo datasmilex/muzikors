@@ -49,7 +49,7 @@ export const UpNextQueueSection: React.FC = () => {
         </div>
 
         <span className="text-[11px] text-amber-200/60 font-medium">
-          Oyla ve Sıranı Öne Al
+          Beğen ve Sıranı Öne Al
         </span>
       </div>
 
@@ -58,7 +58,7 @@ export const UpNextQueueSection: React.FC = () => {
         <p className="text-[11px] text-gray-400/80 leading-snug flex items-start gap-1.5">
           <span className="text-[13px] opacity-90">💡</span>
           <span>
-            <strong className="text-gray-300 font-medium">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşımak için destek verin!
+            <strong className="text-gray-300 font-medium">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşıyın.
           </span>
         </p>
       </div>
