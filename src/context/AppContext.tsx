@@ -817,8 +817,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      if (supabase) {
+      if (supabase && user) {
         const { data, error: rpcErr } = await supabase.rpc('request_track_acid', {
+          p_user_id: user.id,
           p_venue_id: Number(venueId),
           p_song_name: track.title,
           p_artist_name: track.artist,
