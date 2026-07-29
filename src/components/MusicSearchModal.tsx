@@ -20,7 +20,7 @@ export const MusicSearchModal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global' | null>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
@@ -29,8 +29,17 @@ export const MusicSearchModal: React.FC = () => {
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
     const isDefaultSearch = searchQuery.trim() === '';
-    // Use a generic hit query for default state. (2023-2024 pop hits)
-    const queryToFetch = isDefaultSearch ? 'year:2023-2024 genre:pop' : searchQuery.trim();
+    
+    let queryToFetch = searchQuery.trim();
+    if (isDefaultSearch) {
+      if (activeTab === 'turkish') {
+        queryToFetch = 'year:2023-2024 genre:turkish';
+      } else if (activeTab === 'global') {
+        queryToFetch = 'year:2023-2024 genre:pop market:US';
+      } else {
+        queryToFetch = 'year:2023-2024 genre:pop market:TR'; // all / default
+      }
+    }
 
     // Venue guard: if no spotify connection, block search
     if (!activeVenue?.id) {
@@ -74,7 +83,7 @@ export const MusicSearchModal: React.FC = () => {
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, activeVenue?.id]);
+  }, [searchQuery, activeTab, activeVenue?.id]);
 
 
   if (activeModal !== 'search') return null;
@@ -233,7 +242,14 @@ export const MusicSearchModal: React.FC = () => {
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value.trim() !== '') {
+                        setActiveTab(null);
+                      } else if (activeTab === null) {
+                        setActiveTab('all');
+                      }
+                    }}
                     placeholder="Sanatçı veya şarkı adı yazın (örn: Sezen Aksu)..."
                     className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-2xl py-3 pl-11 pr-10 text-sm text-white placeholder-amber-200/40 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                   />
@@ -253,7 +269,7 @@ export const MusicSearchModal: React.FC = () => {
                   <button
                     onClick={() => {
                       setActiveTab('all');
-                      setSearchQuery('Trend');
+                      setSearchQuery('');
                     }}
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
                       activeTab === 'all'
@@ -266,7 +282,7 @@ export const MusicSearchModal: React.FC = () => {
                   <button
                     onClick={() => {
                       setActiveTab('turkish');
-                      setSearchQuery('Türkçe Pop');
+                      setSearchQuery('');
                     }}
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
                       activeTab === 'turkish'
@@ -279,7 +295,7 @@ export const MusicSearchModal: React.FC = () => {
                   <button
                     onClick={() => {
                       setActiveTab('global');
-                      setSearchQuery('Top Hits');
+                      setSearchQuery('');
                     }}
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
                       activeTab === 'global'
