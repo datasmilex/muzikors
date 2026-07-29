@@ -446,7 +446,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             durationMs: r.duration_ms ?? 210000,
             duration: Math.round((r.duration_ms ?? 210000) / 1000),
             creditCost: r.credits_spent ?? 10,
-            votes: r.votes ?? 1,
+            votes: r.votes ?? 0,
             requestedBy: r.requested_by_name || 'Misafir',
             requestedAt: 'Sirada',
             startedAt: r.started_at,
@@ -816,7 +816,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         is_anonymous: isAnonymous || false,
         status: 'pending',
         started_at: null,
-        votes: 1,
+        votes: 0,
         credits_spent: requiredCredits,
         venue_id: venueId,
       });
@@ -836,7 +836,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newTrack: Track = {
       ...track,
       id: `req-${Date.now()}`,
-      votes: 1,
+      votes: 0,
       requestedBy: isAnonymous ? 'Anonim Müşteri' : (user?.name || 'Müşteri'),
       requestedByAvatar: isAnonymous ? '' : (user?.avatar || ''),
       requestedAt: 'Simdi',
