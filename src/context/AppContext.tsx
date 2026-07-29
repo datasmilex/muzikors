@@ -898,7 +898,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setUser((prev) => prev ? { ...prev, credits: newCredits } : null);
       setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
-      showToast(`Sarki meganildi! (Oy hakkiniz: ${newVotesForUser}/5)`);
+      showToast(`Şarkı beğenildi! (Oy hakkınız: ${newVotesForUser}/5)`);
     } catch (err) {
       console.error('[voteTrack exception]', err);
       showToast('Oylama sirasinda bir hata olustu.');
