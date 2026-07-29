@@ -261,6 +261,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const parsed: Venue = JSON.parse(stored);
           if (parsed && parsed.id) {
             setActiveVenue(parsed);
+            // KÖK NEDEN ÇÖZÜMÜ 1: Sadece localStorage'dan okuma, arkadan güncelini de çek!
+            bindVenueById(parsed.id);
           }
         } catch {
           localStorage.removeItem(VENUE_STORAGE_KEY);
@@ -512,6 +514,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     is_tv_active: row.is_tv_active ?? prev.is_tv_active,
                     is_paused: row.is_paused === true,
                     explicit_filter_enabled: row.explicit_filter_enabled === true,
+                    allowed_genres: row.allowed_genres ?? prev.allowed_genres,
                     current_track_info: row.current_track_info,
                   }
                 : null
