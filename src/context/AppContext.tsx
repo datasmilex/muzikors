@@ -419,8 +419,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const elapsedMs = Date.now() - new Date(r.started_at).getTime();
             const durationMs = r.duration_ms ?? 210000;
             if (elapsedMs >= durationMs) {
-              console.log('[Queue] Updating finished song to played status in DB:', r.id);
-              await supabase.from('queue').update({ status: 'played' }).eq('id', r.id);
+              // User App MUST NEVER mutate DB state. We simply hide it from UI if it's stuck.
               continue;
             }
           }
@@ -430,19 +429,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         let playingRow = validRows.find((r) => r.status === 'playing');
         let upcomingRows = validRows.filter((r) => r.id !== playingRow?.id && (r.status === 'queued' || r.status === 'pending'));
 
-        // Promote top queued song if no song is playing
-        if (!playingRow && upcomingRows.length > 0) {
-          playingRow = upcomingRows[0];
-          upcomingRows = upcomingRows.slice(1);
-          const nowIso = new Date().toISOString();
-          playingRow.status = 'playing';
-          playingRow.started_at = nowIso;
-          await supabase.from('queue').update({ status: 'playing', started_at: nowIso }).eq('id', playingRow.id);
-        } else if (playingRow && !playingRow.started_at) {
-          const nowIso = new Date().toISOString();
-          playingRow.started_at = nowIso;
-          await supabase.from('queue').update({ started_at: nowIso }).eq('id', playingRow.id);
-        }
 
         const toTrack = (r: any): Track => {
           const cover = r.album_cover || '';
@@ -616,25 +602,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const trackDurationSec = nowPlaying.duration ?? 180;
 
       if (nowPlaying.id !== 'spotify-bg' && elapsedSec >= trackDurationSec) {
-        if (supabase && nowPlaying.id && !nowPlaying.id.startsWith('req-')) {
-          console.log('[Playback] Hard deleting finished song from Supabase:', nowPlaying.id);
-          supabase.from('queue').delete().eq('id', nowPlaying.id);
-        }
-
-        if (queue.length > 0) {
-          const next = queue[0];
-          const nowIso = new Date().toISOString();
-          if (supabase && next.id && !next.id.startsWith('req-')) {
-            supabase.from('queue').update({ status: 'playing', started_at: nowIso }).eq('id', next.id);
-          }
-          setNowPlaying({ ...next, startedAt: nowIso, isPlaying: true });
-          setQueue((q) => q.slice(1));
-          setAudioProgress(0);
-        } else {
-          setNowPlaying(null);
-          setIsPlayingAudio(false);
-          setAudioProgress(0);
-        }
+        // User App NEVER transitions queue state. It only visually clears the active playback
+        // until Realtime syncs the true state from Kafe Paneli or Spotify API.
+        setNowPlaying(null);
+        setIsPlayingAudio(false);
+        setAudioProgress(0);
       }
     }, 1000);
 
