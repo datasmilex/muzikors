@@ -55,6 +55,8 @@ export interface Venue {
   computedDistance?: number;
   spotify_client_id?: string | null;
   has_spotify?: boolean;
+  opening_time?: string | null;
+  closing_time?: string | null;
   current_track_info?: {
     song_title: string;
     artist: string;

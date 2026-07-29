@@ -185,6 +185,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logo_url: data.logo_url || data.logo || '',
         spotify_client_id: data.spotify_client_id || null,
         has_spotify: !!(data.spotify_refresh_token),
+        opening_time: data.opening_time || null,
+        closing_time: data.closing_time || null,
       };
 
       setActiveVenue(venue);
