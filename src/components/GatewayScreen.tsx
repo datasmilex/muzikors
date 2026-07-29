@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Music, Menu, Wifi, Copy, Check, Store } from 'lucide-react';
 
 export const GatewayScreen: React.FC = () => {
   const { activeVenue, setHasEnteredGateway, showToast, openModal } = useApp();
   const [copied, setCopied] = useState(false);
+  const [isCheckingCooldown, setIsCheckingCooldown] = useState(true);
 
-  if (!activeVenue) return null;
+  useEffect(() => {
+    if (!activeVenue) return;
+    
+    const STORAGE_KEY = `lastSeenCafeMenu_${activeVenue.id}`;
+    const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+    const lastSeen = localStorage.getItem(STORAGE_KEY);
+    const now = Date.now();
+
+    if (lastSeen && now - parseInt(lastSeen, 10) < COOLDOWN_MS) {
+      setHasEnteredGateway(true);
+    } else {
+      localStorage.setItem(STORAGE_KEY, now.toString());
+      setIsCheckingCooldown(false);
+    }
+  }, [activeVenue, setHasEnteredGateway]);
+
+  if (isCheckingCooldown || !activeVenue) return null;
 
   const handleCopyPassword = () => {
     if (activeVenue.wifi_password) {
