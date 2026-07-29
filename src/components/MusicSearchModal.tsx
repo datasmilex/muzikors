@@ -238,6 +238,12 @@ export const MusicSearchModal: React.FC = () => {
 
             {/* Main Search Controls */}
             <div className="space-y-2 mt-2">
+              {/* Vibe Guard Info Text */}
+              {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
+                <p className="text-[11px] font-medium text-amber-200/60 pl-1">
+                  Kafenin Tercihi: <span className="text-amber-200/90">{activeVenue.allowed_genres.join(', ')}</span>
+                </p>
+              )}
               <div className="relative">
                   <Search className="w-5 h-5 text-[#D4AF37] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
