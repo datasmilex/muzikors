@@ -28,11 +28,9 @@ export const MusicSearchModal: React.FC = () => {
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
-    const queryToFetch = searchQuery.trim();
-    if (!queryToFetch) {
-      setSearchResults([]);
-      return;
-    }
+    const isDefaultSearch = searchQuery.trim() === '';
+    // Use a generic hit query for default state. (2023-2024 pop hits)
+    const queryToFetch = isDefaultSearch ? 'year:2023-2024 genre:pop' : searchQuery.trim();
 
     // Venue guard: if no spotify connection, block search
     if (!activeVenue?.id) {
@@ -41,6 +39,10 @@ export const MusicSearchModal: React.FC = () => {
     }
 
     setIsLoading(true);
+    
+    // Apply 800ms debounce for actual typing, but load default instantly
+    const delay = isDefaultSearch ? 10 : 800;
+    
     const timer = setTimeout(async () => {
       try {
         const url = `/api/spotify/search?q=${encodeURIComponent(queryToFetch)}&venueId=${encodeURIComponent(activeVenue.id)}`;
@@ -69,7 +71,7 @@ export const MusicSearchModal: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    }, 300);
+    }, delay);
 
     return () => clearTimeout(timer);
   }, [searchQuery, activeVenue?.id]);
