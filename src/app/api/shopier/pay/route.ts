@@ -32,8 +32,9 @@ export async function POST(req: Request) {
     }
 
     // Platform Order ID (Max 50 chars). 
-    // Format: userId_packageId (e.g. "uuid_pack-120")
-    const platform_order_id = `${userId}_${packageId}`;
+    // Format: userId_packageId_timestamp (Örn: "uuid_pack-120_1710000000000")
+    // Mükerrer sipariş (Duplicate Order ID) hatasını önlemek için Date.now() ekledik.
+    const platform_order_id = `${userId}_${packageId}_${Date.now()}`;
     const random_nr = Math.floor(Math.random() * 1000000).toString();
     const total_order_value = parseFloat(selectedPackage.price.toString()).toFixed(2);
     const currency = '0'; // 0 = TRY
