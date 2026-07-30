@@ -9,14 +9,15 @@ const PACKAGES: Record<string, { price: number; credits: number }> = {
   'pack-250': { price: 200, credits: 250 }
 };
 
-// Supabase Admin Client (Service Role required to bypass RLS and add credits)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: Request) {
   try {
+    // Supabase Admin Client (Service Role required to bypass RLS and add credits)
+    // Build hatasını önlemek için (supabaseKey is required) client'ı dışarıda değil, istek anında başlatıyoruz.
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Shopier sends data as application/x-www-form-urlencoded
     const formData = await req.formData();
     
