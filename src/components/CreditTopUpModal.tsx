@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { CREDIT_PACKAGES } from '../data/mockData';
 
 export const CreditTopUpModal: React.FC = () => {
-  const { activeModal, closeModal, topUpCredits } = useApp();
+  const { activeModal, closeModal, handlePayTRPayment } = useApp();
   const [selectedPackId, setSelectedPackId] = useState<string>('pack-120');
   const [isLegalAccepted, setIsLegalAccepted] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
@@ -120,7 +120,7 @@ export const CreditTopUpModal: React.FC = () => {
           {/* Secure Payment Info */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-amber-200/50 mb-4">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-Bit SSL ile %100 Güvenli Ödeme (Shopier / Kredi Kartı)</span>
+            <span>256-Bit SSL ile %100 Güvenli Ödeme (PayTR / Kredi Kartı)</span>
           </div>
 
           {/* Legal Checkbox */}
@@ -141,7 +141,7 @@ export const CreditTopUpModal: React.FC = () => {
           <button
             onClick={async () => {
               setIsLoadingPayment(true);
-              await topUpCredits(selectedPack.id);
+              await handlePayTRPayment(selectedPack.id);
               setIsLoadingPayment(false);
             }}
             disabled={!isLegalAccepted || isLoadingPayment}
@@ -152,7 +152,7 @@ export const CreditTopUpModal: React.FC = () => {
             }`}
           >
             <CreditCard className={`w-5 h-5 ${isLegalAccepted && !isLoadingPayment ? 'text-stone-950' : 'text-gray-500'}`} />
-            <span>{isLoadingPayment ? 'Yönlendiriliyor...' : `Shopier ile Güvenle Öde (₺${selectedPack.priceTL})`}</span>
+            <span>{isLoadingPayment ? 'Yönlendiriliyor...' : `PayTR ile Güvenle Öde (₺${selectedPack.priceTL})`}</span>
           </button>
         </motion.div>
       </div>

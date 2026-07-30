@@ -31,7 +31,7 @@ interface AppContextType {
   closeModal: () => void;
 
   logout: () => Promise<void>;
-  topUpCredits: (packageId: string) => void;
+  handlePayTRPayment: (packageId: string) => void;
   requestTrack: (track: Track, isAnonymous?: boolean) => Promise<boolean>;
   voteTrack: (trackId: string) => void;
   bindVenueById: (kafeId: string) => void;
@@ -660,49 +660,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Cikis yapildi.'); closeModal();
   }, [showToast, closeModal]);
 
-  const topUpCredits = useCallback(async (packageId: string) => {
-    if (!user) { openProtectedModal('topup'); return; }
-    const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
-    if (!pkg) return;
-    const totalAdded = pkg.credits + pkg.bonusCredits;
-    
-    if (!activeVenue) {
-      showToast('Kredi yüklemek için önce bir mekânın QR kodunu okutmalısınız.');
+  const handlePayTRPayment = useCallback(async (packageId: string) => {
+    // SATIN AL BUTONUNA YETKİ KONTROLÜ (AUTH GUARD)
+    if (!user) {
+      showToast('Ödeme yapabilmek için lütfen önce giriş yapın.');
+      openProtectedModal('login');
       return;
     }
-
-    try {
-      showToast('Güvenli ödeme sayfasına yönlendiriliyorsunuz...');
-      const response = await fetch('/api/shopier/pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          venueId: activeVenue.id,
-          packageId: pkg.id,
-          userId: user.id
-        })
-      });
-      const data = await response.json();
-      if (data.paymentPageUrl) {
-        window.location.href = data.paymentPageUrl; // Redirect to Shopier
-      } else if (data.formHtml) {
-        // Shopier often uses HTML form submission. If the backend returns HTML form string:
-        const formContainer = document.createElement('div');
-        formContainer.innerHTML = data.formHtml;
-        document.body.appendChild(formContainer);
-        const form = formContainer.querySelector('form');
-        if (form) {
-          form.submit();
-        } else {
-          showToast('Shopier ödeme formu oluşturulamadı.');
-        }
-      } else {
-        showToast('Ödeme başlatılamadı: ' + (data.error || 'Bilinmeyen hata'));
-      }
-    } catch (err) {
-      showToast('Ödeme sistemiyle bağlantı kurulamadı.');
-    }
-  }, [user, activeVenue, openProtectedModal, showToast]);
+    
+    console.log(`[PayTR] PayTR ödeme adımına geçiliyor... Paket ID: ${packageId}`);
+    showToast('Ödeme altyapısı güncelleniyor. Çok yakında aktif olacak!');
+    
+  }, [user, openProtectedModal, showToast]);
 
   const getGuestDeviceId = () => {
     let guestId = localStorage.getItem('muzikors_guest_id');
@@ -1023,7 +992,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
-      topUpCredits, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+      handlePayTRPayment, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway
     }}>
       {children}

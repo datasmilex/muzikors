@@ -26,7 +26,7 @@ export const TopRowCards: React.FC = () => {
         </div>
 
         <button
-          onClick={() => openProtectedModal('topup', 'Kredi yüklemek için lütfen Google veya Spotify ile giriş yapın')}
+          onClick={() => openModal('topup')}
           className="mt-1 w-full py-1.5 px-2 rounded-xl gold-gradient-bg text-stone-950 font-bold text-xs flex items-center justify-center gap-1 hover:brightness-110 active:scale-95 transition-all shadow-md"
         >
           <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
