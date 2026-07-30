@@ -22,7 +22,7 @@ export const MusicSearchModal: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'all' | 'turkish' | 'global' | null>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'global' | null>('all');
   
   const [isLoading, setIsLoading] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
@@ -35,9 +35,7 @@ export const MusicSearchModal: React.FC = () => {
     
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
-      if (activeTab === 'turkish') {
-        queryToFetch = 'year:2024-2026 genre:acoustic market:TR';
-      } else if (activeTab === 'global') {
+      if (activeTab === 'global') {
         queryToFetch = 'year:2025-2026 genre:pop market:TR';
       } else {
         queryToFetch = 'year:2025-2026 genre:pop'; // all / default
@@ -57,7 +55,7 @@ export const MusicSearchModal: React.FC = () => {
     
     const timer = setTimeout(async () => {
       try {
-        if (isDefaultSearch && activeTab === 'all') {
+        if (isDefaultSearch && activeTab === 'top10') {
           // TOP 10 ŞARKILAR: RPC üzerinden son 30 günün en çok istenenleri getir
           const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: activeVenue.id });
           if (!topError && topData && topData.length > 0) {
@@ -73,8 +71,10 @@ export const MusicSearchModal: React.FC = () => {
             setIsLoading(false);
             return;
           }
-          // Eğer hiç şarkı istenmemişse veya hata varsa varsayılan Spotify aramasına düş (Fallback)
-          queryToFetch = 'year:2025-2026 genre:pop';
+          // Eğer hiç şarkı istenmemişse veya hata varsa listeyi boşalt
+          setSearchResults([]);
+          setIsLoading(false);
+          return;
         }
 
         const url = `/api/spotify/search?q=${encodeURIComponent(queryToFetch)}&venueId=${encodeURIComponent(activeVenue.id)}`;
@@ -309,16 +309,16 @@ export const MusicSearchModal: React.FC = () => {
                   </button>
                   <button
                     onClick={() => {
-                      setActiveTab('turkish');
+                      setActiveTab('top10');
                       setSearchQuery('');
                     }}
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
-                      activeTab === 'turkish'
+                      activeTab === 'top10'
                         ? 'gold-gradient-bg text-stone-950 shadow-md'
                         : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
                     }`}
                   >
-                    Akustik
+                    Mekanın Tercihi
                   </button>
                   <button
                     onClick={() => {
