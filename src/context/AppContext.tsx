@@ -778,7 +778,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // ── CLOSING TIME & QUEUE LIMIT CHECK ─────────────────────────────────
+    // ── FRONTEND TIMEZONE & CLOSING CHECK ────────────────────────────────
+    if (activeVenue.opening_time && activeVenue.closing_time) {
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTotal = currentHours * 60 + currentMinutes;
+
+      const [openH, openM] = activeVenue.opening_time.split(':').map(Number);
+      const [closeH, closeM] = activeVenue.closing_time.split(':').map(Number);
+      
+      const openTotal = openH * 60 + openM;
+      let closeTotal = closeH * 60 + closeM;
+      let checkTotal = currentTotal;
+
+      // Gece yarısını aşan kapanış saatleri için (örn. 10:00 - 02:00)
+      if (closeTotal <= openTotal) {
+        closeTotal += 24 * 60; // Kapanışa 1 tam gün ekle
+        
+        // Eğer şu an saat gece yarısını geçmişse (örn 01:00) ve açılış saatinden küçükse
+        // Kontrol edilen saati de ertesi güne taşı (24 saat ekle)
+        if (currentTotal < openTotal) {
+          checkTotal += 24 * 60;
+        }
+      }
+
+      // 1. Kapalı mı kontrolü
+      if (checkTotal < openTotal || checkTotal >= closeTotal) {
+        showToast('Mekan şu an kapalı. Çalışma saatleri dışında istek gönderemezsiniz.');
+        return false;
+      }
+
+      // 2. Kapanmak üzere kontrolü (Son 45 dakika)
+      const minutesUntilClose = closeTotal - checkTotal;
+      if (minutesUntilClose <= 45) {
+        showToast('Mekan kapanmak üzere, yarın görüşürüz.');
+        return false;
+      }
+    }
+
+    // ── QUEUE LIMIT CHECK ────────────────────────────────────────────────
     if (supabase) {
       const songDurationMs = track.durationMs ?? (track.duration ? track.duration * 1000 : 210000);
       const { data: limitCheck, error: limitErr } = await supabase.rpc('check_queue_availability', {
@@ -788,10 +827,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (!limitErr && limitCheck) {
         if (!limitCheck.allowed) {
-          if (limitCheck.reason === 'closing_soon') {
-            showToast('Mekan kapanmak üzere, yarın görüşürüz.');
-          } else if (limitCheck.reason === 'queue_full') {
+          if (limitCheck.reason === 'queue_full') {
             showToast('Sıra çok dolu, şarkınız kapanıştan önce çalınamayacağı için alınamadı.');
+          } else if (limitCheck.reason === 'closed_now') {
+            showToast('Mekan şu an kapalı.');
           } else {
             showToast('Mekan şu an istek kabul etmiyor.');
           }
