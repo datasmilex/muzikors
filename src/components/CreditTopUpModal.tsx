@@ -120,7 +120,7 @@ export const CreditTopUpModal: React.FC = () => {
           {/* Secure Payment Info */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-amber-200/50 mb-4">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-Bit SSL ile %100 Güvenli Ödeme (iyzico / Kredi Kartı)</span>
+            <span>256-Bit SSL ile %100 Güvenli Ödeme (Shopier / Kredi Kartı)</span>
           </div>
 
           {/* Legal Checkbox */}
@@ -152,7 +152,7 @@ export const CreditTopUpModal: React.FC = () => {
             }`}
           >
             <CreditCard className={`w-5 h-5 ${isLegalAccepted && !isLoadingPayment ? 'text-stone-950' : 'text-gray-500'}`} />
-            <span>{isLoadingPayment ? 'Yönlendiriliyor...' : `iyzico ile Öde (₺${selectedPack.priceTL})`}</span>
+            <span>{isLoadingPayment ? 'Yönlendiriliyor...' : `Shopier ile Güvenle Öde (₺${selectedPack.priceTL})`}</span>
           </button>
         </motion.div>
       </div>

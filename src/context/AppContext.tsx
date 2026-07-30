@@ -673,7 +673,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       showToast('Güvenli ödeme sayfasına yönlendiriliyorsunuz...');
-      const response = await fetch('/api/payment/initialize', {
+      const response = await fetch('/api/shopier/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -686,7 +686,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       const data = await response.json();
       if (data.paymentPageUrl) {
-        window.location.href = data.paymentPageUrl; // Redirect to iyzico
+        window.location.href = data.paymentPageUrl; // Redirect to Shopier
+      } else if (data.formHtml) {
+        // Shopier often uses HTML form submission. If the backend returns HTML form string:
+        const formContainer = document.createElement('div');
+        formContainer.innerHTML = data.formHtml;
+        document.body.appendChild(formContainer);
+        const form = formContainer.querySelector('form');
+        if (form) {
+          form.submit();
+        } else {
+          showToast('Shopier ödeme formu oluşturulamadı.');
+        }
       } else {
         showToast('Ödeme başlatılamadı: ' + (data.error || 'Bilinmeyen hata'));
       }
