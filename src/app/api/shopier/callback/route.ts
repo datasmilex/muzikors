@@ -92,6 +92,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Bakiye güncellenemedi' }, { status: 500 });
     }
 
+    // FİNANSAL LOGLAMA: İşlemi credit_transactions tablosuna kaydet
+    const { error: logErr } = await supabaseAdmin
+      .from('credit_transactions')
+      .insert({
+        user_id: userId,
+        amount: selectedPackage.price, // Ödenen TL tutarı
+        credits_added: creditAmount,
+        type: 'shopier_topup',
+        status: 'completed'
+      });
+
+    if (logErr) {
+      console.error('[Shopier Callback] İşlem loglanamadı:', logErr);
+      // Loglama hatası kritik değildir, bakiyeyi ekledik. Hata dönmeye gerek yok.
+    }
+
     console.log(`[Shopier Callback] Başarılı! Kullanıcı: ${userId}, Yüklenen: ${creditAmount}, Yeni Bakiye: ${newCredits}`);
 
     // Başarılı ödeme sonrası yönlendirme URL'si (İsteğe bağlı)
