@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
+// GÜVENLİK SÖZLÜĞÜ: Tüm kredi paketleri Backend'de tanımlanır.
+const PACKAGES: Record<string, { price: number; credits: number }> = {
+  'pack-50': { price: 50, credits: 50 },
+  'pack-120': { price: 100, credits: 120 },
+  'pack-250': { price: 200, credits: 250 }
+};
+
 // Supabase Admin Client (Service Role required to bypass RLS and add credits)
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,18 +48,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ status: 'failed' });
     }
 
-    // İşlem başarılı! platform_order_id'den userId ve creditAmount'u ayrıştır.
-    // Pay route'unda formatı `${userId}_${creditAmount}` yapmıştık.
-    const [userId, creditAmountStr] = platform_order_id.split('_');
-    const creditAmount = parseInt(creditAmountStr, 10);
-
-    if (!userId || isNaN(creditAmount)) {
+    // İşlem başarılı! platform_order_id'den userId ve packageId'yi ayrıştır.
+    // Pay route'unda formatı `${userId}_${packageId}` yapmıştık.
+    const [userId, packageId] = platform_order_id.split('_');
+    
+    if (!userId || !packageId) {
       console.error('[Shopier Callback] Hatalı Sipariş ID Formatı:', platform_order_id);
       return NextResponse.json({ error: 'Geçersiz platform_order_id formatı' }, { status: 400 });
     }
 
-    // Müşterinin mevcut kredisini çek ve yeni krediyi ekle (Atomic işlem için RPC de kullanılabilir)
-    // Supabase Service Role yetkisiyle profiles tablosuna doğrudan ekleme:
+    // Güvenli sözlükten yüklenecek krediyi bul
+    const selectedPackage = PACKAGES[packageId];
+    if (!selectedPackage) {
+      console.error('[Shopier Callback] Sistemde olmayan bir paket ID si:', packageId);
+      return NextResponse.json({ error: 'Geçersiz paket' }, { status: 400 });
+    }
+
+    const creditAmount = selectedPackage.credits;
+
+    // Müşterinin mevcut kredisini çek ve yeni krediyi ekle
     const { data: profile, error: fetchErr } = await supabaseAdmin
       .from('profiles')
       .select('credits')
@@ -79,9 +93,7 @@ export async function POST(req: Request) {
 
     console.log(`[Shopier Callback] Başarılı! Kullanıcı: ${userId}, Yüklenen: ${creditAmount}, Yeni Bakiye: ${newCredits}`);
 
-    // Başarılı ödeme sonrası yönlendirme URL'si (İsteğe bağlı - Shopier callback'ten HTTP 200 bekler)
-    // Fakat bazı durumlarda Shopier müşteriyi bu linke redirect edebilir. 
-    // NextResponse.redirect kullanırsak müşteri bizim uygulamamıza geri döner.
+    // Başarılı ödeme sonrası yönlendirme URL'si (İsteğe bağlı)
     const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://muzikors.com';
     return NextResponse.redirect(`${appUrl}?payment=success`);
     

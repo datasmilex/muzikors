@@ -679,8 +679,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         body: JSON.stringify({
           venueId: activeVenue.id,
           packageId: pkg.id,
-          amount: pkg.priceTL,
-          creditAmount: totalAdded,
           userId: user.id
         })
       });
