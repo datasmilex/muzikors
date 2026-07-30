@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -19,11 +19,25 @@ import {
   PlaySquare
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { supabase } from '../lib/supabaseClient';
 import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue } = useApp();
+
+  const [isDj, setIsDj] = useState(false);
+
+  useEffect(() => {
+    if (activeModal === 'drawer' && user && activeVenue) {
+      supabase.rpc('get_user_venue_stats', { p_user_id: user.id, p_venue_id: activeVenue.id })
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            setIsDj(data[0].is_venue_dj);
+          }
+        });
+    }
+  }, [activeModal, user, activeVenue]);
 
   if (activeModal !== 'drawer') return null;
 
@@ -131,7 +145,14 @@ export const DrawerMenu: React.FC = () => {
                     className="w-10 h-10 rounded-full border border-[#D4AF37] object-cover shrink-0"
                   />
                   <div className="min-w-0">
-                    <h3 className="text-xs font-bold text-white truncate">{user.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xs font-bold text-white truncate">{user.name}</h3>
+                      {isDj && (
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-[8px] font-black text-amber-300 uppercase tracking-wider whitespace-nowrap">
+                          Mekanın DJ'i 👑
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1 text-[11px] font-semibold text-[#D4AF37]">
                       <Coins className="w-3 h-3" />
                       <span>{user.credits} Kredi</span>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
 import { formatDuration, getSongCreditCost } from '../utils/formatters';
 
@@ -56,6 +57,26 @@ export const MusicSearchModal: React.FC = () => {
     
     const timer = setTimeout(async () => {
       try {
+        if (isDefaultSearch && activeTab === 'all') {
+          // TOP 10 ŞARKILAR: RPC üzerinden son 30 günün en çok istenenleri getir
+          const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: activeVenue.id });
+          if (!topError && topData && topData.length > 0) {
+            const topTracks: Track[] = topData.map((t: any) => ({
+              id: t.track_id,
+              title: t.song_title,
+              artist: t.artist_name,
+              coverUrl: t.album_cover,
+              albumCover: t.album_cover,
+            }));
+            setSearchResults(topTracks);
+            if (!selectedTrack) setSelectedTrack(topTracks[0]);
+            setIsLoading(false);
+            return;
+          }
+          // Eğer hiç şarkı istenmemişse veya hata varsa varsayılan Spotify aramasına düş (Fallback)
+          queryToFetch = 'year:2025-2026 genre:pop';
+        }
+
         const url = `/api/spotify/search?q=${encodeURIComponent(queryToFetch)}&venueId=${encodeURIComponent(activeVenue.id)}`;
         console.log(`[MusicSearch] Fetching ${url}`);
         const res = await fetch(url);
