@@ -57,7 +57,7 @@ export const MusicSearchModal: React.FC = () => {
       try {
         if (isDefaultSearch && activeTab === 'top10') {
           // TOP 10 ŞARKILAR: RPC üzerinden son 30 günün en çok istenenleri getir
-          const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: activeVenue.id });
+          const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: Number(activeVenue.id) });
           if (!topError && topData && topData.length > 0) {
             const topTracks: Track[] = topData.map((t: any) => ({
               id: t.track_id,

@@ -30,7 +30,7 @@ export const DrawerMenu: React.FC = () => {
 
   useEffect(() => {
     if (activeModal === 'drawer' && user && activeVenue) {
-      supabase.rpc('get_user_venue_stats', { p_user_id: user.id, p_venue_id: activeVenue.id })
+      supabase.rpc('get_user_venue_stats', { p_user_id: user.id, p_venue_id: Number(activeVenue.id) })
         .then(({ data, error }) => {
           if (!error && data && data.length > 0) {
             setIsDj(data[0].is_venue_dj);
