@@ -191,6 +191,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         has_spotify: !!(data.spotify_refresh_token),
         opening_time: data.opening_time || null,
         closing_time: data.closing_time || null,
+        is_happy_hour_active: data.is_happy_hour_active === true,
+        hh_start_time: data.hh_start_time || null,
+        hh_end_time: data.hh_end_time || null,
+        hh_discount_rate: data.hh_discount_rate || 0,
       };
 
       setActiveVenue(venue);
@@ -406,9 +410,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const { data: venueData, error: venueError } = await supabase
           .from('venues')
-          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info')
+          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_happy_hour_active, hh_start_time, hh_end_time, hh_discount_rate')
           .eq('id', targetVenueId)
           .single();
+
+        if (venueData) {
+          setActiveVenue(prev => prev ? {
+            ...prev,
+            explicit_filter_enabled: venueData.explicit_filter_enabled,
+            allowed_genres: venueData.allowed_genres,
+            current_track_info: venueData.current_track_info,
+            is_happy_hour_active: venueData.is_happy_hour_active,
+            hh_start_time: venueData.hh_start_time,
+            hh_end_time: venueData.hh_end_time,
+            hh_discount_rate: venueData.hh_discount_rate,
+          } : null);
+        }
 
         const { data, error } = await supabase
           .from('queue')
@@ -528,6 +545,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     explicit_filter_enabled: row.explicit_filter_enabled === true,
                     allowed_genres: row.allowed_genres ?? prev.allowed_genres,
                     current_track_info: row.current_track_info,
+                    is_happy_hour_active: row.is_happy_hour_active === true,
+                    hh_start_time: row.hh_start_time ?? prev.hh_start_time,
+                    hh_end_time: row.hh_end_time ?? prev.hh_end_time,
+                    hh_discount_rate: row.hh_discount_rate ?? prev.hh_discount_rate,
                   }
                 : null
             );
