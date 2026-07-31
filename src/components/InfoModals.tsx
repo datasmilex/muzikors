@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Gift, Info, Handshake, MessageCircle, HelpCircle, Send, CheckCircle2 } from 'lucide-react';
+import { X, Gift, Info, Handshake, MessageCircle, HelpCircle, Send, CheckCircle2, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const InfoModals: React.FC = () => {
