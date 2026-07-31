@@ -453,7 +453,7 @@ export const MusicSearchModal: React.FC = () => {
                             </span>
                           ) : finalCost === null ? (
                             <span className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest border border-red-500/20 shadow-inner">
-                              >7 Dk
+                              &gt;7 Dk
                             </span>
                           ) : (
                             <button

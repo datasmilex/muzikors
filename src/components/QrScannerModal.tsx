@@ -188,7 +188,6 @@ export const QrScannerModal: React.FC = () => {
   if (activeModal !== 'qr') return null;
 
   return (
-  return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Cinematic Backdrop */}
