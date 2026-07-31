@@ -23,6 +23,7 @@ import { TvShoutoutModal } from '../components/TvShoutoutModal';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 
 import { HappyHourBanner } from '../components/HappyHourBanner';
+import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
 import { useApp } from '../context/AppContext';
 
@@ -41,6 +42,7 @@ const AppContent = () => {
         <>
           <Header />
           <HappyHourBanner />
+          <QuickActionsBanner />
           <VenueGuard>
 
             <NowPlayingSection />

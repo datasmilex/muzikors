@@ -14,7 +14,7 @@ export const QrScannerModal: React.FC = () => {
   const isScanningRef = useRef<boolean>(false);
 
   useEffect(() => {
-    
+    if (activeModal !== 'qr') return;
 
     let mediaStream: MediaStream | null = null;
     let animFrameId: number | null = null;
