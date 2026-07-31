@@ -25,10 +25,11 @@ import { LeaderboardModal } from '../components/LeaderboardModal';
 import { HappyHourBanner } from '../components/HappyHourBanner';
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
+import { WelcomeScreen } from '../components/WelcomeScreen';
 import { useApp } from '../context/AppContext';
 
 const AppContent = () => {
-  const { isVenueBound, hasEnteredGateway, openModal } = useApp();
+  const { isVenueBound, hasEnteredGateway } = useApp();
   const showGateway = isVenueBound && !hasEnteredGateway;
 
   return (
@@ -36,7 +37,10 @@ const AppContent = () => {
       {/* Global Cinematic Mesh Gradients */}
       <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D4AF37]/10 via-transparent to-transparent z-0 pointer-events-none blur-3xl opacity-60" />
       <div className="fixed bottom-0 right-0 w-[80vw] h-[40vh] bg-gradient-to-tr from-[#D4AF37]/5 via-[#120C08] to-transparent z-0 pointer-events-none blur-3xl opacity-50" />
-      {showGateway ? (
+      
+      {!isVenueBound ? (
+        <WelcomeScreen />
+      ) : showGateway ? (
         <GatewayScreen />
       ) : (
         <>
@@ -44,7 +48,6 @@ const AppContent = () => {
           <HappyHourBanner />
           <QuickActionsBanner />
           <VenueGuard>
-
             <NowPlayingSection />
             <UpNextQueueSection />
             <BottomNav />
