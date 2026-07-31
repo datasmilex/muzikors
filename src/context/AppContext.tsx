@@ -455,6 +455,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             creditCost: r.credits_spent ?? 10,
             votes: r.votes ?? 0,
             requestedBy: r.requested_by_name || 'Misafir',
+            requestedByUserId: r.requested_by_user_id,
             requestedAt: 'Sirada',
             startedAt: r.started_at,
             isPlaying: r.status === 'playing',
@@ -477,6 +478,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             creditCost: playingRow?.credits_spent ?? 0,
             votes: playingRow?.votes ?? 0,
             requestedBy: trackInfo.requested_by_name || 'Mekan Listesi',
+            requestedByUserId: trackInfo.requested_by_user_id || undefined,
             requestedAt: 'Canli',
             isPlaying: true,
           });
@@ -566,28 +568,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [activeVenue?.id]); // Re-subscribe when venue changes
 
-  // Update nowPlaying when livePlaybackState changes if no Muzikors queue song is active
+  // Update nowPlaying when livePlaybackState changes
   useEffect(() => {
     if (!livePlaybackState) return;
-    if (!nowPlaying || nowPlaying.id === 'spotify-bg') {
-      setNowPlaying({
-        id: 'spotify-bg',
-        title: livePlaybackState.title || 'Mekan Fon Müziği',
-        artist: livePlaybackState.artist || 'Muzikors Yayın',
-        album: '',
-        albumCover: livePlaybackState.album_art || '',
-        coverUrl: livePlaybackState.album_art || '',
-        album_art: livePlaybackState.album_art || '',
-        durationMs: livePlaybackState.duration_ms || 210000,
-        duration: Math.round((livePlaybackState.duration_ms || 210000) / 1000),
-        creditCost: 0,
-        votes: 0,
-        requestedBy: 'Mekan Fon Müziği',
-        requestedAt: 'Canli',
-        isPlaying: livePlaybackState.is_playing,
-      });
-      setIsPlayingAudio(livePlaybackState.is_playing);
-    }
+    
+    setNowPlaying((prev) => {
+      // Allow update if it's the background music, or if the track titles match
+      const isSameTrack = prev?.title === livePlaybackState.title;
+      if (!prev || prev.id === 'spotify-bg' || isSameTrack) {
+        return {
+          ...(prev || ({} as any)),
+          id: prev?.id && prev.id !== 'spotify-bg' ? prev.id : 'spotify-bg',
+          title: livePlaybackState.title || prev?.title || 'Mekan Fon Müziği',
+          artist: livePlaybackState.artist || prev?.artist || 'Muzikors Yayın',
+          album: prev?.album || '',
+          albumCover: livePlaybackState.album_art || prev?.albumCover || '',
+          coverUrl: livePlaybackState.album_art || prev?.coverUrl || '',
+          album_art: livePlaybackState.album_art || (prev as any)?.album_art || '',
+          durationMs: livePlaybackState.duration_ms || prev?.durationMs || 210000,
+          duration: Math.round((livePlaybackState.duration_ms || 210000) / 1000),
+          creditCost: prev?.creditCost || 0,
+          votes: (livePlaybackState as any).votes || prev?.votes || 0,
+          requestedBy: (livePlaybackState as any).requested_by_name || prev?.requestedBy || 'Mekan Fon Müziği',
+          requestedByUserId: (livePlaybackState as any).requested_by_user_id || prev?.requestedByUserId || undefined,
+          requestedAt: prev?.requestedAt || 'Canli',
+          isPlaying: livePlaybackState.is_playing,
+        };
+      }
+      return prev;
+    });
+    setIsPlayingAudio(livePlaybackState.is_playing);
   }, [livePlaybackState]);
 
   // ── AUDIO PROGRESS TIMER & HARD DELETE FINISHED SONGS ────────────────────
@@ -869,6 +879,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `req-${Date.now()}`,
       votes: 0,
       requestedBy: isAnonymous ? 'Anonim Müşteri' : (user?.name || 'Müşteri'),
+      requestedByUserId: isAnonymous ? undefined : user?.id,
       requestedByAvatar: isAnonymous ? '' : (user?.avatar || ''),
       requestedAt: 'Simdi',
       startedAt: undefined,

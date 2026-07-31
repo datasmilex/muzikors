@@ -12,6 +12,7 @@ export interface Track {
   creditCost: number;
   votes: number;
   requestedBy: string;
+  requestedByUserId?: string;
   requestedByAvatar?: string;
   requestedAt: string;
   startedAt?: string;

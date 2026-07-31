@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, nowPlaying, voteTrack, openProtectedModal } = useApp();
+  const { queue, nowPlaying, voteTrack, openProtectedModal, user } = useApp();
   const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
 
   const handleVoteTrack = (trackId: string) => {
@@ -18,6 +18,11 @@ export const UpNextQueueSection: React.FC = () => {
     setTimeout(() => {
       setVotingCooldowns(prev => ({ ...prev, [trackId]: false }));
     }, 2000);
+  };
+
+  const getRequestedByLabel = (track: any) => {
+    if (user && track.requestedByUserId === user.id) return 'Sen';
+    return track.requestedBy;
   };
 
   // Strict visual filtering: only show pending/queued tracks
@@ -132,7 +137,7 @@ export const UpNextQueueSection: React.FC = () => {
                   
                   <div className="flex items-center gap-1.5 text-[10px] text-amber-200/50 mt-1">
                     <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-                    <span className="truncate max-w-[80px]">{track.requestedBy}</span>
+                    <span className="truncate max-w-[80px]">{getRequestedByLabel(track)}</span>
                     <span>•</span>
                     <span className="flex items-center gap-0.5 text-amber-200/80 font-bold">
                       <Clock className="w-2.5 h-2.5 text-[#D4AF37]" />

@@ -179,7 +179,7 @@ export const NowPlayingSection: React.FC = () => {
 
             <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#120C08]/80 border border-[#D4AF37]/25 text-[10px] text-amber-200 mt-1.5">
               <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-              <span className="truncate">İsteyen: <strong className="text-white font-semibold">{nowPlaying.requestedBy}</strong></span>
+              <span className="truncate">İsteyen: <strong className="text-white font-semibold">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy}</strong></span>
             </div>
           </div>
         </div>
