@@ -188,9 +188,7 @@ export const LeaderboardModal: React.FC = () => {
                           <p className={`font-black truncate ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
                             {maskName(user.name)}
                           </p>
-                          <p className="text-[11px] font-semibold text-[#D4AF37] uppercase tracking-wide truncate">
-                            Müzikşin
-                          </p>
+                          
                         </div>
                         
                         <div className="flex-none px-4 py-2 rounded-2xl bg-black/50 border border-[#D4AF37]/20 flex flex-col items-center justify-center shadow-inner">
@@ -240,9 +238,7 @@ export const LeaderboardModal: React.FC = () => {
                           <p className={`font-black truncate ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
                             {venue.venue_name}
                           </p>
-                          <p className="text-[11px] font-semibold text-[#D4AF37] uppercase tracking-wide truncate">
-                            Mekan Lideri
-                          </p>
+                          
                         </div>
                         
                         <div className="flex-none px-4 py-2 rounded-2xl bg-black/50 border border-[#D4AF37]/20 flex flex-col items-center justify-center shadow-inner">
