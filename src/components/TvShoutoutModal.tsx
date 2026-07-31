@@ -94,49 +94,56 @@ export const TvShoutoutModal: React.FC = () => {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
+        
         <motion.div 
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-          className="relative w-full max-w-md h-auto sm:rounded-[2rem] rounded-t-[2rem] p-5 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden glass-panel border border-[#D4AF37]/20 bg-[#120C08]"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          className="relative w-full max-w-md h-auto sm:rounded-[2.5rem] rounded-t-[2.5rem] p-6 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
         >
+          {/* Decorative Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-[#D4AF37]">
-              <Tv className="w-5 h-5" />
-              <h3 className="font-bold text-lg">TV&apos;ye Mesaj Gönder</h3>
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="flex items-center gap-3 text-[#D4AF37]">
+              <Tv className="w-6 h-6 drop-shadow-md" />
+              <h3 className="font-black text-xl text-white tracking-tight">TV Ekranına Mesaj</h3>
             </div>
             <button 
               onClick={closeModal}
-              className="p-1.5 bg-white/5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 bg-white/5 rounded-full text-white/50 hover:text-white hover:bg-white/10 hover:rotate-90 transition-all duration-300"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-10">
             <div className="relative">
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Mekandakilere bir mesaj gönderin..."
-                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white placeholder-white/40 focus:outline-none focus:border-[#D4AF37]/50 resize-none h-24 text-sm"
+                className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/20 rounded-2xl p-4 text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/60 focus:bg-black/60 resize-none h-28 text-base shadow-inner transition-all duration-300"
                 maxLength={maxLength}
               />
-              <div className={`absolute bottom-2 right-2 text-xs ${text.length >= maxLength ? 'text-red-400' : 'text-white/40'}`}>
+              <div className={`absolute bottom-3 right-3 text-xs font-bold ${text.length >= maxLength ? 'text-red-400' : 'text-[#D4AF37]/50'}`}>
                 {text.length}/{maxLength}
               </div>
             </div>
 
-            <label className="flex items-center gap-3 cursor-pointer p-3 bg-black/20 rounded-xl border border-white/5 hover:bg-black/30 transition-colors">
+            <label className="flex items-center justify-between cursor-pointer p-4 bg-[#1A1A1A]/50 rounded-2xl border border-white/5 hover:border-[#D4AF37]/20 hover:bg-[#1A1A1A]/80 transition-all shadow-sm group">
+              <span className="text-sm font-bold text-gray-300 group-hover:text-white transition-colors">İsmimi gizle (Anonim)</span>
               <div className="relative flex items-center">
                 <input 
                   type="checkbox" 
@@ -144,21 +151,20 @@ export const TvShoutoutModal: React.FC = () => {
                   checked={isAnonymous}
                   onChange={(e) => setIsAnonymous(e.target.checked)}
                 />
-                <div className="w-10 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37]"></div>
+                <div className="w-12 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF37] shadow-inner"></div>
               </div>
-              <span className="text-sm font-medium text-white/80">İsmim ekranda gizlensin (Anonim)</span>
             </label>
 
             <button
               type="submit"
               disabled={isSubmitting || !text.trim()}
-              className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 gold-gradient-bg text-black shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110 active:scale-95 transition-all"
+              className="w-full py-4 mt-2 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 gold-gradient-bg text-black shadow-[0_10px_30px_rgba(212,175,55,0.3)] disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110 active:scale-95 hover:scale-[1.02] transition-all group"
             >
               {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
-                  <Send className="w-4 h-4" />
+                  <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   <span>Gönder (20 🪙)</span>
                 </>
               )}

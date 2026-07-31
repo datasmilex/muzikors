@@ -57,119 +57,124 @@ export const DrawerMenu: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex">
+      <div className="fixed inset-0 z-[100] flex">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/75 backdrop-blur-md"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
 
+        {/* Drawer Container */}
         <motion.div
           initial={{ x: '-100%' }}
           animate={{ x: 0 }}
           exit={{ x: '-100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative w-4/5 max-w-xs h-full bg-[#120C08] border-r border-[#D4AF37]/30 flex flex-col justify-between p-5 z-10 shadow-2xl overflow-y-auto"
+          transition={{ type: 'spring', damping: 25, stiffness: 200, bounce: 0.1 }}
+          className="relative w-[85%] max-w-xs h-full bg-[#120C08] border-r border-[#D4AF37]/30 flex flex-col justify-between p-6 z-10 shadow-[20px_0_40px_rgba(212,175,55,0.15)] overflow-y-auto custom-scrollbar glass-panel-gold"
         >
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl gold-gradient-bg flex items-center justify-center text-stone-950 font-black shadow-md">
-                  <Music className="w-5 h-5 stroke-[2.5]" />
+          {/* Decorative Glow */}
+          <div className="absolute top-0 left-0 w-40 h-40 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-5 border-b border-[#D4AF37]/20 mb-2">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-[1.25rem] gold-gradient-bg flex items-center justify-center text-stone-950 font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]">
+                  <Music className="w-6 h-6 stroke-[2.5]" />
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold gold-gradient-text">Muzikors</h2>
-                  <span className="text-[10px] text-amber-200/60 font-medium">Mobile Jukebox</span>
+                  <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md">Muzikors</h2>
+                  <span className="text-xs text-[#D4AF37] font-bold uppercase tracking-widest">Mobile Jukebox</span>
                 </div>
               </div>
 
               <button
                 onClick={closeModal}
-                className="w-8 h-8 rounded-full bg-[#1C130D] border border-[#D4AF37]/30 flex items-center justify-center text-amber-200 hover:text-white hover:border-[#D4AF37] transition-all"
+                className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
                 aria-label="Kapat"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {!user ? (
-              <div className="my-4 p-3.5 rounded-2xl glass-panel-gold border-2 border-[#D4AF37]/50 space-y-2.5 text-center shadow-lg">
-                <div className="flex items-center justify-center gap-1.5 text-[11px] font-extrabold text-[#D4AF37]">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Giriş Yap ve Müziği Yönet!</span>
+              <div className="my-6 p-5 rounded-[1.5rem] bg-gradient-to-br from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 space-y-4 text-center shadow-[0_10px_30px_rgba(212,175,55,0.1)] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/5 blur-2xl rounded-full pointer-events-none" />
+                <div className="flex flex-col items-center justify-center gap-2 relative z-10">
+                  <Sparkles className="w-6 h-6 text-[#D4AF37] animate-pulse" />
+                  <span className="text-sm font-black text-white tracking-wide">Giriş Yap ve Müziği Yönet!</span>
+                  <span className="text-[11px] text-amber-200/60 font-medium">Favori şarkılarını öne çıkar</span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 relative z-10">
                   <button
                     onClick={() => {
                       closeModal();
                       loginWithProvider('google');
                     }}
-                    className="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+                    className="w-full py-3.5 px-4 rounded-xl bg-white text-stone-950 font-black text-xs flex items-center justify-center gap-3 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95"
                   >
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                      <path
-                        fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                      />
+                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                     </svg>
-                    <span>Google ile Giriş Yap</span>
+                    <span>Google ile Devam Et</span>
                   </button>
-
                 </div>
               </div>
             ) : (
-              <div className="my-4 glass-panel-gold rounded-2xl p-3 flex items-center justify-between border border-[#D4AF37]/30">
-                <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
-                    alt={user.name}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/logo.png';
-                    }}
-                    className="w-10 h-10 rounded-full border border-[#D4AF37] object-cover shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xs font-bold text-white truncate">{user.name}</h3>
-                      {isDj && (
-                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-[8px] font-black text-amber-300 uppercase tracking-wider whitespace-nowrap">
-                          Mekanın DJ'i 👑
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-[#D4AF37]">
-                      <Coins className="w-3 h-3" />
-                      <span>{user.credits} Kredi</span>
-                    </div>
+              <div className="my-6 bg-[#1A1A1A]/80 rounded-[1.5rem] p-4 flex flex-col gap-4 border border-[#D4AF37]/20 shadow-inner group">
+                <div className="flex items-center gap-3">
+                  <div className="relative shrink-0">
+                    <img
+                      src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
+                      alt={user.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/logo.png';
+                      }}
+                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-[0_0_15px_rgba(212,175,55,0.3)] group-hover:scale-105 transition-transform"
+                    />
+                    {isDj && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 rounded-full border-2 border-[#1A1A1A] flex items-center justify-center text-[10px]" title="Mekanın DJ'i">
+                        👑
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-black text-white truncate drop-shadow-sm">{user.name}</h3>
+                    <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-widest block mt-0.5 truncate">{user.username || '@misafir'}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => openModal('topup')}
-                  className="px-2.5 py-1 rounded-lg gold-gradient-bg text-stone-950 font-bold text-[10px] shrink-0"
-                >
-                  +Yükle
-                </button>
+                
+                <div className="flex items-center justify-between bg-[#120C08] p-3 rounded-xl border border-[#D4AF37]/10">
+                  <div className="flex items-center gap-2 text-[#D4AF37]">
+                    <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center">
+                      <Coins className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-white">{user.credits}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-amber-200/50">Mevcut Kredi</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => openModal('topup')}
+                    className="px-4 py-2 rounded-xl gold-gradient-bg text-stone-950 font-black text-xs shadow-md hover:scale-105 active:scale-95 transition-all"
+                  >
+                    + Yükle
+                  </button>
+                </div>
               </div>
             )}
 
 
-            <nav className="space-y-1 mt-2">
+            <nav className="space-y-1.5 mt-2">
               {navItems.map((item) => (
                 <button
                   key={item.label}
@@ -181,18 +186,18 @@ export const DrawerMenu: React.FC = () => {
                       openModal(item.modal);
                     }
                   }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#1C130D] border border-transparent hover:border-[#D4AF37]/20 text-amber-100/90 font-medium text-sm transition-all group relative"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-[#1A1A1A] border border-transparent hover:border-[#D4AF37]/20 text-gray-300 font-bold text-sm transition-all group relative active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#1C130D] border border-[#D4AF37]/20 flex items-center justify-center group-hover:border-[#D4AF37]/50 transition-colors relative">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-[10px] bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-hover:border-[#D4AF37]/50 group-hover:bg-[#D4AF37]/5 transition-colors relative shadow-inner">
                       {item.icon}
                       {item.showBadge && (
-                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black shadow-sm animate-pulse" />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#120C08] shadow-sm animate-pulse" />
                       )}
                     </div>
-                    <span>{item.label}</span>
+                    <span className="group-hover:text-white transition-colors tracking-wide">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-amber-200/40 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
 
@@ -200,30 +205,30 @@ export const DrawerMenu: React.FC = () => {
               <button
                 disabled={true}
                 onClick={() => showToast('Bu özellik çok yakında mobil uygulamamızla birlikte yayında olacaktır!')}
-                className="w-full flex items-center justify-between p-3 mt-2 rounded-xl bg-black/30 border border-white/5 opacity-60 cursor-not-allowed group relative"
+                className="w-full flex items-center justify-between p-3.5 mt-4 rounded-xl bg-black/40 border border-white/5 opacity-60 cursor-not-allowed group relative"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-500">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-[10px] bg-black/60 border border-white/10 flex items-center justify-center text-gray-500">
                     <PlaySquare className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium text-gray-400">Reklam İzle & Kredi Kazan</span>
-                    <span className="text-[10px] text-gray-500">Uygulamayı indirerek kredi kazan.</span>
+                    <span className="text-sm font-bold text-gray-400">Reklam İzle & Kazan</span>
+                    <span className="text-[10px] font-medium text-gray-500 mt-0.5">Uygulamayı indirerek kazan.</span>
                   </div>
                 </div>
-                <div className="text-[9px] font-bold bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full shrink-0">Pek Yakında</div>
+                <div className="text-[9px] font-black bg-gray-800 text-gray-400 px-2.5 py-1 rounded-md shrink-0 uppercase tracking-widest border border-white/5">Pek Yakında</div>
               </button>
             </nav>
           </div>
 
-          <div className="pt-4 border-t border-[#D4AF37]/20 text-center space-y-3">
+          <div className="pt-6 border-t border-[#D4AF37]/20 text-center space-y-4 relative z-10 mt-6">
             {user ? (
               <button
                 onClick={logout}
-                className="w-full py-2 px-3 rounded-xl bg-red-950/30 border border-red-500/30 text-red-300 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-red-900/40 transition-colors"
+                className="w-full py-3.5 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-sm flex items-center justify-center gap-2 hover:bg-red-500/20 active:scale-95 transition-all group shadow-inner"
               >
-                <LogOut className="w-4 h-4" />
-                <span>Çıkış Yap</span>
+                <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                <span className="tracking-wide">Çıkış Yap</span>
               </button>
             ) : (
               <button
@@ -231,16 +236,16 @@ export const DrawerMenu: React.FC = () => {
                   closeModal();
                   openModal('login');
                 }}
-                className="w-full py-2 px-3 rounded-xl bg-[#1C130D] border border-[#D4AF37]/30 text-amber-200 font-semibold text-xs flex items-center justify-center gap-2 hover:border-[#D4AF37] transition-colors"
+                className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-black text-sm flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all shadow-inner group"
               >
-                <LogIn className="w-4 h-4 text-[#D4AF37]" />
-                <span>Giriş Yap / Kaydol</span>
+                <LogIn className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                <span className="tracking-wide">Giriş Yap / Kaydol</span>
               </button>
             )}
 
-            <div className="text-[11px] text-amber-200/50 flex flex-col items-center">
-              <span className="gold-gradient-text font-bold">Müzik Senin, Gece Senin</span>
-              <span className="text-[9px] text-amber-200/40 mt-0.5">© 2026 Muzikors Mobile Inc.</span>
+            <div className="flex flex-col items-center gap-1">
+              <span className="gold-gradient-text font-black text-xs tracking-wider">Müzik Senin, Gece Senin</span>
+              <span className="text-[10px] font-bold text-amber-200/30 uppercase tracking-widest">© 2026 Muzikors Mobile Inc.</span>
             </div>
           </div>
         </motion.div>

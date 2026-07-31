@@ -95,42 +95,50 @@ export const DailyRewardModal: React.FC = () => {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
 
+        {/* Modal Container */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-xs bg-[#120C08] border-2 border-[#D4AF37]/40 rounded-3xl p-6 z-10 shadow-2xl text-center"
+          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          className="relative w-full max-w-xs bg-[#120C08] sm:rounded-[2.5rem] rounded-[2rem] p-6 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 text-center"
         >
+          {/* Decorative Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#1C130D] border border-[#D4AF37]/30 flex items-center justify-center text-amber-200 hover:text-white hover:border-[#D4AF37] transition-all"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300 z-20"
+            aria-label="Kapat"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
 
-          <div className="flex justify-center mb-4 mt-2">
-            <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] bg-[#D4AF37]/10 flex items-center justify-center relative shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+          <div className="flex justify-center mb-6 mt-4 relative z-10">
+            <div className="w-20 h-20 rounded-full border-[3px] border-[#D4AF37] bg-gradient-to-br from-[#D4AF37]/20 to-[#120C08] flex items-center justify-center relative shadow-[0_0_30px_rgba(212,175,55,0.3)]">
               {isButtonDisabled ? (
-                <CheckCircle2 className="w-8 h-8 text-[#D4AF37]" />
+                <CheckCircle2 className="w-10 h-10 text-[#D4AF37] drop-shadow-md" />
               ) : (
-                <Gift className="w-8 h-8 text-[#D4AF37] animate-bounce" />
+                <Gift className="w-10 h-10 text-[#D4AF37] animate-bounce drop-shadow-md" />
               )}
             </div>
           </div>
 
-          <h2 className="text-xl font-black gold-gradient-text tracking-wide mb-2">
+          <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-md mb-2 relative z-10">
             Günlük Ödül 🎁
           </h2>
 
-          <p className="text-xs text-amber-200/70 font-medium mb-6">
+          <p className="text-[13px] text-amber-200/60 font-medium mb-8 leading-relaxed relative z-10 px-2">
             {isButtonDisabled
               ? "Bugünkü ödülünü aldın! Yarın tekrar bekleriz."
               : "Her gün giriş yap, bedava kredileri topla! Hemen +2 Kredini al."}
@@ -139,26 +147,26 @@ export const DailyRewardModal: React.FC = () => {
           <button
             disabled={isButtonDisabled || isClaiming}
             onClick={handleClaimReward}
-            className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md
+            className={`w-full py-4 px-4 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 transition-all duration-300 relative z-10 shadow-[0_10px_30px_rgba(212,175,55,0.2)] group
               ${isButtonDisabled
-                ? 'bg-black/40 border border-[#D4AF37]/30 text-[#D4AF37]/80 cursor-not-allowed'
-                : 'gold-gradient-bg text-black hover:scale-[1.02] active:scale-[0.98]'
+                ? 'bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-not-allowed shadow-none'
+                : 'gold-gradient-bg text-stone-950 hover:brightness-110 hover:scale-[1.02] active:scale-95'
               }
             `}
           >
             {isClaiming ? (
-              <span className="animate-pulse">Bekleniyor...</span>
+              <span className="animate-pulse tracking-wide">Bekleniyor...</span>
             ) : isButtonDisabled ? (
               <>
-                <Clock className="w-4 h-4" />
-                <span className="font-mono tracking-wider">
-                  Yeni Ödüle: {timeLeft !== null ? formatTime(timeLeft) : '00:00:00'}
+                <Clock className="w-5 h-5" />
+                <span className="font-mono tracking-widest text-sm">
+                  {timeLeft !== null ? formatTime(timeLeft) : '00:00:00'}
                 </span>
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
-                <span>🎁 Günlük Ödülünü Al</span>
+                <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="tracking-wide">Günlük Ödülünü Al</span>
               </>
             )}
           </button>

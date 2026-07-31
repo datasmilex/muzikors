@@ -133,91 +133,87 @@ export const NowPlayingSection: React.FC = () => {
   const progressPercent = durationSec > 0 ? Math.min(100, (currentElapsed / durationSec) * 100) : 0;
 
   return (
-    <div className="px-4 py-1.5 relative">
+    <div className="relative w-full overflow-hidden mb-4">
+      {/* Cinematic Mesh Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/20 via-[#120C08]/80 to-[#120C08] z-0 blur-2xl opacity-70 pointer-events-none" />
+      
       <FloatingEmojis reactions={reactions} onComplete={removeReaction} />
-      <div className="glass-panel-gold rounded-3xl p-4 border border-[#D4AF37]/35 relative overflow-hidden shadow-2xl">
-        <div className="absolute -top-12 -right-12 w-36 h-36 bg-[#D4AF37]/15 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Section Header Badge */}
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2">
-            <Disc className={`w-4 h-4 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
-            <span className="text-xs font-bold tracking-wider gold-gradient-text uppercase">
-              Şu An Çalıyor
-            </span>
-          </div>
-
-          <span className="text-[10px] font-mono font-bold text-amber-200/60 flex items-center gap-1">
-            <Volume2 className="w-3 h-3 text-[#D4AF37]" /> Kesintisiz Hoparlör Yayını
+      
+      <div className="relative z-10 px-5 pt-8 pb-4 flex flex-col items-center">
+        {/* Header Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-black/40 border border-[#D4AF37]/30 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+          <Disc className={`w-3.5 h-3.5 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
+          <span className="text-[10px] font-black tracking-[0.2em] gold-gradient-text uppercase">
+            Şu An Çalıyor
           </span>
         </div>
 
-        {/* Hero Track Card Content */}
-        <div className="flex gap-3.5 items-center">
-          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#D4AF37]/40 shadow-xl shrink-0 group">
-            <img
-              src={nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || ''}
-              alt={nowPlaying.title}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = '/logo.png';
-              }}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full gold-gradient-bg border border-stone-950 flex items-center justify-center text-stone-950 shadow-md">
-              <Play className="w-2.5 h-2.5 fill-stone-950 ml-0.5" />
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-bold text-white truncate tracking-tight leading-snug">
-              {nowPlaying.title}
-            </h2>
-            <p className="text-xs text-amber-200/70 font-medium truncate mt-0.5">
-              {nowPlaying.artist}
-            </p>
-
-            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#120C08]/80 border border-[#D4AF37]/25 text-[10px] text-amber-200 mt-1.5">
-              <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-              <span className="truncate">İsteyen: <strong className="text-white font-semibold">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy}</strong></span>
-            </div>
+        {/* Hero Album Art */}
+        <div className="relative w-48 h-48 rounded-[2rem] overflow-hidden border border-[#D4AF37]/40 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(212,175,55,0.3)] mb-6 group">
+          <img
+            src={nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || ''}
+            alt={nowPlaying.title}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/logo.png';
+            }}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+          
+          <div className="absolute bottom-3 right-3 w-8 h-8 rounded-full gold-gradient-bg border-2 border-stone-950 flex items-center justify-center text-stone-950 shadow-xl backdrop-blur-md">
+            <Play className="w-3.5 h-3.5 fill-stone-950 ml-0.5" />
           </div>
         </div>
 
-        {/* Live Soundwave Equalizer & Pulsating Status Badge */}
-        <div className="mt-3 pt-2.5 border-t border-[#D4AF37]/20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex items-end gap-1 h-3.5 px-2 py-0.5 bg-[#1C130D]/80 rounded-full border border-[#D4AF37]/30 shadow-inner">
-              <span className={`w-0.5 bg-[#D4AF37] rounded-full animate-pulse ${isPlayingAudio ? 'h-3' : 'h-1.5'}`} style={{ animationDuration: '0.6s' }} />
-              <span className={`w-0.5 bg-[#E5A93B] rounded-full animate-pulse ${isPlayingAudio ? 'h-3.5' : 'h-2'}`} style={{ animationDuration: '0.9s' }} />
-              <span className={`w-0.5 bg-[#D4AF37] rounded-full animate-pulse ${isPlayingAudio ? 'h-2.5' : 'h-1'}`} style={{ animationDuration: '0.7s' }} />
-              <span className={`w-0.5 bg-[#E5A93B] rounded-full animate-pulse ${isPlayingAudio ? 'h-3' : 'h-2'}`} style={{ animationDuration: '0.8s' }} />
-            </div>
-            <span className="text-[10px] font-extrabold tracking-wider text-amber-200/90 font-mono">
-              CANLI SES AKIŞI
+        {/* Track Info (Big Typography) */}
+        <div className="text-center w-full max-w-sm mb-6">
+          <h2 className="text-2xl sm:text-3xl font-black text-white truncate tracking-tight leading-tight drop-shadow-md">
+            {nowPlaying.title}
+          </h2>
+          <p className="text-sm sm:text-base text-[#D4AF37] font-semibold truncate mt-1 drop-shadow-sm opacity-90">
+            {nowPlaying.artist}
+          </p>
+          
+          <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/5 border border-white/10 text-[10px] text-amber-100 backdrop-blur-md">
+            <User className="w-3 h-3 text-[#D4AF37]" />
+            <span className="truncate tracking-wide">
+              İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy}</strong>
             </span>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold tracking-wider shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>CANLI</span>
-            </div>
-            <div className="flex items-center gap-1 opacity-70">
-              <span className="text-[8px] text-gray-400 font-medium tracking-wide">Powered by</span>
-              <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify" className="h-3 object-contain brightness-0 invert" />
-            </div>
+        {/* Audio Visualizer */}
+        <div className="w-full flex flex-col items-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-1.5 h-12 w-full max-w-[200px]">
+            {[...Array(12)].map((_, i) => (
+              <span 
+                key={i} 
+                className={`w-1.5 rounded-full bg-gradient-to-t from-[#D4AF37] to-[#FFF1C0] shadow-[0_0_8px_rgba(212,175,55,0.8)] ${isPlayingAudio ? 'animate-[pulse_1s_ease-in-out_infinite]' : 'h-2'}`}
+                style={{ 
+                  animationDuration: `${0.5 + Math.random() * 0.8}s`,
+                  animationDelay: `${Math.random() * 0.5}s`,
+                  height: isPlayingAudio ? `${20 + Math.random() * 80}%` : '8px'
+                }} 
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2 opacity-60">
+            <Volume2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span className="text-[9px] font-black tracking-widest text-amber-200 uppercase">
+              Canlı Ses Akışı
+            </span>
           </div>
         </div>
 
         {/* EMOJI REACTIONS */}
         {nowPlaying.id !== 'spotify-bg' && (
-          <div className="mt-3 flex items-center justify-center gap-4">
+          <div className="mt-4 flex items-center justify-center gap-5 bg-black/30 px-5 py-2.5 rounded-full border border-white/5 backdrop-blur-lg">
             {['🔥', '❤️', '👏', '😍', '💃'].map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => handleSendReaction(emoji)}
-                className="text-2xl hover:scale-125 active:scale-95 transition-transform drop-shadow-lg"
+                className="text-2xl sm:text-3xl hover:scale-125 active:scale-90 transition-transform drop-shadow-xl"
               >
                 {emoji}
               </button>

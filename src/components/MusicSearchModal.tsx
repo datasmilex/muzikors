@@ -162,91 +162,99 @@ export const MusicSearchModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
 
-        {/* Modal Container */}
+        {/* Bottom Sheet / Modal Container */}
         <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-          className="relative w-full max-w-md h-[92vh] bg-[#120C08] border-t-2 border-[#D4AF37]/40 rounded-t-[32px] p-5 z-10 shadow-2xl flex flex-col justify-between overflow-hidden"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-[2.5rem] rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
         >
+          {/* Decorative Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+
           {confirmingTrack ? (
-            <div className="flex flex-col h-full justify-between pb-4">
+            <div className="flex flex-col h-full justify-between pb-4 relative z-10">
               <div className="space-y-6 pt-4">
-                <div className="text-center space-y-2">
-                  <AlertTriangle className="w-12 h-12 text-[#E5A93C] mx-auto opacity-90" />
-                  <h2 className="text-xl font-bold text-white tracking-wide">Şarkı İsteğini Onayla</h2>
-                  <p className="text-sm text-gray-400 px-4">
+                <div className="text-center space-y-3">
+                  <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/20 mx-auto flex items-center justify-center shadow-inner">
+                    <AlertTriangle className="w-8 h-8 text-[#E5A93C] drop-shadow-md" />
+                  </div>
+                  <h2 className="text-2xl font-black text-white tracking-tight">Şarkı İsteğini Onayla</h2>
+                  <p className="text-xs text-amber-200/60 px-4 font-medium leading-relaxed">
                     Şarkı isteğinizi onaylamadan önce lütfen aşağıdaki KVKK aydınlatmasını okuyun.
                   </p>
                 </div>
 
                 {/* Track Info Box */}
-                <div className="flex items-center gap-3 bg-[#1A1A1A] rounded-2xl p-4 border border-[#D4AF37]/20">
-                  <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-12 h-12 rounded-lg object-cover" />
+                <div className="flex items-center gap-4 bg-gradient-to-r from-[#241911] to-[#1C130D] rounded-[1.5rem] p-4 border border-[#D4AF37]/40 shadow-xl">
+                  <div className="w-14 h-14 rounded-[1rem] overflow-hidden border border-[#D4AF37]/30 shadow-md shrink-0">
+                    <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" />
+                  </div>
                   <div className="truncate">
-                    <p className="text-sm font-bold text-white truncate">{confirmingTrack.title}</p>
-                    <p className="text-xs text-amber-200/60 truncate">{confirmingTrack.artist}</p>
+                    <p className="text-base font-black text-white truncate drop-shadow-md">{confirmingTrack.title}</p>
+                    <p className="text-xs font-semibold text-[#D4AF37] truncate mt-0.5">{confirmingTrack.artist}</p>
                   </div>
                 </div>
 
                 {/* Anonymous Toggle */}
-                <div className="flex items-center justify-between bg-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/10">
+                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-[1.5rem] p-5 border border-white/5 shadow-inner">
                   <div>
-                    <p className="text-sm font-bold text-white">İsmimi Ekranda Gizle</p>
-                    <p className="text-[10px] text-gray-400 mt-1">Sadece "Anonim Müşteri" olarak görünür.</p>
+                    <p className="text-sm font-bold text-white tracking-wide">İsmimi Ekranda Gizle</p>
+                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">Sadece "Anonim Müşteri" görünür</p>
                   </div>
                   <button 
                     onClick={() => setIsAnonymous(!isAnonymous)}
-                    className={`w-12 h-6 rounded-full p-1 transition-colors flex items-center ${isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'}`}
+                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'}`}
                   >
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isAnonymous ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isAnonymous ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
 
                 {/* Consent Text */}
-                <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80">
+                <div className="bg-amber-900/10 rounded-[1.5rem] p-5 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">
                   {isAnonymous ? (
-                    <p>"Şarkı isteğin TV ekranında ve panellerde <b>'Anonim Müşteri'</b> olarak görünecektir. Onaylıyor musun?"</p>
+                    <p>"Şarkı isteğin TV ekranında ve panellerde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
                   ) : (
-                    <p>"Şarkı isteğinle birlikte ismin <b>{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak TV ekranında ve uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
+                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak TV ekranında ve uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
                   )}
                 </div>
 
                 {/* Vibe Guard Warning */}
                 {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                  <div className="bg-orange-500/10 rounded-2xl p-4 border border-orange-500/20 text-[11px] leading-relaxed text-orange-200/90 mt-4">
+                  <div className="bg-orange-500/10 rounded-[1.5rem] p-5 border border-orange-500/20 text-[11px] leading-relaxed text-orange-200/90 mt-4">
                     <p>
-                      <b>⚠️ Bilgilendirme:</b> Mekân sadece şu tarzlara öncelik vermektedir: <span className="font-bold text-orange-300">{activeVenue.allowed_genres.join(', ')}</span>. Eğer mekanın tarzına tamamen zıt bir şarkı eklerseniz, mekan sahibi şarkıyı atlama (skip) hakkına sahiptir. Sorumluluk size aittir.
+                      <b className="text-orange-400">⚠️ Bilgilendirme:</b> Mekân sadece şu tarzlara öncelik vermektedir: <span className="font-black text-orange-300">{activeVenue.allowed_genres.join(', ')}</span>. Eğer mekanın tarzına tamamen zıt bir şarkı eklerseniz, mekan sahibi şarkıyı atlama (skip) hakkına sahiptir. Sorumluluk size aittir.
                     </p>
                   </div>
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-3 mt-6">
+              <div className="space-y-4 mt-6">
                 <button
                   onClick={handleFinalRequest}
                   disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-4 px-6 rounded-2xl gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-center gap-2 shadow-xl hover:brightness-110 active:scale-[0.98] transition-all"
+                  className="w-full py-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:brightness-110 active:scale-95 hover:scale-[1.02] transition-all group"
                 >
-                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5 stroke-[3]" />}
+                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6 stroke-[3] group-hover:scale-110 transition-transform" />}
                   <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
                 </button>
                 <button
                   onClick={() => { setConfirmingTrack(null); closeModal(); }}
                   disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-4 px-6 rounded-2xl bg-transparent border border-gray-600 text-gray-300 font-bold text-sm flex items-center justify-center hover:bg-white/5 active:scale-[0.98] transition-all"
+                  className="w-full py-4 rounded-[1.5rem] bg-transparent border border-white/10 text-gray-400 font-bold text-sm flex items-center justify-center hover:bg-white/5 hover:text-white active:scale-95 transition-all"
                 >
                   İptal / Vazgeç
                 </button>
@@ -255,32 +263,33 @@ export const MusicSearchModal: React.FC = () => {
           ) : (
             <>
           {/* Top Header & Mode Tab Switcher */}
-          <div className="shrink-0 space-y-3">
-            <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto" />
+          <div className="shrink-0 space-y-4 relative z-10">
+            <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto sm:hidden" />
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-white tracking-wide">Spotify Müzik Arama</h2>
+              <div className="flex items-center gap-2">
+                <Music className="w-5 h-5 text-[#D4AF37]" />
+                <h2 className="text-xl font-black text-white tracking-tight">Müzik Arama</h2>
               </div>
 
               <button
                 onClick={closeModal}
-                className="w-8 h-8 rounded-full bg-[#1C130D] border border-[#D4AF37]/30 flex items-center justify-center text-amber-200 hover:text-white hover:border-[#D4AF37] transition-all"
+                className="p-2 rounded-full bg-white/5 border border-transparent hover:border-[#D4AF37]/30 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
                 aria-label="Kapat"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Main Search Controls */}
-            <div className="space-y-2 mt-2">
+            <div className="space-y-3 mt-2">
               {/* Vibe Guard Info Text */}
               {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                <p className="text-[11px] font-medium text-amber-200/60 pl-1">
-                  Kafenin Tercihi: <span className="text-amber-200/90">{activeVenue.allowed_genres.join(', ')}</span>
+                <p className="text-[11px] font-bold text-amber-200/60 pl-1 uppercase tracking-widest">
+                  Kafenin Tercihi: <span className="text-[#D4AF37] drop-shadow-sm">{activeVenue.allowed_genres.join(', ')}</span>
                 </p>
               )}
-              <div className="relative">
-                  <Search className="w-5 h-5 text-[#D4AF37] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="relative group">
+                  <Search className="w-5 h-5 text-[#D4AF37] absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:scale-110 transition-transform" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -293,30 +302,30 @@ export const MusicSearchModal: React.FC = () => {
                       }
                     }}
                     placeholder="Sanatçı veya şarkı adı yazın (örn: Sezen Aksu)..."
-                    className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-2xl py-3 pl-11 pr-10 text-sm text-white placeholder-amber-200/40 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
+                    className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-[1.5rem] py-4 pl-12 pr-12 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:bg-[#1C130D] focus:ring-4 focus:ring-[#D4AF37]/10 transition-all shadow-inner"
                   />
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 text-[#D4AF37] animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
+                    <Loader2 className="w-5 h-5 text-[#D4AF37] animate-spin absolute right-4 top-1/2 -translate-y-1/2" />
                   ) : searchQuery ? (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-amber-200/60 hover:text-white"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-200/50 hover:text-white transition-colors"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   ) : null}
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x">
                   <button
                     onClick={() => {
                       setActiveTab('all');
                       setSearchQuery('');
                     }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'all'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
+                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
                     }`}
                   >
                     Trendler
@@ -326,10 +335,10 @@ export const MusicSearchModal: React.FC = () => {
                       setActiveTab('top10');
                       setSearchQuery('');
                     }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'top10'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
+                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
                     }`}
                   >
                     Mekanın Tercihi
@@ -339,10 +348,10 @@ export const MusicSearchModal: React.FC = () => {
                       setActiveTab('global');
                       setSearchQuery('');
                     }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'global'
-                        ? 'gold-gradient-bg text-stone-950 shadow-md'
-                        : 'glass-panel text-amber-200/70 border border-[#D4AF37]/20'
+                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
+                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
                     }`}
                   >
                     Global Hits
@@ -352,19 +361,20 @@ export const MusicSearchModal: React.FC = () => {
             </div>
 
           {/* Search Track Results List */}
-          <div className="flex-1 overflow-y-auto my-3 space-y-2 pr-1 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto my-2 space-y-0 flex flex-col pt-2 pr-1 custom-scrollbar relative z-10">
               {isLoading ? (
-                <div className="text-center py-16 text-amber-200/60 flex flex-col items-center justify-center space-y-2">
-                  <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin" />
-                  <p className="text-xs font-bold">Spotify Web API Canlı Aranıyor...</p>
+                <div className="text-center py-16 text-amber-200/60 flex flex-col items-center justify-center space-y-4">
+                  <Loader2 className="w-10 h-10 text-[#D4AF37] animate-spin" />
+                  <p className="text-xs font-bold uppercase tracking-widest">Spotify Müzikleri Aranıyor...</p>
                 </div>
               ) : searchResults.length === 0 ? (
-                <div className="text-center py-12 text-amber-200/50">
-                  <Music className="w-10 h-10 mx-auto mb-2 opacity-40 text-[#D4AF37]" />
-                  <p className="text-sm font-medium">Aramanıza uygun Spotify şarkısı bulunamadı</p>
+                <div className="text-center py-16 text-amber-200/40">
+                  <Music className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
+                  <p className="text-sm font-semibold">Aramanıza uygun Spotify şarkısı bulunamadı</p>
                 </div>
               ) : (
-                searchResults.map((track) => {
+                searchResults.map((track, idx) => {
+                  const zIndex = searchResults.length - idx;
                   const isSelected = selectedTrack?.id === track.id;
                   const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
                   const baseCost = getSongCreditCost(durMs);
@@ -377,95 +387,103 @@ export const MusicSearchModal: React.FC = () => {
                   const canAfford = (user?.credits ?? 0) >= (finalCost ?? 0);
 
                   return (
-                    <div
+                    <div 
                       key={track.id}
-                      onClick={() => !isBlocked && setSelectedTrack(track)}
-                      className={`rounded-2xl p-3 flex items-center justify-between border transition-all duration-200 ${
-                        isBlocked
-                          ? 'glass-panel opacity-60 border-red-500/30'
-                          : isSelected
-                          ? 'glass-panel-gold border-[#D4AF37] ring-1 ring-[#D4AF37]/50 cursor-pointer'
-                          : 'glass-panel border-[#D4AF37]/15 hover:border-[#D4AF37]/35 cursor-pointer'
-                      }`}
+                      className={`relative group transition-all duration-500 hover:-translate-y-1 hover:z-50 ${idx !== 0 ? '-mt-2' : ''}`}
+                      style={{ zIndex }}
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <img
-                          src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                          alt={track.title}
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/logo.png';
-                          }}
-                          className="w-12 h-12 rounded-xl object-cover border border-[#D4AF37]/30 shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className="text-sm font-bold text-white truncate">{track.title}</h4>
-                            {isExplicitBlocked ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
-                                <AlertTriangle className="w-3 h-3 text-red-400" />
-                                🔞 Küfürlü Şarkı (Mekân Filtresi Aktif)
-                              </span>
-                            ) : finalCost === null ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
-                                <AlertTriangle className="w-3 h-3 text-red-400" />
-                                7+ Dk (Eklenemez)
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="text-xs text-amber-200/60 truncate mt-0.5 flex items-center gap-1.5">
-                            <span>{track.artist}</span>
-                            {durMs > 0 && (
-                              <>
-                                <span>•</span>
-                                <span className="font-semibold text-amber-200/80">⏱️ {formatDuration(durMs)}</span>
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pl-2">
-                        {isExplicitBlocked ? (
-                          <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[10px] font-bold border border-red-500/20">
-                            🔞 Sansürlü
-                          </span>
-                        ) : finalCost === null ? (
-                          <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[11px] font-bold border border-red-500/20">
-                            {">7 Dk"}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTrack(track);
-                              handleConfirmRequest(track);
-                            }}
-                            disabled={cooldown.active || !canAfford || submittingTrackId === track.id}
-                            className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 shadow-md transition-all ${
-                              !canAfford || submittingTrackId === track.id
-                                ? 'bg-stone-900/80 text-amber-200/40 border border-amber-500/20 cursor-not-allowed'
-                                : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-95'
-                            }`}
-                          >
-                            {submittingTrackId === track.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4AF37]" />
-                            ) : (
-                              <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                            )}
-                            {submittingTrackId === track.id ? (
-                              <span>Eklenecek...</span>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                <span>İste (</span>
-                                {isHappyHourActive && baseCost !== finalCost && (
-                                  <span className="line-through opacity-50 mr-0.5">{baseCost}</span>
-                                )}
-                                <span className={isHappyHourActive && baseCost !== finalCost ? "text-yellow-100 drop-shadow-md" : ""}>{finalCost} Kredi)</span>
+                      <div
+                        onClick={() => !isBlocked && setSelectedTrack(track)}
+                        className={`rounded-2xl p-3.5 flex items-center justify-between border backdrop-blur-xl shadow-lg transition-all duration-300 ${
+                          isBlocked
+                            ? 'bg-black/60 opacity-60 border-red-500/20'
+                            : isSelected
+                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/60 shadow-[0_0_20px_rgba(212,175,55,0.2)] scale-[1.02] cursor-pointer'
+                            : 'bg-[#1A1A1A]/90 border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:bg-[#221811] cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          <div className="relative w-14 h-14 rounded-[1rem] overflow-hidden border border-[#D4AF37]/30 shadow-md shrink-0">
+                            <img
+                              src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                              alt={track.title}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/logo.png';
+                              }}
+                              className="w-full h-full object-cover"
+                            />
+                            {isSelected && (
+                              <div className="absolute inset-0 bg-[#D4AF37]/20 flex items-center justify-center backdrop-blur-[2px]">
+                                <Check className="w-6 h-6 text-white drop-shadow-md stroke-[3]" />
                               </div>
                             )}
-                          </button>
-                        )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <h4 className={`text-base font-black truncate ${isSelected ? 'text-white' : 'text-gray-100'}`}>{track.title}</h4>
+                              {isExplicitBlocked ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  Sansürlü
+                                </span>
+                              ) : finalCost === null ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  7+ Dk (Eklenemez)
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-xs font-semibold text-[#D4AF37] truncate flex items-center gap-2">
+                              <span>{track.artist}</span>
+                              {durMs > 0 && (
+                                <>
+                                  <span className="text-white/20">•</span>
+                                  <span className="text-amber-200/50">⏱️ {formatDuration(durMs)}</span>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 pl-3">
+                          {isExplicitBlocked ? (
+                            <span className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest border border-red-500/20 shadow-inner">
+                              Engelli
+                            </span>
+                          ) : finalCost === null ? (
+                            <span className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest border border-red-500/20 shadow-inner">
+                              >7 Dk
+                            </span>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTrack(track);
+                                handleConfirmRequest(track);
+                              }}
+                              disabled={cooldown.active || !canAfford || submittingTrackId === track.id}
+                              className={`px-4 py-2 rounded-[1rem] font-black text-xs flex items-center gap-1.5 shadow-lg transition-all duration-300 ${
+                                !canAfford || submittingTrackId === track.id
+                                  ? 'bg-black/50 text-amber-200/30 border border-white/5 cursor-not-allowed'
+                                  : 'bg-white/5 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 active:scale-95 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]'
+                              }`}
+                            >
+                              {submittingTrackId === track.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
+                              ) : (
+                                <Plus className="w-4 h-4 stroke-[3]" />
+                              )}
+                              {submittingTrackId === track.id ? (
+                                <span>İşleniyor</span>
+                              ) : (
+                                <div className="flex items-center gap-1">
+                                  <span>Seç</span>
+                                </div>
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -474,22 +492,22 @@ export const MusicSearchModal: React.FC = () => {
             </div>
 
           {/* Bottom Action Bar */}
-          <div className="shrink-0 pt-3 border-t border-[#D4AF37]/20 space-y-2">
+          <div className="shrink-0 pt-4 border-t border-[#D4AF37]/20 space-y-3 relative z-10 bg-[#120C08]/80 backdrop-blur-md">
             {cooldown.active && (
-              <div className="bg-amber-500/15 border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between text-xs text-amber-200">
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-[1rem] p-3 flex items-center justify-between text-xs text-amber-200 shadow-inner">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
-                  <span>30 Saniye Anti-Spam Bekleme Süresi</span>
+                  <span className="font-bold">Anti-Spam Bekleme Süresi</span>
                 </div>
-                <span className="font-mono font-bold text-amber-400">
+                <span className="font-mono font-black text-amber-400 text-sm">
                   {formatCooldown(cooldown.remainingSeconds)}
                 </span>
               </div>
             )}
 
             {selectedTrack && (
-              <div className="flex items-center justify-between bg-[#1C130D] rounded-xl p-2.5 border border-[#D4AF37]/20">
-                <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center justify-between bg-gradient-to-r from-[#1C130D] to-[#120C08] rounded-[1.5rem] p-4 border border-[#D4AF37]/30 shadow-lg">
+                <div className="flex items-center gap-3 min-w-0">
                   <img
                     src={selectedTrack.albumCover || selectedTrack.coverUrl || selectedTrack.album_art || '/logo.png'}
                     alt={selectedTrack.title}
@@ -497,11 +515,11 @@ export const MusicSearchModal: React.FC = () => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = '/logo.png';
                     }}
-                    className="w-8 h-8 rounded-lg object-cover"
+                    className="w-10 h-10 rounded-[0.8rem] object-cover border border-[#D4AF37]/20 shadow-sm"
                   />
                   <div className="truncate">
-                    <p className="text-xs font-bold text-white truncate">{selectedTrack.title}</p>
-                    <p className="text-[10px] text-amber-200/60 truncate">{selectedTrack.artist}</p>
+                    <p className="text-sm font-black text-white truncate drop-shadow-sm">{selectedTrack.title}</p>
+                    <p className="text-[11px] font-semibold text-[#D4AF37] truncate">{selectedTrack.artist}</p>
                   </div>
                 </div>
 
@@ -509,8 +527,8 @@ export const MusicSearchModal: React.FC = () => {
                   {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
                     <span className="text-[10px] line-through opacity-50 mr-1 text-white block">{selectedBaseCost} Kredi</span>
                   )}
-                  <span className="text-xs font-black text-[#D4AF37] block">{selectedFinalCost} Kredi</span>
-                  <span className="text-[9px] text-amber-200/50">Bakiyeniz: {user ? user.credits : 0}</span>
+                  <span className="text-sm font-black text-[#D4AF37] block drop-shadow-md">{selectedFinalCost} Kredi</span>
+                  <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-wider">Bakiye: {user ? user.credits : 0}</span>
                 </div>
               </div>
             )}
@@ -518,31 +536,25 @@ export const MusicSearchModal: React.FC = () => {
             <button
               onClick={() => handleConfirmRequest()}
               disabled={!selectedTrack || cooldown.active || selectedFinalCost === null}
-              className={`w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl transition-all ${
+              className={`w-full py-4 px-6 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
                 cooldown.active || !selectedTrack || selectedFinalCost === null
-                  ? 'bg-stone-800 text-stone-500 cursor-not-allowed border border-stone-700'
-                  : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-[0.98]'
+                  ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 shadow-none'
+                  : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-95 hover:scale-[1.02]'
               }`}
             >
-              <Coins className="w-5 h-5 text-stone-950" />
+              <Coins className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-hover:scale-110 transition-transform'}`} />
               {cooldown.active ? (
                 <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
               ) : (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <span>Seçili Şarkıyı İste (</span>
                   {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
-                    <span className="line-through opacity-50 mr-0.5">{selectedBaseCost}</span>
+                    <span className="line-through opacity-50">{selectedBaseCost}</span>
                   )}
-                  <span className={isHappyHourActive && selectedBaseCost !== selectedFinalCost ? "text-yellow-100 drop-shadow-md" : ""}>{selectedFinalCost ?? 10} Kredi)</span>
+                  <span className={isHappyHourActive && selectedBaseCost !== selectedFinalCost ? "text-stone-800 font-extrabold" : "font-extrabold"}>{selectedFinalCost ?? 10} 🪙)</span>
                 </div>
               )}
             </button>
-
-            {/* Spotify Branding Compliance */}
-            <div className="flex items-center justify-center gap-1.5 pt-2 pb-1 opacity-60">
-              <span className="text-[10px] text-gray-400 font-medium tracking-wide">Powered by</span>
-              <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify" className="h-4 object-contain brightness-0 invert" />
-            </div>
           </div>
             </>
           )}

@@ -50,7 +50,7 @@ export const GatewayScreen: React.FC = () => {
       <div className="w-full flex justify-center pt-8 pb-4 relative z-10">
         <div className="flex items-center gap-2 opacity-70">
           <Music className="w-4 h-4 text-[#D4AF37]" />
-          <span className="text-[10px] font-bold tracking-widest text-[#D4AF37] uppercase">Powered by Muzikors</span>
+          <span className="text-[10px] font-black tracking-widest text-[#D4AF37] uppercase">Powered by Muzikors</span>
         </div>
       </div>
 
@@ -60,58 +60,59 @@ export const GatewayScreen: React.FC = () => {
         {/* Profile Card */}
         <div className="flex flex-col items-center space-y-5">
           <div className="relative">
-            <div className="w-[120px] h-[120px] rounded-full border-2 border-[#D4AF37]/30 p-1 flex items-center justify-center bg-[#1A1A1A] shadow-[0_0_30px_rgba(212,175,55,0.15)] overflow-hidden">
+            <div className="w-[140px] h-[140px] rounded-full border border-[#D4AF37]/40 p-1.5 flex items-center justify-center bg-gradient-to-br from-[#1C130D] to-[#120C08] shadow-[0_0_40px_rgba(212,175,55,0.25)] overflow-hidden relative group">
+              <div className="absolute inset-0 bg-[#D4AF37]/5 animate-pulse rounded-full pointer-events-none" />
               {activeVenue.logo_url?.trim() ? (
                 <img 
                   src={activeVenue.logo_url} 
                   alt={activeVenue.venue_name} 
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-cover rounded-full z-10"
                 />
               ) : (
-                <Store className="w-12 h-12 text-[#D4AF37]/50" />
+                <Store className="w-14 h-14 text-[#D4AF37]/50 z-10" />
               )}
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-[#D4AF37] w-8 h-8 rounded-full flex items-center justify-center border-[3px] border-[#120C08] shadow-lg">
-              <Check className="w-4 h-4 text-black" />
+            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] w-10 h-10 rounded-full flex items-center justify-center border-[3px] border-[#120C08] shadow-[0_5px_15px_rgba(212,175,55,0.4)]">
+              <Check className="w-5 h-5 text-black stroke-[3]" />
             </div>
           </div>
-          <div className="text-center space-y-1">
-            <h1 className="text-2xl font-black text-white tracking-tight">{activeVenue.venue_name}</h1>
-            <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">Hoş Geldiniz</p>
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name}</h1>
+            <p className="text-xs text-[#D4AF37] font-bold tracking-widest uppercase">Hoş Geldiniz</p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-5">
           <button
             onClick={() => setHasEnteredGateway(true)}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black font-black flex items-center justify-center gap-3 shadow-[0_4px_20px_rgba(212,175,55,0.3)] hover:opacity-95 active:scale-[0.98] transition-all"
+            className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:brightness-110 active:scale-[0.98] hover:scale-[1.02] transition-all group"
           >
-            <Music className="w-6 h-6" />
-            Muzikors Müzik Kutusu
+            <Music className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            Müzik Kutusuna Bağlan
           </button>
 
           {/* Wi-Fi Info Card (CONDITIONAL) */}
           {hasWifi && (
-            <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 text-center mt-4 shadow-xl">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Wifi className="w-5 h-5 text-gray-300" />
-                <h3 className="text-sm font-bold text-gray-200">Mekân Wi-Fi Bilgileri</h3>
+            <div className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/20 rounded-[1.5rem] p-5 text-center mt-5 shadow-inner backdrop-blur-md">
+              <div className="flex items-center justify-center gap-2 mb-4 pb-4 border-b border-[#D4AF37]/10">
+                <Wifi className="w-5 h-5 text-[#D4AF37] animate-pulse" />
+                <h3 className="text-sm font-black text-white tracking-widest uppercase">Mekân Wi-Fi Bilgileri</h3>
               </div>
               
               <div className="space-y-3">
                 {wifiName?.trim() && (
-                  <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
-                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Ağ Adı</span>
-                    <span className="text-sm text-white font-bold">{wifiName}</span>
+                  <div className="flex items-center justify-between bg-black/60 rounded-2xl p-4 border border-white/5 shadow-inner">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ağ Adı</span>
+                    <span className="text-sm text-white font-black">{wifiName}</span>
                   </div>
                 )}
                 
                 {wifiPass?.trim() && (
-                  <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5 group">
-                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Şifre</span>
+                  <div className="flex items-center justify-between bg-black/60 rounded-2xl p-4 border border-white/5 shadow-inner group">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Şifre</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-white font-mono font-bold tracking-wider">{wifiPass}</span>
+                      <span className="text-sm text-[#D4AF37] font-mono font-black tracking-widest drop-shadow-md">{wifiPass}</span>
                       <button 
                         onClick={() => {
                           if (wifiPass) {
@@ -121,7 +122,7 @@ export const GatewayScreen: React.FC = () => {
                             setTimeout(() => setCopied(false), 2000);
                           }
                         }}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition-all hover:scale-110 active:scale-90 shadow-sm"
                         title="Şifreyi Kopyala"
                       >
                         {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -138,7 +139,7 @@ export const GatewayScreen: React.FC = () => {
               href={menuUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full h-14 rounded-2xl bg-[#1A1A1A] border border-[#D4AF37]/20 text-white font-bold flex items-center justify-center gap-3 hover:bg-[#222] active:scale-[0.98] transition-all"
+              className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 hover:bg-[#222] hover:border-[#D4AF37]/60 hover:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
             >
               📖 Dijital Menü
             </a>

@@ -452,8 +452,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           validRows.push(r);
         }
 
-        let playingRow = validRows.find((r) => r.status === 'playing');
-        let upcomingRows = validRows.filter((r) => r.id !== playingRow?.id && (r.status === 'queued' || r.status === 'pending'));
+        const playingRow = validRows.find((r) => r.status === 'playing');
+        const upcomingRows = validRows.filter((r) => r.id !== playingRow?.id && (r.status === 'queued' || r.status === 'pending'));
 
 
         const toTrack = (r: any): Track => {

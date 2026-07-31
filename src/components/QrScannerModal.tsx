@@ -188,39 +188,48 @@ export const QrScannerModal: React.FC = () => {
   if (activeModal !== 'qr') return null;
 
   return (
+  return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/90 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
 
         {/* Camera Viewfinder */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className="relative w-full max-w-sm bg-[#120C08] border-2 border-[#D4AF37]/50 rounded-[32px] p-6 z-10 shadow-2xl overflow-hidden text-center"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-[2.5rem] p-6 z-10 shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden text-center glass-panel-gold"
         >
-          <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20 mb-4">
-            <div className="flex items-center gap-2 text-[#D4AF37]">
-              <QrCode className="w-5 h-5" />
-              <h2 className="text-sm font-bold text-white">Masa QR Kodunu Tara</h2>
+          {/* Decorative Glow */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20 mb-6 relative z-10">
+            <div className="flex items-center gap-3 text-[#D4AF37]">
+              <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-inner">
+                <QrCode className="w-5 h-5 drop-shadow-md" />
+              </div>
+              <h2 className="text-lg font-black text-white tracking-tight drop-shadow-md">Masa QR Kodunu Tara</h2>
             </div>
             <button
               onClick={closeModal}
-              className="w-8 h-8 rounded-full bg-[#1C130D] border border-[#D4AF37]/30 flex items-center justify-center text-amber-200 hover:text-white"
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              aria-label="Kapat"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Direct Camera Video Stream Container */}
-          <div className="relative w-64 h-64 mx-auto rounded-3xl overflow-hidden border-2 border-[#D4AF37]/60 bg-[#1C130D] flex items-center justify-center shadow-inner my-2">
+          <div className="relative w-64 h-64 mx-auto rounded-[2rem] overflow-hidden border-4 border-[#D4AF37]/40 bg-[#1C130D] flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.2)] my-2 relative z-10">
             <video
               ref={videoRef}
               playsInline
@@ -229,23 +238,23 @@ export const QrScannerModal: React.FC = () => {
             />
 
             {/* Corner guides */}
-            <div className="absolute top-3 left-3 w-6 h-6 border-t-4 border-l-4 border-[#D4AF37] rounded-tl-lg pointer-events-none z-10" />
-            <div className="absolute top-3 right-3 w-6 h-6 border-t-4 border-r-4 border-[#D4AF37] rounded-tr-lg pointer-events-none z-10" />
-            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-4 border-l-4 border-[#D4AF37] rounded-bl-lg pointer-events-none z-10" />
-            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-4 border-r-4 border-[#D4AF37] rounded-br-lg pointer-events-none z-10" />
+            <div className="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-[#D4AF37] rounded-tl-xl pointer-events-none z-10" />
+            <div className="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-[#D4AF37] rounded-tr-xl pointer-events-none z-10" />
+            <div className="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-[#D4AF37] rounded-bl-xl pointer-events-none z-10" />
+            <div className="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-[#D4AF37] rounded-br-xl pointer-events-none z-10" />
 
             {/* Laser Line Overlay */}
-            <div className="absolute left-0 right-0 h-0.5 bg-[#D4AF37] shadow-[0_0_15px_#D4AF37] animate-pulse my-auto top-0 bottom-0 pointer-events-none z-10" />
+            <div className="absolute left-4 right-4 h-0.5 bg-[#D4AF37] shadow-[0_0_15px_#D4AF37] animate-pulse my-auto top-0 bottom-0 pointer-events-none z-10" />
 
             {streamError && (
-              <div className="absolute inset-0 bg-[#120C08]/90 flex flex-col items-center justify-center p-4 text-center z-20">
-                <AlertCircle className="w-8 h-8 text-amber-400 mb-2" />
-                <p className="text-xs text-amber-200/80 font-medium">{streamError}</p>
+              <div className="absolute inset-0 bg-[#120C08]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+                <AlertCircle className="w-10 h-10 text-[#D4AF37] mb-3 animate-bounce" />
+                <p className="text-xs text-amber-200/90 font-black uppercase tracking-wider">{streamError}</p>
               </div>
             )}
           </div>
 
-          <p className="text-xs text-amber-200/70 font-medium mt-3">
+          <p className="text-xs text-amber-200/70 font-bold mt-6 tracking-wide px-4 relative z-10">
             Masadaki Muzikors QR kodunu kutucuğun içine getirerek taratın.
           </p>
         </motion.div>

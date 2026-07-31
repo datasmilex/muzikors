@@ -40,142 +40,148 @@ export const UpNextQueueSection: React.FC = () => {
   });
 
   return (
-    <div className="px-4 py-2 pb-28">
+    <div className="px-4 py-2 pb-32">
       {/* Section Header */}
-      <div className="flex items-center justify-between mb-3 px-1">
-        <div className="flex items-center gap-2">
-          <ListMusic className="w-4 h-4 text-[#D4AF37]" />
-          <h3 className="text-sm font-bold text-amber-100 tracking-wide">
+      <div className="flex items-center justify-between mb-6 px-2">
+        <div className="flex items-center gap-2.5">
+          <ListMusic className="w-5 h-5 text-[#D4AF37]" />
+          <h3 className="text-base font-black text-amber-100 tracking-wider">
             Sıradaki Şarkılar
           </h3>
-          <span className="bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full">
+          <span className="bg-[#D4AF37] text-black text-xs font-black px-2.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(212,175,55,0.4)]">
             {filteredQueue.length}
           </span>
         </div>
-
-        <span className="text-[11px] text-amber-200/60 font-medium">
-          Beğen ve Sıranı Öne Al
-        </span>
       </div>
 
       {/* Info Micro-copy */}
-      <div className="px-1.5 mb-4">
-        <p className="text-[11px] text-gray-400/80 leading-snug flex items-start gap-1.5">
-          <span className="text-[13px] opacity-90">💡</span>
+      <div className="px-2 mb-6">
+        <p className="text-xs text-amber-200/60 leading-snug font-medium flex items-center gap-2">
+          <span className="text-lg drop-shadow-md">💡</span>
           <span>
-            <strong className="text-gray-300 font-medium">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşıyın.
+            <strong className="text-white">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşıyın.
           </span>
         </p>
       </div>
 
       {/* Requirement 1: Sleek Empty Queue State Message */}
       {filteredQueue.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-6 text-center border border-[#D4AF37]/25 flex flex-col items-center justify-center space-y-3 my-1 bg-gradient-to-b from-[#1C130D]/90 to-[#120C08]/90">
-          <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-            <QrCode className="w-6 h-6 animate-pulse" />
+        <div className="glass-panel-gold rounded-[2rem] p-8 text-center border border-[#D4AF37]/30 flex flex-col items-center justify-center space-y-4 my-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner">
+            <QrCode className="w-8 h-8 animate-pulse drop-shadow-lg" />
           </div>
-          <div className="space-y-1 max-w-[260px]">
-            <h4 className="text-xs font-bold text-amber-100">Sırada Henüz Şarkı Yok</h4>
-            <p className="text-[11px] text-amber-200/60 leading-relaxed">
+          <div className="space-y-2 max-w-[260px]">
+            <h4 className="text-base font-black text-white tracking-wide">Sırada Henüz Şarkı Yok</h4>
+            <p className="text-xs text-amber-200/60 leading-relaxed font-medium">
               Masadaki QR kodu okutarak veya aşağıdaki butona tıklayarak ilk şarkıyı sen ekle!
             </p>
           </div>
           <button
             onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
-            className="px-4 py-2 rounded-xl gold-gradient-bg text-stone-950 font-extrabold text-xs shadow-md hover:brightness-110 active:scale-95 transition-all"
+            className="mt-4 px-6 py-3 rounded-full gold-gradient-bg text-stone-950 font-black text-sm shadow-[0_10px_20px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all"
           >
             + İlk Şarkıyı Ekle
           </button>
         </div>
       ) : (
-        <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
-          {filteredQueue.map((track, index) => (
-            <div
-              key={track.id}
-              className={`glass-panel rounded-2xl p-3 flex items-center justify-between border transition-all duration-300 ${
-                index === 0
-                  ? 'border-[#D4AF37]/45 bg-gradient-to-r from-[#241911]/90 to-[#1C130D]/90 shadow-md'
-                  : 'border-[#D4AF37]/15 hover:border-[#D4AF37]/30'
-              }`}
-            >
-              {/* Left: Rank & Artwork & Track Details */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                    index === 0
-                      ? 'gold-gradient-bg text-stone-950 font-black shadow-sm'
-                      : 'bg-[#120C08] text-amber-200/70 border border-[#D4AF37]/20'
-                  }`}
-                >
-                  #{index + 1}
-                </div>
-
-                <img
-                  src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                  alt={track.title}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/logo.png';
-                  }}
-                  className="w-12 h-12 rounded-xl object-cover border border-[#D4AF37]/30 shrink-0"
-                />
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="text-xs font-bold text-white truncate">
-                      {track.title}
-                    </h4>
-                    {index === 0 && (
-                      <span className="flex items-center gap-0.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
-                        <Flame className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> TOP
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-amber-200/60 truncate mt-0.5">
-                    {track.artist}
-                  </p>
+        <div className="relative pt-4 space-y-0 flex flex-col">
+          {filteredQueue.map((track, index) => {
+            // Stack effect logic
+            const zIndex = filteredQueue.length - index;
+            const isFirst = index === 0;
+            
+            return (
+              <div
+                key={track.id}
+                className={`relative group transition-all duration-500 ease-out hover:-translate-y-2 hover:z-50 ${!isFirst ? '-mt-4' : ''}`}
+                style={{ zIndex }}
+              >
+                <div className={`glass-panel rounded-3xl p-4 flex items-center justify-between border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
+                  isFirst
+                    ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#2A1D13] to-[#1C130D]'
+                    : 'border-[#D4AF37]/20 bg-[#120C08]/90 hover:border-[#D4AF37]/40'
+                }`}>
                   
-                  <div className="flex items-center gap-1.5 text-[10px] text-amber-200/50 mt-1">
-                    <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-                    <span className="truncate max-w-[80px]">{getRequestedByLabel(track)}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-0.5 text-amber-200/80 font-bold">
-                      <Clock className="w-2.5 h-2.5 text-[#D4AF37]" />
-                      {formatDuration((track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0))}
-                    </span>
+                  {/* Left: Rank & Artwork & Track Details */}
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 shadow-lg ${
+                        isFirst
+                          ? 'gold-gradient-bg text-stone-950'
+                          : 'bg-black/50 text-amber-200 border border-[#D4AF37]/30'
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
+
+                    <div className="relative w-14 h-14 shrink-0 rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-md">
+                      <img
+                        src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                        alt={track.title}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/logo.png';
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className={`font-black truncate ${isFirst ? 'text-base text-white' : 'text-sm text-gray-200'}`}>
+                          {track.title}
+                        </h4>
+                        {isFirst && (
+                          <span className="flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                            <Flame className="w-3 h-3 fill-amber-400 text-amber-400" /> TOP
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#D4AF37] font-semibold truncate mb-1">
+                        {track.artist}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 text-[10px] text-amber-200/60 font-medium">
+                        <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md">
+                          <User className="w-3 h-3 text-[#D4AF37]" />
+                          <span className="truncate max-w-[90px]">{getRequestedByLabel(track)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#D4AF37]" />
+                          {formatDuration((track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Votes & Boost Action */}
+                  <div className="flex items-center gap-3 pl-3 border-l border-[#D4AF37]/20 shrink-0 ml-2">
+                    <div className="text-center min-w-[36px]">
+                      <span className="block text-lg font-black text-[#D4AF37] drop-shadow-md">
+                        {track.votes}
+                      </span>
+                      <span className="text-[10px] text-amber-200/50 font-bold uppercase tracking-wider">
+                        Oy
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handleVoteTrack(track.id)}
+                      disabled={votingCooldowns[track.id]}
+                      className={`p-3 rounded-2xl border flex items-center justify-center transition-all duration-300 group ${
+                        votingCooldowns[track.id] 
+                          ? 'bg-black/50 border-gray-600 text-gray-500 cursor-not-allowed'
+                          : 'bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] active:scale-90 hover:scale-110'
+                      }`}
+                      title="Şarkıyı Beğen"
+                    >
+                      <ThumbsUp className={`w-5 h-5 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:-translate-y-1 fill-[#D4AF37]/30'}`} />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              {/* Right: Votes & Boost Action */}
-              <div className="flex items-center gap-2 pl-2 border-l border-[#D4AF37]/15 shrink-0">
-                <div className="text-center min-w-[32px]">
-                  <span className="block text-xs font-extrabold text-[#D4AF37]">
-                    {track.votes}
-                  </span>
-                  <span className="text-[9px] text-amber-200/50 font-medium">
-                    Oy
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => handleVoteTrack(track.id)}
-                  disabled={votingCooldowns[track.id]}
-                  className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all group ${
-                    votingCooldowns[track.id] 
-                      ? 'bg-[#1C130D] border-gray-600 text-gray-500 cursor-not-allowed'
-                      : 'bg-[#D4AF37]/15 hover:bg-[#D4AF37]/30 border-[#D4AF37]/30 text-[#D4AF37] active:scale-95'
-                  }`}
-                  title="Şarkıyı Beğen"
-                >
-                  <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:scale-110 fill-[#D4AF37]/20'}`} />
-                  <span className={`text-xs font-bold ${votingCooldowns[track.id] ? 'text-gray-500' : 'text-amber-200'}`}>
-                    {votingCooldowns[track.id] ? 'Bekleyin' : 'Beğen'}
-                  </span>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

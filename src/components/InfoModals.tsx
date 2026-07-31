@@ -46,32 +46,41 @@ export const InfoModals: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/85 backdrop-blur-xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
         />
 
+        {/* Modal Container */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-sm bg-[#120C08] border-2 border-[#D4AF37]/40 rounded-[32px] p-6 z-10 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col justify-between"
+          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          className="relative w-full max-w-sm bg-[#120C08] sm:rounded-[2.5rem] rounded-[2rem] p-6 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20 mb-4">
-            <div className="flex items-center gap-2 text-[#D4AF37]">
-              {activeModal === 'campaigns' && <Gift className="w-5 h-5" />}
-              {activeModal === 'about' && <Info className="w-5 h-5" />}
-              {activeModal === 'partners' && <Handshake className="w-5 h-5" />}
-              {activeModal === 'contact' && <MessageCircle className="w-5 h-5" />}
-              {activeModal === 'howitworks' && <HelpCircle className="w-5 h-5" />}
-              {activeModal === 'terms' && <Info className="w-5 h-5" />}
+          {/* Decorative Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
-              <h2 className="text-base font-bold text-white capitalize">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20 mb-5 relative z-10">
+            <div className="flex items-center gap-3 text-[#D4AF37]">
+              <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-inner">
+                {activeModal === 'campaigns' && <Gift className="w-5 h-5 drop-shadow-md" />}
+                {activeModal === 'about' && <Info className="w-5 h-5 drop-shadow-md" />}
+                {activeModal === 'partners' && <Handshake className="w-5 h-5 drop-shadow-md" />}
+                {activeModal === 'contact' && <MessageCircle className="w-5 h-5 drop-shadow-md" />}
+                {activeModal === 'howitworks' && <HelpCircle className="w-5 h-5 drop-shadow-md" />}
+                {activeModal === 'terms' && <Info className="w-5 h-5 drop-shadow-md" />}
+              </div>
+
+              <h2 className="text-lg font-black text-white tracking-tight drop-shadow-lg capitalize">
                 {activeModal === 'campaigns' && 'Mevcut Kampanyalar'}
                 {activeModal === 'terms' && 'Kullanım Koşulları & KVKK'}
                 {activeModal === 'about' && 'Muzikors Hakkında'}
@@ -83,35 +92,37 @@ export const InfoModals: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="w-8 h-8 rounded-full bg-[#1C130D] border border-[#D4AF37]/30 flex items-center justify-center text-amber-200 hover:text-white"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              aria-label="Kapat"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Modal Content Switch */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin text-xs text-amber-200/80 leading-relaxed">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar text-[13px] text-amber-200/80 leading-relaxed relative z-10">
             {activeModal === 'campaigns' && (
-              <div className="space-y-3">
-                <div className="glass-panel rounded-2xl p-4 border border-[#D4AF37]/40 bg-[#D4AF37]/10 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-[9px] font-bold px-2 py-1 rounded-bl-xl">Kazanıldı / Aktif</div>
-                  <h4 className="font-bold text-white mb-1.5 mt-2">Google ile Giriş Ödülü 🎁</h4>
-                  <p>Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-5 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                  <div className="absolute top-0 right-0 gold-gradient-bg text-black text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md uppercase tracking-wider">Kazanıldı</div>
+                  <h4 className="font-black text-white mb-2 mt-3 text-base flex items-center gap-2"><Gift className="w-5 h-5 text-[#D4AF37]"/> Google ile Giriş Ödülü</h4>
+                  <p className="font-medium text-amber-200/60 leading-relaxed">Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
                 </div>
 
-                <div className="glass-panel rounded-2xl p-4 border border-[#D4AF37]/20">
-                  <h4 className="font-bold text-white mb-1">VIP Kredi Bonusu</h4>
-                  <p>100 Kredi alımlarınızda +15, 200 Kredi alımlarınızda +40 Hediye Kredi otomatik hesabınıza tanımlanır.</p>
+                <div className="bg-[#1A1A1A]/80 rounded-2xl p-5 border border-[#D4AF37]/20 shadow-inner group hover:-translate-y-1 transition-transform">
+                  <h4 className="font-black text-white mb-2 text-base flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400"/> VIP Kredi Bonusu</h4>
+                  <p className="font-medium text-amber-200/60 leading-relaxed">100 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+15</span>, 200 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+40</span> Hediye Kredi otomatik hesabınıza tanımlanır.</p>
                 </div>
               </div>
             )}
 
             {activeModal === 'about' && (
-              <div className="space-y-2">
-                <p>
-                  <strong>Muzikors</strong>, mekanlarda müzik seçimini tamamen müşterilere sunan nesil dijital interaktif jukebox platformudur.
+              <div className="space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-5 border border-white/5 shadow-inner">
+                <p className="leading-relaxed">
+                  <strong className="text-[#D4AF37] text-lg font-black block mb-2">Muzikors</strong> Mekanlarda müzik seçimini tamamen müşterilere sunan yeni nesil dijital interaktif jukebox platformudur.
                 </p>
-                <p>
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent my-4" />
+                <p className="leading-relaxed font-medium">
                   Masadaki QR kodu tarayarak mekana bağlanın, favori Spotify şarkılarınızı arayın, kredilerinizle sıraya ekleyin ve mekanın atmosferine yön verin!
                 </p>
               </div>
@@ -120,72 +131,76 @@ export const InfoModals: React.FC = () => {
             {activeModal === 'partners' && (
               <div>
                 {partnerSubmitted ? (
-                  <div className="text-center py-6 space-y-3">
-                    <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-                    <h3 className="text-sm font-bold text-white">Başvurunuz Alındı</h3>
-                    <p className="text-xs text-amber-200/70">
+                  <div className="text-center py-8 space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-6 border border-emerald-500/20 shadow-inner">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h3 className="text-lg font-black text-white tracking-tight">Başvurunuz Alındı</h3>
+                    <p className="text-sm font-medium text-amber-200/70 leading-relaxed">
                       Mekan ortaklığı başvurunuz ekibimize iletildi. En kısa sürede sizinle iletişime geçeceğiz.
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handlePartnerSubmit} className="space-y-3">
-                    <p className="text-[11px] text-amber-200/70 mb-2">
+                  <form onSubmit={handlePartnerSubmit} className="space-y-4">
+                    <p className="text-[13px] font-medium text-amber-200/70 mb-4 px-2 leading-relaxed">
                       Kafeniz veya mekanınız için Muzikors Jukebox platformunu kurmak için formu doldurun.
                     </p>
 
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-200/80 mb-1">Mekan Adı *</label>
-                      <input
-                        type="text"
-                        required
-                        value={partnerForm.venueName}
-                        onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
-                        placeholder="Örn: Velvet Lounge"
-                        className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-xl px-3 py-2 text-xs text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]"
-                      />
-                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Mekan Adı *</label>
+                        <input
+                          type="text"
+                          required
+                          value={partnerForm.venueName}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
+                          placeholder="Örn: Velvet Lounge"
+                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-200/80 mb-1">Yetkili Adı Soyadı *</label>
-                      <input
-                        type="text"
-                        required
-                        value={partnerForm.contactPerson}
-                        onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
-                        placeholder="Örn: Ahmet Yılmaz"
-                        className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-xl px-3 py-2 text-xs text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Yetkili Adı Soyadı *</label>
+                        <input
+                          type="text"
+                          required
+                          value={partnerForm.contactPerson}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
+                          placeholder="Örn: Ahmet Yılmaz"
+                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-200/80 mb-1">Telefon Numarası *</label>
-                      <input
-                        type="tel"
-                        required
-                        value={partnerForm.phone}
-                        onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
-                        placeholder="Örn: 0555 123 4567"
-                        className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-xl px-3 py-2 text-xs text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Telefon Numarası *</label>
+                        <input
+                          type="tel"
+                          required
+                          value={partnerForm.phone}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
+                          placeholder="Örn: 0555 123 4567"
+                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-200/80 mb-1">E-posta Adresi</label>
-                      <input
-                        type="email"
-                        value={partnerForm.email}
-                        onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
-                        placeholder="Örn: mekan@example.com"
-                        className="w-full bg-[#1C130D] border border-[#D4AF37]/30 rounded-xl px-3 py-2 text-xs text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]"
-                      />
+                      <div>
+                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">E-posta Adresi</label>
+                        <input
+                          type="email"
+                          value={partnerForm.email}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
+                          placeholder="Örn: mekan@example.com"
+                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
+                        />
+                      </div>
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl gold-gradient-bg text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md hover:brightness-110 active:scale-95 transition-all mt-2"
+                      className="w-full py-4 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:scale-[1.02] active:scale-95 transition-all mt-6 group"
                     >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Ortaklık Başvurusu Gönder</span>
+                      <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      <span className="tracking-wide">Ortaklık Başvurusu Gönder</span>
                     </button>
                   </form>
                 )}
@@ -193,127 +208,143 @@ export const InfoModals: React.FC = () => {
             )}
 
             {activeModal === 'contact' && (
-              <div className="space-y-3 text-center py-4">
-                <p className="font-semibold text-white text-sm">Destek &amp; Müşteri Hizmetleri</p>
-                <p className="text-amber-300 font-mono text-xs">destek@muzikors.com</p>
-                <div className="pt-2 border-t border-[#D4AF37]/20 space-y-2">
+              <div className="space-y-6 text-center py-6 bg-[#1A1A1A]/60 rounded-2xl border border-white/5 shadow-inner">
+                <div>
+                  <p className="font-black text-white text-base mb-1 tracking-tight">Destek &amp; Müşteri Hizmetleri</p>
+                  <p className="text-[#D4AF37] font-mono text-sm font-bold bg-[#D4AF37]/10 py-1.5 px-4 rounded-lg inline-block border border-[#D4AF37]/20">destek@muzikors.com</p>
+                </div>
+                <div className="pt-6 border-t border-[#D4AF37]/20 space-y-3 px-6">
                   <a
                     href="https://wa.me/905068638306"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs hover:bg-emerald-500/20 transition-all"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-sm hover:bg-emerald-500/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(16,185,129,0.1)] group"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp: +90 506 863 83 06</span>
+                    <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <span className="tracking-wide">WhatsApp Destek Hattı</span>
                   </a>
                   <a
                     href="tel:+905068638306"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-bold text-xs hover:bg-[#D4AF37]/20 transition-all"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-black text-sm hover:bg-[#D4AF37]/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(212,175,55,0.1)] group"
                   >
-                    <span>📞 +90 506 863 83 06</span>
+                    <span className="group-hover:scale-110 transition-transform">📞</span>
+                    <span className="tracking-wide">+90 506 863 83 06</span>
                   </a>
-                  <p className="text-[10px] text-amber-200/50">Haftanın 7 günü 10:00 - 02:00</p>
+                  <p className="text-xs font-bold text-amber-200/50 uppercase tracking-widest mt-4">Haftanın 7 günü 10:00 - 02:00</p>
                 </div>
               </div>
             )}
 
             {activeModal === 'howitworks' && (
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full gold-gradient-bg text-stone-950 font-black flex items-center justify-center shrink-0">1</div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">1</div>
                   <div>
-                    <h4 className="font-bold text-white">Masa QR Okut</h4>
-                    <p className="text-amber-200/60">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine otomatik bağlan.</p>
+                    <h4 className="font-black text-white text-sm mb-1">Masa QR Okut</h4>
+                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine otomatik bağlan.</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full gold-gradient-bg text-stone-950 font-black flex items-center justify-center shrink-0">2</div>
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">2</div>
                   <div>
-                    <h4 className="font-bold text-white">Kredi Yükle & Şarkı Ara</h4>
-                    <p className="text-amber-200/60">Bakiye yükle, binlerce Spotify şarkısı arasından dilediğini seç.</p>
+                    <h4 className="font-black text-white text-sm mb-1">Kredi Yükle & Şarkı Ara</h4>
+                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bakiye yükle, binlerce Spotify şarkısı arasından dilediğini seç.</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full gold-gradient-bg text-stone-950 font-black flex items-center justify-center shrink-0">3</div>
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">3</div>
                   <div>
-                    <h4 className="font-bold text-white">Şarkını Çaldır</h4>
-                    <p className="text-amber-200/60">Sıraya gir, diğer dinleyicilerden oy alarak sıranı öne geçir ve şarkının keyfini çıkar.</p>
+                    <h4 className="font-black text-white text-sm mb-1">Şarkını Çaldır</h4>
+                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Sıraya gir, diğer dinleyicilerden oy alarak sıranı öne geçir ve şarkının keyfini çıkar.</p>
                   </div>
                 </div>
               </div>
             )}
 
             {activeModal === 'terms' && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* 4-Tab Switcher */}
-                <div className="flex bg-black/40 p-1 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth snap-x">
+                <div className="flex bg-black/40 p-1.5 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth snap-x">
                   <button 
                     onClick={() => setActiveLegalTab('kvkk')} 
-                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
                   >
                     KVKK
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('consent')} 
-                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
                   >
                     Açık Rıza
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('cookie')} 
-                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
                   >
-                    Çerez Politikası
+                    Çerez
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('terms')} 
-                    className={`flex-1 min-w-[max-content] px-3 py-2 text-[10px] font-bold rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
                   >
-                    Hizmet Koşulları
+                    Koşullar
                   </button>
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-3 min-h-[220px]">
+                <div className="bg-[#1A1A1A]/60 rounded-2xl p-5 border border-white/5 space-y-4 min-h-[250px] shadow-inner">
                   {activeLegalTab === 'kvkk' && (
-                    <>
-                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">KVKK Aydınlatma Metni</h4>
-                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
-                        <strong className="text-white">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.<br /><br />
-                        <strong className="text-white">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, Spotify hesabı kamuya açık kullanıcı kimliği, mekân içi şarkı istek geçmişi.<br /><br />
-                        <strong className="text-white">Veri İşleme Amacı:</strong> İnteraktif müzik kuyruğu yönetimi, güvenli oturum doğrulama ve mekân içi sıralama hizmeti sunulması.<br /><br />
-                        <strong className="text-white">Haklar (KVKK Madde 11):</strong> Kullanıcı profili ayarlarından "Hesabı Sil" özelliğini kullanarak tüm verilerini dilediği an silme hakkına sahiptir.
-                      </p>
-                    </>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">KVKK Aydınlatma Metni</h4>
+                      <div className="space-y-3 text-xs text-amber-200/70 font-medium leading-relaxed">
+                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.</p>
+                        <div className="w-8 h-px bg-white/10" />
+                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, Spotify hesabı kamuya açık kullanıcı kimliği, mekân içi şarkı istek geçmişi.</p>
+                        <div className="w-8 h-px bg-white/10" />
+                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Veri İşleme Amacı:</strong> İnteraktif müzik kuyruğu yönetimi, güvenli oturum doğrulama ve mekân içi sıralama hizmeti sunulması.</p>
+                        <div className="w-8 h-px bg-white/10" />
+                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Haklar (KVKK Madde 11):</strong> Kullanıcı profili ayarlarından "Hesabı Sil" özelliğini kullanarak tüm verilerini dilediği an silme hakkına sahiptir.</p>
+                      </div>
+                    </motion.div>
                   )}
 
                   {activeLegalTab === 'consent' && (
-                    <>
-                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Açık Rıza Metni</h4>
-                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Açık Rıza Metni</h4>
+                      <p className="text-amber-200/70 text-xs font-medium leading-relaxed">
                         Kullanıcı, Muzikors platformunda hesabını oluştururken ve hizmeti kullanırken; kişisel verilerinin ve oturum bilgilerinin yüksek güvenlik standartlarına sahip bulut veritabanı altyapısında (Supabase) saklanmasına, işlenmesine ve yurt dışı sunucu aktarımlarına özgür iradesiyle açık rıza göstermektedir.
                       </p>
-                    </>
+                    </motion.div>
                   )}
 
                   {activeLegalTab === 'cookie' && (
-                    <>
-                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Çerez Politikası</h4>
-                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
-                        Muzikors, oturum durumunun korunması, Spotify API erişim jetonlarının (tokens) güvenliği ve kullanıcı tercihlerinin hatırlanması amacıyla zorunlu teknik çerezler ve localStorage (yerel depolama) teknolojileri kullanmaktadır.<br /><br />
-                        Bu çerezler reklam/pazarlama amacıyla kullanılmaz ve üçüncü şahıslara satılmaz.
-                      </p>
-                    </>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Çerez Politikası</h4>
+                      <div className="space-y-3 text-amber-200/70 text-xs font-medium leading-relaxed">
+                        <p>
+                          Muzikors, oturum durumunun korunması, Spotify API erişim jetonlarının (tokens) güvenliği ve kullanıcı tercihlerinin hatırlanması amacıyla zorunlu teknik çerezler ve localStorage (yerel depolama) teknolojileri kullanmaktadır.
+                        </p>
+                        <div className="w-8 h-px bg-white/10" />
+                        <p>
+                          Bu çerezler reklam/pazarlama amacıyla <strong className="text-white">kullanılmaz</strong> ve üçüncü şahıslara <strong className="text-white">satılmaz</strong>.
+                        </p>
+                      </div>
+                    </motion.div>
                   )}
 
                   {activeLegalTab === 'terms' && (
-                    <>
-                      <h4 className="font-bold text-[#E5A93C] text-sm flex items-center gap-2">Hizmet Koşulları & İade Politikası</h4>
-                      <p className="text-amber-200/60 text-[11px] leading-relaxed">
-                        Yüklenen krediler telifli içerik satın alma ücreti değil, mekân içi müzik kuyruğundaki "Sıralama Önceliği Yazılım Bedeli"dir.<br /><br />
-                        Dijital hizmet anında ifa edildiğinden bakiye ve kredi harcamaları iade edilemez.
-                      </p>
-                    </>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Hizmet Koşulları & İade Politikası</h4>
+                      <div className="space-y-3 text-amber-200/70 text-xs font-medium leading-relaxed">
+                        <p>
+                          Yüklenen krediler telifli içerik satın alma ücreti değil, mekân içi müzik kuyruğundaki <strong className="text-white">"Sıralama Önceliği Yazılım Bedeli"</strong>dir.
+                        </p>
+                        <div className="w-8 h-px bg-white/10" />
+                        <p className="text-orange-300 font-bold">
+                          ⚠️ Dijital hizmet anında ifa edildiğinden bakiye ve kredi harcamaları iade edilemez.
+                        </p>
+                      </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
