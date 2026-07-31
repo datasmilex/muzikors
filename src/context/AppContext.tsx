@@ -465,22 +465,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // PRIMARY SOURCE OF TRUTH FOR NOW PLAYING: venues.current_track_info
         if (venueData?.current_track_info) {
           const trackInfo = venueData.current_track_info;
-          setNowPlaying({
-            id: trackInfo.spotify_track_id || playingRow?.id || 'live-track',
-            title: trackInfo.song_title || 'Bilinmeyen Şarkı',
-            artist: trackInfo.artist || 'Bilinmeyen Sanatçı',
-            albumCover: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            coverUrl: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            album_art: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-            spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
-            durationMs: 210000,
-            duration: 210,
-            creditCost: playingRow?.credits_spent ?? 0,
-            votes: playingRow?.votes ?? 0,
-            requestedBy: trackInfo.requested_by_name || 'Mekan Listesi',
-            requestedByUserId: trackInfo.requested_by_user_id || undefined,
-            requestedAt: 'Canli',
-            isPlaying: true,
+          setNowPlaying(prev => {
+            const isSameTrack = prev?.title === trackInfo.song_title || prev?.id === trackInfo.spotify_track_id;
+            return {
+              id: trackInfo.spotify_track_id || playingRow?.id || 'live-track',
+              title: trackInfo.song_title || 'Bilinmeyen Şarkı',
+              artist: trackInfo.artist || 'Bilinmeyen Sanatçı',
+              albumCover: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+              coverUrl: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+              album_art: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+              spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
+              durationMs: prev?.durationMs || 210000,
+              duration: prev?.duration || 210,
+              creditCost: playingRow?.credits_spent ?? prev?.creditCost ?? 0,
+              votes: playingRow?.votes ?? prev?.votes ?? 0,
+              requestedBy: (isSameTrack && prev?.requestedByUserId) ? prev.requestedBy : (trackInfo.requested_by_name || 'Mekan Listesi'),
+              requestedByUserId: (isSameTrack && prev?.requestedByUserId) ? prev.requestedByUserId : (trackInfo.requested_by_user_id || undefined),
+              requestedAt: 'Canli',
+              isPlaying: true,
+            };
           });
           setIsPlayingAudio(true);
         } else if (playingRow) {
