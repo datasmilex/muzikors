@@ -80,7 +80,7 @@ export const QrScannerModal: React.FC = () => {
               audio: false
             });
           } catch (fallbackErr) {
-            console.error('[Rear Camera Fallback Error]', fallbackErr);
+            console.warn('[Rear Camera Fallback] Device not found or inaccessible.');
           }
         }
 
