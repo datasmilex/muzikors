@@ -25,14 +25,14 @@ export const LeaderboardModal: React.FC = () => {
       if (activeTab === 'users') {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, name, full_name, avatar_url, total_songs_requested')
+          .select('id, full_name, avatar_url, total_songs_requested')
           .order('total_songs_requested', { ascending: false })
           .limit(50);
         
         if (profiles && !error) {
           const list = profiles.map((p: any) => ({
             id: p.id,
-            name: p.name || p.full_name || 'Kullanıcı',
+            name: p.full_name || 'Kullanıcı',
             avatar: p.avatar_url,
             total_songs_requested: p.total_songs_requested || 0
           }));
