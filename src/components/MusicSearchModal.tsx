@@ -406,7 +406,7 @@ export const MusicSearchModal: React.FC = () => {
                                 <AlertTriangle className="w-3 h-3 text-red-400" />
                                 🔞 Küfürlü Şarkı (Mekân Filtresi Aktif)
                               </span>
-                            ) : cost === null ? (
+                            ) : finalCost === null ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-extrabold shrink-0">
                                 <AlertTriangle className="w-3 h-3 text-red-400" />
                                 7+ Dk (Eklenemez)
@@ -430,7 +430,7 @@ export const MusicSearchModal: React.FC = () => {
                           <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[10px] font-bold border border-red-500/20">
                             🔞 Sansürlü
                           </span>
-                        ) : cost === null ? (
+                        ) : finalCost === null ? (
                           <span className="px-2.5 py-1 rounded-xl bg-stone-900/90 text-red-300/80 text-[11px] font-bold border border-red-500/20">
                             {">7 Dk"}
                           </span>
