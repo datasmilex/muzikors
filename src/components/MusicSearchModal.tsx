@@ -123,7 +123,7 @@ export const MusicSearchModal: React.FC = () => {
   }, [searchQuery, activeTab, activeVenue?.id]);
 
 
-  if (activeModal !== 'search') return null;
+  
 
   const formatDuration = (duration_ms: number) => {
     const minutes = Math.floor(duration_ms / 60000);
@@ -162,12 +162,14 @@ export const MusicSearchModal: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {activeModal === 'search' && (<>
+
       <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -177,7 +179,7 @@ export const MusicSearchModal: React.FC = () => {
         <motion.div
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
           className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
         >
@@ -386,24 +388,25 @@ export const MusicSearchModal: React.FC = () => {
                   const isBlocked = finalCost === null || isExplicitBlocked;
                   const canAfford = (user?.credits ?? 0) >= (finalCost ?? 0);
 
-                  return (
+                                    return (
                     <div 
                       key={track.id}
-                      className={`relative group transition-all duration-500 hover:-translate-y-2 hover:z-50 ${idx !== 0 ? '-mt-3' : ''}`}
+                      className={`relative group transition-all duration-300 hover:-translate-y-1 ${idx !== 0 ? 'mt-1.5' : ''}`}
                       style={{ zIndex }}
                     >
                       <div
                         onClick={() => !isBlocked && setSelectedTrack(track)}
-                        className={`rounded-2xl p-3.5 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
+                        className={`rounded-[1.25rem] p-2 flex items-center justify-between border transition-all duration-300 ${
                           isBlocked
-                            ? 'bg-black/60 opacity-60 border-red-500/20 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]'
+                            ? 'bg-black/40 opacity-50 border-red-500/10'
                             : isSelected
-                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/60 shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02] cursor-pointer'
-                            : 'bg-[#1A1A1A]/95 border-[#D4AF37]/20 shadow-[0_-5px_20px_rgba(0,0,0,0.7)] hover:border-[#D4AF37]/40 hover:bg-[#221811] cursor-pointer'
+                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/50 shadow-[0_5px_15px_rgba(212,175,55,0.15)] scale-[1.01] cursor-pointer'
+                            : 'bg-white/5 border-transparent hover:border-white/10 hover:bg-white/10 cursor-pointer'
                         }`}
                       >
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
-                          <div className="relative w-14 h-14 rounded-[1rem] overflow-hidden border border-[#D4AF37]/30 shadow-md shrink-0">
+                        <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
+                          {/* Compact Album Cover */}
+                          <div className="relative w-10 h-10 rounded-[0.6rem] overflow-hidden shrink-0 shadow-sm border border-white/5">
                             <img
                               src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
                               alt={track.title}
@@ -414,47 +417,42 @@ export const MusicSearchModal: React.FC = () => {
                               className="w-full h-full object-cover"
                             />
                             {isSelected && (
-                              <div className="absolute inset-0 bg-[#D4AF37]/20 flex items-center justify-center backdrop-blur-[2px]">
-                                <Check className="w-6 h-6 text-white drop-shadow-md stroke-[3]" />
+                              <div className="absolute inset-0 bg-[#D4AF37]/30 flex items-center justify-center backdrop-blur-sm">
+                                <Check className="w-5 h-5 text-white drop-shadow-md stroke-[3]" />
                               </div>
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h4 className={`text-base font-black truncate ${isSelected ? 'text-white' : 'text-gray-100'}`}>{track.title}</h4>
+                          
+                          {/* Title & Artist - Single Column */}
+                          <div className="min-w-0 flex-1 flex flex-col justify-center py-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className={`text-[13px] font-black truncate leading-tight ${isSelected ? 'text-white' : 'text-gray-100'}`}>
+                                {track.title}
+                              </h4>
                               {isExplicitBlocked ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
-                                  <AlertTriangle className="w-3 h-3" />
-                                  Sansürlü
-                                </span>
+                                <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
                               ) : finalCost === null ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
-                                  <AlertTriangle className="w-3 h-3" />
-                                  7+ Dk (Eklenemez)
-                                </span>
+                                <Clock className="w-3 h-3 text-red-400 shrink-0" />
                               ) : null}
                             </div>
-                            <p className="text-xs font-semibold text-[#D4AF37] truncate flex items-center gap-2">
-                              <span>{track.artist}</span>
-                              {durMs > 0 && (
-                                <>
-                                  <span className="text-white/20">•</span>
-                                  <span className="text-amber-200/50">⏱️ {formatDuration(durMs)}</span>
-                                </>
-                              )}
+                            <p className="text-[11px] font-semibold text-gray-400 truncate mt-0.5 leading-tight">
+                              {track.artist}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 pl-3">
+                        {/* Right side: Duration + Action Button */}
+                        <div className="flex items-center gap-3 shrink-0 pr-1">
+                          {durMs > 0 && !isBlocked && (
+                            <span className="text-[11px] font-semibold text-gray-400/80 tracking-wide">
+                              {formatDuration(durMs)}
+                            </span>
+                          )}
+                          
                           {isExplicitBlocked ? (
-                            <span className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest border border-red-500/20 shadow-inner">
-                              Engelli
-                            </span>
+                            <span className="text-[9px] text-red-400/80 font-bold uppercase tracking-wider">Engelli</span>
                           ) : finalCost === null ? (
-                            <span className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest border border-red-500/20 shadow-inner">
-                              &gt;7 Dk
-                            </span>
+                            <span className="text-[9px] text-red-400/80 font-bold uppercase tracking-wider">&gt;7 Dk</span>
                           ) : (
                             <button
                               onClick={(e) => {
@@ -463,23 +461,16 @@ export const MusicSearchModal: React.FC = () => {
                                 handleConfirmRequest(track);
                               }}
                               disabled={cooldown.active || !canAfford || submittingTrackId === track.id}
-                              className={`px-4 py-2 rounded-[1rem] font-black text-xs flex items-center gap-1.5 shadow-lg transition-all duration-300 ${
+                              className={`h-7 px-3.5 rounded-full font-black text-[10px] flex items-center shadow-sm transition-all duration-300 ${
                                 !canAfford || submittingTrackId === track.id
-                                  ? 'bg-black/50 text-amber-200/30 border border-white/5 cursor-not-allowed'
-                                  : 'bg-white/5 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 active:scale-95 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]'
+                                  ? 'bg-black/30 text-gray-500 border border-white/5 cursor-not-allowed'
+                                  : 'bg-white/10 text-white border border-white/10 hover:bg-white/20 active:scale-95'
                               }`}
                             >
                               {submittingTrackId === track.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
+                                <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
-                                <Plus className="w-4 h-4 stroke-[3]" />
-                              )}
-                              {submittingTrackId === track.id ? (
-                                <span>İşleniyor</span>
-                              ) : (
-                                <div className="flex items-center gap-1">
-                                  <span>Seç</span>
-                                </div>
+                                <span>SEÇ</span>
                               )}
                             </button>
                           )}
@@ -560,6 +551,8 @@ export const MusicSearchModal: React.FC = () => {
           )}
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

@@ -9,7 +9,7 @@ export const LoginModal: React.FC = () => {
   const { activeModal, closeModal, loginWithProvider, loginPromptReason, showToast, openModal } = useApp();
   const [legalConsent, setLegalConsent] = useState(false);
 
-  if (activeModal !== 'login') return null;
+  
 
   const handleLoginClick = (provider: 'google') => {
     if (!legalConsent) {
@@ -21,12 +21,14 @@ export const LoginModal: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {activeModal === 'login' && (<>
+
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/85 backdrop-blur-2xl"
         />
@@ -35,7 +37,7 @@ export const LoginModal: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          exit={{ opacity: 0, y: "100%" }}
           className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-3xl p-5 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] overflow-hidden flex flex-col justify-between"
         >
           {/* Header Bar */}
@@ -133,6 +135,8 @@ export const LoginModal: React.FC = () => {
           {/* Legacy Legal Info Text Removed in favor of mandatory checkbox */}
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

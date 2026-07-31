@@ -26,7 +26,7 @@ export const InfoModals: React.FC = () => {
     'terms',
   ].includes(activeModal);
 
-  if (!isInfoModal) return null;
+  
 
   const handlePartnerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +46,14 @@ export const InfoModals: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {isInfoModal && (<>
+
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -61,7 +63,7 @@ export const InfoModals: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          exit={{ opacity: 0, y: "100%" }}
           className="relative w-full max-w-sm bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}
@@ -351,6 +353,8 @@ export const InfoModals: React.FC = () => {
           </div>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

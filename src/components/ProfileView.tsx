@@ -9,16 +9,18 @@ export const ProfileView: React.FC = () => {
   const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  if (activeModal !== 'profile') return null;
+  
 
   return (
     <AnimatePresence>
+      {activeModal === 'profile' && (<>
+
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Cinematic Deep Black Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/90 backdrop-blur-xl"
@@ -28,7 +30,7 @@ export const ProfileView: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="relative w-full max-w-sm bg-gradient-to-b from-[#1C130D] to-black rounded-3xl p-6 z-10 shadow-[0_0_50px_rgba(212,175,55,0.1)] border border-[#D4AF37]/20 overflow-hidden"
         >
@@ -169,6 +171,8 @@ export const ProfileView: React.FC = () => {
           </div>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

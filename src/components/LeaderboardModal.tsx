@@ -22,68 +22,39 @@ export const LeaderboardModal: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
       if (activeTab === 'users') {
-        const { data: logData, error: logErr } = await supabase
-          .from('song_requests_log')
-          .select('user_id')
-          .gte('created_at', firstDayOfMonth);
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('id, name, full_name, avatar_url, total_songs_requested')
+          .order('total_songs_requested', { ascending: false })
+          .limit(50);
         
-        const counts: { [key: string]: number } = {};
-        if (!logErr && logData) {
-          logData.forEach((row: any) => {
-            if (row.user_id) counts[row.user_id] = (counts[row.user_id] || 0) + 1;
-          });
-        }
-        const userIds = Object.keys(counts);
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, name, full_name, avatar_url')
-            .in('id', userIds);
-          
-          if (profiles) {
-            const list = profiles.map((p: any) => ({
-              id: p.id,
-              name: p.name || p.full_name || 'Kullanıcı',
-              avatar: p.avatar_url,
-              total_songs_requested: counts[p.id] || 0
-            })).sort((a, b) => b.total_songs_requested - a.total_songs_requested).slice(0, 20);
-            setUsers(list);
-          }
+        if (profiles && !error) {
+          const list = profiles.map((p: any) => ({
+            id: p.id,
+            name: p.name || p.full_name || 'Kullanıcı',
+            avatar: p.avatar_url,
+            total_songs_requested: p.total_songs_requested || 0
+          }));
+          setUsers(list);
         } else {
           setUsers([]);
         }
       } else {
-        const { data: logData, error: logErr } = await supabase
-          .from('song_requests_log')
-          .select('venue_id')
-          .gte('created_at', firstDayOfMonth);
+        const { data: venueData, error } = await supabase
+          .from('venues')
+          .select('id, venue_name, logo_url, total_requests')
+          .order('total_requests', { ascending: false })
+          .limit(50);
         
-        const counts: { [key: string]: number } = {};
-        if (!logErr && logData) {
-          logData.forEach((row: any) => {
-            if (row.venue_id) counts[row.venue_id] = (counts[row.venue_id] || 0) + 1;
-          });
-        }
-        const venueIds = Object.keys(counts);
-        if (venueIds.length > 0) {
-          const { data: venueData } = await supabase
-            .from('venues')
-            .select('id, venue_name, logo_url')
-            .in('id', venueIds);
-          
-          if (venueData) {
-            const list = venueData.map((v: any) => ({
-              id: v.id,
-              venue_name: v.venue_name,
-              logo_url: v.logo_url,
-              total_songs_requested: counts[v.id] || 0
-            })).sort((a, b) => b.total_songs_requested - a.total_songs_requested).slice(0, 20);
-            setVenues(list);
-          }
+        if (venueData && !error) {
+          const list = venueData.map((v: any) => ({
+            id: v.id,
+            venue_name: v.venue_name,
+            logo_url: v.logo_url,
+            total_songs_requested: v.total_requests || 0
+          }));
+          setVenues(list);
         } else {
           setVenues([]);
         }
@@ -95,7 +66,7 @@ export const LeaderboardModal: React.FC = () => {
     }
   };
 
-  if (activeModal !== 'leaderboard') return null;
+  
 
   const maskName = (name: string) => {
     if (!name) return 'Anonim Müşteri';
@@ -109,12 +80,14 @@ export const LeaderboardModal: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {activeModal === 'leaderboard' && (<>
+
       <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-4">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -124,7 +97,7 @@ export const LeaderboardModal: React.FC = () => {
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
-          exit={{ y: '100%' }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
           className="relative w-full max-w-md h-[80vh] sm:h-[600px] sm:rounded-[2.5rem] rounded-t-[2.5rem] flex flex-col overflow-hidden glass-panel-gold border border-[#D4AF37]/30 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] bg-[#120C08]"
         >
@@ -229,7 +202,7 @@ export const LeaderboardModal: React.FC = () => {
                   );
                 })
               ) : (
-                <div className="text-center text-zinc-500 mt-10 font-medium">Bu ay henüz kayıt bulunamadı.</div>
+                <div className="text-center text-zinc-500 mt-10 font-medium">Henüz kayıt bulunamadı.</div>
               )
             ) : (
               venues.length > 0 ? (
@@ -281,12 +254,14 @@ export const LeaderboardModal: React.FC = () => {
                   );
                 })
               ) : (
-                <div className="text-center text-zinc-500 mt-10 font-medium">Bu ay henüz kayıt bulunamadı.</div>
+                <div className="text-center text-zinc-500 mt-10 font-medium">Henüz kayıt bulunamadı.</div>
               )
             )}
           </div>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

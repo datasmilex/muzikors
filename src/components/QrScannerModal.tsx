@@ -14,7 +14,7 @@ export const QrScannerModal: React.FC = () => {
   const isScanningRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (activeModal !== 'qr') return;
+    
 
     let mediaStream: MediaStream | null = null;
     let animFrameId: number | null = null;
@@ -185,16 +185,20 @@ export const QrScannerModal: React.FC = () => {
     };
   }, [activeModal, bindVenueById, closeModal, showToast]);
 
-  if (activeModal !== 'qr') return null;
+  
 
   return (
     <AnimatePresence>
+      {activeModal === 'qr' && (<>
+
+      {activeModal === 'qr' && (<>
+
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -204,7 +208,7 @@ export const QrScannerModal: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
           className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-3xl p-5 z-10 shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden text-center glass-panel-gold"
         >
@@ -258,6 +262,10 @@ export const QrScannerModal: React.FC = () => {
           </p>
         </motion.div>
       </div>
+    
+      </>)}
+    
+      </>)}
     </AnimatePresence>
   );
 };

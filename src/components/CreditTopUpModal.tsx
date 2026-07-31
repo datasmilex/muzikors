@@ -12,18 +12,20 @@ export const CreditTopUpModal: React.FC = () => {
   const [isLegalAccepted, setIsLegalAccepted] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
-  if (activeModal !== 'topup') return null;
+  
 
   const selectedPack = CREDIT_PACKAGES.find((p) => p.id === selectedPackId) || CREDIT_PACKAGES[1];
 
   return (
     <AnimatePresence>
+      {activeModal === 'topup' && (<>
+
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -33,9 +35,9 @@ export const CreditTopUpModal: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-4 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] overflow-hidden glass-panel-gold border border-[#D4AF37]/30 backdrop-blur-3xl"
+          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-4 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] glass-panel-gold border border-[#D4AF37]/30 backdrop-blur-3xl"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
@@ -63,7 +65,7 @@ export const CreditTopUpModal: React.FC = () => {
           </div>
 
           {/* Credit Package Options (Compact) */}
-          <div className="space-y-2.5 my-4 relative z-10">
+          <div className="space-y-3 mt-5 mb-4 relative z-10">
             {CREDIT_PACKAGES.map((pkg) => {
               const isSelected = selectedPackId === pkg.id;
               return (
@@ -78,7 +80,7 @@ export const CreditTopUpModal: React.FC = () => {
                 >
                   {/* Badge */}
                   {pkg.badge && (
-                    <span className="absolute -top-2 right-3 gold-gradient-bg text-stone-950 font-black text-[8px] px-2 py-0.5 rounded-full shadow-[0_5px_10px_rgba(212,175,55,0.3)] uppercase tracking-widest z-10">
+                    <span className="absolute -top-2.5 right-4 gold-gradient-bg text-stone-950 font-black text-[9px] px-2.5 py-0.5 rounded-full shadow-[0_4px_10px_rgba(212,175,55,0.4)] uppercase tracking-wider z-10">
                       {pkg.badge}
                     </span>
                   )}
@@ -86,7 +88,7 @@ export const CreditTopUpModal: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     {/* Circle Radio Indicator */}
                     <div
-                      className={`w-4 h-4 rounded-full border-[2px] flex items-center justify-center transition-all duration-300 shadow-inner ${
+                      className={`w-4 h-4 shrink-0 rounded-full border-[2px] flex items-center justify-center transition-all duration-300 shadow-inner ${
                         isSelected
                           ? 'border-[#D4AF37] bg-[#D4AF37] text-stone-950 scale-110'
                           : 'border-[#D4AF37]/30 bg-[#120C08] group-hover:border-[#D4AF37]/50'
@@ -96,10 +98,10 @@ export const CreditTopUpModal: React.FC = () => {
                     </div>
 
                     <div>
-                      <div className="flex items-baseline gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`text-sm font-black tracking-tight ${isSelected ? 'text-white' : 'text-gray-200'}`}>+{pkg.credits} <span className="text-[10px] text-[#D4AF37]">Kr.</span></span>
                         {pkg.bonusCredits > 0 && (
-                          <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20 shadow-sm">
+                          <span className="text-[9px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20 shadow-sm whitespace-nowrap">
                             +{pkg.bonusCredits} Hediye
                           </span>
                         )}
@@ -107,11 +109,11 @@ export const CreditTopUpModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-right flex flex-col items-end justify-center">
+                  <div className="text-right flex flex-col items-end justify-center shrink-0 pl-2">
                     {pkg.oldPriceTL && (
-                      <span className="text-[9px] text-gray-500 font-bold line-through mb-0.5">₺{pkg.oldPriceTL}</span>
+                      <span className="text-[10px] text-gray-500 font-bold line-through mb-0.5">₺{pkg.oldPriceTL}</span>
                     )}
-                    <span className={`text-sm font-black drop-shadow-md ${isSelected ? 'text-[#D4AF37]' : 'text-amber-100/80'}`}>₺{pkg.priceTL}</span>
+                    <span className={`text-[15px] font-black drop-shadow-md ${isSelected ? 'text-[#D4AF37]' : 'text-amber-100/80'}`}>₺{pkg.priceTL}</span>
                   </div>
                 </button>
               );
@@ -163,6 +165,8 @@ export const CreditTopUpModal: React.FC = () => {
           </button>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

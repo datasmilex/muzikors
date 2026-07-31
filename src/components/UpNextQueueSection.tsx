@@ -66,7 +66,7 @@ export const UpNextQueueSection: React.FC = () => {
 
       {/* Requirement 1: Sleek Empty Queue State Message */}
       {filteredQueue.length === 0 ? (
-        <div className="glass-panel-gold rounded-[2rem] p-8 text-center border border-[#D4AF37]/30 flex flex-col items-center justify-center space-y-4 my-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-black/30 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 flex flex-col items-center justify-center space-y-4 my-2 shadow-sm">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner">
             <QrCode className="w-8 h-8 animate-pulse drop-shadow-lg" />
           </div>
@@ -99,7 +99,7 @@ export const UpNextQueueSection: React.FC = () => {
                 <div className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
                   isFirst
                     ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02]'
-                    : 'border-[#D4AF37]/20 bg-[#1A1A1A]/95 shadow-[0_-8px_20px_rgba(0,0,0,0.8)] hover:border-[#D4AF37]/40 hover:bg-[#221811]'
+                    : 'border-white/5 bg-[#1A1A1A]/30 shadow-[0_-8px_20px_rgba(0,0,0,0.3)] hover:border-white/10 hover:bg-[#1A1A1A]/50'
                 }`}>
                   
                   {/* Left: Rank & Artwork & Track Details */}

@@ -9,11 +9,13 @@ export const VenueInfoModal: React.FC = () => {
   const { activeModal, closeModal, activeVenue, showToast } = useApp();
   const [copied, setCopied] = useState(false);
 
-  if (activeModal !== 'venue_info' || !activeVenue) return null;
+  
 
-  const wifiName = activeVenue.wifi_name || (activeVenue as any).wifi_ssid;
-  const wifiPass = activeVenue.wifi_password || (activeVenue as any).wifi_pass;
-  const menuUrl = activeVenue.menu_link || (activeVenue as any).menu_url;
+  if (!activeVenue) return null;
+
+  const wifiName = (activeVenue as any).wifi_name || (activeVenue as any).wifi_ssid;
+  const wifiPass = (activeVenue as any).wifi_password || (activeVenue as any).wifi_pass;
+  const menuUrl = (activeVenue as any).menu_link || (activeVenue as any).menu_url;
   const hasWifi = Boolean(wifiName?.trim()) || Boolean(wifiPass?.trim());
   const hasMenu = Boolean(menuUrl?.trim());
 
@@ -28,12 +30,14 @@ export const VenueInfoModal: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {activeModal === 'venue_info' && (<>
+
       <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -43,7 +47,7 @@ export const VenueInfoModal: React.FC = () => {
         <motion.div
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
           className="relative w-full max-w-md h-[85vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl flex flex-col overflow-hidden glass-panel-gold border border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] bg-[#120C08]"
         >
@@ -68,10 +72,10 @@ export const VenueInfoModal: React.FC = () => {
           <div className="flex flex-col items-center space-y-5">
             <div className="w-[140px] h-[140px] rounded-full border border-[#D4AF37]/40 p-1.5 flex items-center justify-center bg-gradient-to-br from-[#1C130D] to-[#120C08] shadow-[0_0_40px_rgba(212,175,55,0.25)] overflow-hidden relative group">
               <div className="absolute inset-0 bg-[#D4AF37]/5 animate-pulse rounded-full pointer-events-none" />
-              {activeVenue.logo_url?.trim() ? (
+              {(activeVenue as any).logo_url?.trim() ? (
                 <img 
-                  src={activeVenue.logo_url} 
-                  alt={activeVenue.venue_name || activeVenue.name} 
+                  src={(activeVenue as any).logo_url} 
+                  alt={(activeVenue as any).venue_name || (activeVenue as any).name} 
                   className="w-full h-full object-cover rounded-full z-10"
                 />
               ) : (
@@ -79,7 +83,7 @@ export const VenueInfoModal: React.FC = () => {
               )}
             </div>
             <div className="text-center space-y-2">
-              <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name || activeVenue.name}</h1>
+              <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">{(activeVenue as any).venue_name || (activeVenue as any).name}</h1>
               {hasWorkingHours && (
                 <div className="inline-flex items-center justify-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300 text-xs font-semibold shadow-sm">
                   <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -153,6 +157,8 @@ export const VenueInfoModal: React.FC = () => {
         </div>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };

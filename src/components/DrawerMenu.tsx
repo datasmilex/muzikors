@@ -39,7 +39,7 @@ export const DrawerMenu: React.FC = () => {
     }
   }, [activeModal, user, activeVenue]);
 
-  if (activeModal !== 'drawer') return null;
+  
 
   // Calculate daily reward dot
   const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
@@ -57,12 +57,14 @@ export const DrawerMenu: React.FC = () => {
 
   return (
     <AnimatePresence>
+      {activeModal === 'drawer' && (<>
+
       <div className="fixed inset-0 z-[100] flex">
         {/* Cinematic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
           className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
@@ -250,6 +252,8 @@ export const DrawerMenu: React.FC = () => {
           </div>
         </motion.div>
       </div>
+    
+      </>)}
     </AnimatePresence>
   );
 };
