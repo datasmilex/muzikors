@@ -61,16 +61,41 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-2">
+        {user && (
+          <div className="flex items-center gap-1.5 mr-1">
+            {/* Credits Button */}
+            <button
+              onClick={() => openModal('topup')}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 hover:scale-105 active:scale-95 transition-all shadow-inner"
+            >
+              <span className="text-[11px] font-black text-[#D4AF37] drop-shadow-md">
+                {user.credits + (user.promo_credits || 0)} <span className="text-[9px] opacity-70">Kr.</span>
+              </span>
+              <div className="w-4 h-4 rounded-full bg-[#D4AF37] flex items-center justify-center text-black">
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </div>
+            </button>
+
+            {/* QR Scanner Button */}
+            <button
+              onClick={() => openModal('qr')}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#D4AF37] text-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+            >
+              <QrCode className="w-4 h-4" strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+
         <button
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="relative w-11 h-11 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden hover:border-[#D4AF37] hover:scale-105 transition-all active:scale-95 flex items-center justify-center shadow-inner"
+          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden hover:border-[#D4AF37] hover:scale-105 transition-all active:scale-95 flex items-center justify-center shadow-inner shrink-0"
         >
           {user && user.avatar ? (
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
           ) : (
             <User className="w-5 h-5 text-[#D4AF37]" />
           )}
-          {user && <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-black shadow-[0_0_8px_#10b981]" />}
+          {user && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-black shadow-[0_0_8px_#10b981]" />}
         </button>
       </div>
     </header>
