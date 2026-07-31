@@ -47,7 +47,7 @@ export const LoginModal: React.FC = () => {
           <div className="flex items-center justify-between mb-4 relative z-10">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
-              <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] uppercase">Yetkilendirme</span>
+              <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] uppercase">Giriş Yap</span>
             </div>
             <button
               onClick={closeModal}
@@ -68,8 +68,8 @@ export const LoginModal: React.FC = () => {
 
           {/* Icon & Title */}
           <div className="flex flex-col items-center text-center mb-6 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-black/50 border border-[#D4AF37]/30 flex items-center justify-center shadow-inner mb-3">
-              <Music className="w-6 h-6 text-[#D4AF37] drop-shadow-md" />
+            <div className="w-14 h-14 rounded-2xl bg-black/50 border border-[#D4AF37]/30 flex items-center justify-center shadow-inner mb-3 overflow-hidden p-2">
+              <img src="/logo.png" alt="Muzikors Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
 
             <h1 className="text-2xl font-black text-white tracking-tight drop-shadow-sm mb-1">
