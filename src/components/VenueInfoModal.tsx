@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Store, BookOpen, Wifi, Copy, Check, Clock } from 'lucide-react';
+import { ArrowLeft, Store, BookOpen, Wifi, Copy, Check, Clock, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const VenueInfoModal: React.FC = () => {
@@ -28,19 +28,37 @@ export const VenueInfoModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[60] flex flex-col bg-[#0A0604]">
-        {/* Header */}
-        <div className="flex items-center px-4 py-4 border-b border-[#D4AF37]/20 bg-[#120C08]">
-          <button 
-            onClick={closeModal}
-            className="p-2 rounded-xl bg-[#1C130D] border border-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h2 className="text-lg font-bold text-white mx-auto pr-9">
-            Mekân Bilgileri
-          </h2>
-        </div>
+      <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeModal}
+          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+        />
+
+        {/* Modal Container */}
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+          className="relative w-full max-w-md h-[85vh] sm:h-[650px] sm:rounded-[2rem] rounded-t-[2rem] flex flex-col overflow-hidden glass-panel border border-[#D4AF37]/20 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] bg-[#120C08]"
+        >
+          {/* Header */}
+          <div className="flex-none p-4 flex items-center justify-between border-b border-[#D4AF37]/20">
+            <div className="flex items-center gap-2 text-[#D4AF37]">
+              <Store className="w-5 h-5" />
+              <h2 className="text-lg font-bold">Mekân Bilgileri</h2>
+            </div>
+            <button
+              onClick={closeModal}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center space-y-8 pb-20">
@@ -131,6 +149,7 @@ export const VenueInfoModal: React.FC = () => {
 
           </div>
         </div>
+        </motion.div>
       </div>
     </AnimatePresence>
   );

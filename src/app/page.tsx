@@ -3,13 +3,11 @@
 import React from 'react';
 import { AppProvider } from '../context/AppContext';
 import { Header } from '../components/Header';
-import { TopRowCards } from '../components/TopRowCards';
 import { GpsBanner } from '../components/GpsBanner';
 import { NowPlayingSection } from '../components/NowPlayingSection';
 import { UpNextQueueSection } from '../components/UpNextQueueSection';
-import { StickyAddMusicButton } from '../components/StickyAddMusicButton';
 import { VenueGuard } from '../components/VenueGuard';
-import { DrawerMenu } from '../components/DrawerMenu';
+import { BottomNav } from '../components/BottomNav';
 import { CreditTopUpModal } from '../components/CreditTopUpModal';
 import { MusicSearchModal } from '../components/MusicSearchModal';
 import { ProfileView } from '../components/ProfileView';
@@ -21,6 +19,7 @@ import { VenueInfoModal } from '../components/VenueInfoModal';
 import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
 import { TvShoutoutModal } from '../components/TvShoutoutModal';
+import { LeaderboardModal } from '../components/LeaderboardModal';
 
 import { HappyHourBanner } from '../components/HappyHourBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -39,7 +38,6 @@ const AppContent = () => {
           <Header />
           <HappyHourBanner />
           <VenueGuard>
-            <TopRowCards />
             <GpsBanner />
             <NowPlayingSection />
             <UpNextQueueSection />
@@ -53,13 +51,12 @@ const AppContent = () => {
                 <a href="/legal/sales" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Mesafeli Satış</a>
               </div>
             </div>
-
-            <StickyAddMusicButton />
+            <BottomNav />
           </VenueGuard>
         </>
       )}
 
-      <DrawerMenu />
+      <LeaderboardModal />
       <CreditTopUpModal />
       <MusicSearchModal />
       <ProfileView />

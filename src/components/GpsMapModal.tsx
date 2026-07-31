@@ -107,21 +107,21 @@ export const GpsMapModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/85 backdrop-blur-xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md"
         />
 
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-          className="relative w-full max-w-md h-[88vh] bg-[#120C08] border-t-2 border-[#D4AF37]/40 rounded-t-[32px] p-5 z-10 shadow-2xl flex flex-col justify-between overflow-hidden"
+          transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+          className="relative w-full max-w-md h-[88vh] sm:h-[650px] sm:rounded-[2rem] rounded-t-[2rem] p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel border border-[#D4AF37]/20 bg-[#120C08]"
         >
           {/* Header */}
           <div className="shrink-0 pb-3 border-b border-[#D4AF37]/20">

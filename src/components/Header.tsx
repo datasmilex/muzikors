@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, User, QrCode } from 'lucide-react';
+import { User, QrCode } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const Header: React.FC = () => {
@@ -9,14 +9,6 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-30 w-full glass-panel border-b border-[#D4AF37]/20 px-4 py-3 flex items-center justify-between shadow-lg">
-      <button
-        onClick={() => openModal('drawer')}
-        className="w-10 h-10 rounded-full flex items-center justify-center bg-[#1C130D]/80 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all active:scale-95"
-        aria-label="Menü Aç"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
-
       <div className="flex items-center gap-2 text-center">
         <img
           src="/logo.png"

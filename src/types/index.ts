@@ -114,7 +114,8 @@ export type ModalType =
   | 'terms'
   | 'daily_reward'
   | 'tvShoutout'
-  | 'venue_info';
+  | 'venue_info'
+  | 'leaderboard';
 
 export interface CooldownState {
   active: boolean;

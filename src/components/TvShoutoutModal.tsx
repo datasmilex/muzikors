@@ -93,12 +93,20 @@ export const TvShoutoutModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeModal}
+          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+        />
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="w-full max-w-sm bg-gradient-to-br from-[#26190F] to-[#120C08] border border-[#D4AF37]/30 rounded-2xl p-5 relative overflow-hidden shadow-2xl"
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+          className="relative w-full max-w-md h-auto sm:rounded-[2rem] rounded-t-[2rem] p-5 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden glass-panel border border-[#D4AF37]/20 bg-[#120C08]"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
