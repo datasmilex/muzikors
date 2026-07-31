@@ -22,6 +22,7 @@ import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
 import { TvShoutoutModal } from '../components/TvShoutoutModal';
 
+import { HappyHourBanner } from '../components/HappyHourBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
 import { useApp } from '../context/AppContext';
 
@@ -36,6 +37,7 @@ const AppContent = () => {
       ) : (
         <>
           <Header />
+          <HappyHourBanner />
           <VenueGuard>
             <TopRowCards />
             <GpsBanner />

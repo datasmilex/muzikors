@@ -6,7 +6,7 @@ import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Pl
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
-import { formatDuration, getSongCreditCost } from '../utils/formatters';
+import { formatDuration, getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -24,10 +24,24 @@ export const MusicSearchModal: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'global' | null>('all');
   
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
+
+  const isHappyHourActive = isHappyHourNow(
+    activeVenue?.is_happy_hour_active || false,
+    activeVenue?.hh_start_time || null,
+    activeVenue?.hh_end_time || null
+  );
+  const hhDiscount = activeVenue?.hh_discount_rate || 0;
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Derived selected track cost
+  const selectedDurMs = selectedTrack ? ((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) : 0;
+  const selectedBaseCost = getSongCreditCost(selectedDurMs);
+  const selectedFinalCost = selectedBaseCost === null ? null : (isHappyHourActive ? calculateDiscountedPrice(selectedBaseCost, hhDiscount) : selectedBaseCost);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
@@ -353,13 +367,14 @@ export const MusicSearchModal: React.FC = () => {
                 searchResults.map((track) => {
                   const isSelected = selectedTrack?.id === track.id;
                   const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                  const cost = getSongCreditCost(durMs);
+                  const baseCost = getSongCreditCost(durMs);
+                  const finalCost = baseCost === null ? null : (isHappyHourActive ? calculateDiscountedPrice(baseCost, hhDiscount) : baseCost);
                   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
                   const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
                   
-                  const isBlocked = cost === null || isExplicitBlocked;
-                  const canAfford = (user?.credits ?? 0) >= (cost ?? 0);
+                  const isBlocked = finalCost === null || isExplicitBlocked;
+                  const canAfford = (user?.credits ?? 0) >= (finalCost ?? 0);
 
                   return (
                     <div
@@ -438,7 +453,17 @@ export const MusicSearchModal: React.FC = () => {
                             ) : (
                               <Plus className="w-3.5 h-3.5 stroke-[3]" />
                             )}
-                            <span>{submittingTrackId === track.id ? 'Eklenecek...' : `İste (${cost} Kredi)`}</span>
+                            {submittingTrackId === track.id ? (
+                              <span>Eklenecek...</span>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <span>İste (</span>
+                                {isHappyHourActive && baseCost !== finalCost && (
+                                  <span className="line-through opacity-50 mr-0.5">{baseCost}</span>
+                                )}
+                                <span className={isHappyHourActive && baseCost !== finalCost ? "text-yellow-100 drop-shadow-md" : ""}>{finalCost} Kredi)</span>
+                              </div>
+                            )}
                           </button>
                         )}
                       </div>
@@ -481,7 +506,10 @@ export const MusicSearchModal: React.FC = () => {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-black text-[#D4AF37] block">10 Kredi</span>
+                  {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
+                    <span className="text-[10px] line-through opacity-50 mr-1 text-white block">{selectedBaseCost} Kredi</span>
+                  )}
+                  <span className="text-xs font-black text-[#D4AF37] block">{selectedFinalCost} Kredi</span>
                   <span className="text-[9px] text-amber-200/50">Bakiyeniz: {user ? user.credits : 0}</span>
                 </div>
               </div>
@@ -489,19 +517,25 @@ export const MusicSearchModal: React.FC = () => {
 
             <button
               onClick={() => handleConfirmRequest()}
-              disabled={!selectedTrack || cooldown.active || getSongCreditCost((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) === null}
+              disabled={!selectedTrack || cooldown.active || selectedFinalCost === null}
               className={`w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl transition-all ${
-                cooldown.active || !selectedTrack || getSongCreditCost((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) === null
+                cooldown.active || !selectedTrack || selectedFinalCost === null
                   ? 'bg-stone-800 text-stone-500 cursor-not-allowed border border-stone-700'
                   : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-[0.98]'
               }`}
             >
               <Coins className="w-5 h-5 text-stone-950" />
-              <span>
-                {cooldown.active
-                  ? `Bekleme Süresi (${formatCooldown(cooldown.remainingSeconds)})`
-                  : `Seçili Şarkıyı İste (${getSongCreditCost(selectedTrack ? ((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) : 0) ?? 10} Kredi)`}
-              </span>
+              {cooldown.active ? (
+                <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <span>Seçili Şarkıyı İste (</span>
+                  {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
+                    <span className="line-through opacity-50 mr-0.5">{selectedBaseCost}</span>
+                  )}
+                  <span className={isHappyHourActive && selectedBaseCost !== selectedFinalCost ? "text-yellow-100 drop-shadow-md" : ""}>{selectedFinalCost ?? 10} Kredi)</span>
+                </div>
+              )}
             </button>
 
             {/* Spotify Branding Compliance */}

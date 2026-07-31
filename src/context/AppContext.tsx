@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { CREDIT_PACKAGES } from '../data/mockData';
 import { supabase } from '../lib/supabaseClient';
-import { getSongCreditCost } from '../utils/formatters';
+import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -719,12 +719,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const trackDurationMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 210000);
-    const requiredCredits = getSongCreditCost(trackDurationMs);
-
-    if (requiredCredits === null) {
+    const baseCredits = getSongCreditCost(trackDurationMs);
+    
+    if (baseCredits === null) {
       showToast('7 dakikadan uzun sarkilar mekan akisi icin eklenemez!');
       return false;
     }
+
+    const isHappyHourActive = isHappyHourNow(
+      activeVenue?.is_happy_hour_active || false,
+      activeVenue?.hh_start_time || null,
+      activeVenue?.hh_end_time || null
+    );
+    const requiredCredits = isHappyHourActive 
+      ? calculateDiscountedPrice(baseCredits, activeVenue?.hh_discount_rate || 0) 
+      : baseCredits;
 
     if (cooldown.active) {
       const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
