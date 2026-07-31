@@ -110,7 +110,7 @@ export const LeaderboardModal: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shadow-inner">
                 <Trophy className="w-5 h-5 drop-shadow-md" />
               </div>
-              <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md">Bu Ayın Sıralamaları</h2>
+              <h2 className="text-lg font-black text-white tracking-tight drop-shadow-md">Tüm Zamanların En İyileri</h2>
             </div>
             <button
               onClick={closeModal}
