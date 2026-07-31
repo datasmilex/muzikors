@@ -22,37 +22,70 @@ export const LeaderboardModal: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
       if (activeTab === 'users') {
-        // Fetch top users globally by total_songs_requested
-        const { data, error } = await supabase
-          .from('users')
-          .select('id, name, avatar, total_songs_requested')
-          .order('total_songs_requested', { ascending: false })
-          .limit(20);
+        const { data: logData, error: logErr } = await supabase
+          .from('song_requests_log')
+          .select('user_id')
+          .gte('created_at', firstDayOfMonth);
         
-        if (!error && data) {
-          setUsers(data);
-        } else {
-          // fallback to profiles if users table doesn't have it
-          const { data: profileData, error: profileErr } = await supabase
-             .from('profiles')
-             .select('id, name, avatar_url, total_songs_requested')
-             .order('total_songs_requested', { ascending: false })
-             .limit(20);
-          if (!profileErr && profileData) {
-            setUsers(profileData.map((u: any) => ({ ...u, avatar: u.avatar_url })));
+        const counts: { [key: string]: number } = {};
+        if (!logErr && logData) {
+          logData.forEach((row: any) => {
+            if (row.user_id) counts[row.user_id] = (counts[row.user_id] || 0) + 1;
+          });
+        }
+        const userIds = Object.keys(counts);
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, name, full_name, avatar_url')
+            .in('id', userIds);
+          
+          if (profiles) {
+            const list = profiles.map((p: any) => ({
+              id: p.id,
+              name: p.name || p.full_name || 'Kullanıcı',
+              avatar: p.avatar_url,
+              total_songs_requested: counts[p.id] || 0
+            })).sort((a, b) => b.total_songs_requested - a.total_songs_requested).slice(0, 20);
+            setUsers(list);
           }
+        } else {
+          setUsers([]);
         }
       } else {
-        // Fetch top venues globally by total_songs_requested
-        const { data, error } = await supabase
-          .from('venues')
-          .select('id, venue_name, total_songs_requested')
-          .order('total_songs_requested', { ascending: false })
-          .limit(20);
+        const { data: logData, error: logErr } = await supabase
+          .from('song_requests_log')
+          .select('venue_id')
+          .gte('created_at', firstDayOfMonth);
+        
+        const counts: { [key: string]: number } = {};
+        if (!logErr && logData) {
+          logData.forEach((row: any) => {
+            if (row.venue_id) counts[row.venue_id] = (counts[row.venue_id] || 0) + 1;
+          });
+        }
+        const venueIds = Object.keys(counts);
+        if (venueIds.length > 0) {
+          const { data: venueData } = await supabase
+            .from('venues')
+            .select('id, venue_name, logo_url')
+            .in('id', venueIds);
           
-        if (!error && data) {
-          setVenues(data);
+          if (venueData) {
+            const list = venueData.map((v: any) => ({
+              id: v.id,
+              venue_name: v.venue_name,
+              logo_url: v.logo_url,
+              total_songs_requested: counts[v.id] || 0
+            })).sort((a, b) => b.total_songs_requested - a.total_songs_requested).slice(0, 20);
+            setVenues(list);
+          }
+        } else {
+          setVenues([]);
         }
       }
     } catch (err) {
@@ -98,7 +131,7 @@ export const LeaderboardModal: React.FC = () => {
           <div className="flex-none p-4 flex items-center justify-between border-b border-[#D4AF37]/20">
             <div className="flex items-center gap-2 text-[#D4AF37]">
               <Trophy className="w-5 h-5" />
-              <h2 className="text-lg font-bold">Sıralamalar</h2>
+              <h2 className="text-lg font-bold">Bu Ayın Sıralamaları</h2>
             </div>
             <button
               onClick={closeModal}

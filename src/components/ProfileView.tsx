@@ -6,95 +6,13 @@ import { X, User, Coins, Music, Trash2, LogOut, Sparkles, Trophy, Loader2, Award
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 
-interface LeaderboardUser {
-  userId: string;
-  fullName: string;
-  avatarUrl: string;
-  songCount: number;
-}
+
 
 export const ProfileView: React.FC = () => {
   const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
-  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
 
-  // ── PERMANENT MONTHLY LEADERBOARD FETCH FROM song_requests_log ─────────
-  useEffect(() => {
-    if (activeModal !== 'profile' || !supabase) return;
 
-    const fetchMonthlyLeaderboard = async () => {
-      setIsLoadingLeaderboard(true);
-      try {
-        const now = new Date();
-        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-        // 1. Fetch permanent logs created this month
-        const { data: logData, error: logErr } = await supabase
-          .from('song_requests_log')
-          .select('user_id')
-          .gte('created_at', firstDayOfMonth);
-
-        const userCounts: { [key: string]: number } = {};
-
-        if (!logErr && logData && logData.length > 0) {
-          logData.forEach((row: any) => {
-            if (row.user_id) {
-              userCounts[row.user_id] = (userCounts[row.user_id] || 0) + 1;
-            }
-          });
-        }
-
-        const userIds = Object.keys(userCounts);
-
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url')
-            .in('id', userIds);
-
-          const list: LeaderboardUser[] = (profiles || [])
-            .map((p: any) => ({
-              userId: p.id,
-              fullName: p.full_name || 'Kullanıcı',
-              avatarUrl: p.avatar_url || '',
-              songCount: userCounts[p.id] || 0,
-            }))
-            .sort((a, b) => b.songCount - a.songCount)
-            .slice(0, 10);
-
-          setLeaderboard(list);
-        } else {
-          // Fallback to profiles total_songs_requested for display if log table is new
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url, total_songs_requested')
-            .gt('total_songs_requested', 0)
-            .order('total_songs_requested', { ascending: false })
-            .limit(10);
-
-          if (profiles && profiles.length > 0) {
-            setLeaderboard(
-              profiles.map((p: any) => ({
-                userId: p.id,
-                fullName: p.full_name || 'Kullanıcı',
-                avatarUrl: p.avatar_url || '',
-                songCount: p.total_songs_requested || 0,
-              }))
-            );
-          } else {
-            setLeaderboard([]);
-          }
-        }
-      } catch (err) {
-        console.error('[Leaderboard exception]', err);
-      } finally {
-        setIsLoadingLeaderboard(false);
-      }
-    };
-
-    fetchMonthlyLeaderboard();
-  }, [activeModal]);
 
   if (activeModal !== 'profile') return null;
 
@@ -193,64 +111,7 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
 
-          {/* ITEM 5: Monthly Leaderboard Section */}
-          <div className="my-3 pt-3 border-t border-[#D4AF37]/20 space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-1.5 text-xs font-black text-amber-100">
-                <Trophy className="w-4 h-4 text-[#D4AF37]" />
-                <span>Bu Ayın En Çok Şarkı Açanları</span>
-              </div>
-              <span className="text-[10px] text-amber-200/50">Canlı</span>
-            </div>
 
-            {isLoadingLeaderboard ? (
-              <div className="py-6 text-center text-amber-200/50 flex flex-col items-center justify-center">
-                <Loader2 className="w-5 h-5 text-[#D4AF37] animate-spin mb-1" />
-                <span className="text-[10px]">Sıralama yükleniyor...</span>
-              </div>
-            ) : leaderboard.length === 0 ? (
-              <div className="p-4 glass-panel rounded-2xl text-center text-amber-200/50 text-xs">
-                Bu ay henüz şarkı isteği yapılmadı.
-              </div>
-            ) : (
-              <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-none">
-                {leaderboard.map((item, index) => (
-                  <div
-                    key={item.userId + index}
-                    className="glass-panel-gold rounded-2xl p-2.5 border border-[#D4AF37]/30 min-w-[105px] w-[105px] shrink-0 flex flex-col items-center text-center shadow-md relative"
-                  >
-                    {/* Rank Badge */}
-                    <div className="absolute top-1 left-1.5 w-4 h-4 rounded-full gold-gradient-bg text-stone-950 font-black text-[9px] flex items-center justify-center shadow-sm">
-                      #{index + 1}
-                    </div>
-
-                    {/* 1. User Avatar Image */}
-                    <div className="w-10 h-10 rounded-full border border-[#D4AF37] overflow-hidden mb-1.5 bg-[#1C130D] flex items-center justify-center shrink-0">
-                      {item.avatarUrl ? (
-                        <img
-                          src={item.avatarUrl}
-                          alt={item.fullName}
-                          className="w-full h-full object-cover rounded-full"
-                        />
-                      ) : (
-                        <User className="w-5 h-5 text-[#D4AF37]" />
-                      )}
-                    </div>
-
-                    {/* 2. User Full Name */}
-                    <h4 className="text-[11px] font-bold text-white truncate w-full">
-                      {item.fullName}
-                    </h4>
-
-                    {/* 3. Count of songs requested this month */}
-                    <span className="text-[10px] font-extrabold text-[#D4AF37] mt-0.5">
-                      {item.songCount} Şarkı
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Actions */}
           <div className="pt-3 border-t border-[#D4AF37]/20 text-center space-y-2">
