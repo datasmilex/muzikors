@@ -386,7 +386,7 @@ export const MusicSearchModal: React.FC = () => {
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
                   
                   const isBlocked = finalCost === null || isExplicitBlocked;
-                  const canAfford = (user?.credits ?? 0) >= (finalCost ?? 0);
+                  const canAfford = ((user?.credits ?? 0) + (user?.promo_credits ?? 0)) >= (finalCost ?? 0);
 
                                     return (
                     <div 
@@ -519,7 +519,7 @@ export const MusicSearchModal: React.FC = () => {
                     <span className="text-[10px] line-through opacity-50 mr-1 text-white block">{selectedBaseCost} Kredi</span>
                   )}
                   <span className="text-sm font-black text-[#D4AF37] block drop-shadow-md">{selectedFinalCost} Kredi</span>
-                  <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-wider">Bakiye: {user ? user.credits : 0}</span>
+                  <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-wider">Bakiye: {user ? user.credits + (user.promo_credits || 0) : 0}</span>
                 </div>
               </div>
             )}

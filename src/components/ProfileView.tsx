@@ -93,7 +93,7 @@ export const ProfileView: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Aktif Bakiye</div>
-                  <div className="text-xl font-black text-white font-mono leading-none">{user ? user.credits : 0}</div>
+                  <div className="text-xl font-black text-white font-mono leading-none">{user ? user.credits + (user.promo_credits || 0) : 0}</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-600" />

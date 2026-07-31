@@ -29,7 +29,7 @@ export const DrawerMenu: React.FC = () => {
   const [isDj, setIsDj] = useState(false);
 
   useEffect(() => {
-    if (activeModal === 'drawer' && user && activeVenue) {
+    if (activeModal === 'drawer' && user?.id && activeVenue?.id) {
       supabase.rpc('get_user_venue_stats', { p_user_id: user.id, p_venue_id: Number(activeVenue.id) })
         .then(({ data, error }) => {
           if (!error && data && data.length > 0) {
@@ -37,7 +37,7 @@ export const DrawerMenu: React.FC = () => {
           }
         });
     }
-  }, [activeModal, user, activeVenue]);
+  }, [activeModal, user?.id, activeVenue?.id]);
 
   
 
@@ -161,7 +161,7 @@ export const DrawerMenu: React.FC = () => {
                       <Coins className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-black text-white">{user.credits}</div>
+                      <div className="text-sm font-black text-white">{user.credits + (user.promo_credits || 0)}</div>
                       <div className="text-[9px] font-bold uppercase tracking-widest text-amber-200/50">Mevcut Kredi</div>
                     </div>
                   </div>

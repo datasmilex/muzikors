@@ -52,7 +52,7 @@ export const TvShoutoutModal: React.FC = () => {
       return;
     }
 
-    if (user.credits < 20) {
+    if (user.credits + (user.promo_credits || 0) < 20) {
       showToast('TV mesajı için yeterli krediniz (20) bulunmuyor.');
       return;
     }
@@ -79,7 +79,7 @@ export const TvShoutoutModal: React.FC = () => {
         return;
       }
 
-      setUser(prev => prev ? { ...prev, credits: prev.credits - 20 } : prev);
+      setUser(prev => prev ? { ...prev, credits: Math.max(0, prev.credits - 20) } : prev);
       showToast('Mesajınız TV ekranına gönderildi!');
       closeModal();
       setText('');
