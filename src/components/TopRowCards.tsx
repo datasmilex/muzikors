@@ -50,28 +50,6 @@ export const TopRowCards: React.FC = () => {
       </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => activeVenue?.is_tv_active && openProtectedModal('tvShoutout', 'TV mesajı göndermek için giriş yapın')}
-          disabled={!activeVenue?.is_tv_active}
-          className={`w-full rounded-xl p-3 flex flex-col items-center justify-center gap-1 font-bold transition-all border ${
-            activeVenue?.is_tv_active 
-              ? 'bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-500/20 border border-purple-500/30 active:scale-95' 
-              : 'bg-black/40 border-white/10 text-white/40 cursor-not-allowed'
-          }`}
-        >
-          <Tv className={`w-5 h-5 ${activeVenue?.is_tv_active ? 'stroke-[2.5]' : ''}`} />
-          <span className="text-[11px] text-center">{activeVenue?.is_tv_active ? "TV'ye Mesaj Gönder (20 🪙)" : "TV Ekranı Kapalı"}</span>
-        </button>
-
-        <button
-          onClick={() => openModal('venue_info')}
-          className="w-full rounded-xl p-3 flex flex-col items-center justify-center gap-1 font-bold transition-all border bg-gradient-to-br from-[#1A1A1A] to-[#26190F] hover:from-[#222] hover:to-[#2F1D11] text-amber-100 border-[#D4AF37]/30 hover:border-[#D4AF37]/50 shadow-lg shadow-[#D4AF37]/10 active:scale-95"
-        >
-          <Store className="w-5 h-5 text-[#D4AF37]" />
-          <span className="text-[11px] text-center">Kafe Bilgileri</span>
-        </button>
-      </div>
     </div>
   );
 };
