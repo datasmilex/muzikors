@@ -111,7 +111,7 @@ export const DailyRewardModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-xs bg-[#120C08] sm:rounded-[2.5rem] rounded-[2rem] p-6 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 text-center"
+          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 text-center"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
@@ -134,7 +134,7 @@ export const DailyRewardModal: React.FC = () => {
             </div>
           </div>
 
-          <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-md mb-2 relative z-10">
+          <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md mb-2 relative z-10">
             Günlük Ödül 🎁
           </h2>
 

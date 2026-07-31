@@ -18,32 +18,25 @@ export const HappyHourBanner: React.FC = () => {
   if (!isHappyHourActive) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 border-b border-yellow-500/30 overflow-hidden relative z-50 shadow-[0_4px_20px_rgba(234,179,8,0.2)]"
-    >
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay"></div>
-      
-      <div className="flex items-center justify-center gap-3 px-4 py-3 relative z-10">
-        <motion.div
-          animate={{ rotate: [0, 15, -15, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        >
-          <Sparkles className="w-5 h-5 text-yellow-400" />
-        </motion.div>
+    <div className="px-4 py-2 relative z-50">
+      <motion.div 
+        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="w-full bg-[#120C08]/80 backdrop-blur-md border border-[#D4AF37]/30 rounded-full overflow-hidden shadow-[0_4px_20px_rgba(212,175,55,0.15)] flex items-center p-1.5"
+      >
+        {/* Glow Element */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent animate-[shimmer_3s_infinite] -translate-x-full" />
         
-        <div className="text-sm font-bold text-yellow-50 tracking-wide text-center">
-          🎉 Happy Hour Başladı! Tüm şarkılarda <span className="text-yellow-400 font-extrabold">%{(activeVenue.hh_discount_rate || 0)} İndirim!</span>
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8860B] flex items-center justify-center shrink-0 shadow-inner z-10">
+          <Sparkles className="w-3.5 h-3.5 text-stone-950 animate-pulse" />
         </div>
-
-        <motion.div
-          animate={{ rotate: [0, -15, 15, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut", delay: 1 }}
-        >
-          <Sparkles className="w-5 h-5 text-yellow-400" />
-        </motion.div>
-      </div>
-    </motion.div>
+        
+        <div className="flex-1 overflow-hidden px-2 flex items-center whitespace-nowrap z-10">
+          <p className="text-[11px] font-bold text-amber-50 truncate tracking-wide">
+            Happy Hour Aktif! Tüm şarkı isteklerinde <span className="text-[#D4AF37] font-black">%{(activeVenue.hh_discount_rate || 0)} indirim</span> fırsatını kaçırma.
+          </p>
+        </div>
+      </motion.div>
+    </div>
   );
 };

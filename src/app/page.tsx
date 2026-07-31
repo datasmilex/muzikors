@@ -3,7 +3,7 @@
 import React from 'react';
 import { AppProvider } from '../context/AppContext';
 import { Header } from '../components/Header';
-import { TopRowCards } from '../components/TopRowCards';
+
 import { NowPlayingSection } from '../components/NowPlayingSection';
 import { UpNextQueueSection } from '../components/UpNextQueueSection';
 import { VenueGuard } from '../components/VenueGuard';
@@ -42,7 +42,7 @@ const AppContent = () => {
           <Header />
           <HappyHourBanner />
           <VenueGuard>
-            <TopRowCards />
+
             <NowPlayingSection />
             <UpNextQueueSection />
             

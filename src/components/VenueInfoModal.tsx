@@ -45,10 +45,10 @@ export const VenueInfoModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-md h-[85vh] sm:h-[650px] sm:rounded-[2.5rem] rounded-t-[2.5rem] flex flex-col overflow-hidden glass-panel-gold border border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] bg-[#120C08]"
+          className="relative w-full max-w-md h-[85vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl flex flex-col overflow-hidden glass-panel-gold border border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] bg-[#120C08]"
         >
           {/* Header */}
-          <div className="flex-none p-5 flex items-center justify-between border-b border-[#D4AF37]/20 bg-black/20">
+          <div className="flex-none p-4 flex items-center justify-between border-b border-[#D4AF37]/20 bg-black/20">
             <div className="flex items-center gap-3 text-[#D4AF37]">
               <Store className="w-6 h-6 drop-shadow-md" />
               <h2 className="text-xl font-black tracking-tight text-white">Mekân Bilgileri</h2>
@@ -62,7 +62,7 @@ export const VenueInfoModal: React.FC = () => {
           </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center space-y-8 pb-20 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center space-y-6 pb-20 custom-scrollbar">
           
           {/* Logo Section */}
           <div className="flex flex-col items-center space-y-5">
@@ -79,7 +79,7 @@ export const VenueInfoModal: React.FC = () => {
               )}
             </div>
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name || activeVenue.name}</h1>
+              <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name || activeVenue.name}</h1>
               {hasWorkingHours && (
                 <div className="inline-flex items-center justify-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300 text-xs font-semibold shadow-sm">
                   <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -105,7 +105,7 @@ export const VenueInfoModal: React.FC = () => {
             )}
 
             {hasWifi && (
-              <div className="w-full bg-[#1A1A1A]/50 border border-[#D4AF37]/20 rounded-[1.5rem] p-6 shadow-2xl backdrop-blur-md">
+              <div className="w-full bg-[#1A1A1A]/50 border border-[#D4AF37]/20 rounded-2xl p-4 shadow-2xl backdrop-blur-md">
                 <div className="flex items-center justify-center gap-2 mb-5 border-b border-[#D4AF37]/10 pb-4">
                   <Wifi className="w-5 h-5 text-[#D4AF37] animate-pulse" />
                   <h3 className="text-sm font-black text-white tracking-widest uppercase">Wi-Fi Bilgileri</h3>

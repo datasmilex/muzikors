@@ -62,8 +62,7 @@ export const InfoModals: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-sm bg-[#120C08] sm:rounded-[2.5rem] rounded-[2rem] p-6 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
+          className="relative w-full max-w-sm bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
@@ -103,13 +102,13 @@ export const InfoModals: React.FC = () => {
           <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar text-[13px] text-amber-200/80 leading-relaxed relative z-10">
             {activeModal === 'campaigns' && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-5 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group hover:-translate-y-1 transition-transform">
                   <div className="absolute top-0 right-0 gold-gradient-bg text-black text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md uppercase tracking-wider">Kazanıldı</div>
                   <h4 className="font-black text-white mb-2 mt-3 text-base flex items-center gap-2"><Gift className="w-5 h-5 text-[#D4AF37]"/> Google ile Giriş Ödülü</h4>
                   <p className="font-medium text-amber-200/60 leading-relaxed">Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
                 </div>
 
-                <div className="bg-[#1A1A1A]/80 rounded-2xl p-5 border border-[#D4AF37]/20 shadow-inner group hover:-translate-y-1 transition-transform">
+                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group hover:-translate-y-1 transition-transform">
                   <h4 className="font-black text-white mb-2 text-base flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400"/> VIP Kredi Bonusu</h4>
                   <p className="font-medium text-amber-200/60 leading-relaxed">100 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+15</span>, 200 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+40</span> Hediye Kredi otomatik hesabınıza tanımlanır.</p>
                 </div>
@@ -117,7 +116,7 @@ export const InfoModals: React.FC = () => {
             )}
 
             {activeModal === 'about' && (
-              <div className="space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-5 border border-white/5 shadow-inner">
+              <div className="space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
                 <p className="leading-relaxed">
                   <strong className="text-[#D4AF37] text-lg font-black block mb-2">Muzikors</strong> Mekanlarda müzik seçimini tamamen müşterilere sunan yeni nesil dijital interaktif jukebox platformudur.
                 </p>
@@ -131,7 +130,7 @@ export const InfoModals: React.FC = () => {
             {activeModal === 'partners' && (
               <div>
                 {partnerSubmitted ? (
-                  <div className="text-center py-8 space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-6 border border-emerald-500/20 shadow-inner">
+                  <div className="text-center py-6 space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-4 border border-emerald-500/20 shadow-inner">
                     <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                       <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                     </div>
@@ -292,7 +291,7 @@ export const InfoModals: React.FC = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-[#1A1A1A]/60 rounded-2xl p-5 border border-white/5 space-y-4 min-h-[250px] shadow-inner">
+                <div className="bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 space-y-4 min-h-[250px] shadow-inner">
                   {activeLegalTab === 'kvkk' && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                       <h4 className="font-black text-[#D4AF37] text-base tracking-tight">KVKK Aydınlatma Metni</h4>

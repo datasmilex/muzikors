@@ -109,7 +109,7 @@ export const TvShoutoutModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-md h-auto sm:rounded-[2.5rem] rounded-t-[2.5rem] p-6 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
+          className="relative w-full max-w-md h-auto sm:rounded-3xl rounded-t-3xl p-5 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />

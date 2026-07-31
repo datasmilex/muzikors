@@ -33,10 +33,10 @@ export const LoginModal: React.FC = () => {
 
         {/* Login & Onboarding Modal Container */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-sm bg-[#120C08] border-2 border-[#D4AF37]/40 rounded-[32px] p-6 z-10 shadow-2xl overflow-hidden flex flex-col justify-between"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-3xl p-5 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] overflow-hidden flex flex-col justify-between"
         >
           {/* Header Bar */}
           <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20">
@@ -68,7 +68,7 @@ export const LoginModal: React.FC = () => {
               </div>
             </div>
 
-            <h1 className="text-2xl font-black gold-gradient-text tracking-wide">
+            <h1 className="text-xl font-black gold-gradient-text tracking-wide">
               Muzikors
             </h1>
             <p className="text-xs text-amber-200/70 font-medium max-w-[240px] mt-1">

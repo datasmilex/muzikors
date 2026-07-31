@@ -84,7 +84,7 @@ export const UpNextQueueSection: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="relative pt-4 space-y-0 flex flex-col">
+        <div className="relative pt-4 space-y-0 flex flex-col z-10">
           {filteredQueue.map((track, index) => {
             // Stack effect logic
             const zIndex = filteredQueue.length - index;
@@ -93,19 +93,19 @@ export const UpNextQueueSection: React.FC = () => {
             return (
               <div
                 key={track.id}
-                className={`relative group transition-all duration-500 ease-out hover:-translate-y-2 hover:z-50 ${!isFirst ? '-mt-4' : ''}`}
+                className={`relative group transition-all duration-500 ease-out hover:-translate-y-2 hover:z-50 ${!isFirst ? '-mt-6' : ''}`}
                 style={{ zIndex }}
               >
-                <div className={`glass-panel rounded-3xl p-4 flex items-center justify-between border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
+                <div className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
                   isFirst
-                    ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#2A1D13] to-[#1C130D]'
-                    : 'border-[#D4AF37]/20 bg-[#120C08]/90 hover:border-[#D4AF37]/40'
+                    ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02]'
+                    : 'border-[#D4AF37]/20 bg-[#1A1A1A]/95 shadow-[0_-8px_20px_rgba(0,0,0,0.8)] hover:border-[#D4AF37]/40 hover:bg-[#221811]'
                 }`}>
                   
                   {/* Left: Rank & Artwork & Track Details */}
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 shadow-lg ${
+                      className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shrink-0 shadow-lg ${
                         isFirst
                           ? 'gold-gradient-bg text-stone-950'
                           : 'bg-black/50 text-amber-200 border border-[#D4AF37]/30'
@@ -114,7 +114,7 @@ export const UpNextQueueSection: React.FC = () => {
                       {index + 1}
                     </div>
 
-                    <div className="relative w-14 h-14 shrink-0 rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-md">
+                    <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden border border-[#D4AF37]/30 shadow-md">
                       <img
                         src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
                         alt={track.title}
@@ -127,27 +127,27 @@ export const UpNextQueueSection: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`font-black truncate ${isFirst ? 'text-base text-white' : 'text-sm text-gray-200'}`}>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <h4 className={`font-black text-sm truncate ${isFirst ? 'text-white' : 'text-gray-100'}`}>
                           {track.title}
                         </h4>
                         {isFirst && (
-                          <span className="flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-                            <Flame className="w-3 h-3 fill-amber-400 text-amber-400" /> TOP
+                          <span className="flex items-center gap-1 text-[8px] font-black px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                            <Flame className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> TOP
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#D4AF37] font-semibold truncate mb-1">
+                      <p className="text-[11px] text-[#D4AF37] font-semibold truncate mb-1">
                         {track.artist}
                       </p>
                       
-                      <div className="flex items-center gap-2 text-[10px] text-amber-200/60 font-medium">
-                        <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md">
-                          <User className="w-3 h-3 text-[#D4AF37]" />
-                          <span className="truncate max-w-[90px]">{getRequestedByLabel(track)}</span>
+                      <div className="flex items-center gap-2 text-[9px] text-amber-200/60 font-medium">
+                        <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded border border-white/5">
+                          <User className="w-2.5 h-2.5 text-[#D4AF37]" />
+                          <span className="truncate max-w-[80px]">{getRequestedByLabel(track)}</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-[#D4AF37]" />
+                          <Clock className="w-2.5 h-2.5 text-[#D4AF37]" />
                           {formatDuration((track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0))}
                         </span>
                       </div>
@@ -155,12 +155,12 @@ export const UpNextQueueSection: React.FC = () => {
                   </div>
 
                   {/* Right: Votes & Boost Action */}
-                  <div className="flex items-center gap-3 pl-3 border-l border-[#D4AF37]/20 shrink-0 ml-2">
-                    <div className="text-center min-w-[36px]">
-                      <span className="block text-lg font-black text-[#D4AF37] drop-shadow-md">
+                  <div className="flex items-center gap-2 pl-2 border-l border-[#D4AF37]/20 shrink-0 ml-1">
+                    <div className="text-center min-w-[32px]">
+                      <span className="block text-base font-black text-[#D4AF37] drop-shadow-md">
                         {track.votes}
                       </span>
-                      <span className="text-[10px] text-amber-200/50 font-bold uppercase tracking-wider">
+                      <span className="text-[9px] text-amber-200/50 font-bold uppercase tracking-widest">
                         Oy
                       </span>
                     </div>
@@ -168,14 +168,14 @@ export const UpNextQueueSection: React.FC = () => {
                     <button
                       onClick={() => handleVoteTrack(track.id)}
                       disabled={votingCooldowns[track.id]}
-                      className={`p-3 rounded-2xl border flex items-center justify-center transition-all duration-300 group ${
+                      className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-300 group ${
                         votingCooldowns[track.id] 
                           ? 'bg-black/50 border-gray-600 text-gray-500 cursor-not-allowed'
                           : 'bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] active:scale-90 hover:scale-110'
                       }`}
                       title="Şarkıyı Beğen"
                     >
-                      <ThumbsUp className={`w-5 h-5 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:-translate-y-1 fill-[#D4AF37]/30'}`} />
+                      <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:-translate-y-0.5 fill-[#D4AF37]/30'}`} />
                     </button>
                   </div>
                 </div>

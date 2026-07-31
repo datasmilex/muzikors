@@ -42,7 +42,7 @@ export const GatewayScreen: React.FC = () => {
   const hasMenu = Boolean(menuUrl?.trim());
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#120C08] p-6 relative overflow-hidden items-center">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#120C08] p-4 relative overflow-hidden items-center">
       {/* Background Glow */}
       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-[#120C08]/5 to-transparent pointer-events-none" />
 
@@ -77,7 +77,7 @@ export const GatewayScreen: React.FC = () => {
             </div>
           </div>
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name}</h1>
+            <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">{activeVenue.venue_name}</h1>
             <p className="text-xs text-[#D4AF37] font-bold tracking-widest uppercase">Hoş Geldiniz</p>
           </div>
         </div>
@@ -94,7 +94,7 @@ export const GatewayScreen: React.FC = () => {
 
           {/* Wi-Fi Info Card (CONDITIONAL) */}
           {hasWifi && (
-            <div className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/20 rounded-[1.5rem] p-5 text-center mt-5 shadow-inner backdrop-blur-md">
+            <div className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/20 rounded-2xl p-4 text-center mt-4 shadow-inner backdrop-blur-md">
               <div className="flex items-center justify-center gap-2 mb-4 pb-4 border-b border-[#D4AF37]/10">
                 <Wifi className="w-5 h-5 text-[#D4AF37] animate-pulse" />
                 <h3 className="text-sm font-black text-white tracking-widest uppercase">Mekân Wi-Fi Bilgileri</h3>

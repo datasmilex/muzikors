@@ -133,23 +133,23 @@ export const NowPlayingSection: React.FC = () => {
   const progressPercent = durationSec > 0 ? Math.min(100, (currentElapsed / durationSec) * 100) : 0;
 
   return (
-    <div className="relative w-full overflow-hidden mb-4">
+    <div className="relative w-full overflow-hidden mb-2">
       {/* Cinematic Mesh Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/20 via-[#120C08]/80 to-[#120C08] z-0 blur-2xl opacity-70 pointer-events-none" />
       
       <FloatingEmojis reactions={reactions} onComplete={removeReaction} />
       
-      <div className="relative z-10 px-5 pt-8 pb-4 flex flex-col items-center">
+      <div className="relative z-10 px-4 pt-4 pb-2 flex flex-col items-center">
         {/* Header Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-black/40 border border-[#D4AF37]/30 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-          <Disc className={`w-3.5 h-3.5 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
-          <span className="text-[10px] font-black tracking-[0.2em] gold-gradient-text uppercase">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 rounded-full bg-black/40 border border-[#D4AF37]/30 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+          <Disc className={`w-3 h-3 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
+          <span className="text-[9px] font-black tracking-[0.2em] gold-gradient-text uppercase">
             Şu An Çalıyor
           </span>
         </div>
 
         {/* Hero Album Art */}
-        <div className="relative w-48 h-48 rounded-[2rem] overflow-hidden border border-[#D4AF37]/40 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(212,175,55,0.3)] mb-6 group">
+        <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-[1.5rem] overflow-hidden border border-[#D4AF37]/40 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.3)] mb-4 group">
           <img
             src={nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || ''}
             alt={nowPlaying.title}
@@ -161,22 +161,22 @@ export const NowPlayingSection: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
           
-          <div className="absolute bottom-3 right-3 w-8 h-8 rounded-full gold-gradient-bg border-2 border-stone-950 flex items-center justify-center text-stone-950 shadow-xl backdrop-blur-md">
-            <Play className="w-3.5 h-3.5 fill-stone-950 ml-0.5" />
+          <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full gold-gradient-bg border-2 border-stone-950 flex items-center justify-center text-stone-950 shadow-xl backdrop-blur-md">
+            <Play className="w-3 h-3 fill-stone-950 ml-0.5" />
           </div>
         </div>
 
-        {/* Track Info (Big Typography) */}
-        <div className="text-center w-full max-w-sm mb-6">
-          <h2 className="text-2xl sm:text-3xl font-black text-white truncate tracking-tight leading-tight drop-shadow-md">
+        {/* Track Info (Compact Typography) */}
+        <div className="text-center w-full max-w-xs mb-4">
+          <h2 className="text-lg sm:text-xl font-black text-white truncate tracking-tight leading-tight drop-shadow-md">
             {nowPlaying.title}
           </h2>
-          <p className="text-sm sm:text-base text-[#D4AF37] font-semibold truncate mt-1 drop-shadow-sm opacity-90">
+          <p className="text-xs sm:text-sm text-[#D4AF37] font-semibold truncate mt-0.5 drop-shadow-sm opacity-90">
             {nowPlaying.artist}
           </p>
           
-          <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/5 border border-white/10 text-[10px] text-amber-100 backdrop-blur-md">
-            <User className="w-3 h-3 text-[#D4AF37]" />
+          <div className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md">
+            <User className="w-2.5 h-2.5 text-[#D4AF37]" />
             <span className="truncate tracking-wide">
               İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy}</strong>
             </span>
@@ -184,36 +184,30 @@ export const NowPlayingSection: React.FC = () => {
         </div>
 
         {/* Audio Visualizer */}
-        <div className="w-full flex flex-col items-center gap-2 mb-2">
-          <div className="flex items-center justify-center gap-1.5 h-12 w-full max-w-[200px]">
+        <div className="w-full flex flex-col items-center gap-1.5 mb-2">
+          <div className="flex items-center justify-center gap-1 h-8 w-full max-w-[150px]">
             {[...Array(12)].map((_, i) => (
               <span 
                 key={i} 
-                className={`w-1.5 rounded-full bg-gradient-to-t from-[#D4AF37] to-[#FFF1C0] shadow-[0_0_8px_rgba(212,175,55,0.8)] ${isPlayingAudio ? 'animate-[pulse_1s_ease-in-out_infinite]' : 'h-2'}`}
+                className={`w-1 rounded-full bg-gradient-to-t from-[#D4AF37] to-[#FFF1C0] shadow-[0_0_8px_rgba(212,175,55,0.8)] ${isPlayingAudio ? 'animate-[pulse_1s_ease-in-out_infinite]' : 'h-1.5'}`}
                 style={{ 
                   animationDuration: `${0.5 + Math.random() * 0.8}s`,
                   animationDelay: `${Math.random() * 0.5}s`,
-                  height: isPlayingAudio ? `${20 + Math.random() * 80}%` : '8px'
+                  height: isPlayingAudio ? `${20 + Math.random() * 80}%` : '6px'
                 }} 
               />
             ))}
-          </div>
-          <div className="flex items-center gap-2 opacity-60">
-            <Volume2 className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="text-[9px] font-black tracking-widest text-amber-200 uppercase">
-              Canlı Ses Akışı
-            </span>
           </div>
         </div>
 
         {/* EMOJI REACTIONS */}
         {nowPlaying.id !== 'spotify-bg' && (
-          <div className="mt-4 flex items-center justify-center gap-5 bg-black/30 px-5 py-2.5 rounded-full border border-white/5 backdrop-blur-lg">
+          <div className="mt-2 flex items-center justify-center gap-4 bg-black/30 px-4 py-2 rounded-full border border-white/5 backdrop-blur-lg">
             {['🔥', '❤️', '👏', '😍', '💃'].map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => handleSendReaction(emoji)}
-                className="text-2xl sm:text-3xl hover:scale-125 active:scale-90 transition-transform drop-shadow-xl"
+                className="text-xl sm:text-2xl hover:scale-125 active:scale-90 transition-transform drop-shadow-xl"
               >
                 {emoji}
               </button>

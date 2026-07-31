@@ -179,7 +179,7 @@ export const MusicSearchModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-[2.5rem] rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
+          className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
@@ -191,7 +191,7 @@ export const MusicSearchModal: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/20 mx-auto flex items-center justify-center shadow-inner">
                     <AlertTriangle className="w-8 h-8 text-[#E5A93C] drop-shadow-md" />
                   </div>
-                  <h2 className="text-2xl font-black text-white tracking-tight">Şarkı İsteğini Onayla</h2>
+                  <h2 className="text-xl font-black text-white tracking-tight">Şarkı İsteğini Onayla</h2>
                   <p className="text-xs text-amber-200/60 px-4 font-medium leading-relaxed">
                     Şarkı isteğinizi onaylamadan önce lütfen aşağıdaki KVKK aydınlatmasını okuyun.
                   </p>
@@ -209,7 +209,7 @@ export const MusicSearchModal: React.FC = () => {
                 </div>
 
                 {/* Anonymous Toggle */}
-                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-[1.5rem] p-5 border border-white/5 shadow-inner">
+                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
                   <div>
                     <p className="text-sm font-bold text-white tracking-wide">İsmimi Ekranda Gizle</p>
                     <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">Sadece "Anonim Müşteri" görünür</p>
@@ -223,7 +223,7 @@ export const MusicSearchModal: React.FC = () => {
                 </div>
 
                 {/* Consent Text */}
-                <div className="bg-amber-900/10 rounded-[1.5rem] p-5 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">
+                <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">
                   {isAnonymous ? (
                     <p>"Şarkı isteğin TV ekranında ve panellerde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
                   ) : (
@@ -233,7 +233,7 @@ export const MusicSearchModal: React.FC = () => {
 
                 {/* Vibe Guard Warning */}
                 {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                  <div className="bg-orange-500/10 rounded-[1.5rem] p-5 border border-orange-500/20 text-[11px] leading-relaxed text-orange-200/90 mt-4">
+                  <div className="bg-orange-500/10 rounded-2xl p-4 border border-orange-500/20 text-[11px] leading-relaxed text-orange-200/90 mt-4">
                     <p>
                       <b className="text-orange-400">⚠️ Bilgilendirme:</b> Mekân sadece şu tarzlara öncelik vermektedir: <span className="font-black text-orange-300">{activeVenue.allowed_genres.join(', ')}</span>. Eğer mekanın tarzına tamamen zıt bir şarkı eklerseniz, mekan sahibi şarkıyı atlama (skip) hakkına sahiptir. Sorumluluk size aittir.
                     </p>
@@ -389,17 +389,17 @@ export const MusicSearchModal: React.FC = () => {
                   return (
                     <div 
                       key={track.id}
-                      className={`relative group transition-all duration-500 hover:-translate-y-1 hover:z-50 ${idx !== 0 ? '-mt-2' : ''}`}
+                      className={`relative group transition-all duration-500 hover:-translate-y-2 hover:z-50 ${idx !== 0 ? '-mt-3' : ''}`}
                       style={{ zIndex }}
                     >
                       <div
                         onClick={() => !isBlocked && setSelectedTrack(track)}
-                        className={`rounded-2xl p-3.5 flex items-center justify-between border backdrop-blur-xl shadow-lg transition-all duration-300 ${
+                        className={`rounded-2xl p-3.5 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
                           isBlocked
-                            ? 'bg-black/60 opacity-60 border-red-500/20'
+                            ? 'bg-black/60 opacity-60 border-red-500/20 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]'
                             : isSelected
-                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/60 shadow-[0_0_20px_rgba(212,175,55,0.2)] scale-[1.02] cursor-pointer'
-                            : 'bg-[#1A1A1A]/90 border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:bg-[#221811] cursor-pointer'
+                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/60 shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02] cursor-pointer'
+                            : 'bg-[#1A1A1A]/95 border-[#D4AF37]/20 shadow-[0_-5px_20px_rgba(0,0,0,0.7)] hover:border-[#D4AF37]/40 hover:bg-[#221811] cursor-pointer'
                         }`}
                       >
                         <div className="flex items-center gap-4 min-w-0 flex-1">

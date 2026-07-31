@@ -206,7 +206,7 @@ export const QrScannerModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
-          className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-[2.5rem] p-6 z-10 shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden text-center glass-panel-gold"
+          className="relative w-full max-w-sm bg-[#120C08] border border-[#D4AF37]/30 rounded-3xl p-5 z-10 shadow-[0_20px_50px_rgba(212,175,55,0.15)] overflow-hidden text-center glass-panel-gold"
         >
           {/* Decorative Glow */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
@@ -246,7 +246,7 @@ export const QrScannerModal: React.FC = () => {
             <div className="absolute left-4 right-4 h-0.5 bg-[#D4AF37] shadow-[0_0_15px_#D4AF37] animate-pulse my-auto top-0 bottom-0 pointer-events-none z-10" />
 
             {streamError && (
-              <div className="absolute inset-0 bg-[#120C08]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+              <div className="absolute inset-0 bg-[#120C08]/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
                 <AlertCircle className="w-10 h-10 text-[#D4AF37] mb-3 animate-bounce" />
                 <p className="text-xs text-amber-200/90 font-black uppercase tracking-wider">{streamError}</p>
               </div>
