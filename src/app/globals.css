@@ -97,3 +97,8 @@
 .pulse-gold {
   animation: pulseGold 2s infinite;
 }
+
+@keyframes smoothVisualizer {
+  0%, 100% { transform: scaleY(0.15); opacity: 0.6; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
