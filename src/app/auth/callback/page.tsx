@@ -95,30 +95,60 @@ export default function AuthCallback() {
     };
 
     // First check if there's already a session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        processSession(session);
-      } else {
-        // If no session immediately available, wait for auth state change
-        // This handles the implicit flow hash parsing
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
-          if (event === 'SIGNED_IN' && newSession) {
-            processSession(newSession);
+    const checkSession = async () => {
+      try {
+        // If there's a code in the URL, manually exchange it (needed because router.push doesn't trigger page load)
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const code = urlParams.get('code');
+          if (code) {
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            if (exchangeError) throw exchangeError;
+            if (data.session) {
+              await processSession(data.session);
+              return;
+            }
           }
-        });
-        
-        // Timeout fallback just in case the hash is invalid or missing
-        setTimeout(() => {
-          if (mounted && !error) {
-            router.replace('/');
+          
+          // Implicit flow hash parsing fallback (if hash exists but wasn't processed)
+          if (window.location.hash.includes('access_token=')) {
+            // Force hashchange for supabase to pick it up if it hasn't
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
           }
-        }, 3000);
+        }
 
-        return () => {
-          authListener.subscription.unsubscribe();
-        };
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          processSession(session);
+        } else {
+          // If no session immediately available, wait for auth state change
+          const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
+            if (event === 'SIGNED_IN' && newSession) {
+              processSession(newSession);
+            }
+          });
+          
+          // Timeout fallback
+          setTimeout(() => {
+            if (mounted && !error) {
+              router.replace('/');
+            }
+          }, 3000);
+
+          return () => {
+            authListener.subscription.unsubscribe();
+          };
+        }
+      } catch (err: any) {
+        console.error('[Auth Callback Error]', err);
+        if (mounted) setError(err.message || 'An error occurred during authentication.');
+        setTimeout(() => {
+          if (mounted) router.replace('/');
+        }, 3000);
       }
-    });
+    };
+
+    checkSession();
 
     return () => { mounted = false; };
   }, [router]);
