@@ -251,7 +251,7 @@ export const DrawerMenu: React.FC = () => {
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-md bg-[#1A1A1A] border border-white/5 flex items-center justify-center group-active:border-[#D4AF37]/50 transition-colors">
-                            {React.cloneElement(item.icon as React.ReactElement, { className: 'w-3.5 h-3.5 text-gray-400 group-active:text-[#D4AF37]' })}
+                            {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-3.5 h-3.5 text-gray-400 group-active:text-[#D4AF37]' })}
                           </div>
                           <span className="group-active:text-white transition-colors">{item.label}</span>
                         </div>
