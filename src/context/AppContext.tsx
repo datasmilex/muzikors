@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient';
 import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { useRouter } from 'next/navigation';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
@@ -239,6 +240,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const setupListener = async () => {
       try {
         listener = await App.addListener('appUrlOpen', (event) => {
+          if (Capacitor.isNativePlatform()) {
+            Browser.close().catch(() => {});
+          }
+
           let slug = '';
           if (event.url.startsWith('muzikors://')) {
             // e.g. muzikors://auth/callback#...
@@ -722,16 +727,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loginWithProvider = useCallback(async (provider: 'google') => {
     if (!supabase) return;
-    const redirectUrl = Capacitor.isNativePlatform() 
+    const isNative = Capacitor.isNativePlatform();
+    const redirectUrl = isNative 
       ? 'muzikors://auth/callback' 
       : 'https://muzikors.com.tr/auth/callback';
       
     try {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: redirectUrl },
+          options: { 
+            redirectTo: redirectUrl,
+            skipBrowserRedirect: isNative
+          },
         });
-        if (error) { console.error('[OAuth Google]', error); showToast('Giris yapilamadi.'); }
+        
+        if (error) { 
+          console.error('[OAuth Google]', error); 
+          showToast('Giris yapilamadi.'); 
+          return;
+        }
+
+        if (isNative && data?.url) {
+          await Browser.open({ url: data.url });
+        }
     } catch (err) { console.error('[OAuth]', err); showToast('Giris yapilamadi.'); }
   }, [showToast]);
 
