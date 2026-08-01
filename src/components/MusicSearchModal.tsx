@@ -16,6 +16,7 @@ export const MusicSearchModal: React.FC = () => {
     user,
     activeVenue,
     cooldown,
+    showToast,
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
