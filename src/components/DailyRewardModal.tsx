@@ -76,6 +76,7 @@ export const DailyRewardModal: React.FC = () => {
         setUser(prev => prev ? {
           ...prev,
           credits: prev.credits + 2,
+          promo_credits: prev.isPremium ? (prev.promo_credits || 0) + 5 : prev.promo_credits,
           lastDailyClaim: new Date().toISOString()
         } : prev);
         
