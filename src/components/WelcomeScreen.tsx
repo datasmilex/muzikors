@@ -16,7 +16,7 @@ export const WelcomeScreen: React.FC = () => {
         <div className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-[#120C08] blur-[120px] rounded-full mix-blend-screen" />
         
         {/* Animated Particles or subtle lines can be added here if desired */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay" />
+        <div className="absolute inset-0 opacity-5 mix-blend-overlay" />
       </div>
 
       {/* Top Header - Minimal */}
