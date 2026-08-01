@@ -11,6 +11,7 @@ export const QrScannerModal: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const isScanningRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export const QrScannerModal: React.FC = () => {
     let mediaStream: MediaStream | null = null;
     let animFrameId: number | null = null;
     setStreamError(null);
+    setIsCameraReady(false);
     isScanningRef.current = true;
 
     // Helper: Select optimal standard back camera to prevent macro/wide-angle lens issues
@@ -104,7 +106,10 @@ export const QrScannerModal: React.FC = () => {
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play();
+          videoRef.current.onloadedmetadata = async () => {
+            await videoRef.current?.play();
+            setIsCameraReady(true);
+          };
         }
 
         // Frame scanner loop
@@ -253,7 +258,7 @@ export const QrScannerModal: React.FC = () => {
               }
             `}} />
 
-            {!videoRef.current?.srcObject && !streamError && (
+            {!isCameraReady && !streamError && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white/50 z-20">
                 <span className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mb-2" />
                 <span className="text-[10px] font-bold tracking-widest uppercase">Kamera Başlatılıyor</span>
