@@ -173,16 +173,19 @@ export const LeaderboardModal: React.FC = () => {
                           {idx + 1 === 1 ? '1' : idx + 1 === 2 ? '2' : idx + 1 === 3 ? '3' : idx + 1}
                         </div>
                         
-                        <div className={`relative w-12 h-12 shrink-0 rounded-2xl overflow-hidden border shadow-md ${isUserVip ? 'border-amber-400' : 'border-[#D4AF37]/30'}`}>
-                          <img
-                            src={user.avatar || '/logo.png'}
-                            alt={user.name}
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = '/logo.png';
-                            }}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="relative group shrink-0">
+                          <div className={`absolute -inset-0.5 rounded-full blur opacity-30 animate-pulse ${isUserVip ? 'bg-gradient-to-r from-amber-300 via-[#D4AF37] to-amber-300' : 'bg-gradient-to-r from-[#D4AF37] to-amber-600'}`} />
+                          <div className={`relative w-12 h-12 rounded-full border-2 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.2)] ${isUserVip ? 'border-amber-400 shadow-[0_0_20px_rgba(252,211,77,0.4)]' : 'border-[#D4AF37]/50'}`}>
+                            <img
+                              src={user.avatar || '/logo.png'}
+                              alt={user.name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/logo.png';
+                              }}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </div>
                         
                         <div className="flex-1 min-w-0">

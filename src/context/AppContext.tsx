@@ -440,12 +440,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: authUser.id,
         name: fullName,
         username: '@' + (emailStr.split('@')[0] || 'kullanici'),
-        email: emailStr,
         avatar: authUser.user_metadata?.avatar_url || prev?.avatar || avatarUrl,
+        email: emailStr,
         credits: liveCredits.real,
         promo_credits: liveCredits.promo,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
         lifetimeCredits: prev?.lifetimeCredits ?? liveCredits.real,
+        last_username_update: prev?.last_username_update,
         loginMethod: 'google',
       }));
 
@@ -484,6 +485,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
                 lifetimeCredits: typeof row?.lifetime_credits === 'number' ? row.lifetime_credits : prev.lifetimeCredits,
                 lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
+                username: row?.username ? row.username : prev.username,
+                last_username_update: row?.last_username_update ?? prev.last_username_update,
+                avatar: row?.avatar_url ?? prev.avatar,
               }
             : null
         );

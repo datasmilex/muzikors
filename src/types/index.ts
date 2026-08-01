@@ -86,6 +86,7 @@ export interface UserProfile {
   lastDailyClaim?: string;
   isPremium?: boolean;
   daily_free_votes?: number;
+  last_username_update?: string;
 }
 
 export interface CreditPackage {

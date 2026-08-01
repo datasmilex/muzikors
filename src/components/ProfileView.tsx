@@ -6,10 +6,66 @@ import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, Chev
 import { useApp } from '../context/AppContext';
 
 export const ProfileView: React.FC = () => {
-  const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider } = useApp();
+  const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider, showToast } = useApp();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editUsername, setEditUsername] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  
+  const presetAvatars = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+  ];
+
+  const handleEditClick = () => {
+    setEditUsername(user?.username?.replace('@', '') || '');
+    setEditAvatar(user?.avatar || presetAvatars[0]);
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    
+    try {
+      const newUsername = '@' + editUsername.trim();
+      
+      // Check 7-day limit if username is changed
+      if (newUsername !== user.username) {
+        if (user.last_username_update) {
+          const daysSince = (new Date().getTime() - new Date(user.last_username_update).getTime()) / (1000 * 3600 * 24);
+          if (daysSince < 7) {
+            showToast('ID (Kullanıcı Adı) haftada sadece 1 kez değiştirilebilir.');
+            setIsSaving(false);
+            return;
+          }
+        }
+      }
+
+      const updates: any = { avatar_url: editAvatar };
+      if (newUsername !== user.username) {
+        updates.username = newUsername;
+        updates.last_username_update = new Date().toISOString();
+      }
+
+      const { supabase } = await import('../lib/supabaseClient');
+      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+      
+      if (error) throw error;
+      
+      showToast('Profiliniz başarıyla güncellendi!');
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error(err);
+      showToast('Profil güncellenirken bir hata oluştu.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -80,19 +136,79 @@ export const ProfileView: React.FC = () => {
               )}
             </div>
 
-            <div className="mt-5 text-center">
-              <div className="flex items-center justify-center gap-2">
-                <h2 className={`text-xl font-black tracking-tight leading-none drop-shadow-md ${user?.isPremium ? 'text-amber-100' : 'text-white'}`}>
-                  {user ? user.name : 'Misafir Kullanıcı'}
-                </h2>
-                {user?.isPremium && (
-                  <ShieldCheck className="w-4 h-4 text-amber-400 drop-shadow-md" />
-                )}
-              </div>
-              <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                <span className="text-[9px] text-gray-300 font-medium tracking-wider">ID:</span>
-                <span className={`text-[10px] font-black tracking-widest ${user?.isPremium ? 'text-amber-400' : 'text-[#D4AF37]'}`}>{user ? user.username : '@misafir'}</span>
-              </div>
+            <div className="mt-5 text-center w-full">
+              {isEditing ? (
+                <div className="space-y-4 px-2">
+                  <div className="flex justify-center gap-2 mb-4">
+                    {presetAvatars.map((url, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setEditAvatar(url)}
+                        className={`w-10 h-10 rounded-full border-2 overflow-hidden transition-all ${
+                          editAvatar === url ? 'border-[#D4AF37] scale-110 shadow-[0_0_10px_rgba(212,175,55,0.5)]' : 'border-transparent opacity-50 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={url} alt={`Avatar ${idx}`} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 block">Kullanıcı ID</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37] font-bold">@</span>
+                      <input
+                        type="text"
+                        value={editUsername}
+                        onChange={(e) => setEditUsername(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+                        placeholder="kullanici_adi"
+                      />
+                    </div>
+                    <p className="text-[9px] text-amber-200/50 mt-1">Haftada sadece 1 kez değiştirebilirsiniz.</p>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-bold text-[10px] uppercase tracking-widest active:scale-95"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="flex-1 py-2 rounded-xl gold-gradient-bg text-black font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-[0_0_15px_rgba(212,175,55,0.3)] disabled:opacity-50"
+                    >
+                      {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center gap-2">
+                    <h2 className={`text-xl font-black tracking-tight leading-none drop-shadow-md ${user?.isPremium ? 'text-amber-100' : 'text-white'}`}>
+                      {user ? user.name : 'Misafir Kullanıcı'}
+                    </h2>
+                    {user?.isPremium && (
+                      <ShieldCheck className="w-4 h-4 text-amber-400 drop-shadow-md" />
+                    )}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                    <span className="text-[9px] text-gray-300 font-medium tracking-wider">ID:</span>
+                    <span className={`text-[10px] font-black tracking-widest ${user?.isPremium ? 'text-amber-400' : 'text-[#D4AF37]'}`}>{user ? user.username : '@misafir'}</span>
+                  </div>
+                  
+                  {user && (
+                    <div className="mt-4">
+                      <button
+                        onClick={handleEditClick}
+                        className="text-[10px] font-bold text-gray-300 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/10 active:scale-95 transition-all shadow-sm"
+                      >
+                        ✏️ Profili Düzenle
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

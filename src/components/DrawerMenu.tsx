@@ -27,6 +27,7 @@ export const DrawerMenu: React.FC = () => {
   const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, presentPremiumPaywall } = useApp();
 
   const [isDj, setIsDj] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   useEffect(() => {
     if (activeModal === 'drawer' && user?.id && activeVenue?.id) {
@@ -45,12 +46,15 @@ export const DrawerMenu: React.FC = () => {
   const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
   const showRewardDot = !!user && !hasClaimedToday;
 
-  const navItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
+  const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
     { label: 'Muzikors Premium', icon: <Sparkles className="w-5 h-5 text-amber-300" />, modal: 'premium_buy', isProtected: true },
-    { label: 'Abonelik Yönetimi', icon: <Coins className="w-5 h-5 text-[#D4AF37]" />, modal: 'manage_subscription', isProtected: true },
     { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
+  ];
+
+  const secondaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
+    { label: 'Abonelik Yönetimi', icon: <Coins className="w-5 h-5 text-[#D4AF37]" />, modal: 'manage_subscription', isProtected: true },
     { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
     { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
     { label: 'İletişim', icon: <MessageCircle className="w-5 h-5 text-[#D4AF37]" />, modal: 'contact' },
@@ -179,17 +183,13 @@ export const DrawerMenu: React.FC = () => {
 
 
             <nav className="space-y-1.5 mt-2">
-              {navItems.map((item) => (
+              {primaryNavItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => {
                     closeModal();
                     if (item.modal === 'premium_buy' as ModalType) {
                       presentPremiumPaywall();
-                      return;
-                    }
-                    if (item.modal === 'manage_subscription' as ModalType) {
-                      showToast('Abonelik yönetimi şu anda güncellenmektedir.');
                       return;
                     }
                     if (item.isProtected && !user) {
@@ -212,6 +212,54 @@ export const DrawerMenu: React.FC = () => {
                   <ChevronRight className="w-5 h-5 text-gray-600 group-active:text-[#D4AF37] group-active:translate-x-1 transition-all" />
                 </button>
               ))}
+
+              <button
+                onClick={() => setIsMoreOpen(!isMoreOpen)}
+                className="w-full flex items-center justify-between px-3 py-2.5 mt-1 rounded-xl active:bg-[#1A1A1A] border border-transparent text-gray-400 font-bold text-sm transition-all group relative"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="tracking-wide text-xs uppercase opacity-60">Daha Fazla / Kurumsal</span>
+                </div>
+                <ChevronRight className={`w-4 h-4 text-gray-600 transition-transform ${isMoreOpen ? 'rotate-90' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isMoreOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden space-y-1.5 pl-2 border-l border-white/5 ml-3"
+                  >
+                    {secondaryNavItems.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => {
+                          closeModal();
+                          if (item.modal === 'manage_subscription' as ModalType) {
+                            showToast('Abonelik yönetimi şu anda güncellenmektedir.');
+                            return;
+                          }
+                          if (item.isProtected && !user) {
+                            openProtectedModal(item.modal, 'Bu bölümü görüntülemek için giriş yapmalısınız.');
+                          } else {
+                            openModal(item.modal);
+                          }
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl active:bg-[#1A1A1A] border border-transparent text-gray-400 font-bold text-xs transition-all group relative active:scale-[0.98]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-md bg-[#1A1A1A] border border-white/5 flex items-center justify-center group-active:border-[#D4AF37]/50 transition-colors">
+                            {React.cloneElement(item.icon as React.ReactElement, { className: 'w-3.5 h-3.5 text-gray-400 group-active:text-[#D4AF37]' })}
+                          </div>
+                          <span className="group-active:text-white transition-colors">{item.label}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Disabled Watch Ads Button */}
               <button

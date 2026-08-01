@@ -99,7 +99,7 @@ export const CreditTopUpModal: React.FC = () => {
 
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`text-sm font-black tracking-tight ${isSelected ? 'text-white' : 'text-gray-200'}`}>+{pkg.credits} <span className="text-[10px] text-[#D4AF37]">Kr.</span></span>
+                        <span className={`text-sm font-black tracking-tight ${isSelected ? 'text-white' : 'text-gray-200'}`}>+{pkg.credits} <span className="text-[10px] text-[#D4AF37]">Kredi</span></span>
                         {pkg.bonusCredits > 0 && (
                           <span className="text-[9px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20 shadow-sm whitespace-nowrap">
                             +{pkg.bonusCredits} Hediye
