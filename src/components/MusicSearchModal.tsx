@@ -493,7 +493,7 @@ export const MusicSearchModal: React.FC = () => {
                               {/* Happy hour discount badge if applicable */}
                               {isHappyHourActive && baseCost !== finalCost && (
                                 <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded shadow-sm">
-                                  %{(hhDiscount * 100).toFixed(0)} HH İndirimi
+                                  %{hhDiscount} HH İndirimi
                                 </span>
                               )}
                               
