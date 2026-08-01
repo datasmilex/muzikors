@@ -1,4 +1,4 @@
-package tr.com.muzikors.app;
+package com.muzikors.app;
 
 import com.getcapacitor.BridgeActivity;
 
