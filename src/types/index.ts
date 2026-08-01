@@ -117,6 +117,8 @@ export type ModalType =
   | 'daily_reward'
   | 'tvShoutout'
   | 'venue_info'
+  | 'premium_buy'
+  | 'manage_subscription'
   | 'leaderboard';
 
 export interface CooldownState {
