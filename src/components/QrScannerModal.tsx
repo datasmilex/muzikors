@@ -106,10 +106,12 @@ export const QrScannerModal: React.FC = () => {
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = async () => {
-            await videoRef.current?.play();
+          try {
+            await videoRef.current.play();
             setIsCameraReady(true);
-          };
+          } catch (playErr) {
+            console.error('[Video Play Error]', playErr);
+          }
         }
 
         // Frame scanner loop
