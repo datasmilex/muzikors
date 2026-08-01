@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
     const spotifyParams = new URLSearchParams({
       q: q,
       type: 'track',
-      limit: '10',
+      limit: '20',
     });
     const searchUrl = 'https://api.spotify.com/v1/search?' + spotifyParams.toString();
 

@@ -395,18 +395,20 @@ export const MusicSearchModal: React.FC = () => {
                       style={{ zIndex }}
                     >
                       <div
-                        onClick={() => !isBlocked && setSelectedTrack(track)}
-                        className={`rounded-[1.25rem] p-2 flex items-center justify-between border transition-all duration-300 ${
+                        onClick={() => {
+                          if (isBlocked || cooldown.active || !canAfford || submittingTrackId === track.id) return;
+                          setSelectedTrack(track);
+                          handleConfirmRequest(track);
+                        }}
+                        className={`rounded-[1.2rem] p-2 flex items-center justify-between border transition-all duration-300 ${
                           isBlocked
                             ? 'bg-black/40 opacity-50 border-red-500/10'
-                            : isSelected
-                            ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/50 shadow-[0_5px_15px_rgba(212,175,55,0.15)] scale-[1.01] cursor-pointer'
-                            : 'bg-white/5 border-transparent hover:border-white/10 hover:bg-white/10 cursor-pointer'
+                            : 'bg-white/5 border-white/5 hover:border-[#D4AF37]/30 hover:bg-[#1C130D]/60 hover:shadow-[0_4px_15px_rgba(212,175,55,0.1)] cursor-pointer'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
                           {/* Compact Album Cover */}
-                          <div className="relative w-10 h-10 rounded-[0.6rem] overflow-hidden shrink-0 shadow-sm border border-white/5">
+                          <div className="relative w-11 h-11 rounded-[0.7rem] overflow-hidden shrink-0 shadow-md border border-white/10 group-hover:border-[#D4AF37]/40 transition-colors">
                             <img
                               src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
                               alt={track.title}
@@ -441,38 +443,44 @@ export const MusicSearchModal: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Right side: Duration + Action Button */}
-                        <div className="flex items-center gap-3 shrink-0 pr-1">
-                          {durMs > 0 && !isBlocked && (
-                            <span className="text-[11px] font-semibold text-gray-400/80 tracking-wide">
-                              {formatDuration(durMs)}
-                            </span>
-                          )}
-                          
+                        {/* Right side: Cost Info */}
+                        <div className="flex flex-col items-end justify-center shrink-0 pr-2">
                           {isExplicitBlocked ? (
-                            <span className="text-[9px] text-red-400/80 font-bold uppercase tracking-wider">Engelli</span>
+                            <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">Engelli</span>
                           ) : finalCost === null ? (
-                            <span className="text-[9px] text-red-400/80 font-bold uppercase tracking-wider">&gt;7 Dk</span>
+                            <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">&gt;7 Dk</span>
                           ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTrack(track);
-                                handleConfirmRequest(track);
-                              }}
-                              disabled={cooldown.active || !canAfford || submittingTrackId === track.id}
-                              className={`h-7 px-3.5 rounded-full font-black text-[10px] flex items-center shadow-sm transition-all duration-300 ${
-                                !canAfford || submittingTrackId === track.id
-                                  ? 'bg-black/30 text-gray-500 border border-white/5 cursor-not-allowed'
-                                  : 'bg-white/10 text-white border border-white/10 hover:bg-white/20 active:scale-95'
-                              }`}
-                            >
-                              {submittingTrackId === track.id ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <span>SEÇ</span>
+                            <div className="flex flex-col items-end gap-0.5">
+                              {/* Cost Display */}
+                              <div className="flex items-center gap-1.5">
+                                {isHappyHourActive && baseCost !== finalCost && (
+                                  <span className="text-[10px] text-gray-500 font-bold line-through">
+                                    {baseCost}
+                                  </span>
+                                )}
+                                <span className={`text-xs font-black drop-shadow-md ${canAfford ? 'text-[#D4AF37]' : 'text-red-400'}`}>
+                                  {finalCost} <span className="text-[9px] opacity-80 uppercase tracking-wider">Kredi</span>
+                                </span>
+                              </div>
+                              
+                              {/* Happy hour discount badge if applicable */}
+                              {isHappyHourActive && baseCost !== finalCost && (
+                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded shadow-sm">
+                                  %{(hhDiscount * 100).toFixed(0)} HH İndirimi
+                                </span>
                               )}
-                            </button>
+                              
+                              {/* Duration display instead of separate text */}
+                              {!isHappyHourActive && durMs > 0 && (
+                                <span className="text-[9px] font-semibold text-gray-500 tracking-wider">
+                                  {formatDuration(durMs)}
+                                </span>
+                              )}
+                              
+                              {submittingTrackId === track.id && (
+                                <Loader2 className="w-3 h-3 text-[#D4AF37] animate-spin mt-1" />
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
