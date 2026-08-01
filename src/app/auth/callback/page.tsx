@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function AuthCallback() {
+function AuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,24 +98,22 @@ export default function AuthCallback() {
     // First check if there's already a session
     const checkSession = async () => {
       try {
-        // If there's a code in the URL, manually exchange it (needed because router.push doesn't trigger page load)
-        if (typeof window !== 'undefined') {
-          const urlParams = new URLSearchParams(window.location.search);
-          const code = urlParams.get('code');
-          if (code) {
-            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-            if (exchangeError) throw exchangeError;
-            if (data.session) {
-              await processSession(data.session);
-              return;
-            }
+        // If there's a code in the URL, manually exchange it
+        const code = searchParams?.get('code');
+        if (code) {
+          console.log('[Auth Callback] Found code in URL, exchanging for session...');
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+          if (data.session) {
+            await processSession(data.session);
+            return;
           }
-          
-          // Implicit flow hash parsing fallback (if hash exists but wasn't processed)
-          if (window.location.hash.includes('access_token=')) {
-            // Force hashchange for supabase to pick it up if it hasn't
-            window.dispatchEvent(new HashChangeEvent('hashchange'));
-          }
+        }
+        
+        // Implicit flow hash parsing fallback (if hash exists but wasn't processed)
+        if (typeof window !== 'undefined' && window.location.hash.includes('access_token=')) {
+          // Force hashchange for supabase to pick it up if it hasn't
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
         }
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -151,7 +150,7 @@ export default function AuthCallback() {
     checkSession();
 
     return () => { mounted = false; };
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-[#120C08] text-white">
@@ -168,5 +167,17 @@ export default function AuthCallback() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#120C08] text-white">
+        <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <AuthCallback />
+    </React.Suspense>
   );
 }
