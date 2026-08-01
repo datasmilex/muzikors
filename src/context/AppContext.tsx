@@ -240,6 +240,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const setupListener = async () => {
       try {
         listener = await App.addListener('appUrlOpen', (event) => {
+          console.log('[AppUrlOpen] Received raw URL:', event.url);
+          
           if (Capacitor.isNativePlatform()) {
             Browser.close().catch(() => {});
           }
@@ -252,7 +254,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             slug = event.url.split('.com.tr').pop() || '';
           }
           
+          console.log('[AppUrlOpen] Computed slug:', slug);
           if (slug) {
+            console.log('[AppUrlOpen] Pushing to router:', slug);
             router.push(slug);
           }
         });

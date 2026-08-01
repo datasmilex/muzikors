@@ -98,6 +98,16 @@ function AuthCallback() {
     // First check if there's already a session
     const checkSession = async () => {
       try {
+        // Wait 1.5 seconds to allow Android WebView to regain network connectivity 
+        // (often drops momentarily when closing Custom Tabs)
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        const errorParam = searchParams?.get('error');
+        const errorDesc = searchParams?.get('error_description');
+        if (errorParam) {
+          throw new Error(`Auth Error: ${errorDesc || errorParam}`);
+        }
+
         // If there's a code in the URL, manually exchange it
         const code = searchParams?.get('code');
         if (code) {
@@ -113,7 +123,7 @@ function AuthCallback() {
         // Implicit flow hash parsing fallback (if hash exists but wasn't processed)
         if (typeof window !== 'undefined' && window.location.hash.includes('access_token=')) {
           // Force hashchange for supabase to pick it up if it hasn't
-          window.dispatchEvent(new HashChangeEvent('hashchange'));
+          window.dispatchEvent(new Event('hashchange')); // Using standard Event for older WebViews
         }
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -127,12 +137,13 @@ function AuthCallback() {
             }
           });
           
-          // Timeout fallback
+          // Timeout fallback (increased to 8 seconds to allow for slow networks)
           setTimeout(() => {
             if (mounted && !error) {
+              console.warn('[Auth Callback] Timeout waiting for session, redirecting to home...');
               router.replace('/');
             }
-          }, 3000);
+          }, 8000);
 
           return () => {
             authListener.subscription.unsubscribe();
