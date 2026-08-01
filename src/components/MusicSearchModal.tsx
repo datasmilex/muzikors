@@ -294,6 +294,14 @@ export const MusicSearchModal: React.FC = () => {
                   Kafenin Tercihi: <span className="text-[#D4AF37] drop-shadow-sm">{activeVenue.allowed_genres.join(', ')}</span>
                 </p>
               )}
+              
+              {/* Pricing Info */}
+              <div className="flex items-center gap-1.5 px-1 pb-1">
+                <Coins className="w-3.5 h-3.5 text-[#D4AF37]/70" />
+                <p className="text-[10px] font-bold text-amber-200/60 tracking-wider">
+                  <span className="text-white">0-4 dk</span> 10 Kredi <span className="mx-1 opacity-40">|</span> <span className="text-white">4-7 dk</span> 20 Kredi
+                </p>
+              </div>
               <div className="relative group">
                   <Search className="w-5 h-5 text-[#D4AF37] absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:scale-110 transition-transform" />
                   <input
