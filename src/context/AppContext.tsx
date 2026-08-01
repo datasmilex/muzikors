@@ -6,6 +6,7 @@ import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { CREDIT_PACKAGES } from '../data/mockData';
 import { supabase } from '../lib/supabaseClient';
 import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
+import { App } from '@capacitor/app';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -228,6 +229,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sessionStorage.setItem('muzikors_onboarding_shown', 'true');
     }
   }, [user]);
+
+  // ── DEEP LINKING (APP LINKS) ──────────────────────────────────────────────
+  useEffect(() => {
+    let listener: any = null;
+    const setupListener = async () => {
+      try {
+        listener = await App.addListener('appUrlOpen', (event) => {
+          const slug = event.url.split('.com.tr').pop();
+          if (slug) {
+            // Forward the path and query to the Next.js router
+            window.location.assign(slug);
+          }
+        });
+      } catch (err) {
+        console.warn('[AppUrlOpen] Not running in native capacitor environment', err);
+      }
+    };
+    setupListener();
+
+    return () => {
+      if (listener) {
+        listener.remove();
+      }
+    };
+  }, []);
 
   // ── URL PARAMS + LOCALSTORAGE VENUE RESTORE ───────────────────────────────
   useEffect(() => {
