@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 
 export const LeaderboardModal: React.FC = () => {
-  const { activeModal, closeModal } = useApp();
+  const { activeModal, closeModal, user: currentUser } = useApp();
   const [activeTab, setActiveTab] = useState<'users' | 'venues'>('users');
   const [users, setUsers] = useState<any[]>([]);
   const [venues, setVenues] = useState<any[]>([]);
@@ -153,6 +153,7 @@ export const LeaderboardModal: React.FC = () => {
                 users.map((user, idx) => {
                   const zIndex = users.length - idx;
                   const isTop = idx === 0;
+                  const isUserVip = currentUser?.id === user.id && currentUser?.isPremium;
                   
                   return (
                     <div 
@@ -162,7 +163,7 @@ export const LeaderboardModal: React.FC = () => {
                     >
                       <div className={`flex items-center gap-4 p-4 rounded-3xl border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
                         isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 active:border-[#D4AF37]/40'
-                      }`}>
+                      } ${isUserVip ? 'border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]' : ''}`}>
                         <div className={`w-10 h-10 flex-none flex items-center justify-center font-black text-xl rounded-full shadow-lg ${
                           idx + 1 === 1 ? 'gold-gradient-bg text-black' : 
                           idx + 1 === 2 ? 'bg-slate-300 text-slate-800' : 
@@ -172,7 +173,7 @@ export const LeaderboardModal: React.FC = () => {
                           {idx + 1 === 1 ? '1' : idx + 1 === 2 ? '2' : idx + 1 === 3 ? '3' : idx + 1}
                         </div>
                         
-                        <div className="relative w-12 h-12 shrink-0 rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-md">
+                        <div className={`relative w-12 h-12 shrink-0 rounded-2xl overflow-hidden border shadow-md ${isUserVip ? 'border-amber-400' : 'border-[#D4AF37]/30'}`}>
                           <img
                             src={user.avatar || '/logo.png'}
                             alt={user.name}
@@ -185,8 +186,11 @@ export const LeaderboardModal: React.FC = () => {
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <p className={`font-black truncate ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
+                          <p className={`font-black truncate flex items-center gap-1.5 ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
                             {maskName(user.name)}
+                            {isUserVip && (
+                              <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase tracking-wider shadow-[0_0_5px_rgba(251,191,36,0.5)]">VIP</span>
+                            )}
                           </p>
                           
                         </div>

@@ -84,6 +84,8 @@ export interface UserProfile {
   isSpotifyConnected?: boolean;
   loginMethod: 'google' | 'spotify';
   lastDailyClaim?: string;
+  isPremium?: boolean;
+  daily_free_votes?: number;
 }
 
 export interface CreditPackage {

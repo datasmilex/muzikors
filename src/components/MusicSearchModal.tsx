@@ -91,22 +91,19 @@ export const MusicSearchModal: React.FC = () => {
           return;
         }
 
-        const url = `/api/spotify/search?q=${encodeURIComponent(queryToFetch)}&venueId=${encodeURIComponent(activeVenue.id)}`;
-        console.log(`[MusicSearch] Fetching ${url}`);
-        const res = await fetch(url);
+        console.log(`[MusicSearch] Invoking Edge Function spotify-search`);
+        const { data: resData, error: invokeError } = await supabase.functions.invoke('spotify-search', {
+          body: { q: queryToFetch, venueId: activeVenue.id }
+        });
 
-        // Always parse JSON so we can see the error body even on non-ok responses
-        let data: any = {};
-        try { data = await res.json(); } catch { /* non-JSON body */ }
+        if (invokeError) {
+          throw new Error(invokeError.message || 'Arama işlemi başarısız');
+        }
 
-        if (!res.ok) {
-          console.error('[MusicSearch API Error Details]:', data.details || data);
-          setSearchResults([]);
-          if (data.error && data.error.includes('bağlantısını henüz kurmamış')) {
-            // Mekan spotify'a bağlı değilse kullanıcıya uyarı gösterilebilir, ama alert basmak sinir bozucu olabilir
-            // Bu yüzden listeyi boş bırakıyoruz, isterseniz state'e atıp "Mekan Spotify'a bağlı değil" yazdırabilirsiniz.
-          }
-          return;
+        let data: any = resData || {};
+
+        if (data.error) {
+          throw new Error(data.error);
         }
 
         const tracks: Track[] = data.tracks ?? [];
@@ -214,17 +211,35 @@ export const MusicSearchModal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Anonymous Toggle */}
+                {/* Anonymous Toggle (VIP Feature) */}
                 <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
                   <div>
-                    <p className="text-sm font-bold text-white tracking-wide">İsmimi Ekranda Gizle</p>
-                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">Sadece "Anonim Müşteri" görünür</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-white tracking-wide">Hayalet Modu</p>
+                      {!user?.isPremium && (
+                        <span className="text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">
+                      {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
+                    </p>
                   </div>
                   <button 
-                    onClick={() => setIsAnonymous(!isAnonymous)}
-                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'}`}
+                    onClick={() => {
+                      if (!user?.isPremium) {
+                        showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
+                        // Optionally close search modal and open paywall:
+                        // closeModal(); presentPremiumPaywall();
+                        return;
+                      }
+                      setIsAnonymous(!isAnonymous);
+                    }}
+                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${
+                      !user?.isPremium ? 'bg-gray-800 opacity-50 cursor-not-allowed' :
+                      isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'
+                    }`}
                   >
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isAnonymous ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
 

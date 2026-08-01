@@ -39,11 +39,12 @@ interface AppContextType {
   showToast: (msg: string) => void;
   toggleAudioPlay: () => void;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  presentPremiumPaywall: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const COOLDOWN_DURATION_SECONDS = 30;
+const COOLDOWN_DURATION_SECONDS = 120;
 const DEFAULT_CREDITS = 10;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -328,6 +329,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginMethod: 'google',
       }));
 
+      // Initialize RevenueCat with user ID and fetch customer info
+      import('../services/RevenueCatService').then(async ({ RevenueCatService }) => {
+        await RevenueCatService.initialize(authUser.id);
+        const isPrem = await RevenueCatService.checkPremiumEntitlement();
+        setUser((current) => current ? { ...current, isPremium: isPrem } : current);
+      });
+
 
     };
 
@@ -337,6 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (event === 'SIGNED_OUT') {
         setUser(null);
         userIdRef.current = null;
+        import('../services/RevenueCatService').then(({ RevenueCatService }) => RevenueCatService.initialize());
       } else {
         handleSession(session, event);
       }
@@ -702,9 +711,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     
-    console.log(`[PayTR] PayTR ödeme adımına geçiliyor... Paket ID: ${packageId}`);
-    showToast('Ödeme altyapısı güncelleniyor. Çok yakında aktif olacak!');
+    console.log(`[RevenueCat] Satın alım başlatılıyor... Paket ID: ${packageId}`);
+    try {
+      const { RevenueCatService } = await import('../services/RevenueCatService');
+      
+      // We pass the package identifier (e.g. muzikors_credits_120) to RevenueCat.
+      // RevenueCat expects a Package object for purchasePackage, but Capacitor RevenueCat
+      // also provides `purchaseStoreProduct` for product identifiers.
+      // Assuming RevenueCatService handles mapping or we pass product identifier.
+      const offerings = await RevenueCatService.getOfferings();
+      if (!offerings) {
+        showToast('Mağaza ürünleri alınamadı. Lütfen tekrar deneyin.');
+        return;
+      }
+      
+      const pkgToBuy = offerings.availablePackages.find((p: any) => p.identifier === packageId);
+      
+      if (!pkgToBuy) {
+         showToast('Seçilen paket mağazada bulunamadı.');
+         return;
+      }
+
+      const customerInfo = await RevenueCatService.purchasePackage(pkgToBuy);
+      
+      if (customerInfo) {
+        showToast('Satın alım başarılı! Kredileriniz yükleniyor...');
+        // Webhook will handle adding credits to the DB.
+        // The realtime subscription to `profiles` will automatically update the UI.
+        closeModal();
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Satın alma işlemi başarısız oldu veya iptal edildi.');
+    }
     
+  }, [user, openProtectedModal, showToast, closeModal]);
+
+  const presentPremiumPaywall = useCallback(async () => {
+    if (!user) {
+      showToast('Premium ayrıcalıklarını görmek için giriş yapmalısınız.');
+      openProtectedModal('login');
+      return;
+    }
+    
+    try {
+      const { RevenueCatService } = await import('../services/RevenueCatService');
+      const result = await RevenueCatService.presentPaywall();
+      
+      // We can also check customerInfo immediately after presentation
+      if (result) {
+        const isPrem = await RevenueCatService.checkPremiumEntitlement();
+        if (isPrem && !user.isPremium) {
+           setUser(prev => prev ? { ...prev, isPremium: true } : null);
+           showToast('Muzikors Premium aktif edildi! Hoş geldin VIP!');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Ödeme ekranı açılırken bir hata oluştu.');
+    }
   }, [user, openProtectedModal, showToast]);
 
   const getGuestDeviceId = () => {
@@ -756,7 +821,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? calculateDiscountedPrice(baseCredits, activeVenue?.hh_discount_rate || 0) 
       : baseCredits;
 
-    if (cooldown.active) {
+    if (cooldown.active && !user?.isPremium) {
       const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
       showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
     }
@@ -864,8 +929,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     // Name Masking Logic
     let requestedByName = 'Müşteri';
-    if (isAnonymous) {
-      requestedByName = 'Anonim Müşteri';
+    if (isAnonymous && user?.isPremium) {
+      requestedByName = 'Anonim';
     } else if (user?.name) {
       const parts = user.name.trim().split(' ');
       if (parts.length > 1) {
@@ -874,6 +939,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         requestedByName = `${user.name.charAt(0)}.***`;
       }
+    }
+
+    if (user?.isPremium && !isAnonymous) {
+      requestedByName += ' VIP';
     }
 
     try {
@@ -1037,7 +1106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
       handlePayTRPayment, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
-      hasEnteredGateway, setHasEnteredGateway
+      hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall
     }}>
       {children}
     </AppContext.Provider>

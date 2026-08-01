@@ -24,7 +24,7 @@ import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, presentPremiumPaywall } = useApp();
 
   const [isDj, setIsDj] = useState(false);
 
@@ -48,6 +48,7 @@ export const DrawerMenu: React.FC = () => {
   const navItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
+    { label: 'Muzikors Premium', icon: <Sparkles className="w-5 h-5 text-amber-300" />, modal: 'premium_buy', isProtected: true },
     { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
     { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
     { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
@@ -182,6 +183,10 @@ export const DrawerMenu: React.FC = () => {
                   key={item.label}
                   onClick={() => {
                     closeModal();
+                    if (item.modal === 'premium_buy' as ModalType) {
+                      presentPremiumPaywall();
+                      return;
+                    }
                     if (item.isProtected && !user) {
                       openProtectedModal(item.modal, 'Bu bölümü görüntülemek için giriş yapmalısınız.');
                     } else {

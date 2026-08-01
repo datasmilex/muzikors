@@ -56,29 +56,42 @@ export const ProfileView: React.FC = () => {
           <div className="flex flex-col items-center relative z-10 mb-8">
             <div className="relative group">
               {/* Outer Glowing Ring */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37] to-amber-600 rounded-full blur opacity-25 group-active:opacity-50 transition duration-1000 group-active:duration-200 animate-pulse" />
+              <div className={`absolute -inset-1 rounded-full blur opacity-25 group-active:opacity-50 transition duration-1000 group-active:duration-200 animate-pulse ${user?.isPremium ? 'bg-gradient-to-r from-amber-300 via-[#D4AF37] to-amber-300' : 'bg-gradient-to-r from-[#D4AF37] to-amber-600'}`} />
               
-              <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/50 bg-black flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+              <div className={`relative w-20 h-20 rounded-full border-2 bg-black flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(212,175,55,0.2)] ${user?.isPremium ? 'border-amber-300 shadow-[0_0_25px_rgba(252,211,77,0.4)]' : 'border-[#D4AF37]/50'}`}>
                 {user && user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-8 h-8 text-[#D4AF37]" />
+                  <User className={`w-8 h-8 ${user?.isPremium ? 'text-amber-300' : 'text-[#D4AF37]'}`} />
                 )}
               </div>
-              {user && (
+              
+              {/* Premium Badge */}
+              {user?.isPremium && (
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-400 px-2 py-0.5 rounded-full border border-yellow-200 shadow-[0_0_10px_rgba(251,191,36,0.6)] z-20">
+                  <span className="text-[9px] font-black text-stone-900 uppercase tracking-widest leading-none block pt-0.5">VIP</span>
+                </div>
+              )}
+              
+              {user && !user.isPremium && (
                 <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-amber-400 to-[#D4AF37] p-1.5 rounded-full border-2 border-black shadow-lg">
                   <Sparkles className="w-3 h-3 text-black" />
                 </div>
               )}
             </div>
 
-            <div className="mt-4 text-center">
-              <h2 className="text-xl font-black text-white tracking-tight leading-none drop-shadow-md">
-                {user ? user.name : 'Misafir Kullanıcı'}
-              </h2>
+            <div className="mt-5 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <h2 className={`text-xl font-black tracking-tight leading-none drop-shadow-md ${user?.isPremium ? 'text-amber-100' : 'text-white'}`}>
+                  {user ? user.name : 'Misafir Kullanıcı'}
+                </h2>
+                {user?.isPremium && (
+                  <ShieldCheck className="w-4 h-4 text-amber-400 drop-shadow-md" />
+                )}
+              </div>
               <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
                 <span className="text-[9px] text-gray-300 font-medium tracking-wider">ID:</span>
-                <span className="text-[10px] text-[#D4AF37] font-black tracking-widest">{user ? user.username : '@misafir'}</span>
+                <span className={`text-[10px] font-black tracking-widest ${user?.isPremium ? 'text-amber-400' : 'text-[#D4AF37]'}`}>{user ? user.username : '@misafir'}</span>
               </div>
             </div>
           </div>

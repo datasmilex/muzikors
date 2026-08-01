@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Muzikors</string>
+    <string name="title_activity_main">Muzikors</string>
+    <string name="package_name">tr.com.muzikors.app</string>
+    <string name="custom_url_scheme">tr.com.muzikors.app</string>
+</resources>

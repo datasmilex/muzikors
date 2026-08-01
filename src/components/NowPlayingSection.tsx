@@ -177,8 +177,11 @@ export const NowPlayingSection: React.FC = () => {
           
           <div className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md">
             <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-            <span className="truncate tracking-wide">
-              İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy}</strong>
+            <span className="truncate tracking-wide flex items-center gap-1">
+              İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy.replace(' VIP', '')}</strong>
+              {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium)) && (
+                <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase ml-0.5 leading-none shadow-[0_0_5px_rgba(212,175,55,0.4)]">VIP</span>
+              )}
             </span>
           </div>
         </div>
