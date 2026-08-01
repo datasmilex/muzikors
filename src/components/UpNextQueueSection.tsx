@@ -66,22 +66,16 @@ export const UpNextQueueSection: React.FC = () => {
         </div>
 
         {filteredQueue.length === 0 ? (
-          <div className="bg-black/30 backdrop-blur-md rounded-[2rem] p-8 text-center border border-white/5 flex flex-col items-center justify-center space-y-4 my-2 shadow-sm">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner">
-              <QrCode className="w-8 h-8 animate-pulse drop-shadow-lg" />
+          <div className="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/5 flex items-center gap-4 my-2 shadow-sm">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner">
+              <QrCode className="w-6 h-6 animate-pulse drop-shadow-lg" />
             </div>
-            <div className="space-y-2 max-w-[260px]">
-              <h4 className="text-base font-black text-white tracking-wide">Sırada Henüz Şarkı Yok</h4>
-              <p className="text-xs text-amber-200/60 leading-relaxed font-medium">
-                Masadaki QR kodu okutarak veya aşağıdaki butona tıklayarak ilk şarkıyı sen ekle!
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-black text-white tracking-wide truncate">Sırada Henüz Şarkı Yok</h4>
+              <p className="text-[10px] text-amber-200/60 font-medium leading-snug mt-0.5">
+                Masadaki QR kodu okutarak sıradaki şarkıyı sen seç!
               </p>
             </div>
-            <button
-              onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen giriş yapın')}
-              className="mt-4 px-6 py-3 rounded-full gold-gradient-bg text-stone-950 font-black text-sm shadow-[0_10px_20px_rgba(212,175,55,0.3)] active:scale-95 transition-all"
-            >
-              + İlk Şarkıyı Ekle
-            </button>
           </div>
         ) : (
           <div 

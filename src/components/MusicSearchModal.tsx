@@ -189,7 +189,7 @@ export const MusicSearchModal: React.FC = () => {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {confirmingTrack ? (
-            <div className="flex flex-col h-full justify-between pb-4 relative z-10">
+            <div className="flex-1 flex flex-col pt-4 overflow-y-auto custom-scrollbar h-full relative z-10 px-2 pb-24">
               <div className="flex justify-end pt-2">
                 <button
                   onClick={() => setConfirmingTrack(null)}

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight } from 'lucide-react';
+import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const ProfileView: React.FC = () => {
@@ -12,6 +12,8 @@ export const ProfileView: React.FC = () => {
   const [editUsername, setEditUsername] = useState('');
   const [editAvatar, setEditAvatar] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const presetAvatars = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
@@ -25,6 +27,46 @@ export const ProfileView: React.FC = () => {
     setEditUsername(user?.username?.replace('@', '') || '');
     setEditAvatar(user?.avatar || presetAvatars[0]);
     setIsEditing(true);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Lütfen sadece resim dosyası yükleyin.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // If user.avatar is from avatars bucket, we should delete it first
+      if (user.avatar && user.avatar.includes('/storage/v1/object/public/avatars/')) {
+        const oldFileName = user.avatar.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage.from('avatars').remove([oldFileName]);
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      setEditAvatar(publicUrl);
+      showToast('Fotoğraf başarıyla yüklendi!');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Fotoğraf yüklenirken bir hata oluştu.');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleSave = async () => {
@@ -140,6 +182,20 @@ export const ProfileView: React.FC = () => {
               {isEditing ? (
                 <div className="space-y-4 px-2">
                   <div className="flex justify-center gap-2 mb-4">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="w-10 h-10 rounded-full border-2 border-dashed border-[#D4AF37]/50 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all text-[#D4AF37]"
+                    >
+                      {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileUpload} 
+                    />
                     {presetAvatars.map((url, idx) => (
                       <button
                         key={idx}
