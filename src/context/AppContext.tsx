@@ -7,6 +7,7 @@ import { CREDIT_PACKAGES } from '../data/mockData';
 import { supabase } from '../lib/supabaseClient';
 import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -236,9 +237,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const setupListener = async () => {
       try {
         listener = await App.addListener('appUrlOpen', (event) => {
-          const slug = event.url.split('.com.tr').pop();
+          let slug = '';
+          if (event.url.startsWith('muzikors://')) {
+            // e.g. muzikors://auth/callback#...
+            slug = event.url.replace('muzikors://', '/');
+          } else if (event.url.includes('.com.tr')) {
+            slug = event.url.split('.com.tr').pop() || '';
+          }
+          
           if (slug) {
-            // Forward the path and query to the Next.js router
             window.location.assign(slug);
           }
         });
@@ -713,7 +720,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loginWithProvider = useCallback(async (provider: 'google') => {
     if (!supabase) return;
-    const redirectUrl = 'https://muzikors.com.tr/auth/callback';
+    const redirectUrl = Capacitor.isNativePlatform() 
+      ? 'muzikors://auth/callback' 
+      : 'https://muzikors.com.tr/auth/callback';
+      
     try {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
