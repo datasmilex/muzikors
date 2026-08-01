@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient';
 import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { useRouter } from 'next/navigation';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -50,6 +51,7 @@ const COOLDOWN_DURATION_SECONDS = 120;
 const DEFAULT_CREDITS = 10;
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>('none');
   const [pendingModal, setPendingModal] = useState<ModalType | null>(null);
@@ -246,7 +248,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           
           if (slug) {
-            window.location.assign(slug);
+            router.push(slug);
           }
         });
       } catch (err) {

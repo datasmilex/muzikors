@@ -9,18 +9,15 @@ export default function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleCallback = async () => {
+    let mounted = true;
+
+    const processSession = async (session: any) => {
+      if (!session) {
+        if (mounted) router.replace('/');
+        return;
+      }
+
       try {
-        // Supabase client automatically processes the URL hash on load.
-        // We just need to wait for the session.
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-        if (sessionError) throw sessionError;
-        if (!session) {
-          router.replace('/');
-          return;
-        }
-
         const userId = session.user.id;
         const provider = session.user.app_metadata?.provider ?? 'google';
         const isSpotify = provider === 'spotify';
@@ -87,15 +84,43 @@ export default function AuthCallback() {
           console.error('[Auth Callback] Profile upsert error:', upsertErr.message);
         }
 
-        router.replace('/');
+        if (mounted) router.replace('/');
       } catch (err: any) {
         console.error('[Auth Callback Error]', err);
-        setError(err.message || 'An error occurred during authentication.');
-        setTimeout(() => router.replace('/'), 3000);
+        if (mounted) setError(err.message || 'An error occurred during authentication.');
+        setTimeout(() => {
+          if (mounted) router.replace('/');
+        }, 3000);
       }
     };
 
-    handleCallback();
+    // First check if there's already a session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        processSession(session);
+      } else {
+        // If no session immediately available, wait for auth state change
+        // This handles the implicit flow hash parsing
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
+          if (event === 'SIGNED_IN' && newSession) {
+            processSession(newSession);
+          }
+        });
+        
+        // Timeout fallback just in case the hash is invalid or missing
+        setTimeout(() => {
+          if (mounted && !error) {
+            router.replace('/');
+          }
+        }, 3000);
+
+        return () => {
+          authListener.subscription.unsubscribe();
+        };
+      }
+    });
+
+    return () => { mounted = false; };
   }, [router]);
 
   return (
