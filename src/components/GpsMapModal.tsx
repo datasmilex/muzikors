@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, Navigation, Store, List, Map as MapIcon, QrCode } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 import { Venue } from '../types';
 import { Map, Marker, ZoomControl } from 'pigeon-maps';
 
@@ -64,22 +66,46 @@ export const GpsMapModal: React.FC = () => {
     setLoading(false);
   };
 
-  const getUserLocation = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLoc({ lat: position.coords.latitude, lng: position.coords.longitude });
-          setLocError(null);
-        },
-        (err) => {
-          console.error('Location error:', err);
-          setUserLoc(ISTANBUL_CENTER); // Fallback
-          setLocError('Konum alınamadı, varsayılan merkez gösteriliyor.');
+  const getUserLocation = async () => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const permission = await Geolocation.checkPermissions();
+        if (permission.location !== 'granted') {
+          const req = await Geolocation.requestPermissions();
+          if (req.location !== 'granted') {
+            throw new Error('Konum izni verilmedi');
+          }
         }
-      );
-    } else {
+        
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
+        
+        setUserLoc({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocError(null);
+      } else {
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setUserLoc({ lat: position.coords.latitude, lng: position.coords.longitude });
+              setLocError(null);
+            },
+            (err) => {
+              console.error('Location error:', err);
+              setUserLoc(ISTANBUL_CENTER); // Fallback
+              setLocError('Konum alınamadı, varsayılan merkez gösteriliyor.');
+            }
+          );
+        } else {
+          setUserLoc(ISTANBUL_CENTER);
+          setLocError('Tarayıcınız konum özelliğini desteklemiyor.');
+        }
+      }
+    } catch (err) {
+      console.error('Location exception:', err);
       setUserLoc(ISTANBUL_CENTER);
-      setLocError('Tarayıcınız konum özelliğini desteklemiyor.');
+      setLocError('Konum alınamadı, varsayılan merkez gösteriliyor.');
     }
   };
 
