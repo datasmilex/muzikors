@@ -50,9 +50,9 @@ export const MusicSearchModal: React.FC = () => {
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
       if (activeTab === 'global') {
-        queryToFetch = 'year:2025-2026 genre:pop market:TR';
+        queryToFetch = 'top hits';
       } else {
-        queryToFetch = 'year:2025-2026 genre:pop'; // all / default
+        queryToFetch = 'yeni çıkanlar'; // all / default
       }
     }
 
@@ -102,6 +102,10 @@ export const MusicSearchModal: React.FC = () => {
         if (!res.ok) {
           console.error('[MusicSearch API Error Details]:', data.details || data);
           setSearchResults([]);
+          if (data.error && data.error.includes('bağlantısını henüz kurmamış')) {
+            // Mekan spotify'a bağlı değilse kullanıcıya uyarı gösterilebilir, ama alert basmak sinir bozucu olabilir
+            // Bu yüzden listeyi boş bırakıyoruz, isterseniz state'e atıp "Mekan Spotify'a bağlı değil" yazdırabilirsiniz.
+          }
           return;
         }
 
