@@ -92,6 +92,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTimeout(() => setToastMessage(null), 4500);
   }, []);
 
+  // ── PREVENT BODY SCROLL WHEN MODAL IS ACTIVE ──────────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (activeModal !== 'none') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeModal]);
+
   // ── FETCH PROFILE STATS & CREDITS DIRECTLY FROM DB ─────────────────────────
   const fetchProfileCredits = useCallback(async (userId: string): Promise<{ real: number, promo: number }> => {
     if (!supabase) return { real: 0, promo: 0 };

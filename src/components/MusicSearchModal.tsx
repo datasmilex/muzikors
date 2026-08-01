@@ -190,7 +190,16 @@ export const MusicSearchModal: React.FC = () => {
 
           {confirmingTrack ? (
             <div className="flex flex-col h-full justify-between pb-4 relative z-10">
-              <div className="space-y-6 pt-4">
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setConfirmingTrack(null)}
+                  className="p-2 rounded-full bg-white/5 border border-transparent active:border-[#D4AF37]/30 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
+                  aria-label="Geri"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-6 pt-2">
                 <div className="text-center space-y-3">
                   <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/20 mx-auto flex items-center justify-center shadow-inner">
                     <AlertTriangle className="w-8 h-8 text-[#E5A93C] drop-shadow-md" />
@@ -229,8 +238,6 @@ export const MusicSearchModal: React.FC = () => {
                     onClick={() => {
                       if (!user?.isPremium) {
                         showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
-                        // Optionally close search modal and open paywall:
-                        // closeModal(); presentPremiumPaywall();
                         return;
                       }
                       setIsAnonymous(!isAnonymous);
@@ -272,13 +279,6 @@ export const MusicSearchModal: React.FC = () => {
                 >
                   {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6 stroke-[3] group-active:scale-95 transition-transform" />}
                   <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
-                </button>
-                <button
-                  onClick={() => { setConfirmingTrack(null); }}
-                  disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-4 rounded-[1.5rem] bg-transparent border border-white/10 text-gray-400 font-bold text-sm flex items-center justify-center active:bg-white/5 active:text-white active:scale-95 transition-all"
-                >
-                  Geri Dön
                 </button>
               </div>
             </div>
