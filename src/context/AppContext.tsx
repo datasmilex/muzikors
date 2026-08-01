@@ -239,19 +239,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let listener: any = null;
     const setupListener = async () => {
       try {
-        listener = await App.addListener('appUrlOpen', (event) => {
+        listener = await App.addListener('appUrlOpen', async (event) => {
           console.log('[AppUrlOpen] Received raw URL:', event.url);
           
           if (Capacitor.isNativePlatform()) {
             Browser.close().catch(() => {});
           }
 
+          const rawUrl = event.url;
+
+          // ── OAUTH CALLBACK: handle directly here (router.push doesn't update window.location in static export)
+          if (rawUrl.includes('auth/callback') || rawUrl.includes('code=') || rawUrl.includes('access_token=')) {
+            console.log('[AppUrlOpen] OAuth callback detected, processing...');
+
+            try {
+              // Extract query string — works for both muzikors://auth/callback?code=... and https://...?code=...
+              const queryStart = rawUrl.indexOf('?');
+              const hashStart = rawUrl.indexOf('#');
+              
+              // Try code flow (PKCE)
+              if (queryStart !== -1) {
+                const queryString = rawUrl.slice(queryStart + 1);
+                const params = new URLSearchParams(queryString);
+                const code = params.get('code');
+                const errorParam = params.get('error');
+
+                if (errorParam) {
+                  console.error('[AppUrlOpen] OAuth error:', params.get('error_description') || errorParam);
+                  return;
+                }
+
+                if (code) {
+                  console.log('[AppUrlOpen] Exchanging code for session...');
+                  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                  if (exchangeError) {
+                    console.error('[AppUrlOpen] exchangeCodeForSession error:', exchangeError.message);
+                  } else if (data?.session) {
+                    console.log('[AppUrlOpen] Session established! User:', data.session.user.email);
+                    // onAuthStateChange in AppContext will fire automatically and set the user
+                  }
+                  return;
+                }
+              }
+
+              // Try implicit flow (token in hash)
+              if (hashStart !== -1) {
+                const hashString = rawUrl.slice(hashStart + 1);
+                const params = new URLSearchParams(hashString);
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+                
+                if (accessToken && refreshToken) {
+                  console.log('[AppUrlOpen] Setting session from hash tokens...');
+                  const { error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                  });
+                  if (sessionError) {
+                    console.error('[AppUrlOpen] setSession error:', sessionError.message);
+                  } else {
+                    console.log('[AppUrlOpen] Session set from hash tokens!');
+                  }
+                  return;
+                }
+              }
+            } catch (err) {
+              console.error('[AppUrlOpen] OAuth processing error:', err);
+            }
+            return; // Don't route to callback page
+          }
+
+          // ── REGULAR DEEP LINKS ──────────────────────────────────────────
           let slug = '';
-          if (event.url.startsWith('muzikors://')) {
-            // e.g. muzikors://auth/callback#...
-            slug = event.url.replace('muzikors://', '/');
-          } else if (event.url.includes('.com.tr')) {
-            slug = event.url.split('.com.tr').pop() || '';
+          if (rawUrl.startsWith('muzikors://')) {
+            slug = rawUrl.replace('muzikors://', '/');
+          } else if (rawUrl.includes('.com.tr')) {
+            slug = rawUrl.split('.com.tr').pop() || '';
           }
           
           console.log('[AppUrlOpen] Computed slug:', slug);
@@ -271,7 +334,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         listener.remove();
       }
     };
-  }, []);
+  }, [router]);
 
   // ── URL PARAMS + LOCALSTORAGE VENUE RESTORE ───────────────────────────────
   useEffect(() => {
