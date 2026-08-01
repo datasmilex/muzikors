@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, QrCode, Clock } from 'lucide-react';
+import { ListMusic, ThumbsUp, Flame, User, QrCode, Clock, Coins } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
@@ -56,12 +56,12 @@ export const UpNextQueueSection: React.FC = () => {
 
       {/* Info Micro-copy */}
       <div className="px-2 mb-6">
-        <p className="text-xs text-amber-200/60 leading-snug font-medium flex items-center gap-2">
-          <span className="text-lg drop-shadow-md">💡</span>
-          <span>
-            <strong className="text-white">1 Beğeni = 1 Kredi.</strong> Sevdiğiniz şarkıları üst sıralara taşıyın.
-          </span>
-        </p>
+        <div className="flex items-center gap-1.5 px-1 pb-1">
+          <Coins className="w-4 h-4 text-[#D4AF37]/70 shrink-0" />
+          <p className="text-[11px] font-bold text-amber-200/60 tracking-wider">
+            <span className="text-white">1 Beğeni</span> = 1 Kredi <span className="mx-1.5 opacity-40">|</span> Sevilen şarkıları üste taşıyın
+          </p>
+        </div>
       </div>
 
       {/* Requirement 1: Sleek Empty Queue State Message */}
