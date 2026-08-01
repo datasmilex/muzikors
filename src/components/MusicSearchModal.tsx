@@ -402,7 +402,6 @@ export const MusicSearchModal: React.FC = () => {
                         onClick={() => {
                           if (isBlocked || cooldown.active || !canAfford || submittingTrackId === track.id) return;
                           setSelectedTrack(track);
-                          handleConfirmRequest(track);
                         }}
                         className={`rounded-[1.2rem] p-2 flex items-center justify-between border transition-all duration-300 ${
                           isBlocked
