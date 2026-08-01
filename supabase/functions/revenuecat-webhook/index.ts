@@ -27,9 +27,34 @@ serve(async (req) => {
     const userId = event.app_user_id;
     const productId = event.product_id;
 
-    // We only process purchase events
-    if (eventType !== 'INITIAL_PURCHASE' && eventType !== 'NON_RENEWING_PURCHASE') {
+    // We only process purchase and subscription events
+    if (eventType === 'INITIAL_PURCHASE' || eventType === 'NON_RENEWING_PURCHASE' || eventType === 'RENEWAL') {
+      if (productId === 'Baslangic') {
+        creditsToAdd = 50;
+      } else if (productId === 'Orta') {
+        creditsToAdd = 100;
+      } else if (productId === 'Yuksek') {
+        creditsToAdd = 200;
+      } else if (productId === 'Muzikors_premium') {
+        // 100 credits per month/purchase for premium
+        creditsToAdd = 100;
+        isPremiumUpdate = true;
+        isPremiumValue = true;
+      } else {
+        console.warn(`[RevenueCat Webhook] Unknown product_id: ${productId}`);
+        return new Response('Unknown product', { status: 400 });
+      }
+    } else if (eventType === 'CANCELLATION' || eventType === 'EXPIRATION') {
+      if (productId === 'Muzikors_premium') {
+        isPremiumUpdate = true;
+        isPremiumValue = false;
+      }
+    } else {
       return new Response('Ignored event type', { status: 200 });
+    }
+
+    if (creditsToAdd === 0 && !isPremiumUpdate) {
+      return new Response('Success (No changes)', { status: 200 });
     }
 
     if (!userId || !productId) {
@@ -42,32 +67,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Map Product ID to Credits
-    // Replace these product IDs with the actual ones used in RevenueCat/Play Console
-    let creditsToAdd = 0;
-    
-    // Example mapping - you should adjust these based on your exact product identifiers
-    if (productId === 'muzikors_credits_15') {
-      creditsToAdd = 15;
-    } else if (productId === 'muzikors_credits_30') {
-      creditsToAdd = 30; // e.g. 25 + 5 bonus
-    } else if (productId === 'muzikors_credits_60') {
-      creditsToAdd = 60; // e.g. 50 + 10 bonus
-    } else if (productId === 'muzikors_credits_120') {
-      creditsToAdd = 120; // e.g. 100 + 20 bonus
-    } else if (productId === 'muzikors_credits_250') {
-      creditsToAdd = 250; // e.g. 200 + 50 bonus
-    } else {
-      console.warn(`[RevenueCat Webhook] Unknown product_id: ${productId}`);
-      // Fallback or ignore
-      return new Response('Unknown product', { status: 400 });
-    }
-
-    // Since we need to increment, we can use the 'increment_credits' if it exists,
-    // or just fetch and update. 
-    // BUT fetching and updating is subject to race conditions. 
-    // It's safer to use an RPC. If no RPC exists, we fetch, calculate, update.
-    
     const { data: profile, error: fetchErr } = await supabaseAdmin
       .from('profiles')
       .select('credits, lifetime_credits')
@@ -79,15 +78,19 @@ serve(async (req) => {
       return new Response('User not found', { status: 404 });
     }
 
-    const newCredits = (profile.credits || 0) + creditsToAdd;
-    const newLifetime = (profile.lifetime_credits || 0) + creditsToAdd;
+    const updates: any = {};
+    if (creditsToAdd > 0) {
+      updates.credits = (profile.credits || 0) + creditsToAdd;
+      updates.lifetime_credits = (profile.lifetime_credits || 0) + creditsToAdd;
+    }
+    
+    if (isPremiumUpdate) {
+      updates.is_premium = isPremiumValue;
+    }
 
     const { error: updateErr } = await supabaseAdmin
       .from('profiles')
-      .update({
-        credits: newCredits,
-        lifetime_credits: newLifetime,
-      })
+      .update(updates)
       .eq('id', userId);
 
     if (updateErr) {
@@ -95,7 +98,7 @@ serve(async (req) => {
       return new Response('Failed to update credits', { status: 500 });
     }
 
-    console.log(`[RevenueCat Webhook] Added ${creditsToAdd} credits to user ${userId}`);
+    console.log(`[RevenueCat Webhook] Processed ${eventType} for user ${userId}`);
     return new Response('Success', { status: 200 });
 
   } catch (error) {
