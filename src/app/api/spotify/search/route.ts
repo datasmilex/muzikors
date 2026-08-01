@@ -124,7 +124,6 @@ export async function GET(request: NextRequest) {
     const spotifyParams = new URLSearchParams();
     spotifyParams.append('q', q);
     spotifyParams.append('type', 'track');
-    spotifyParams.append('limit', '15');
     spotifyParams.append('market', 'TR');
     
     const searchUrl = 'https://api.spotify.com/v1/search?' + spotifyParams.toString();
@@ -226,7 +225,9 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({ tracks, total: data.tracks?.total ?? tracks.length });
+    const finalTracks = tracks.slice(0, 15);
+
+    return NextResponse.json({ tracks: finalTracks, total: data.tracks?.total ?? finalTracks.length });
   } catch (err) {
     console.error('[Spotify Search Exception]', err);
     return NextResponse.json(
