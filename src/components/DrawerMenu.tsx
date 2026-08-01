@@ -189,9 +189,7 @@ export const DrawerMenu: React.FC = () => {
                       return;
                     }
                     if (item.modal === 'manage_subscription' as ModalType) {
-                      import('../services/RevenueCatService').then(({ RevenueCatService }) => {
-                        RevenueCatService.presentCustomerCenter();
-                      });
+                      showToast('Abonelik yönetimi şu anda güncellenmektedir.');
                       return;
                     }
                     if (item.isProtected && !user) {

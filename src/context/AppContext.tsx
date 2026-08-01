@@ -449,12 +449,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginMethod: 'google',
       }));
 
-      // Initialize RevenueCat with user ID and fetch customer info
-      import('../services/RevenueCatService').then(async ({ RevenueCatService }) => {
-        await RevenueCatService.initialize(authUser.id);
-        const isPrem = await RevenueCatService.checkPremiumEntitlement();
-        setUser((current) => current ? { ...current, isPremium: isPrem } : current);
-      });
+      // Kredi yüklemesi, login olduğunda profilden zaten geliyor.
 
 
     };
@@ -465,7 +460,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (event === 'SIGNED_OUT') {
         setUser(null);
         userIdRef.current = null;
-        import('../services/RevenueCatService').then(({ RevenueCatService }) => RevenueCatService.initialize());
+        userIdRef.current = null;
       } else {
         handleSession(session, event);
       }
@@ -847,39 +842,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     
-    console.log(`[RevenueCat] Satın alım başlatılıyor... Paket ID: ${packageId}`);
-    try {
-      const { RevenueCatService } = await import('../services/RevenueCatService');
-      
-      // We pass the package identifier (e.g. muzikors_credits_120) to RevenueCat.
-      // RevenueCat expects a Package object for purchasePackage, but Capacitor RevenueCat
-      // also provides `purchaseStoreProduct` for product identifiers.
-      // Assuming RevenueCatService handles mapping or we pass product identifier.
-      const offerings = await RevenueCatService.getOfferings();
-      if (!offerings) {
-        showToast('Mağaza ürünleri alınamadı. Lütfen tekrar deneyin.');
-        return;
-      }
-      
-      const pkgToBuy = offerings.availablePackages.find((p: any) => p.identifier === packageId);
-      
-      if (!pkgToBuy) {
-         showToast('Seçilen paket mağazada bulunamadı.');
-         return;
-      }
-
-      const customerInfo = await RevenueCatService.purchasePackage(pkgToBuy);
-      
-      if (customerInfo) {
-        showToast('Satın alım başarılı! Kredileriniz yükleniyor...');
-        // Webhook will handle adding credits to the DB.
-        // The realtime subscription to `profiles` will automatically update the UI.
-        closeModal();
-      }
-    } catch (e) {
-      console.error(e);
-      showToast('Satın alma işlemi başarısız oldu veya iptal edildi.');
-    }
+    // Geçici uyarı (Kullanıcı talebi)
+    showToast('Ödeme altyapısı güncellenmektedir. Lütfen daha sonra tekrar deneyin.');
+    closeModal();
     
   }, [user, openProtectedModal, showToast, closeModal]);
 
@@ -890,22 +855,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     
-    try {
-      const { RevenueCatService } = await import('../services/RevenueCatService');
-      const result = await RevenueCatService.presentPaywall();
-      
-      // We can also check customerInfo immediately after presentation
-      if (result) {
-        const isPrem = await RevenueCatService.checkPremiumEntitlement();
-        if (isPrem && !user.isPremium) {
-           setUser(prev => prev ? { ...prev, isPremium: true } : null);
-           showToast('Muzikors Premium aktif edildi! Hoş geldin VIP!');
-        }
-      }
-    } catch (e) {
-      console.error(e);
-      showToast('Ödeme ekranı açılırken bir hata oluştu.');
-    }
+    showToast('Premium üyelik sistemi şu anda güncellenmektedir.');
   }, [user, openProtectedModal, showToast]);
 
   const getGuestDeviceId = () => {
