@@ -18,7 +18,7 @@ export const BottomNav: React.FC = () => {
           onClick={() => openModal('venue_info')}
           disabled={!isVenueBound}
           className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'venue_info' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 hover:text-zinc-300'
+            activeModal === 'venue_info' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
           } ${!isVenueBound ? 'opacity-30 cursor-not-allowed' : 'active:scale-90'}`}
         >
           <Info className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'venue_info' ? 2.5 : 2} />
@@ -29,7 +29,7 @@ export const BottomNav: React.FC = () => {
         <button
           onClick={() => openModal('map')}
           className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'map' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 hover:text-zinc-300'
+            activeModal === 'map' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
           } active:scale-90`}
         >
           <Map className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'map' ? 2.5 : 2} />
@@ -39,7 +39,7 @@ export const BottomNav: React.FC = () => {
         {/* ŞARKI EKLE (FAB) - Floating Action Button overflowing the pill */}
         <div className="relative -top-8 flex flex-col items-center mx-2">
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            
             whileTap={{ scale: 0.95 }}
             onClick={() => openModal('search')}
             disabled={!isVenueBound}
@@ -65,7 +65,7 @@ export const BottomNav: React.FC = () => {
           onClick={() => openModal('tvShoutout')}
           disabled={!isVenueBound}
           className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'tvShoutout' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 hover:text-zinc-300'
+            activeModal === 'tvShoutout' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
           } ${!isVenueBound ? 'opacity-30 cursor-not-allowed' : 'active:scale-90'}`}
         >
           <Tv className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'tvShoutout' ? 2.5 : 2} />
@@ -76,7 +76,7 @@ export const BottomNav: React.FC = () => {
         <button
           onClick={() => openModal('leaderboard')}
           className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'leaderboard' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 hover:text-zinc-300'
+            activeModal === 'leaderboard' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
           } active:scale-90`}
         >
           <Trophy className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'leaderboard' ? 2.5 : 2} />

@@ -220,7 +220,7 @@ export const QrScannerModal: React.FC = () => {
             </div>
             <button
               onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all backdrop-blur-md"
+              className="p-1.5 rounded-full bg-white/5 active:bg-white/10 text-gray-400 active:text-white transition-all backdrop-blur-md"
               aria-label="Kapat"
             >
               <X className="w-4 h-4" />

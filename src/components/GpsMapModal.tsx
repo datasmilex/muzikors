@@ -143,7 +143,7 @@ export const GpsMapModal: React.FC = () => {
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+                className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
                 aria-label="Kapat"
               >
                 <X className="w-5 h-5" />
@@ -156,13 +156,13 @@ export const GpsMapModal: React.FC = () => {
           <div className="flex bg-black/40 p-1.5 rounded-xl mt-4 mb-3 shrink-0 border border-white/5 relative z-10 shadow-inner">
             <button
               onClick={() => setViewMode('list')}
-              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'list' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'list' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
             >
               <List className="w-4 h-4" /> Liste
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'map' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'map' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
             >
               <MapIcon className="w-4 h-4" /> Harita
             </button>
@@ -175,7 +175,7 @@ export const GpsMapModal: React.FC = () => {
                 <button
                   key={r}
                   onClick={() => setRadiusFilter(r)}
-                  className={`px-4 py-1.5 rounded-full text-[11px] font-black border transition-all whitespace-nowrap shadow-sm ${radiusFilter === r ? 'border-[#D4AF37] bg-[#D4AF37]/20 text-[#D4AF37]' : 'border-white/10 text-gray-400 bg-white/5 hover:bg-white/10'}`}
+                  className={`px-4 py-1.5 rounded-full text-[11px] font-black border transition-all whitespace-nowrap shadow-sm ${radiusFilter === r ? 'border-[#D4AF37] bg-[#D4AF37]/20 text-[#D4AF37]' : 'border-white/10 text-gray-400 bg-white/5 active:bg-white/10'}`}
                 >
                   {r === 0 ? 'Tümü' : `${r} km`}
                 </button>
@@ -213,10 +213,10 @@ export const GpsMapModal: React.FC = () => {
                           className="flex flex-col items-center group cursor-pointer"
                           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
                         >
-                          <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 flex items-center justify-center font-bold shadow-[0_5px_15px_rgba(212,175,55,0.4)] border-2 border-[#120C08] group-hover:scale-110 transition-transform">
+                          <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 flex items-center justify-center font-bold shadow-[0_5px_15px_rgba(212,175,55,0.4)] border-2 border-[#120C08] group-active:scale-95 transition-transform">
                             <Store className="w-5 h-5" />
                           </div>
-                          <div className="bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[11px] font-bold text-white mt-2 opacity-0 group-hover:opacity-100 transition-opacity absolute top-full whitespace-nowrap border border-[#D4AF37]/30 shadow-lg pointer-events-none">
+                          <div className="bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[11px] font-bold text-white mt-2 opacity-0 group-active:opacity-100 transition-opacity absolute top-full whitespace-nowrap border border-[#D4AF37]/30 shadow-lg pointer-events-none">
                             {v.name}
                           </div>
                         </div>
@@ -235,8 +235,8 @@ export const GpsMapModal: React.FC = () => {
                     : '';
 
                   return (
-                    <div key={v.id} className="bg-[#1A1A1A]/80 border border-[#D4AF37]/20 p-4 rounded-2xl flex items-center gap-4 relative shadow-inner hover:-translate-y-1 transition-transform group">
-                      <div className="w-14 h-14 rounded-xl bg-black/60 border border-[#D4AF37]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-md group-hover:border-[#D4AF37]/60 transition-colors">
+                    <div key={v.id} className="bg-[#1A1A1A]/80 border border-[#D4AF37]/20 p-4 rounded-2xl flex items-center gap-4 relative shadow-inner active:-translate-y-1 transition-transform group">
+                      <div className="w-14 h-14 rounded-xl bg-black/60 border border-[#D4AF37]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-md group-active:border-[#D4AF37]/60 transition-colors">
                         {v.logo ? (
                           <img src={v.logo} alt={v.name} className="w-full h-full object-cover" />
                         ) : (
@@ -256,7 +256,7 @@ export const GpsMapModal: React.FC = () => {
                       {v.latitude && v.longitude && (
                         <button
                           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
-                          className="w-12 h-12 rounded-xl bg-white/5 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-sm"
+                          className="w-12 h-12 rounded-xl bg-white/5 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] active:bg-[#D4AF37]/10 active:scale-95 transition-all shrink-0 shadow-sm"
                         >
                           <Navigation className="w-5 h-5" />
                         </button>
@@ -282,9 +282,9 @@ export const GpsMapModal: React.FC = () => {
                      closeModal();
                      openModal('qr');
                    }}
-                   className="w-full mt-6 p-5 rounded-[1.5rem] border-2 border-dashed border-[#D4AF37]/40 flex items-center justify-center gap-4 hover:bg-[#D4AF37]/5 hover:border-[#D4AF37] active:scale-95 transition-all text-amber-200/80 group bg-black/20"
+                   className="w-full mt-6 p-5 rounded-[1.5rem] border-2 border-dashed border-[#D4AF37]/40 flex items-center justify-center gap-4 active:bg-[#D4AF37]/5 active:border-[#D4AF37] active:scale-95 transition-all text-amber-200/80 group bg-black/20"
                  >
-                   <div className="w-12 h-12 rounded-xl gold-gradient-bg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform shrink-0">
+                   <div className="w-12 h-12 rounded-xl gold-gradient-bg flex items-center justify-center shadow-md group-active:scale-95 transition-transform shrink-0">
                      <QrCode className="w-6 h-6 text-stone-950" />
                    </div>
                    <div className="text-left">

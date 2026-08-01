@@ -59,7 +59,7 @@ export const VenueInfoModal: React.FC = () => {
             </div>
             <button
               onClick={closeModal}
-              className="p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
             >
               <X className="w-5 h-5" />
             </button>
@@ -101,9 +101,9 @@ export const VenueInfoModal: React.FC = () => {
                 href={menuUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 hover:bg-[#222] hover:border-[#D4AF37]/60 hover:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
+                className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
               >
-                <BookOpen className="w-6 h-6 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                <BookOpen className="w-6 h-6 text-[#D4AF37] group-active:scale-95 transition-transform" />
                 Dijital Menü
               </a>
             )}
@@ -135,7 +135,7 @@ export const VenueInfoModal: React.FC = () => {
                             showToast('Wi-Fi Şifresi Kopyalandı!');
                             setTimeout(() => setCopied(false), 2000);
                           }}
-                          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition-all hover:scale-110 active:scale-90 shadow-sm"
+                          className="p-2 rounded-xl bg-white/5 active:bg-white/10 text-gray-300 transition-all active:scale-95 active:scale-90 shadow-sm"
                           title="Şifreyi Kopyala"
                         >
                           {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}

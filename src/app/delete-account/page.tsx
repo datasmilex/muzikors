@@ -39,7 +39,7 @@ export default function DeleteAccountPage() {
             <h2 className="text-lg font-bold text-blue-400 mb-3">Yöntem 2 (E-posta ile Talep)</h2>
             <p>
               Uygulama cihazınızda yüklü değilse, kayıtlı e-posta adresiniz üzerinden 
-              <a href="mailto:destek@muzikors.com.tr" className="text-[#D4AF37] font-semibold mx-1 hover:underline">destek@muzikors.com.tr</a> 
+              <a href="mailto:destek@muzikors.com.tr" className="text-[#D4AF37] font-semibold mx-1 active:underline">destek@muzikors.com.tr</a> 
               adresine <strong>"Hesabımın Silinmesi"</strong> konu başlığıyla e-posta göndererek veri silme talebinde bulunabilirsiniz. Talebiniz en geç 24 saat içerisinde işleme alınacaktır.
             </p>
           </div>

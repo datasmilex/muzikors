@@ -109,7 +109,7 @@ export const NowPlayingSection: React.FC = () => {
           </div>
           <button
             onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
-            className="py-2.5 px-5 rounded-2xl gold-gradient-bg text-stone-950 font-black text-xs shadow-lg hover:brightness-110 active:scale-95 transition-all"
+            className="py-2.5 px-5 rounded-2xl gold-gradient-bg text-stone-950 font-black text-xs shadow-lg active:brightness-110 active:scale-95 transition-all"
           >
             + Sıraya İlk Şarkıyı Ekle
           </button>
@@ -157,7 +157,7 @@ export const NowPlayingSection: React.FC = () => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/logo.png';
             }}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover group-active:scale-95 transition-transform duration-700 ease-out"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
           
@@ -207,7 +207,7 @@ export const NowPlayingSection: React.FC = () => {
               <button
                 key={emoji}
                 onClick={() => handleSendReaction(emoji)}
-                className="text-xl sm:text-2xl hover:scale-125 active:scale-90 transition-transform drop-shadow-xl"
+                className="text-xl sm:text-2xl active:scale-125 active:scale-90 transition-transform drop-shadow-xl"
               >
                 {emoji}
               </button>

@@ -86,9 +86,9 @@ export const GatewayScreen: React.FC = () => {
         <div className="w-full space-y-5">
           <button
             onClick={() => setHasEnteredGateway(true)}
-            className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:brightness-110 active:scale-[0.98] hover:scale-[1.02] transition-all group"
+            className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-[0.98] active:scale-95 transition-all group"
           >
-            <Music className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <Music className="w-6 h-6 group-active:scale-95 transition-transform" />
             Müzik Kutusuna Bağlan
           </button>
 
@@ -122,7 +122,7 @@ export const GatewayScreen: React.FC = () => {
                             setTimeout(() => setCopied(false), 2000);
                           }
                         }}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition-all hover:scale-110 active:scale-90 shadow-sm"
+                        className="p-2 rounded-xl bg-white/5 active:bg-white/10 text-gray-300 transition-all active:scale-95 active:scale-90 shadow-sm"
                         title="Şifreyi Kopyala"
                       >
                         {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -139,7 +139,7 @@ export const GatewayScreen: React.FC = () => {
               href={menuUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 hover:bg-[#222] hover:border-[#D4AF37]/60 hover:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
+              className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
             >
               📖 Dijital Menü
             </a>
@@ -150,10 +150,10 @@ export const GatewayScreen: React.FC = () => {
       {/* Footer KVKK */}
       <div className="absolute bottom-4 w-full flex flex-col items-center gap-1 z-10 px-4">
         <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[10px] text-gray-500">
-          <a href="/legal/terms" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Hizmet Sözleşmesi</a>
-          <a href="/legal/privacy" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Gizlilik & KVKK</a>
-          <a href="/legal/refund" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">İptal & İade</a>
-          <a href="/legal/sales" className="hover:text-[#E5A93C] underline underline-offset-2 transition-colors">Mesafeli Satış</a>
+          <a href="/legal/terms" className="active:text-[#E5A93C] underline underline-offset-2 transition-colors">Hizmet Sözleşmesi</a>
+          <a href="/legal/privacy" className="active:text-[#E5A93C] underline underline-offset-2 transition-colors">Gizlilik & KVKK</a>
+          <a href="/legal/refund" className="active:text-[#E5A93C] underline underline-offset-2 transition-colors">İptal & İade</a>
+          <a href="/legal/sales" className="active:text-[#E5A93C] underline underline-offset-2 transition-colors">Mesafeli Satış</a>
         </div>
       </div>
     </div>

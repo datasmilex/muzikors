@@ -78,7 +78,7 @@ export const UpNextQueueSection: React.FC = () => {
           </div>
           <button
             onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
-            className="mt-4 px-6 py-3 rounded-full gold-gradient-bg text-stone-950 font-black text-sm shadow-[0_10px_20px_rgba(212,175,55,0.3)] hover:scale-105 active:scale-95 transition-all"
+            className="mt-4 px-6 py-3 rounded-full gold-gradient-bg text-stone-950 font-black text-sm shadow-[0_10px_20px_rgba(212,175,55,0.3)] active:scale-95 transition-all"
           >
             + İlk Şarkıyı Ekle
           </button>
@@ -93,13 +93,13 @@ export const UpNextQueueSection: React.FC = () => {
             return (
               <div
                 key={track.id}
-                className={`relative group transition-all duration-500 ease-out hover:-translate-y-2 hover:z-50 ${!isFirst ? '-mt-6' : ''}`}
+                className={`relative group transition-all duration-500 ease-out active:-translate-y-2 active:z-50 ${!isFirst ? '-mt-6' : ''}`}
                 style={{ zIndex }}
               >
                 <div className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
                   isFirst
                     ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02]'
-                    : 'border-white/5 bg-[#1A1A1A]/30 shadow-[0_-8px_20px_rgba(0,0,0,0.3)] hover:border-white/10 hover:bg-[#1A1A1A]/50'
+                    : 'border-white/5 bg-[#1A1A1A]/30 shadow-[0_-8px_20px_rgba(0,0,0,0.3)] active:border-white/10 active:bg-[#1A1A1A]/50'
                 }`}>
                   
                   {/* Left: Rank & Artwork & Track Details */}
@@ -171,11 +171,11 @@ export const UpNextQueueSection: React.FC = () => {
                       className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-300 group ${
                         votingCooldowns[track.id] 
                           ? 'bg-black/50 border-gray-600 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] active:scale-90 hover:scale-110'
+                          : 'bg-[#D4AF37]/10 active:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] active:scale-90 active:scale-95'
                       }`}
                       title="Şarkıyı Beğen"
                     >
-                      <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-hover:-translate-y-0.5 fill-[#D4AF37]/30'}`} />
+                      <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-active:-translate-y-0.5 fill-[#D4AF37]/30'}`} />
                     </button>
                   </div>
                 </div>

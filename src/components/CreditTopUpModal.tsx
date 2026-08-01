@@ -47,7 +47,7 @@ export const CreditTopUpModal: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37]/20 to-[#120C08] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner relative overflow-hidden group">
                 <div className="absolute inset-0 bg-[#D4AF37]/10 animate-pulse pointer-events-none" />
-                <Coins className="w-4 h-4 z-10 drop-shadow-md group-hover:scale-110 transition-transform" />
+                <Coins className="w-4 h-4 z-10 drop-shadow-md group-active:scale-95 transition-transform" />
               </div>
               <div>
                 <h2 className="text-base font-black text-white tracking-tight drop-shadow-lg">Kredi Yükle</h2>
@@ -57,7 +57,7 @@ export const CreditTopUpModal: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              className="p-1.5 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
               aria-label="Kapat"
             >
               <X className="w-4 h-4" />
@@ -75,7 +75,7 @@ export const CreditTopUpModal: React.FC = () => {
                   className={`w-full text-left rounded-[1rem] p-3 transition-all duration-300 relative border flex items-center justify-between group ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#241911] to-[#1C130D] border-[#D4AF37]/60 shadow-[0_0_15px_rgba(212,175,55,0.2)] scale-[1.02]'
-                      : 'bg-[#1A1A1A]/40 border-[#D4AF37]/20 hover:border-[#D4AF37]/40'
+                      : 'bg-[#1A1A1A]/40 border-[#D4AF37]/20 active:border-[#D4AF37]/40'
                   }`}
                 >
                   {/* Badge */}
@@ -91,7 +91,7 @@ export const CreditTopUpModal: React.FC = () => {
                       className={`w-4 h-4 shrink-0 rounded-full border-[2px] flex items-center justify-center transition-all duration-300 shadow-inner ${
                         isSelected
                           ? 'border-[#D4AF37] bg-[#D4AF37] text-stone-950 scale-110'
-                          : 'border-[#D4AF37]/30 bg-[#120C08] group-hover:border-[#D4AF37]/50'
+                          : 'border-[#D4AF37]/30 bg-[#120C08] group-active:border-[#D4AF37]/50'
                       }`}
                     >
                       {isSelected && <Check className="w-2.5 h-2.5 stroke-[4]" />}
@@ -138,7 +138,7 @@ export const CreditTopUpModal: React.FC = () => {
               />
             </div>
             <label htmlFor="legal-checkbox" className="text-[10px] font-medium text-gray-400 leading-relaxed cursor-pointer select-none">
-              <a href="/legal/sales" className="text-[#E5A93C] hover:text-[#FFC145] underline underline-offset-2 transition-colors font-bold">Satış Sözleşmesi</a>'ni ve <a href="/legal/refund" className="text-[#E5A93C] hover:text-[#FFC145] underline underline-offset-2 transition-colors font-bold">İptal Koşulları</a>'nı okudum.
+              <a href="/legal/sales" className="text-[#E5A93C] active:text-[#FFC145] underline underline-offset-2 transition-colors font-bold">Satış Sözleşmesi</a>'ni ve <a href="/legal/refund" className="text-[#E5A93C] active:text-[#FFC145] underline underline-offset-2 transition-colors font-bold">İptal Koşulları</a>'nı okudum.
             </label>
           </div>
 
@@ -152,14 +152,14 @@ export const CreditTopUpModal: React.FC = () => {
             disabled={!isLegalAccepted || isLoadingPayment}
             className={`w-full py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(212,175,55,0.3)] transition-all duration-300 relative z-10 overflow-hidden group ${
               isLegalAccepted && !isLoadingPayment
-                ? 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-95' 
+                ? 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95' 
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700 shadow-none'
             }`}
           >
             {isLoadingPayment ? (
               <div className="w-4 h-4 border-[2.5px] border-black/20 border-t-black rounded-full animate-spin" />
             ) : (
-              <CreditCard className={`w-4 h-4 ${isLegalAccepted && !isLoadingPayment ? 'text-stone-950 group-hover:-translate-y-0.5 group-hover:rotate-3 transition-transform' : 'text-zinc-500'}`} />
+              <CreditCard className={`w-4 h-4 ${isLegalAccepted && !isLoadingPayment ? 'text-stone-950 group-active:-translate-y-0.5 group-active:rotate-3 transition-transform' : 'text-zinc-500'}`} />
             )}
             <span className="tracking-wide">{isLoadingPayment ? 'Yönlendiriliyor...' : `Öde (₺${selectedPack.priceTL})`}</span>
           </button>

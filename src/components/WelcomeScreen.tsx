@@ -41,7 +41,7 @@ export const WelcomeScreen: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="relative w-11 h-11 rounded-full border border-[#D4AF37]/30 p-0.5 bg-[#120C08] hover:border-[#D4AF37] hover:scale-105 transition-all shadow-[0_0_15px_rgba(212,175,55,0.1)] flex items-center justify-center"
+          className="relative w-11 h-11 rounded-full border border-[#D4AF37]/30 p-0.5 bg-[#120C08] active:border-[#D4AF37] active:scale-95 transition-all shadow-[0_0_15px_rgba(212,175,55,0.1)] flex items-center justify-center"
         >
           {user && user.avatar ? (
             <img src={user.avatar} alt="Profile" className="w-full h-full object-cover rounded-full" />
@@ -79,15 +79,15 @@ export const WelcomeScreen: React.FC = () => {
           {/* Main Huge QR Button */}
           <button
             onClick={() => openModal('qr')}
-            className="relative w-48 h-48 rounded-[3rem] bg-gradient-to-br from-[#1C130D] to-black border-2 border-[#D4AF37]/40 flex flex-col items-center justify-center gap-4 shadow-[0_0_60px_rgba(212,175,55,0.2)] hover:shadow-[0_0_80px_rgba(212,175,55,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 group overflow-hidden"
+            className="relative w-48 h-48 rounded-[3rem] bg-gradient-to-br from-[#1C130D] to-black border-2 border-[#D4AF37]/40 flex flex-col items-center justify-center gap-4 shadow-[0_0_60px_rgba(212,175,55,0.2)] active:shadow-[0_0_80px_rgba(212,175,55,0.4)] active:scale-95 transition-all duration-300 group overflow-hidden"
           >
             {/* Inner rotating glow */}
-            <div className="absolute inset-[-50%] bg-gradient-to-tr from-transparent via-[#D4AF37]/20 to-transparent animate-[spin_4s_linear_infinite] opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            <div className="absolute inset-[-50%] bg-gradient-to-tr from-transparent via-[#D4AF37]/20 to-transparent animate-[spin_4s_linear_infinite] opacity-50 group-active:opacity-100 transition-opacity pointer-events-none" />
             
             {/* Scanner line effect inside button */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-[#D4AF37] shadow-[0_0_10px_#D4AF37] animate-[scan_2.5s_ease-in-out_infinite] opacity-70 pointer-events-none" />
             
-            <QrCode className="w-16 h-16 text-[#D4AF37] drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] relative z-10 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+            <QrCode className="w-16 h-16 text-[#D4AF37] drop-shadow-[0_0_15px_rgba(212,175,55,0.6)] relative z-10 group-active:scale-95 transition-transform duration-300" strokeWidth={1.5} />
             
             <span className="text-[15px] font-black tracking-widest uppercase text-white drop-shadow-md relative z-10">
               QR Okut
@@ -116,10 +116,10 @@ export const WelcomeScreen: React.FC = () => {
         >
           <button
             onClick={() => openModal('map')}
-            className="w-full flex items-center justify-center gap-3 h-14 rounded-full bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/10 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] active:scale-95 group"
+            className="w-full flex items-center justify-center gap-3 h-14 rounded-full bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/10 active:border-[#D4AF37]/50 active:bg-[#D4AF37]/10 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] active:scale-95 group"
           >
-            <Map className="w-5 h-5 text-gray-400 group-hover:text-[#D4AF37] transition-colors" />
-            <span className="text-sm font-black tracking-wider uppercase text-gray-300 group-hover:text-white transition-colors">
+            <Map className="w-5 h-5 text-gray-400 group-active:text-[#D4AF37] transition-colors" />
+            <span className="text-sm font-black tracking-wider uppercase text-gray-300 group-active:text-white transition-colors">
               Mekanları Keşfet
             </span>
           </button>

@@ -124,7 +124,7 @@ export const TvShoutoutModal: React.FC = () => {
             </div>
             <button 
               onClick={closeModal}
-              className="p-2 bg-white/5 rounded-full text-white/50 hover:text-white hover:bg-white/10 hover:rotate-90 transition-all duration-300"
+              className="p-2 bg-white/5 rounded-full text-white/50 active:text-white active:bg-white/10 active:rotate-90 transition-all duration-300"
             >
               <X className="w-5 h-5" />
             </button>
@@ -144,8 +144,8 @@ export const TvShoutoutModal: React.FC = () => {
               </div>
             </div>
 
-            <label className="flex items-center justify-between cursor-pointer p-4 bg-[#1A1A1A]/50 rounded-2xl border border-white/5 hover:border-[#D4AF37]/20 hover:bg-[#1A1A1A]/80 transition-all shadow-sm group">
-              <span className="text-sm font-bold text-gray-300 group-hover:text-white transition-colors">İsmimi gizle (Anonim)</span>
+            <label className="flex items-center justify-between cursor-pointer p-4 bg-[#1A1A1A]/50 rounded-2xl border border-white/5 active:border-[#D4AF37]/20 active:bg-[#1A1A1A]/80 transition-all shadow-sm group">
+              <span className="text-sm font-bold text-gray-300 group-active:text-white transition-colors">İsmimi gizle (Anonim)</span>
               <div className="relative flex items-center">
                 <input 
                   type="checkbox" 
@@ -160,13 +160,13 @@ export const TvShoutoutModal: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || !text.trim()}
-              className="w-full py-4 mt-2 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 gold-gradient-bg text-black shadow-[0_10px_30px_rgba(212,175,55,0.3)] disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110 active:scale-95 hover:scale-[1.02] transition-all group"
+              className="w-full py-4 mt-2 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 gold-gradient-bg text-black shadow-[0_10px_30px_rgba(212,175,55,0.3)] disabled:opacity-50 disabled:cursor-not-allowed active:brightness-110 active:scale-95 transition-all group"
             >
               {isSubmitting ? (
                 <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
-                  <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  <Send className="w-5 h-5 group-active:translate-x-1 group-active:-translate-y-1 transition-transform" />
                   <span>Gönder (20 🪙)</span>
                 </>
               )}

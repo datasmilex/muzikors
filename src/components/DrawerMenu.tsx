@@ -96,7 +96,7 @@ export const DrawerMenu: React.FC = () => {
 
               <button
                 onClick={closeModal}
-                className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+                className="p-2.5 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
                 aria-label="Kapat"
               >
                 <X className="w-5 h-5" />
@@ -118,7 +118,7 @@ export const DrawerMenu: React.FC = () => {
                       closeModal();
                       loginWithProvider('google');
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white text-stone-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95"
+                    className="w-full py-2.5 px-4 rounded-xl bg-white text-stone-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] active:scale-95"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -141,7 +141,7 @@ export const DrawerMenu: React.FC = () => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = '/logo.png';
                       }}
-                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-[0_0_15px_rgba(212,175,55,0.3)] group-hover:scale-105 transition-transform"
+                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-[0_0_15px_rgba(212,175,55,0.3)] group-active:scale-95 transition-transform"
                     />
                     {isDj && (
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-[#1A1A1A] flex items-center justify-center text-[8px]" title="Mekanın DJ'i">
@@ -167,7 +167,7 @@ export const DrawerMenu: React.FC = () => {
                   </div>
                   <button
                     onClick={() => openModal('topup')}
-                    className="px-3 py-1.5 rounded-lg gold-gradient-bg text-stone-950 font-black text-xs shadow-md hover:scale-105 active:scale-95 transition-all"
+                    className="px-3 py-1.5 rounded-lg gold-gradient-bg text-stone-950 font-black text-xs shadow-md active:scale-95 transition-all"
                   >
                     + Yükle
                   </button>
@@ -188,18 +188,18 @@ export const DrawerMenu: React.FC = () => {
                       openModal(item.modal);
                     }
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#1A1A1A] border border-transparent hover:border-[#D4AF37]/20 text-gray-300 font-bold text-sm transition-all group relative active:scale-[0.98]"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-[#1A1A1A] border border-transparent active:border-[#D4AF37]/20 text-gray-300 font-bold text-sm transition-all group relative active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-hover:border-[#D4AF37]/50 group-hover:bg-[#D4AF37]/5 transition-colors relative shadow-inner">
+                    <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-active:border-[#D4AF37]/50 group-active:bg-[#D4AF37]/5 transition-colors relative shadow-inner">
                       {item.icon}
                       {item.showBadge && (
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#120C08] shadow-sm animate-pulse" />
                       )}
                     </div>
-                    <span className="group-hover:text-white transition-colors tracking-wide">{item.label}</span>
+                    <span className="group-active:text-white transition-colors tracking-wide">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="w-5 h-5 text-gray-600 group-active:text-[#D4AF37] group-active:translate-x-1 transition-all" />
                 </button>
               ))}
 
@@ -227,9 +227,9 @@ export const DrawerMenu: React.FC = () => {
             {user ? (
               <button
                 onClick={logout}
-                className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-sm flex items-center justify-center gap-2 hover:bg-red-500/20 active:scale-95 transition-all group shadow-inner"
+                className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-sm flex items-center justify-center gap-2 active:bg-red-500/20 active:scale-95 transition-all group shadow-inner"
               >
-                <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                <LogOut className="w-4 h-4 group-active:-translate-x-1 transition-transform" />
                 <span className="tracking-wide">Çıkış Yap</span>
               </button>
             ) : (
@@ -238,9 +238,9 @@ export const DrawerMenu: React.FC = () => {
                   closeModal();
                   openModal('login');
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-black text-sm flex items-center justify-center gap-2 hover:bg-white/10 active:scale-95 transition-all shadow-inner group"
+                className="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-black text-sm flex items-center justify-center gap-2 active:bg-white/10 active:scale-95 transition-all shadow-inner group"
               >
-                <LogIn className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                <LogIn className="w-4 h-4 text-[#D4AF37] group-active:scale-95 transition-transform" />
                 <span className="tracking-wide">Giriş Yap / Kaydol</span>
               </button>
             )}

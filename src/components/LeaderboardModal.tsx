@@ -114,7 +114,7 @@ export const LeaderboardModal: React.FC = () => {
             </div>
             <button
               onClick={closeModal}
-              className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              className="p-2.5 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
               aria-label="Kapat"
             >
               <X className="w-5 h-5" />
@@ -126,7 +126,7 @@ export const LeaderboardModal: React.FC = () => {
             <button
               onClick={() => setActiveTab('users')}
               className={`flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all ${
-                activeTab === 'users' ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20' : 'text-zinc-400 hover:text-zinc-200'
+                activeTab === 'users' ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20' : 'text-zinc-400 active:text-zinc-200'
               }`}
             >
               <Users className="w-4 h-4" /> Kullanıcılar
@@ -134,7 +134,7 @@ export const LeaderboardModal: React.FC = () => {
             <button
               onClick={() => setActiveTab('venues')}
               className={`flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all ${
-                activeTab === 'venues' ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20' : 'text-zinc-400 hover:text-zinc-200'
+                activeTab === 'venues' ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20' : 'text-zinc-400 active:text-zinc-200'
               }`}
             >
               <Store className="w-4 h-4" /> Kafeler
@@ -157,11 +157,11 @@ export const LeaderboardModal: React.FC = () => {
                   return (
                     <div 
                       key={user.id} 
-                      className={`relative group transition-all duration-500 hover:-translate-y-2 hover:z-50 ${idx !== 0 ? '-mt-4' : ''}`}
+                      className={`relative group transition-all duration-500 active:-translate-y-2 active:z-50 ${idx !== 0 ? '-mt-4' : ''}`}
                       style={{ zIndex }}
                     >
                       <div className={`flex items-center gap-4 p-4 rounded-3xl border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
-                        isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 hover:border-[#D4AF37]/40'
+                        isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 active:border-[#D4AF37]/40'
                       }`}>
                         <div className={`w-10 h-10 flex-none flex items-center justify-center font-black text-xl rounded-full shadow-lg ${
                           idx + 1 === 1 ? 'gold-gradient-bg text-black' : 
@@ -211,11 +211,11 @@ export const LeaderboardModal: React.FC = () => {
                   return (
                     <div 
                       key={venue.id} 
-                      className={`relative group transition-all duration-500 hover:-translate-y-2 hover:z-50 ${idx !== 0 ? '-mt-4' : ''}`}
+                      className={`relative group transition-all duration-500 active:-translate-y-2 active:z-50 ${idx !== 0 ? '-mt-4' : ''}`}
                       style={{ zIndex }}
                     >
                       <div className={`flex items-center gap-4 p-4 rounded-3xl border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
-                        isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 hover:border-[#D4AF37]/40'
+                        isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 active:border-[#D4AF37]/40'
                       }`}>
                         <div className={`w-10 h-10 flex-none flex items-center justify-center font-black text-xl rounded-full shadow-lg ${
                           idx + 1 === 1 ? 'gold-gradient-bg text-black' : 

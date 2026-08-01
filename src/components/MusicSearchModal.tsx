@@ -248,15 +248,15 @@ export const MusicSearchModal: React.FC = () => {
                 <button
                   onClick={handleFinalRequest}
                   disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:brightness-110 active:scale-95 hover:scale-[1.02] transition-all group"
+                  className="w-full py-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-95 transition-all group"
                 >
-                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6 stroke-[3] group-hover:scale-110 transition-transform" />}
+                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6 stroke-[3] group-active:scale-95 transition-transform" />}
                   <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
                 </button>
                 <button
                   onClick={() => { setConfirmingTrack(null); closeModal(); }}
                   disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-4 rounded-[1.5rem] bg-transparent border border-white/10 text-gray-400 font-bold text-sm flex items-center justify-center hover:bg-white/5 hover:text-white active:scale-95 transition-all"
+                  className="w-full py-4 rounded-[1.5rem] bg-transparent border border-white/10 text-gray-400 font-bold text-sm flex items-center justify-center active:bg-white/5 active:text-white active:scale-95 transition-all"
                 >
                   İptal / Vazgeç
                 </button>
@@ -275,7 +275,7 @@ export const MusicSearchModal: React.FC = () => {
 
               <button
                 onClick={closeModal}
-                className="p-2 rounded-full bg-white/5 border border-transparent hover:border-[#D4AF37]/30 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+                className="p-2 rounded-full bg-white/5 border border-transparent active:border-[#D4AF37]/30 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
                 aria-label="Kapat"
               >
                 <X className="w-5 h-5" />
@@ -311,7 +311,7 @@ export const MusicSearchModal: React.FC = () => {
                   ) : searchQuery ? (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-200/50 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-200/50 active:text-white transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -327,7 +327,7 @@ export const MusicSearchModal: React.FC = () => {
                     className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'all'
                         ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
+                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
                     }`}
                   >
                     Trendler
@@ -340,7 +340,7 @@ export const MusicSearchModal: React.FC = () => {
                     className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'top10'
                         ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
+                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
                     }`}
                   >
                     Mekanın Tercihi
@@ -353,7 +353,7 @@ export const MusicSearchModal: React.FC = () => {
                     className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
                       activeTab === 'global'
                         ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 hover:border-[#D4AF37]/30 hover:text-white'
+                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
                     }`}
                   >
                     Global Hits
@@ -391,7 +391,7 @@ export const MusicSearchModal: React.FC = () => {
                                     return (
                     <div 
                       key={track.id}
-                      className={`relative group transition-all duration-300 hover:-translate-y-1 ${idx !== 0 ? 'mt-1.5' : ''}`}
+                      className={`relative group transition-all duration-300 active:-translate-y-1 ${idx !== 0 ? 'mt-1.5' : ''}`}
                       style={{ zIndex }}
                     >
                       <div
@@ -403,12 +403,12 @@ export const MusicSearchModal: React.FC = () => {
                         className={`rounded-[1.2rem] p-2 flex items-center justify-between border transition-all duration-300 ${
                           isBlocked
                             ? 'bg-black/40 opacity-50 border-red-500/10'
-                            : 'bg-white/5 border-white/5 hover:border-[#D4AF37]/30 hover:bg-[#1C130D]/60 hover:shadow-[0_4px_15px_rgba(212,175,55,0.1)] cursor-pointer'
+                            : 'bg-white/5 border-white/5 active:border-[#D4AF37]/30 active:bg-[#1C130D]/60 active:shadow-[0_4px_15px_rgba(212,175,55,0.1)] cursor-pointer'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
                           {/* Compact Album Cover */}
-                          <div className="relative w-11 h-11 rounded-[0.7rem] overflow-hidden shrink-0 shadow-md border border-white/10 group-hover:border-[#D4AF37]/40 transition-colors">
+                          <div className="relative w-11 h-11 rounded-[0.7rem] overflow-hidden shrink-0 shadow-md border border-white/10 group-active:border-[#D4AF37]/40 transition-colors">
                             <img
                               src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
                               alt={track.title}
@@ -538,10 +538,10 @@ export const MusicSearchModal: React.FC = () => {
               className={`w-full py-4 px-6 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
                 cooldown.active || !selectedTrack || selectedFinalCost === null
                   ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 shadow-none'
-                  : 'gold-gradient-bg text-stone-950 hover:brightness-110 active:scale-95 hover:scale-[1.02]'
+                  : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
               }`}
             >
-              <Coins className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-hover:scale-110 transition-transform'}`} />
+              <Coins className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
               {cooldown.active ? (
                 <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
               ) : (

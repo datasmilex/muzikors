@@ -15,7 +15,7 @@ export const QuickActionsBanner: React.FC = () => {
         {/* Credits Button */}
         <button
           onClick={() => openModal('topup')}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 hover:scale-[1.02] active:scale-95 transition-all shadow-inner backdrop-blur-sm"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 active:border-[#D4AF37]/60 active:scale-95 transition-all shadow-inner backdrop-blur-sm"
         >
           <span className="text-xs font-black text-[#D4AF37] drop-shadow-md">
             {user.credits + (user.promo_credits || 0)} <span className="text-[9px] opacity-70">Kredi</span>
@@ -28,7 +28,7 @@ export const QuickActionsBanner: React.FC = () => {
         {/* QR Scanner Button */}
         <button
           onClick={() => openModal('qr')}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-[#D4AF37]/90 backdrop-blur-sm text-black font-black text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] border border-[#D4AF37]"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 rounded-full bg-[#D4AF37]/90 backdrop-blur-sm text-black font-black text-xs active:scale-95 transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] border border-[#D4AF37]"
         >
           <QrCode className="w-4 h-4" strokeWidth={2.5} />
           <span>QR Okut</span>

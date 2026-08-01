@@ -51,7 +51,7 @@ export const LoginModal: React.FC = () => {
             </div>
             <button
               onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all backdrop-blur-md"
+              className="p-1.5 rounded-full bg-white/5 active:bg-white/10 text-gray-400 active:text-white transition-all backdrop-blur-md"
               aria-label="Kapat"
             >
               <X className="w-4 h-4" />
@@ -90,7 +90,7 @@ export const LoginModal: React.FC = () => {
           {/* Action Area */}
           <div className="relative z-10">
             {/* Legal Checkbox */}
-            <label className="flex items-start gap-3 cursor-pointer bg-[#1A1A1A]/50 p-3.5 rounded-2xl border border-white/5 mb-4 group hover:bg-[#1A1A1A]/80 transition-colors">
+            <label className="flex items-start gap-3 cursor-pointer bg-[#1A1A1A]/50 p-3.5 rounded-2xl border border-white/5 mb-4 group active:bg-[#1A1A1A]/80 transition-colors">
               <div className="mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-md border border-gray-600 bg-black/50 overflow-hidden relative">
                 <input
                   type="checkbox"
@@ -106,15 +106,15 @@ export const LoginModal: React.FC = () => {
                   </div>
                 )}
               </div>
-              <span className="text-[10px] leading-relaxed font-medium text-gray-400 group-hover:text-gray-300 transition-colors">
-                <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] hover:underline font-bold">KVKK</button>, <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] hover:underline font-bold">Açık Rıza</button> ve <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] hover:underline font-bold">Çerez Politikası</button>'nı okudum, kabul ediyorum.
+              <span className="text-[10px] leading-relaxed font-medium text-gray-400 group-active:text-gray-300 transition-colors">
+                <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] active:underline font-bold">KVKK</button>, <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] active:underline font-bold">Açık Rıza</button> ve <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-[#D4AF37] active:underline font-bold">Çerez Politikası</button>'nı okudum, kabul ediyorum.
               </span>
             </label>
 
             {/* Google Button */}
             <button
               onClick={() => handleLoginClick('google')}
-              className="w-full py-3.5 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] border border-transparent hover:border-gray-200"
+              className="w-full py-3.5 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] border border-transparent active:border-gray-200"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

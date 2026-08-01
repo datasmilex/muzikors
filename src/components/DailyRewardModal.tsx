@@ -120,7 +120,7 @@ export const DailyRewardModal: React.FC = () => {
 
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300 z-20"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300 z-20"
             aria-label="Kapat"
           >
             <X className="w-5 h-5" />
@@ -152,7 +152,7 @@ export const DailyRewardModal: React.FC = () => {
             className={`w-full py-4 px-4 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 transition-all duration-300 relative z-10 shadow-[0_10px_30px_rgba(212,175,55,0.2)] group
               ${isButtonDisabled
                 ? 'bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-not-allowed shadow-none'
-                : 'gold-gradient-bg text-stone-950 hover:brightness-110 hover:scale-[1.02] active:scale-95'
+                : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
               }
             `}
           >
@@ -167,7 +167,7 @@ export const DailyRewardModal: React.FC = () => {
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Sparkles className="w-5 h-5 group-active:scale-95 transition-transform" />
                 <span className="tracking-wide">Günlük Ödülünü Al</span>
               </>
             )}

@@ -93,7 +93,7 @@ export const InfoModals: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="p-2 rounded-full bg-white/5 hover:bg-white/10 hover:rotate-90 text-zinc-400 hover:text-white transition-all duration-300"
+              className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
               aria-label="Kapat"
             >
               <X className="w-5 h-5" />
@@ -104,13 +104,13 @@ export const InfoModals: React.FC = () => {
           <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar text-[13px] text-amber-200/80 leading-relaxed relative z-10">
             {activeModal === 'campaigns' && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group active:-translate-y-1 transition-transform">
                   <div className="absolute top-0 right-0 gold-gradient-bg text-black text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md uppercase tracking-wider">Kazanıldı</div>
                   <h4 className="font-black text-white mb-2 mt-3 text-base flex items-center gap-2"><Gift className="w-5 h-5 text-[#D4AF37]"/> Google ile Giriş Ödülü</h4>
                   <p className="font-medium text-amber-200/60 leading-relaxed">Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
                 </div>
 
-                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group hover:-translate-y-1 transition-transform">
+                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group active:-translate-y-1 transition-transform">
                   <h4 className="font-black text-white mb-2 text-base flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400"/> VIP Kredi Bonusu</h4>
                   <p className="font-medium text-amber-200/60 leading-relaxed">100 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+15</span>, 200 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+40</span> Hediye Kredi otomatik hesabınıza tanımlanır.</p>
                 </div>
@@ -198,9 +198,9 @@ export const InfoModals: React.FC = () => {
 
                     <button
                       type="submit"
-                      className="w-full py-4 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:scale-[1.02] active:scale-95 transition-all mt-6 group"
+                      className="w-full py-4 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(212,175,55,0.2)] active:scale-95 transition-all mt-6 group"
                     >
-                      <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      <Send className="w-5 h-5 group-active:translate-x-1 group-active:-translate-y-1 transition-transform" />
                       <span className="tracking-wide">Ortaklık Başvurusu Gönder</span>
                     </button>
                   </form>
@@ -219,16 +219,16 @@ export const InfoModals: React.FC = () => {
                     href="https://wa.me/905068638306"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-sm hover:bg-emerald-500/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(16,185,129,0.1)] group"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-sm active:bg-emerald-500/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(16,185,129,0.1)] group"
                   >
-                    <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <MessageCircle className="w-5 h-5 group-active:scale-95 transition-transform" />
                     <span className="tracking-wide">WhatsApp Destek Hattı</span>
                   </a>
                   <a
                     href="tel:+905068638306"
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-black text-sm hover:bg-[#D4AF37]/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(212,175,55,0.1)] group"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-black text-sm active:bg-[#D4AF37]/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(212,175,55,0.1)] group"
                   >
-                    <span className="group-hover:scale-110 transition-transform">📞</span>
+                    <span className="group-active:scale-95 transition-transform">📞</span>
                     <span className="tracking-wide">+90 506 863 83 06</span>
                   </a>
                   <p className="text-xs font-bold text-amber-200/50 uppercase tracking-widest mt-4">Haftanın 7 günü 10:00 - 02:00</p>
@@ -238,22 +238,22 @@ export const InfoModals: React.FC = () => {
 
             {activeModal === 'howitworks' && (
               <div className="space-y-4">
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">1</div>
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">1</div>
                   <div>
                     <h4 className="font-black text-white text-sm mb-1">Masa QR Okut</h4>
                     <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine otomatik bağlan.</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">2</div>
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">2</div>
                   <div>
                     <h4 className="font-black text-white text-sm mb-1">Kredi Yükle & Şarkı Ara</h4>
                     <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bakiye yükle, binlerce Spotify şarkısı arasından dilediğini seç.</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 hover:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">3</div>
+                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
+                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">3</div>
                   <div>
                     <h4 className="font-black text-white text-sm mb-1">Şarkını Çaldır</h4>
                     <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Sıraya gir, diğer dinleyicilerden oy alarak sıranı öne geçir ve şarkının keyfini çıkar.</p>
@@ -268,25 +268,25 @@ export const InfoModals: React.FC = () => {
                 <div className="flex bg-black/40 p-1.5 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth snap-x">
                   <button 
                     onClick={() => setActiveLegalTab('kvkk')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
                   >
                     KVKK
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('consent')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
                   >
                     Açık Rıza
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('cookie')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
                   >
                     Çerez
                   </button>
                   <button 
                     onClick={() => setActiveLegalTab('terms')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 hover:text-white'}`}
+                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
                   >
                     Koşullar
                   </button>

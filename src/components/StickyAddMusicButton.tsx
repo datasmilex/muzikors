@@ -31,7 +31,7 @@ export const StickyAddMusicButton: React.FC = () => {
       <div className="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-md mx-auto pointer-events-auto">
         <button
           onClick={handleClick}
-          className="w-full py-4 px-6 rounded-2xl bg-zinc-900/95 border border-[#D4AF37]/30 text-amber-200 font-semibold text-sm flex items-center justify-center gap-3 shadow-2xl shadow-black/40 hover:brightness-110 active:scale-[0.98] transition-all"
+          className="w-full py-4 px-6 rounded-2xl bg-zinc-900/95 border border-[#D4AF37]/30 text-amber-200 font-semibold text-sm flex items-center justify-center gap-3 shadow-2xl shadow-black/40 active:brightness-110 active:scale-[0.98] transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
             <QrCode className="w-4 h-4 text-[#D4AF37]" />
@@ -61,7 +61,7 @@ export const StickyAddMusicButton: React.FC = () => {
     <div className="fixed bottom-4 left-0 right-0 z-40 px-4 max-w-md mx-auto pointer-events-auto">
       <button
         onClick={handleClick}
-        className={`w-full py-4 px-6 rounded-2xl gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-center gap-3 shadow-2xl shadow-amber-500/20 hover:brightness-110 active:scale-[0.98] transition-all border border-amber-300/40 relative overflow-hidden ${
+        className={`w-full py-4 px-6 rounded-2xl gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-center gap-3 shadow-2xl shadow-amber-500/20 active:brightness-110 active:scale-[0.98] transition-all border border-amber-300/40 relative overflow-hidden ${
           cooldown.active ? 'opacity-95' : 'pulse-gold'
         }`}
       >

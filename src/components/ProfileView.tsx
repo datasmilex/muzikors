@@ -46,7 +46,7 @@ export const ProfileView: React.FC = () => {
             </div>
             <button
               onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all backdrop-blur-md"
+              className="p-1.5 rounded-full bg-white/5 active:bg-white/10 text-gray-400 active:text-white transition-all backdrop-blur-md"
             >
               <X className="w-4 h-4" />
             </button>
@@ -56,7 +56,7 @@ export const ProfileView: React.FC = () => {
           <div className="flex flex-col items-center relative z-10 mb-8">
             <div className="relative group">
               {/* Outer Glowing Ring */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37] to-amber-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200 animate-pulse" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37] to-amber-600 rounded-full blur opacity-25 group-active:opacity-50 transition duration-1000 group-active:duration-200 animate-pulse" />
               
               <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/50 bg-black flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(212,175,55,0.2)]">
                 {user && user.avatar ? (
@@ -122,7 +122,7 @@ export const ProfileView: React.FC = () => {
             {!user ? (
               <button
                 onClick={() => { closeModal(); loginWithProvider('google'); }}
-                className="w-full py-3 rounded-xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
+                className="w-full py-3 rounded-xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -138,13 +138,13 @@ export const ProfileView: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowConfirmDelete(false)}
-                    className="flex-1 py-2 rounded-lg bg-black/50 border border-white/5 text-gray-300 font-bold text-[10px] hover:bg-white/10 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
+                    className="flex-1 py-2 rounded-lg bg-black/50 border border-white/5 text-gray-300 font-bold text-[10px] active:bg-white/10 active:text-white transition-all active:scale-95 uppercase tracking-widest"
                   >
                     Vazgeç
                   </button>
                   <button
                     onClick={deleteAccount}
-                    className="flex-1 py-2 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 font-bold text-[10px] hover:bg-red-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
+                    className="flex-1 py-2 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 font-bold text-[10px] active:bg-red-500 active:text-white transition-all active:scale-95 uppercase tracking-widest"
                   >
                     Kalıcı Sil
                   </button>
@@ -154,16 +154,16 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center justify-between mt-2">
                 <button
                   onClick={logout}
-                  className="text-[9px] font-bold text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-white/5 transition-all group uppercase tracking-widest"
+                  className="text-[9px] font-bold text-gray-400 active:text-white flex items-center gap-1.5 px-3 py-2 rounded-lg active:bg-white/5 transition-all group uppercase tracking-widest"
                 >
-                  <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                  <LogOut className="w-3.5 h-3.5 group-active:-translate-x-1 transition-transform" />
                   Çıkış Yap
                 </button>
                 <button
                   onClick={() => setShowConfirmDelete(true)}
-                  className="text-[9px] font-bold text-red-500/60 hover:text-red-400 flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-red-500/10 transition-all group uppercase tracking-widest"
+                  className="text-[9px] font-bold text-red-500/60 active:text-red-400 flex items-center gap-1.5 px-3 py-2 rounded-lg active:bg-red-500/10 transition-all group uppercase tracking-widest"
                 >
-                  <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                  <Trash2 className="w-3.5 h-3.5 group-active:scale-95 transition-transform" />
                   Hesabı Sil
                 </button>
               </div>
@@ -172,13 +172,13 @@ export const ProfileView: React.FC = () => {
 
           {/* Legal Links (List Group) */}
           <div className="relative z-10 mt-6 pt-4 border-t border-white/5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[10px] text-gray-500 font-medium">
-            <a href="/legal/terms" className="hover:text-[#D4AF37] transition-colors">Hizmet Sözleşmesi</a>
+            <a href="/legal/terms" className="active:text-[#D4AF37] transition-colors">Hizmet Sözleşmesi</a>
             <span className="text-white/10">•</span>
-            <a href="/legal/privacy" className="hover:text-[#D4AF37] transition-colors">KVKK & Gizlilik</a>
+            <a href="/legal/privacy" className="active:text-[#D4AF37] transition-colors">KVKK & Gizlilik</a>
             <span className="text-white/10">•</span>
-            <a href="/legal/refund" className="hover:text-[#D4AF37] transition-colors">İptal & İade</a>
+            <a href="/legal/refund" className="active:text-[#D4AF37] transition-colors">İptal & İade</a>
             <span className="text-white/10">•</span>
-            <a href="/legal/sales" className="hover:text-[#D4AF37] transition-colors">Mesafeli Satış</a>
+            <a href="/legal/sales" className="active:text-[#D4AF37] transition-colors">Mesafeli Satış</a>
           </div>
         </motion.div>
       </div>

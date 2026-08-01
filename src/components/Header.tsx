@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-30 w-full bg-[#120C08]/90 backdrop-blur-2xl border-b border-[#D4AF37]/20 px-4 py-3 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
       <button
         onClick={() => openModal('drawer')}
-        className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[#D4AF37] hover:bg-white/10 transition-all active:scale-95 shadow-inner"
+        className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[#D4AF37] active:bg-white/10 transition-all active:scale-95 shadow-inner"
         aria-label="Menü Aç"
       >
         <Menu className="w-5 h-5 drop-shadow-md" />
@@ -27,7 +27,7 @@ export const Header: React.FC = () => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/logo.png';
             }}
-            className="w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.4)] relative z-10 group-hover:scale-110 transition-transform"
+            className="w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.4)] relative z-10 group-active:scale-95 transition-transform"
           />
         </div>
         <div className="flex flex-col items-start text-left">
@@ -63,7 +63,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-2">
         <button
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden hover:border-[#D4AF37] hover:scale-105 transition-all active:scale-95 flex items-center justify-center shadow-inner shrink-0"
+          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden active:border-[#D4AF37] active:scale-95 transition-all active:scale-95 flex items-center justify-center shadow-inner shrink-0"
         >
           {user && user.avatar ? (
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />

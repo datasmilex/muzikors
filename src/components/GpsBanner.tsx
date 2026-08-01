@@ -11,7 +11,7 @@ export const GpsBanner: React.FC = () => {
     <div className="px-4 py-2">
       <button
         onClick={() => openModal('map')}
-        className="w-full glass-panel rounded-xl p-3 flex items-center justify-between border border-[#D4AF37]/25 hover:border-[#D4AF37]/50 active:scale-[0.99] transition-all bg-gradient-to-r from-[#1C130D]/90 via-[#26190F]/70 to-[#1C130D]/90 text-left"
+        className="w-full glass-panel rounded-xl p-3 flex items-center justify-between border border-[#D4AF37]/25 active:border-[#D4AF37]/50 active:scale-[0.99] transition-all bg-gradient-to-r from-[#1C130D]/90 via-[#26190F]/70 to-[#1C130D]/90 text-left"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0">
