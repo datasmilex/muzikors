@@ -49,6 +49,7 @@ export const DrawerMenu: React.FC = () => {
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
     { label: 'Muzikors Premium', icon: <Sparkles className="w-5 h-5 text-amber-300" />, modal: 'premium_buy', isProtected: true },
+    { label: 'Abonelik Yönetimi', icon: <Coins className="w-5 h-5 text-[#D4AF37]" />, modal: 'manage_subscription', isProtected: true },
     { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
     { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
     { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
@@ -185,6 +186,12 @@ export const DrawerMenu: React.FC = () => {
                     closeModal();
                     if (item.modal === 'premium_buy' as ModalType) {
                       presentPremiumPaywall();
+                      return;
+                    }
+                    if (item.modal === 'manage_subscription' as ModalType) {
+                      import('../services/RevenueCatService').then(({ RevenueCatService }) => {
+                        RevenueCatService.presentCustomerCenter();
+                      });
                       return;
                     }
                     if (item.isProtected && !user) {
