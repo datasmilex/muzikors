@@ -121,17 +121,20 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const spotifyParams = new URLSearchParams({
-      q: q,
-      type: 'track',
-      limit: '20',
-    });
+    const spotifyParams = new URLSearchParams();
+    spotifyParams.append('q', q);
+    spotifyParams.append('type', 'track');
+    spotifyParams.append('limit', '20');
+    spotifyParams.append('market', 'TR');
+    
     const searchUrl = 'https://api.spotify.com/v1/search?' + spotifyParams.toString();
 
     const searchRes = await fetch(searchUrl, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${accessToken.trim()}`,
         'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       cache: 'no-store',
     });
@@ -142,8 +145,9 @@ export async function GET(request: NextRequest) {
       catch { spotifyErrorPayload = await searchRes.text(); }
       console.error('[Spotify Search Failed]', searchRes.status, spotifyErrorPayload);
 
-      // Clear cache on 401 so next request refreshes
-      if (searchRes.status === 401) {
+      // Clear cache on 400 or 401 so next request refreshes the token
+      // Sometimes Spotify returns 400 Bad Request for malformed/expired tokens instead of 401
+      if (searchRes.status === 401 || searchRes.status === 400) {
         tokenCache.delete(venueId);
       }
 
