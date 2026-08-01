@@ -93,13 +93,13 @@ export const UpNextQueueSection: React.FC = () => {
             return (
               <div
                 key={track.id}
-                className={`relative group transition-all duration-500 ease-out active:-translate-y-2 active:z-50 ${!isFirst ? '-mt-6' : ''}`}
+                className={`relative group transition-all duration-500 ease-out active:z-50 ${!isFirst ? '-mt-4' : ''}`}
                 style={{ zIndex }}
               >
-                <div className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
+                <div className={`rounded-2xl flex items-center justify-between border backdrop-blur-2xl transition-all duration-300 ${
                   isFirst
-                    ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_-5px_25px_rgba(212,175,55,0.2)] scale-[1.02]'
-                    : 'border-white/5 bg-[#1A1A1A]/30 shadow-[0_-8px_20px_rgba(0,0,0,0.3)] active:border-white/10 active:bg-[#1A1A1A]/50'
+                    ? 'p-3 border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_12px_24px_rgba(0,0,0,0.6)] scale-[1.02]'
+                    : 'pt-7 px-3 pb-3 border-white/5 bg-[#1A1A1A]/95 shadow-[0_8px_20px_rgba(0,0,0,0.4)] active:border-white/10 active:bg-[#2A2A2A]/95'
                 }`}>
                   
                   {/* Left: Rank & Artwork & Track Details */}
