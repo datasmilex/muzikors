@@ -274,11 +274,11 @@ export const MusicSearchModal: React.FC = () => {
                   <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
                 </button>
                 <button
-                  onClick={() => { setConfirmingTrack(null); closeModal(); }}
+                  onClick={() => { setConfirmingTrack(null); }}
                   disabled={submittingTrackId === confirmingTrack.id}
                   className="w-full py-4 rounded-[1.5rem] bg-transparent border border-white/10 text-gray-400 font-bold text-sm flex items-center justify-center active:bg-white/5 active:text-white active:scale-95 transition-all"
                 >
-                  İptal / Vazgeç
+                  Geri Dön
                 </button>
               </div>
             </div>
