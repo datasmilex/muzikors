@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { CREDIT_PACKAGES } from '../data/mockData';
 
 export const CreditTopUpModal: React.FC = () => {
-  const { activeModal, closeModal, handlePayTRPayment } = useApp();
+  const { activeModal, closeModal, handleIyzicoPayment } = useApp();
   const [selectedPackId, setSelectedPackId] = useState<string>('pack-120');
   const [isLegalAccepted, setIsLegalAccepted] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
@@ -122,7 +122,7 @@ export const CreditTopUpModal: React.FC = () => {
           {/* Secure Payment Info */}
           <div className="flex items-center justify-center gap-1.5 text-[9px] font-bold text-amber-200/60 mb-4 bg-[#1A1A1A]/40 py-2 rounded-lg border border-white/5 relative z-10">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 drop-shadow-sm" />
-            <span className="tracking-wide">256-Bit SSL %100 Güvenli Ödeme (PayTR)</span>
+            <span className="tracking-wide">256-Bit SSL %100 Güvenli Ödeme (Iyzico)</span>
           </div>
 
           {/* Legal Checkbox */}
@@ -145,7 +145,7 @@ export const CreditTopUpModal: React.FC = () => {
           <button
             onClick={async () => {
               setIsLoadingPayment(true);
-              await handlePayTRPayment(selectedPack.id);
+              await handleIyzicoPayment(selectedPack.id);
               setIsLoadingPayment(false);
             }}
             disabled={!isLegalAccepted || isLoadingPayment}

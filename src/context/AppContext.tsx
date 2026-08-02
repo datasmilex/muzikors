@@ -35,7 +35,8 @@ interface AppContextType {
   closeModal: () => void;
 
   logout: () => Promise<void>;
-  handlePayTRPayment: (packageId: string) => void;
+  handleIyzicoPayment: (packageId: string) => void;
+  iyzicoHtml: string | null;
   requestTrack: (track: Track, isAnonymous?: boolean) => Promise<boolean>;
   voteTrack: (trackId: string) => void;
   bindVenueById: (kafeId: string) => void;
@@ -58,6 +59,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [pendingModal, setPendingModal] = useState<ModalType | null>(null);
   const [loginPromptReason, setLoginPromptReason] = useState<string | null>(null);
   const [activeVenue, setActiveVenue] = useState<Venue | null>(null);
+  const [iyzicoHtml, setIyzicoHtml] = useState<string | null>(null);
   const [kafeIdParam, setKafeIdParam] = useState<string | null>(null);
   const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
@@ -868,7 +870,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Cikis yapildi.'); closeModal();
   }, [showToast, closeModal]);
 
-  const handlePayTRPayment = useCallback(async (packageId: string) => {
+  const handleIyzicoPayment = useCallback(async (packageId: string) => {
     // SATIN AL BUTONUNA YETKİ KONTROLÜ (AUTH GUARD)
     if (!user) {
       showToast('Ödeme yapabilmek için lütfen önce giriş yapın.');
@@ -876,11 +878,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     
-    // Geçici uyarı (Kullanıcı talebi)
-    showToast('Ödeme altyapısı güncellenmektedir. Lütfen daha sonra tekrar deneyin.');
-    closeModal();
+    // TODO: Bu aşamada Supabase Edge Function'a (örn: /create-iyzico-checkout) istek atılarak Iyzico'dan HTML snippet alınacak.
+    // Şimdilik test amaçlı sahte bir HTML formu yerleştiriyoruz. Sana Iyzico keyleri verildiğinde buraya gerçek API çağrısını ekleyeceğiz.
     
-  }, [user, openProtectedModal, showToast, closeModal]);
+    // Fake Iyzico HTML Content
+    const fakeHtml = `
+      <div style="font-family: sans-serif; text-align: center; color: white; padding: 20px;">
+        <h3 style="color: #D4AF37;">Iyzico Güvenli Ödeme</h3>
+        <p style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;">Ödeme formu buraya yüklenecek.</p>
+        <button style="background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold;">(Simülasyon) Ödemeyi Tamamla</button>
+      </div>
+    `;
+    
+    setIyzicoHtml(fakeHtml);
+    openModal('iyzico');
+    
+  }, [user, openProtectedModal, openModal, showToast]);
 
   const presentPremiumPaywall = useCallback(async () => {
     if (!user) {
@@ -1225,7 +1238,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
-      handlePayTRPayment, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+      handleIyzicoPayment, iyzicoHtml, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall
     }}>
       {children}
