@@ -174,12 +174,12 @@ export const ProfileView: React.FC = () => {
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   const presetAvatars = [
-    '/avatar_cat.jpg',
-    '/avatar_male.jpg',
-    '/avatar_female.jpg',
-    '/avatar_dj_panda.jpg',
-    '/avatar_robot.jpg',
-    '/avatar_fox.jpg',
+    '/logo_gold.png',
+    '/logo_red.png',
+    '/logo_green.png',
+    '/logo_cyan.png',
+    '/logo_blue.png',
+    '/logo_purple.png',
   ];
 
   const handleEditClick = () => {
@@ -337,7 +337,7 @@ export const ProfileView: React.FC = () => {
                     const av = isEditing ? editAvatar : user?.avatar;
                     const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
                     return av && !isGoogle ? (
-                      <img src={av} alt={user?.name} className="w-full h-full object-cover" />
+                      <img src={av} alt={user?.name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <User className="w-10 h-10 text-[#D4AF37]/40" />
@@ -387,7 +387,7 @@ export const ProfileView: React.FC = () => {
                                   : 'border-white/10 opacity-55 active:opacity-100'
                               }`}
                             >
-                              <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-cover" />
+                              <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-contain p-1.5 bg-black" />
                             </button>
                           </div>
                         ))}
