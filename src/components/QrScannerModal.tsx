@@ -217,7 +217,6 @@ export const QrScannerModal: React.FC = () => {
           className="relative w-full max-w-sm bg-gradient-to-b from-[#1C130D] to-black border border-[#D4AF37]/20 rounded-[2rem] p-6 z-10 shadow-[0_0_50px_rgba(212,175,55,0.1)] overflow-hidden flex flex-col"
         >
           {/* Subtle Cyberpunk/Futuristic Glow */}
-          <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {/* Header Row */}
           <div className="flex items-center justify-between mb-6 relative z-10">

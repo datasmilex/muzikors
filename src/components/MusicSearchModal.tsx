@@ -186,7 +186,6 @@ export const MusicSearchModal: React.FC = () => {
           className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {confirmingTrack ? (
             <div className="flex-1 flex flex-col pt-4 overflow-y-auto custom-scrollbar h-full relative z-10 px-2 pb-24">

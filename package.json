@@ -24,7 +24,8 @@
     "next": "16.2.11",
     "pigeon-maps": "^0.22.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-easy-crop": "^6.2.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",

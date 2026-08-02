@@ -85,7 +85,6 @@ export const DrawerMenu: React.FC = () => {
           className="relative w-[80%] max-w-[280px] h-full bg-[#120C08] border-r border-[#D4AF37]/30 flex flex-col justify-between p-4 z-10 shadow-[20px_0_40px_rgba(212,175,55,0.15)] overflow-y-auto custom-scrollbar glass-panel-gold"
         >
           {/* Decorative Glow */}
-          <div className="absolute top-0 left-0 w-40 h-40 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           <div className="relative z-10">
             {/* Header */}

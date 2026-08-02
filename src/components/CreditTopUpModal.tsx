@@ -37,10 +37,9 @@ export const CreditTopUpModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-4 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] glass-panel-gold border border-[#D4AF37]/30 backdrop-blur-3xl"
+          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-4 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] glass-panel-gold border border-[#D4AF37]/30 backdrop-blur"
         >
           {/* Decorative Glow */}
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {/* Modal Header */}
           <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20 relative z-10">

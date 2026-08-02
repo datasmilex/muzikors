@@ -67,7 +67,6 @@ export const InfoModals: React.FC = () => {
           className="relative w-full max-w-sm bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20 mb-5 relative z-10">

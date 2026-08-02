@@ -417,8 +417,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       userIdRef.current = authUser.id;
 
-      // Fetch existing profile from DB to get custom avatar if set
-      let dbAvatarUrl = googleAvatarUrl;
+      // Helper: check if a URL is a Google/OAuth auto-generated photo
+      const isGooglePhoto = (url: string) =>
+        url.includes('googleusercontent.com') ||
+        url.includes('google.com/a/') ||
+        url.includes('lh3.google') ||
+        url.includes('lh4.google') ||
+        url.includes('lh5.google') ||
+        url.includes('lh6.google');
+
+      // Fetch existing profile — ONLY use DB avatar if it is a custom (non-Google) one
+      let customAvatarUrl: string = '';
       let dbUsername: string | null = null;
       let dbLastUsernameUpdate: string | null = null;
       if (supabase) {
@@ -428,24 +437,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
-          // Prefer DB avatar (custom) over Google avatar
-          dbAvatarUrl = existingProfile.avatar_url || googleAvatarUrl;
+          // Only keep the avatar if it is NOT a Google photo
+          const raw = existingProfile.avatar_url || '';
+          customAvatarUrl = raw && !isGooglePhoto(raw) ? raw : '';
           dbUsername = existingProfile.username || null;
           dbLastUsernameUpdate = existingProfile.last_username_update || null;
         }
       }
 
       if (supabase && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        // Never store the Google photo — only upsert non-avatar profile fields
         const profileData: any = {
           id: authUser.id,
           full_name: fullName,
           email: emailStr,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          // Clear any previously stored Google photo
+          ...(customAvatarUrl === '' && { avatar_url: null }),
         };
-        // Only set avatar_url on first create (if no custom avatar stored)
-        if (!dbAvatarUrl || dbAvatarUrl === googleAvatarUrl) {
-          profileData.avatar_url = googleAvatarUrl;
-        }
 
         try {
           const { error } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' });
@@ -464,7 +473,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: authUser.id,
         name: fullName,
         username: dbUsername || prev?.username || ('@' + (emailStr.split('@')[0] || 'kullanici')),
-        avatar: dbAvatarUrl,
+        // Use only custom (non-Google) avatar; empty string = show default icon
+        avatar: customAvatarUrl,
         email: emailStr,
         credits: liveCredits.real,
         promo_credits: liveCredits.promo,

@@ -155,7 +155,6 @@ export const GpsMapModal: React.FC = () => {
           className="relative w-full max-w-md h-[88vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
         >
           {/* Decorative Glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
 
           {/* Header */}
           <div className="shrink-0 pb-4 border-b border-[#D4AF37]/20 relative z-10">

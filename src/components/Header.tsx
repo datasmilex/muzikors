@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
   const { openModal, activeVenue, user, isVenueBound, isVenueActive } = useApp();
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#120C08]/90 backdrop-blur-2xl border-b border-[#D4AF37]/20 px-4 py-3 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+    <header className="sticky top-0 z-30 w-full bg-[#120C08]/95 backdrop-blur-md border-b border-[#D4AF37]/20 px-4 py-3 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
       <button
         onClick={() => openModal('drawer')}
         className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[#D4AF37] active:bg-white/10 transition-all active:scale-95 shadow-inner"
@@ -65,7 +65,7 @@ export const Header: React.FC = () => {
           onClick={() => openModal(user ? 'profile' : 'login')}
           className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden active:border-[#D4AF37] active:scale-95 transition-all active:scale-95 flex items-center justify-center shadow-inner shrink-0"
         >
-          {user && user.avatar ? (
+          {user && user.avatar && !user.avatar.includes('googleusercontent') ? (
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
           ) : (
             <User className="w-5 h-5 text-[#D4AF37]" />

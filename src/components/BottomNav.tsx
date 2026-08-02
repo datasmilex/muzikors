@@ -10,7 +10,7 @@ export const BottomNav: React.FC = () => {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-sm z-50">
       {/* Floating Pill Container */}
-      <div className="relative flex items-center justify-between bg-black/60 backdrop-blur-2xl border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.15)]">
+      <div className="relative flex items-center justify-between bg-black/75 backdrop-blur border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.15)]">
         
         {/* Kafe Bilgileri */}
         <button
