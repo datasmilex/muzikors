@@ -25,41 +25,9 @@ export const QrScannerModal: React.FC = () => {
 
     // Helper: Select optimal standard back camera to prevent macro/wide-angle lens issues
     const getOptimalConstraints = async (): Promise<MediaStreamConstraints> => {
-      if (!navigator?.mediaDevices?.enumerateDevices) {
-        return { video: { facingMode: { exact: 'environment' } }, audio: false };
-      }
-
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-
-        // Prefer standard back/rear camera over ultra-wide or macro
-        const standardBackCamera = videoDevices.find((d) => {
-          const lbl = d.label.toLowerCase();
-          return (
-            (lbl.includes('back') || lbl.includes('rear') || lbl.includes('0') || lbl.includes('1')) &&
-            !lbl.includes('front') &&
-            !lbl.includes('user') &&
-            !lbl.includes('selfie') &&
-            !lbl.includes('wide') &&
-            !lbl.includes('ultra') &&
-            !lbl.includes('macro') &&
-            !lbl.includes('depth') &&
-            !lbl.includes('telephoto')
-          );
-        }) || videoDevices.find((d) => {
-          const lbl = d.label.toLowerCase();
-          return (lbl.includes('back') || lbl.includes('rear')) && !lbl.includes('front');
-        });
-
-        if (standardBackCamera && standardBackCamera.deviceId) {
-          return { video: { deviceId: { exact: standardBackCamera.deviceId } }, audio: false };
-        }
-      } catch (err) {
-        console.warn('[Camera Enumeration Warning]', err);
-      }
-
-      return { video: { facingMode: { exact: 'environment' } }, audio: false };
+      // Default to the OS's primary rear camera (1x) rather than manually parsing device labels 
+      // which often selects the ultra-wide lens by mistake on modern Android devices.
+      return { video: { facingMode: 'environment' }, audio: false };
     };
 
     const startCameraAndScan = async () => {

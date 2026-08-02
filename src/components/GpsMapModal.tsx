@@ -22,7 +22,7 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 };
 
 export const GpsMapModal: React.FC = () => {
-  const { activeModal, closeModal, activeVenue, openModal } = useApp();
+  const { activeModal, closeModal, activeVenue, openModal, bindVenueById, showToast } = useApp();
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [locError, setLocError] = useState<string | null>(null);
@@ -278,14 +278,28 @@ export const GpsMapModal: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      {v.latitude && v.longitude && (
+                      <div className="flex gap-2 shrink-0">
                         <button
-                          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
-                          className="w-12 h-12 rounded-xl bg-white/5 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] active:bg-[#D4AF37]/10 active:scale-95 transition-all shrink-0 shadow-sm"
+                          onClick={() => {
+                            bindVenueById(v.id.toString());
+                            closeModal();
+                            showToast('Mekana başarıyla bağlandınız!');
+                          }}
+                          className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#E5A93B] flex items-center justify-center text-black active:scale-95 transition-all shadow-[0_4px_15px_rgba(212,175,55,0.3)]"
+                          title="Mekana Git"
                         >
-                          <Navigation className="w-5 h-5" />
+                          <Store className="w-5 h-5 stroke-[2.5]" />
                         </button>
-                      )}
+                        {v.latitude && v.longitude && (
+                          <button
+                            onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
+                            className="w-12 h-12 rounded-xl bg-white/5 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] active:bg-[#D4AF37]/10 active:scale-95 transition-all shadow-sm"
+                            title="Yol Tarifi"
+                          >
+                            <Navigation className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 }) : (
