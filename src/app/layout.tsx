@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: 'Muzikors | Mobil Müzik Kutusu & Jukebox',
   description: 'Müziği Sen Yönet! Bulunduğun kafe ve barlarda favori şarkılarını çaldır, gecenin ritmini belirle.',
   keywords: ['muzikors', 'jukebox', 'mobile jukebox', 'gece hayatı', 'şarkı iste', 'spotify jukebox'],
+  manifest: '/manifest.json',
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
