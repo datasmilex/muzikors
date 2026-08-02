@@ -113,7 +113,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim')
+        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim, total_credits_spent, claimed_achievements, pinned_achievements')
         .eq('id', userId)
         .single();
 
@@ -131,6 +131,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits,
               totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
               lastDailyClaim: data?.last_daily_claim ?? prev.lastDailyClaim,
+              totalCreditsSpent: data?.total_credits_spent ?? prev.totalCreditsSpent ?? 0,
+              claimed_achievements: Array.isArray(data?.claimed_achievements) ? data.claimed_achievements : (prev.claimed_achievements ?? []),
+              pinned_achievements: Array.isArray(data?.pinned_achievements) ? data.pinned_achievements : (prev.pinned_achievements ?? []),
             }
           : null
       );
@@ -520,6 +523,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 username: row?.username ? row.username : prev.username,
                 last_username_update: row?.last_username_update ?? prev.last_username_update,
                 avatar: row?.avatar_url ?? prev.avatar,
+                totalCreditsSpent: typeof row?.total_credits_spent === 'number' ? row.total_credits_spent : prev.totalCreditsSpent,
+                claimed_achievements: Array.isArray(row?.claimed_achievements) ? row.claimed_achievements : prev.claimed_achievements,
+                pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
               }
             : null
         );

@@ -80,6 +80,7 @@ export interface UserProfile {
   credits: number;
   promo_credits?: number;
   totalSongsRequested: number;
+  totalCreditsSpent?: number;
   lifetimeCredits?: number;
   isSpotifyConnected?: boolean;
   loginMethod: 'google' | 'spotify';
@@ -87,6 +88,8 @@ export interface UserProfile {
   isPremium?: boolean;
   daily_free_votes?: number;
   last_username_update?: string;
+  claimed_achievements?: string[];
+  pinned_achievements?: string[];
 }
 
 export interface CreditPackage {

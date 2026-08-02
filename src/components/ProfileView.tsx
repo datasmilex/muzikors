@@ -2,9 +2,11 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon } from 'lucide-react';
+import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import Cropper from 'react-easy-crop';
+import { AchievementsModal } from './AchievementsModal';
+import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed } from '../data/achievements';
 
 // ─── Crop helpers ─────────────────────────────────────────────────────────────
 interface Area { x: number; y: number; width: number; height: number; }
@@ -165,6 +167,7 @@ export const ProfileView: React.FC = () => {
   const [editAvatar, setEditAvatar] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Crop state
@@ -487,6 +490,63 @@ export const ProfileView: React.FC = () => {
               </div>
             </div>
 
+            {/* ── Pinned Achievement Badges ───────────────────────────── */}
+            {user && (
+              <div className="mb-4 relative z-10">
+                {/* Pinned badges row */}
+                {(user.pinned_achievements?.length ?? 0) > 0 ? (
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    {user.pinned_achievements!.map((id) => {
+                      const ach = ACHIEVEMENTS.find(a => a.id === id);
+                      if (!ach) return null;
+                      const s = TIER_STYLES[ach.tier];
+                      return (
+                        <div
+                          key={id}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-bold ${s.bg} ${s.border} ${s.glow}`}
+                        >
+                          <span className="text-base leading-none">{ach.emoji}</span>
+                          <span className={s.text}>{ach.title}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-gray-600 font-medium mb-3 text-center">
+                    Başarım kazan ve profiline sabitle 📌
+                  </p>
+                )}
+
+                {/* Achievements entry button */}
+                <button
+                  onClick={() => setShowAchievements(true)}
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#1C130D] to-[#241911] border border-[#D4AF37]/30 text-white font-bold text-sm flex items-center justify-between active:scale-95 transition-all shadow-[0_4px_15px_rgba(212,175,55,0.08)] hover:border-[#D4AF37]/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-[#120C08] border border-[#D4AF37]/30 flex items-center justify-center">
+                      <Trophy className="w-4.5 h-4.5 text-[#D4AF37]" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-black text-white leading-tight">Başarımlar</p>
+                      <p className="text-[10px] text-amber-200/50 font-medium">
+                        {user.claimed_achievements?.length ?? 0}/{ACHIEVEMENTS.length} tamamlandı
+                        {(() => {
+                          const pending = ACHIEVEMENTS.filter(
+                            a => isAchievementUnlocked(a, user.totalSongsRequested, user.totalCreditsSpent ?? 0)
+                              && !isAchievementClaimed(a, user.claimed_achievements ?? [])
+                          ).length;
+                          return pending > 0 ? (
+                            <span className="ml-2 text-emerald-400 font-black">{pending} ödül bekliyor!</span>
+                          ) : null;
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#D4AF37]/40" />
+                </button>
+              </div>
+            )}
+
             {/* Action buttons */}
             {!user ? (
               <div className="space-y-3">
@@ -544,6 +604,12 @@ export const ProfileView: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Achievements Modal — inside the fragment so it shares the conditional render */}
+      <AchievementsModal
+        isOpen={showAchievements}
+        onClose={() => setShowAchievements(false)}
+      />
       </>)}
     </AnimatePresence>
   );
