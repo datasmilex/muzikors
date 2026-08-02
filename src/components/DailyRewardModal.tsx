@@ -105,7 +105,7 @@ export const DailyRewardModal: React.FC = () => {
           exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         {/* Modal Container */}
@@ -113,7 +113,7 @@ export const DailyRewardModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 text-center"
         >
           {/* Decorative Glow */}

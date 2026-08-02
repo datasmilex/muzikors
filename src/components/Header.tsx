@@ -27,7 +27,7 @@ export const Header: React.FC = () => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/logo.png';
             }}
-            className="w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.4)] relative z-10 group-active:scale-95 transition-transform"
+            className="w-9 h-9 object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.6)] relative z-10 group-active:scale-95 transition-transform"
           />
         </div>
         <div className="flex flex-col items-start text-left">

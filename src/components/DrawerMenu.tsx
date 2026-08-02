@@ -70,10 +70,10 @@ export const DrawerMenu: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ duration: 0.4 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md"
         />
 
         {/* Drawer Container */}
@@ -81,7 +81,7 @@ export const DrawerMenu: React.FC = () => {
           initial={{ x: '-100%' }}
           animate={{ x: 0 }}
           exit={{ x: '-100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200, bounce: 0.1 }}
+          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-[80%] max-w-[280px] h-full bg-[#120C08] border-r border-[#D4AF37]/30 flex flex-col justify-between p-4 z-10 shadow-[20px_0_40px_rgba(212,175,55,0.15)] overflow-y-auto custom-scrollbar glass-panel-gold"
         >
           {/* Decorative Glow */}

@@ -3,7 +3,6 @@
 import React from 'react';
 import { Info, Map, Plus, Tv, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { motion } from 'framer-motion';
 
 export const BottomNav: React.FC = () => {
   const { openModal, isVenueBound, activeModal } = useApp();
@@ -38,24 +37,18 @@ export const BottomNav: React.FC = () => {
 
         {/* ŞARKI EKLE (FAB) - Floating Action Button overflowing the pill */}
         <div className="relative -top-8 flex flex-col items-center mx-2">
-          <motion.button
-            
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => openModal('search')}
             disabled={!isVenueBound}
-            className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFDF73] to-[#D4AF37] shadow-[0_0_30px_rgba(212,175,55,0.6)] border-4 border-[#120C08] z-50 transition-all ${
+            className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFDF73] to-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.5)] border-4 border-[#120C08] z-50 active:scale-95 transition-transform duration-100 will-change-transform ${
               !isVenueBound ? 'opacity-50 cursor-not-allowed grayscale' : ''
             }`}
           >
-            {/* Pronounced Pulse effect */}
             {isVenueBound && (
-              <span className="absolute inset-0 rounded-full border border-[#D4AF37] animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-50" />
-            )}
-            {isVenueBound && (
-              <span className="absolute inset-0 rounded-full bg-[#D4AF37] opacity-20 animate-pulse" />
+              <span className="absolute inset-0 rounded-full border border-[#D4AF37] animate-ping opacity-40" style={{ animationDuration: '3s' }} />
             )}
             <Plus className="w-8 h-8 text-black stroke-[3] drop-shadow-md" />
-          </motion.button>
+          </button>
           {/* Subtle label below FAB */}
           <span className="absolute -bottom-5 text-[10px] font-black text-[#D4AF37] tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Ekle</span>
         </div>

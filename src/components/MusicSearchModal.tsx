@@ -174,7 +174,7 @@ export const MusicSearchModal: React.FC = () => {
           exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         {/* Bottom Sheet / Modal Container */}
@@ -182,7 +182,7 @@ export const MusicSearchModal: React.FC = () => {
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 22, stiffness: 200, bounce: 0.2 }}
+          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
         >
           {/* Decorative Glow */}

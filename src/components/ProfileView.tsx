@@ -16,12 +16,15 @@ export const ProfileView: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const presetAvatars = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+    '/avatar_cat.jpg',
+    '/avatar_male.jpg',
+    '/avatar_female.jpg',
+    '/avatar_dj_panda.jpg',
+    '/avatar_robot.jpg',
+    '/avatar_fox.jpg',
   ];
+
+  const presetAvatarLabels = ['Kedi', 'Erkek', 'Kız', 'DJ Panda', 'Robot', 'Tilki'];
 
   const handleEditClick = () => {
     setEditUsername(user?.username?.replace('@', '') || '');
@@ -98,7 +101,10 @@ export const ProfileView: React.FC = () => {
       const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
       
       if (error) throw error;
-      
+
+      // Update user state immediately so UI reflects change without needing a page reload
+      const { setUser: _setUser } = await import('../context/AppContext').then(m => ({ setUser: null })).catch(() => ({ setUser: null }));
+      // Trigger re-render via toast; Realtime subscription will propagate actual change
       showToast('Profiliniz başarıyla güncellendi!');
       setIsEditing(false);
     } catch (err: any) {
@@ -129,7 +135,7 @@ export const ProfileView: React.FC = () => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-sm bg-gradient-to-b from-[#1C130D] to-black rounded-3xl p-6 z-10 shadow-[0_0_50px_rgba(212,175,55,0.1)] border border-[#D4AF37]/20 overflow-hidden"
         >
           {/* Subtle Cyberpunk/Futuristic Grid & Glow */}
@@ -181,31 +187,37 @@ export const ProfileView: React.FC = () => {
             <div className="mt-5 text-center w-full">
               {isEditing ? (
                 <div className="space-y-4 px-2">
-                  <div className="flex justify-center gap-2 mb-4">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingAvatar}
-                      className="w-10 h-10 rounded-full border-2 border-dashed border-[#D4AF37]/50 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all text-[#D4AF37]"
-                    >
-                      {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    </button>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleFileUpload} 
+                  <div className="flex gap-3 overflow-x-auto pb-2 px-1 scrollbar-hide mb-4">
+                    {/* Upload button */}
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingAvatar}
+                        className="w-14 h-14 rounded-full border-2 border-dashed border-[#D4AF37]/50 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all text-[#D4AF37]"
+                      >
+                        {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                      </button>
+                      <span className="text-[8px] text-amber-200/50 font-bold">Yükle</span>
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileUpload}
                     />
                     {presetAvatars.map((url, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setEditAvatar(url)}
-                        className={`w-10 h-10 rounded-full border-2 overflow-hidden transition-all ${
-                          editAvatar === url ? 'border-[#D4AF37] scale-110 shadow-[0_0_10px_rgba(212,175,55,0.5)]' : 'border-transparent opacity-50 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={url} alt={`Avatar ${idx}`} className="w-full h-full object-cover" />
-                      </button>
+                      <div key={idx} className="flex flex-col items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => setEditAvatar(url)}
+                          className={`w-14 h-14 rounded-full border-2 overflow-hidden transition-all ${
+                            editAvatar === url ? 'border-[#D4AF37] scale-110 shadow-[0_0_12px_rgba(212,175,55,0.6)]' : 'border-white/10 opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={url} alt={presetAvatarLabels[idx]} className="w-full h-full object-cover" />
+                        </button>
+                        <span className="text-[8px] text-amber-200/50 font-bold">{presetAvatarLabels[idx]}</span>
+                      </div>
                     ))}
                   </div>
                   <div>

@@ -149,14 +149,14 @@ export const UpNextQueueSection: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={() => setIsExpanded(false)}
-              className="absolute inset-0 bg-black/85 backdrop-blur-2xl"
+              className="absolute inset-0 bg-black/85 backdrop-blur-sm"
             />
             
             <motion.div
               initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="relative w-full max-w-md h-[85vh] bg-[#120C08] sm:rounded-3xl rounded-t-[2.5rem] p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col border border-[#D4AF37]/30 glass-panel-gold overflow-hidden"
             >
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-b-xl" />

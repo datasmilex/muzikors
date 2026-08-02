@@ -56,7 +56,7 @@ export const InfoModals: React.FC = () => {
           exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         {/* Modal Container */}

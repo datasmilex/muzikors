@@ -186,21 +186,21 @@ export const NowPlayingSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Audio Visualizer */}
-        <div className="w-full flex flex-col items-center gap-1.5 mb-2">
-          <div className="flex items-center justify-center gap-1 h-8 w-full max-w-[150px]">
-            {[...Array(12)].map((_, i) => (
-              <span 
-                key={i} 
-                className={`w-1 rounded-full bg-gradient-to-t from-[#D4AF37] to-[#FFF1C0] shadow-[0_0_8px_rgba(212,175,55,0.8)] ${isPlayingAudio ? 'animate-[pulse_1s_ease-in-out_infinite]' : 'h-1.5'}`}
-                style={{ 
-                  animationDuration: `${0.5 + Math.random() * 0.8}s`,
-                  animationDelay: `${Math.random() * 0.5}s`,
-                  height: isPlayingAudio ? `${20 + Math.random() * 80}%` : '6px'
-                }} 
-              />
-            ))}
-          </div>
+        {/* Music Notes Floating Animation */}
+        <div className="w-full flex items-center justify-center gap-3 mb-2 h-8 overflow-hidden select-none">
+          {['♩','♪','♫','♬','♩','♪'].map((note, i) => (
+            <span
+              key={i}
+              className={`text-[#D4AF37] font-bold drop-shadow-[0_0_8px_rgba(212,175,55,0.9)] select-none pointer-events-none ${isPlayingAudio ? 'animate-bounce' : 'opacity-20'}`}
+              style={{
+                fontSize: `${10 + (i % 3) * 4}px`,
+                animationDuration: `${0.6 + i * 0.15}s`,
+                animationDelay: `${i * 0.1}s`,
+              }}
+            >
+              {note}
+            </span>
+          ))}
         </div>
 
         {/* EMOJI REACTIONS */}

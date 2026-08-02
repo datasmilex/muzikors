@@ -412,19 +412,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const authUser = session.user;
       const metadata = authUser.user_metadata || {};
       const fullName = metadata.full_name || metadata.name || authUser.email?.split('@')[0] || 'Kullanıcı';
-      const avatarUrl = metadata.avatar_url || metadata.picture || '';
+      const googleAvatarUrl = metadata.avatar_url || metadata.picture || '';
       const emailStr = authUser.email || '';
 
       userIdRef.current = authUser.id;
 
+      // Fetch existing profile from DB to get custom avatar if set
+      let dbAvatarUrl = googleAvatarUrl;
+      let dbUsername: string | null = null;
+      let dbLastUsernameUpdate: string | null = null;
+      if (supabase) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('avatar_url, username, last_username_update')
+          .eq('id', authUser.id)
+          .single();
+        if (existingProfile) {
+          // Prefer DB avatar (custom) over Google avatar
+          dbAvatarUrl = existingProfile.avatar_url || googleAvatarUrl;
+          dbUsername = existingProfile.username || null;
+          dbLastUsernameUpdate = existingProfile.last_username_update || null;
+        }
+      }
+
       if (supabase && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        const profileData = {
+        const profileData: any = {
           id: authUser.id,
           full_name: fullName,
-          avatar_url: avatarUrl,
           email: emailStr,
           updated_at: new Date().toISOString()
         };
+        // Only set avatar_url on first create (if no custom avatar stored)
+        if (!dbAvatarUrl || dbAvatarUrl === googleAvatarUrl) {
+          profileData.avatar_url = googleAvatarUrl;
+        }
 
         try {
           const { error } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' });
@@ -432,6 +453,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch (err) {
           console.error('[Muzikors Profile Catch Error]:', err);
         }
+
+        // Close login modal after successful sign-in
+        setActiveModal((prev) => (prev === 'login' ? 'none' : prev));
       }
 
       const liveCredits = await fetchProfileCredits(authUser.id);
@@ -439,20 +463,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser((prev) => ({
         id: authUser.id,
         name: fullName,
-        username: '@' + (emailStr.split('@')[0] || 'kullanici'),
-        avatar: authUser.user_metadata?.avatar_url || prev?.avatar || avatarUrl,
+        username: dbUsername || prev?.username || ('@' + (emailStr.split('@')[0] || 'kullanici')),
+        avatar: dbAvatarUrl,
         email: emailStr,
         credits: liveCredits.real,
         promo_credits: liveCredits.promo,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
         lifetimeCredits: prev?.lifetimeCredits ?? liveCredits.real,
-        last_username_update: prev?.last_username_update,
+        last_username_update: dbLastUsernameUpdate || prev?.last_username_update,
         loginMethod: 'google',
       }));
-
-      // Kredi yüklemesi, login olduğunda profilden zaten geliyor.
-
-
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => handleSession(session, 'INITIAL_SESSION'));

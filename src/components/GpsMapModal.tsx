@@ -143,7 +143,7 @@ export const GpsMapModal: React.FC = () => {
           exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         {/* Modal Container */}
@@ -151,7 +151,7 @@ export const GpsMapModal: React.FC = () => {
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 26, stiffness: 260, bounce: 0.1 }}
+          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-md h-[88vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
         >
           {/* Decorative Glow */}

@@ -37,7 +37,7 @@ export const LoginModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-sm bg-gradient-to-b from-[#1C130D] to-black border border-[#D4AF37]/20 rounded-[2rem] p-6 z-10 shadow-[0_0_50px_rgba(212,175,55,0.1)] overflow-hidden flex flex-col"
         >
           {/* Subtle Cyberpunk/Futuristic Glow */}

@@ -28,7 +28,7 @@ export const CreditTopUpModal: React.FC = () => {
           exit={{ opacity: 0, y: "100%" }}
           transition={{ duration: 0.4 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-2xl"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         {/* Compact Centered Modal Container */}
@@ -36,7 +36,7 @@ export const CreditTopUpModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-4 z-10 shadow-[0_15px_40px_rgba(212,175,55,0.15)] glass-panel-gold border border-[#D4AF37]/30 backdrop-blur-3xl"
         >
           {/* Decorative Glow */}
