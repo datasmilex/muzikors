@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, X, Navigation, Store, List, Map as MapIcon, QrCode } from 'lucide-react';
+import { MapPin, X, Navigation, Store, List, Map as MapIcon, QrCode, Search } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Capacitor } from '@capacitor/core';
@@ -29,6 +29,7 @@ export const GpsMapModal: React.FC = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [radiusFilter, setRadiusFilter] = useState<number>(0); // 0 = Hepsi
+  const [searchQuery, setSearchQuery] = useState('');
 
   const ISTANBUL_CENTER = { lat: 41.0082, lng: 28.9784 };
 
@@ -111,6 +112,16 @@ export const GpsMapModal: React.FC = () => {
 
   const processedVenues = useMemo(() => {
     let list = [...venues];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(v => 
+        (v.name && v.name.toLowerCase().includes(q)) || 
+        (v.address && v.address.toLowerCase().includes(q)) || 
+        (v.district && v.district.toLowerCase().includes(q))
+      );
+    }
+
     if (userLoc) {
       list = list.map(v => {
         if (v.latitude && v.longitude) {
@@ -127,7 +138,7 @@ export const GpsMapModal: React.FC = () => {
       }
     }
     return list;
-  }, [venues, userLoc, radiusFilter]);
+  }, [venues, userLoc, radiusFilter, searchQuery]);
 
   
 
@@ -175,6 +186,30 @@ export const GpsMapModal: React.FC = () => {
               </button>
             </div>
             {locError && <p className="text-[11px] text-red-400 font-medium mt-2 px-1">{locError}</p>}
+          </div>
+
+          {/* Search Input */}
+          <div className="mt-4 shrink-0 relative z-10">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Search className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                placeholder="Mekan adı, ilçe veya adres ara..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white font-medium focus:outline-none focus:border-[#D4AF37]/50 transition-colors shadow-inner"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Toggle Map/List */}
