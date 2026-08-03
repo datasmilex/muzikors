@@ -28,8 +28,44 @@ export default function SalesPage() {
         </div>
         <div className="space-y-10 text-amber-200/80 leading-relaxed text-sm sm:text-base font-medium">
           <section className="space-y-4">
-            <div className="bg-[#1C130D]/80 backdrop-blur-md rounded-[1.5rem] p-8 border border-[#D4AF37]/20 shadow-inner">
-              <p>İşbu Sözleşme'nin konusu, ALICI'nın Muzikors platformu üzerinden elektronik ortamda satın aldığı dijital kredi paketinin satışı ile ilgili tarafların hak ve yükümlülüklerinin saptanmasıdır. Sözleşme konusu Krediler, ödemenin tamamlanmasını müteakip dijital ortamda ALICI'nın hesabına anında yüklenir ve fiziksel bir teslimatı yoktur. ALICI, satın aldığı dijital Kredi paketi yönünden cayma hakkının bulunmadığını, Kredilerin iade edilemeyeceğini peşinen kabul, beyan ve taahhüt eder.</p>
+            <div className="bg-[#1C130D]/80 backdrop-blur-md rounded-[1.5rem] p-8 border border-[#D4AF37]/20 shadow-inner space-y-6 text-sm text-gray-300">
+              <h2 className="text-xl font-bold text-[#D4AF37] mb-2">1. TARAFLAR</h2>
+              <p>
+                <strong>SATICI:</strong><br />
+                Unvan: Muzikors Bilişim Teknolojileri<br />
+                E-posta: destek@muzikors.com<br />
+              </p>
+              <p>
+                <strong>ALICI:</strong><br />
+                Muzikors uygulamasını veya web sitesini kullanan, uygulama üzerinden kredi paketi satın alan son kullanıcıdır.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">2. SÖZLEŞMENİN KONUSU</h2>
+              <p>
+                İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait Muzikors platformu üzerinden elektronik ortamda siparişini yaptığı, özellikleri ve satış fiyatı platformda belirtilen dijital kredi paketinin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">3. HİZMETİN TESLİMİ VE KULLANIMI</h2>
+              <p>
+                Satın alınan kredi paketleri (tamamen dijital bir ürün olup) ödeme işleminin başarıyla gerçekleşmesinin hemen ardından ALICI'nın Muzikors platformundaki hesabına anlık olarak tanımlanır. Krediler yalnızca Muzikors platformuna dahil olan anlaşmalı mekanlarda şarkı isteğinde bulunmak amacıyla kullanılabilir.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">4. CAYMA HAKKI VE İSTİSNALAR</h2>
+              <p>
+                Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin 1. fıkrasının (ğ) bendi uyarınca, elektronik ortamda anında ifa edilen hizmetler ve tüketiciye anında teslim edilen gayrimaddi mallara ilişkin sözleşmelerde <strong>CAYMA HAKKI KULLANILAMAZ</strong>. ALICI, satın aldığı kredi paketinin dijital bir içerik olduğunu, hesabına tanımlandığı anda ifanın gerçekleştiğini ve bu nedenle cayma ve iade hakkı bulunmadığını peşinen kabul eder.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">5. GENEL HÜKÜMLER</h2>
+              <p>
+                5.1. ALICI, platformda belirtilen temel özellikleri, satış fiyatı, ödeme şekli ile teslimata ilişkin ön bilgileri okuyup bilgi sahibi olduğunu ve elektronik ortamda gerekli teyidi verdiğini kabul eder.<br />
+                5.2. SATICI, hizmetin eksiksiz ve siparişte belirtilen niteliklere uygun olarak sunulmasından sorumludur.<br />
+                5.3. Sistemsel hatalardan dolayı meydana gelen fiyat yanlışlıklarından SATICI sorumlu değildir.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">6. UYUŞMAZLIKLARIN ÇÖZÜMÜ</h2>
+              <p>
+                İşbu sözleşmeden doğan uyuşmazlıklarda, Ticaret Bakanlığı'nca her yıl ilan edilen parasal sınırlar dâhilinde ALICI'nın yerleşim yerindeki veya tüketici işleminin yapıldığı yerdeki Tüketici Hakem Heyetleri veya Tüketici Mahkemeleri yetkilidir.
+              </p>
             </div>
           </section>
         </div>

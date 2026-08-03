@@ -122,7 +122,7 @@ export const CreditTopUpModal: React.FC = () => {
           {/* Secure Payment Info */}
           <div className="flex items-center justify-center gap-1.5 text-[9px] font-bold text-amber-200/60 mb-4 bg-[#1A1A1A]/40 py-2 rounded-lg border border-white/5 relative z-10">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 drop-shadow-sm" />
-            <span className="tracking-wide">256-Bit SSL %100 Güvenli Ödeme (Iyzico)</span>
+            <span className="tracking-wide">256-Bit SSL ile %100 Güvenli Ödeme</span>
           </div>
 
           {/* Legal Checkbox */}

@@ -28,8 +28,28 @@ export default function RefundPage() {
         </div>
         <div className="space-y-10 text-amber-200/80 leading-relaxed text-sm sm:text-base font-medium">
           <section className="space-y-4">
-            <div className="bg-[#1C130D]/80 backdrop-blur-md rounded-[1.5rem] p-8 border border-[#D4AF37]/20 shadow-inner">
-              <p>Muzikors altyapısı üzerinden satın alınan 'Krediler', tamamen dijital ortamda üretilen ve anında tüketilebilen gayrimaddi varlıklardır. 6502 sayılı Kanun ve Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin 1. fıkrasının (ğ) bendi uyarınca elektronik ortamda anında ifa edilen hizmetlerde tüketici cayma hakkını kullanamaz. Vibe Guard mekanizması veya Mekan yetkilisinin takdiri doğrultusunda reddedilen, silinen veya atlanan şarkılar için harcanan Krediler kesinlikle iade edilmez.</p>
+            <div className="bg-[#1C130D]/80 backdrop-blur-md rounded-[1.5rem] p-8 border border-[#D4AF37]/20 shadow-inner space-y-6 text-sm text-gray-300">
+              <h2 className="text-xl font-bold text-[#D4AF37] mb-2">1. İPTAL KOŞULLARI</h2>
+              <p>
+                Kullanıcılar (ALICI), satın alma işlemini onaylamadan önce sepetlerindeki kredi paketlerini istedikleri zaman iptal edebilirler. Ancak, ödeme işlemi tamamlandıktan ve kredi paketi dijital ortamda hesaba tanımlandıktan sonra siparişin iptali mümkün değildir.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">2. İADE KOŞULLARI VE CAYMA HAKKI İSTİSNASI</h2>
+              <p>
+                Muzikors altyapısı üzerinden satın alınan "Krediler", tamamen dijital ortamda üretilen, hesaba anında tanımlanan ve anında ifa edilen gayrimaddi varlıklardır.
+                <br /><br />
+                <strong>Cayma Hakkı:</strong> 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve 27.11.2014 tarihli Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin 1. fıkrasının (ğ) bendi uyarınca, "Elektronik ortamda anında ifa edilen hizmetler ve tüketiciye anında teslim edilen gayrimaddi mallara ilişkin sözleşmeler" cayma hakkının istisnaları arasındadır. Bu nedenle satın alınan dijital kredi paketlerinde iade veya değişim yapılamaz.
+              </p>
+
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">3. HİZMETİN KULLANILAMAMASI DURUMUNDA İADE</h2>
+              <p>
+                Kullanıcının satın aldığı krediler hesabına teknik bir aksaklık sebebiyle yansımazsa veya platformdan kaynaklı sistemsel bir hata nedeniyle tamamen kullanılamaz hale gelirse, kullanıcı 14 gün içerisinde <strong>destek@muzikors.com</strong> adresi üzerinden inceleme talep edebilir. Yapılan inceleme sonucunda teknik bir kusur tespit edilirse, harcanamayan tutarın iadesi, işlemin yapıldığı kredi kartına 7-14 iş günü içerisinde yapılır.
+              </p>
+              
+              <h2 className="text-xl font-bold text-[#D4AF37] mt-6 mb-2">4. KULLANICI HATALARI</h2>
+              <p>
+                Mekan kurallarına uymayan, Vibe Guard mekanizması tarafından reddedilen veya mekan yetkilisinin takdiri doğrultusunda uygun görülmeyerek atlanan/silinen şarkılar için harcanan Krediler kesinlikle iade edilmez. Bu risk ve sorumluluk tamamen ALICI'ya aittir.
+              </p>
             </div>
           </section>
         </div>
