@@ -114,7 +114,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim, total_credits_spent, claimed_achievements, pinned_achievements')
+        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim, total_credits_spent, claimed_achievements, pinned_achievements, is_beta_tester, beta_tester_reward_claimed')
         .eq('id', userId)
         .single();
 
@@ -135,6 +135,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               totalCreditsSpent: data?.total_credits_spent ?? prev.totalCreditsSpent ?? 0,
               claimed_achievements: Array.isArray(data?.claimed_achievements) ? data.claimed_achievements : (prev.claimed_achievements ?? []),
               pinned_achievements: Array.isArray(data?.pinned_achievements) ? data.pinned_achievements : (prev.pinned_achievements ?? []),
+              is_beta_tester: data?.is_beta_tester ?? prev.is_beta_tester,
+              beta_tester_reward_claimed: data?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
             }
           : null
       );
@@ -471,6 +473,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const liveCredits = await fetchProfileCredits(authUser.id);
 
       setUser((prev) => ({
+        ...(prev || ({} as any)),
         id: authUser.id,
         name: fullName,
         username: dbUsername || prev?.username || ('@' + (emailStr.split('@')[0] || 'kullanici')),
@@ -522,6 +525,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 totalCreditsSpent: typeof row?.total_credits_spent === 'number' ? row.total_credits_spent : prev.totalCreditsSpent,
                 claimed_achievements: Array.isArray(row?.claimed_achievements) ? row.claimed_achievements : prev.claimed_achievements,
                 pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
+                is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
+                beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
               }
             : null
         );
@@ -533,6 +538,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  // ── BETA TESTER REWARD AUTO-CLAIM ─────────────────────────────────────────
+  useEffect(() => {
+    if (user?.is_beta_tester && !user?.beta_tester_reward_claimed && supabase) {
+      const claimBetaReward = async () => {
+        try {
+          const { data, error } = await supabase.rpc('claim_beta_tester_reward');
+          if (error) throw error;
+          
+          if (data && data.success) {
+            showToast(data.message);
+            confetti({
+              particleCount: 150,
+              spread: 100,
+              origin: { y: 0.6 },
+              colors: ['#A855F7', '#D8B4FE', '#FFFFFF']
+            });
+          }
+        } catch (err) {
+          console.error('[Beta Tester Claim Error]:', err);
+        }
+      };
+      
+      claimBetaReward();
+    }
+  }, [user?.is_beta_tester, user?.beta_tester_reward_claimed, supabase, showToast]);
 
   // ── SUPABASE REALTIME: SONG QUEUE (venue-isolated) ────────────────────────
   useEffect(() => {

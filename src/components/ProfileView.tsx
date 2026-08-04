@@ -532,8 +532,8 @@ export const ProfileView: React.FC = () => {
                         {user.claimed_achievements?.length ?? 0}/{ACHIEVEMENTS.length} tamamlandı
                         {(() => {
                           const pending = ACHIEVEMENTS.filter(
-                            a => isAchievementUnlocked(a, user.totalSongsRequested, user.totalCreditsSpent ?? 0)
-                              && !isAchievementClaimed(a, user.claimed_achievements ?? [])
+                            a => isAchievementUnlocked(a, user.totalSongsRequested, user.totalCreditsSpent ?? 0, user.is_beta_tester)
+                              && !isAchievementClaimed(a, user.claimed_achievements ?? [], user.beta_tester_reward_claimed)
                           ).length;
                           return pending > 0 ? (
                             <span className="ml-2 text-emerald-400 font-black">{pending} ödül bekliyor!</span>

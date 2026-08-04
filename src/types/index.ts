@@ -90,6 +90,8 @@ export interface UserProfile {
   last_username_update?: string;
   claimed_achievements?: string[];
   pinned_achievements?: string[];
+  is_beta_tester?: boolean;
+  beta_tester_reward_claimed?: boolean;
 }
 
 export interface CreditPackage {

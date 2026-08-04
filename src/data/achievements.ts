@@ -4,7 +4,7 @@
 //           'spend'  = total_credits_spent bazlı
 // tier: görsel kalite seviyesi ('bronze' | 'silver' | 'gold' | 'diamond')
 
-export type AchievementCategory = 'songs' | 'spend';
+export type AchievementCategory = 'songs' | 'spend' | 'special';
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond';
 
 export interface Achievement {
@@ -112,14 +112,30 @@ const spendAchievements: Achievement[] = [
   },
 ];
 
-export const ACHIEVEMENTS: Achievement[] = [...songAchievements, ...spendAchievements];
+// ─── Özel Başarımlar (Special) ──────────────────────────────────────────────
+const specialAchievements: Achievement[] = [
+  {
+    id: 'beta_tester',
+    emoji: '🧪',
+    title: 'Beta Tester',
+    description: 'Muzikors\'un erken aşama test sürecine katkıda bulundun.',
+    tier: 'diamond',
+    category: 'special',
+    target: 1, // Kilitli olup olmadığını özel mantıkla çözeceğiz
+    reward: 300,
+  },
+];
+
+export const ACHIEVEMENTS: Achievement[] = [...songAchievements, ...spendAchievements, ...specialAchievements];
 
 // ─── Yardımcı Fonksiyonlar ───────────────────────────────────────────────
 export function getAchievementProgress(
   achievement: Achievement,
   totalSongs: number,
-  totalSpent: number
+  totalSpent: number,
+  isBetaTester: boolean = false
 ): number {
+  if (achievement.id === 'beta_tester') return isBetaTester ? 1 : 0;
   const current = achievement.category === 'songs' ? totalSongs : totalSpent;
   return Math.min(current, achievement.target);
 }
@@ -127,12 +143,19 @@ export function getAchievementProgress(
 export function isAchievementUnlocked(
   achievement: Achievement,
   totalSongs: number,
-  totalSpent: number
+  totalSpent: number,
+  isBetaTester: boolean = false
 ): boolean {
-  return getAchievementProgress(achievement, totalSongs, totalSpent) >= achievement.target;
+  if (achievement.id === 'beta_tester') return isBetaTester;
+  return getAchievementProgress(achievement, totalSongs, totalSpent, isBetaTester) >= achievement.target;
 }
 
-export function isAchievementClaimed(achievement: Achievement, claimedList: string[]): boolean {
+export function isAchievementClaimed(
+  achievement: Achievement, 
+  claimedList: string[],
+  isBetaTesterRewardClaimed: boolean = false
+): boolean {
+  if (achievement.id === 'beta_tester') return isBetaTesterRewardClaimed;
   return claimedList.includes(achievement.id);
 }
 

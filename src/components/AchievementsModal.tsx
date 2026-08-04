@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, Gift, Check, ChevronLeft, Pin, PinOff } from 'lucide-react';
+import { X, Trophy, Gift, Check, CheckCircle2, ChevronLeft, Pin, PinOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   ACHIEVEMENTS,
@@ -32,6 +32,8 @@ interface AchievementCardProps {
   onClaim: (achievement: Achievement) => Promise<void>;
   onTogglePin: (id: string) => void;
   isClaiming: boolean;
+  isBetaTester: boolean;
+  isBetaTesterRewardClaimed: boolean;
 }
 
 const AchievementCard: React.FC<AchievementCardProps> = ({
@@ -43,11 +45,13 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
   onClaim,
   onTogglePin,
   isClaiming,
+  isBetaTester,
+  isBetaTesterRewardClaimed,
 }) => {
   const s = TIER_STYLES[achievement.tier];
-  const progress = getAchievementProgress(achievement, totalSongs, totalSpent);
-  const unlocked = isAchievementUnlocked(achievement, totalSongs, totalSpent);
-  const claimed = isAchievementClaimed(achievement, claimedList);
+  const progress = getAchievementProgress(achievement, totalSongs, totalSpent, isBetaTester);
+  const unlocked = isAchievementUnlocked(achievement, totalSongs, totalSpent, isBetaTester);
+  const claimed = isAchievementClaimed(achievement, claimedList, isBetaTesterRewardClaimed);
   const pinned = pinnedList.includes(achievement.id);
   const pct = Math.round((progress / achievement.target) * 100);
 
@@ -117,7 +121,14 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                 {progress.toLocaleString('tr-TR')} / {achievement.target.toLocaleString('tr-TR')}
               </span>
               <span className="text-[10px] font-bold text-amber-300/70">
-                +{achievement.reward} 🎁 Kredi
+                {claimed ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
+                    Ödül Alındı
+                  </>
+                ) : (
+                  <span className="opacity-75">Ödül: +{achievement.reward} Kredi</span>
+                )}
               </span>
             </div>
           </div>
@@ -125,7 +136,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
       </div>
 
       {/* Claim button — only shows when unlocked but not yet claimed */}
-      {unlocked && !claimed && (
+      {unlocked && !claimed && achievement.category !== 'special' && (
         <motion.button
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -160,10 +171,12 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
   const pinnedList: string[] = (user as any)?.pinned_achievements ?? [];
   const totalSongs = user?.totalSongsRequested ?? 0;
   const totalSpent = (user as any)?.totalCreditsSpent ?? 0;
+  const isBetaTester = user?.is_beta_tester ?? false;
+  const isBetaTesterRewardClaimed = user?.beta_tester_reward_claimed ?? false;
 
-  // Count unlocked but unclaimed
+  // Count unlocked but unclaimed (excluding special categories as they are auto-claimed)
   const pendingCount = ACHIEVEMENTS.filter(
-    a => isAchievementUnlocked(a, totalSongs, totalSpent) && !isAchievementClaimed(a, claimedList)
+    a => a.category !== 'special' && isAchievementUnlocked(a, totalSongs, totalSpent, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
   ).length;
 
   const handleClaim = useCallback(async (achievement: Achievement) => {
@@ -333,6 +346,8 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   onClaim={handleClaim}
                   onTogglePin={handleTogglePin}
                   isClaiming={claimingId === a.id}
+                  isBetaTester={isBetaTester}
+                  isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
                 />
               ))}
 
@@ -349,6 +364,26 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   onClaim={handleClaim}
                   onTogglePin={handleTogglePin}
                   isClaiming={claimingId === a.id}
+                  isBetaTester={isBetaTester}
+                  isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
+                />
+              ))}
+
+              {/* Section: Özel */}
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">✨ Özel Başarımlar</p>
+              {ACHIEVEMENTS.filter(a => a.category === 'special').map(a => (
+                <AchievementCard
+                  key={a.id}
+                  achievement={a}
+                  totalSongs={totalSongs}
+                  totalSpent={totalSpent}
+                  claimedList={claimedList}
+                  pinnedList={pinnedList}
+                  onClaim={handleClaim}
+                  onTogglePin={handleTogglePin}
+                  isClaiming={false}
+                  isBetaTester={isBetaTester}
+                  isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
                 />
               ))}
             </div>
