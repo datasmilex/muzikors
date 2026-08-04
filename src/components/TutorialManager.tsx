@@ -7,11 +7,14 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 
 export const TutorialManager: React.FC = () => {
-  const { user, openModal, showToast, fetchProfileCredits } = useApp();
+  const { user, openModal, showToast, fetchProfileCredits, isVenueBound, hasEnteredGateway } = useApp();
   const driverRef = useRef<any>(null);
   const isRunning = useRef(false);
 
   useEffect(() => {
+    // Only run if the user has bound to a venue AND has entered the gateway
+    if (!isVenueBound || !hasEnteredGateway) return;
+
     // Only run once per session/device if not completed
     const hasCompleted = localStorage.getItem('muzikors_tutorial_completed');
     if (hasCompleted || isRunning.current) return;
@@ -22,7 +25,7 @@ export const TutorialManager: React.FC = () => {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, isVenueBound, hasEnteredGateway]);
 
   const startTutorial = () => {
     if (isRunning.current) return;
@@ -130,5 +133,67 @@ export const TutorialManager: React.FC = () => {
     driverObj.drive();
   };
 
-  return null;
+  return (
+    <style dangerouslySetInnerHTML={{ __html: `
+      .driver-popover {
+        background-color: #120C08 !important;
+        color: #FCEFD5 !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
+        border-radius: 1.5rem !important;
+        box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15) !important;
+        padding: 1.5rem !important;
+      }
+      .driver-popover-title {
+        color: #D4AF37 !important;
+        font-weight: 900 !important;
+        font-size: 1.25rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      .driver-popover-description {
+        color: #FCEFD5 !important;
+        font-size: 0.95rem !important;
+        opacity: 0.9;
+        line-height: 1.5;
+      }
+      .driver-popover-footer {
+        margin-top: 1rem !important;
+      }
+      .driver-popover-next-btn, .driver-popover-prev-btn {
+        background-color: #D4AF37 !important;
+        color: #000 !important;
+        border-radius: 0.75rem !important;
+        font-weight: 800 !important;
+        text-shadow: none !important;
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+      }
+      .driver-popover-prev-btn {
+        background-color: #1C130D !important;
+        color: #D4AF37 !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+      }
+      .driver-popover-close-btn {
+        color: rgba(252, 239, 213, 0.5) !important;
+      }
+      .driver-popover-close-btn:hover {
+        color: #fff !important;
+      }
+      .driver-popover-progress-text {
+        color: rgba(212, 175, 55, 0.8) !important;
+        font-weight: bold !important;
+      }
+      div[class*="driver-popover-arrow-side-top"] {
+        border-top-color: #120C08 !important;
+      }
+      div[class*="driver-popover-arrow-side-bottom"] {
+        border-bottom-color: #120C08 !important;
+      }
+      div[class*="driver-popover-arrow-side-left"] {
+        border-left-color: #120C08 !important;
+      }
+      div[class*="driver-popover-arrow-side-right"] {
+        border-right-color: #120C08 !important;
+      }
+    `}} />
+  );
 };

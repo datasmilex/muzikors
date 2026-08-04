@@ -80,7 +80,7 @@ export const GatewayScreen: React.FC = () => {
             className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] text-black font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-[0.98] active:scale-95 transition-all group"
           >
             <Music className="w-6 h-6 group-active:scale-95 transition-transform" />
-            Müzik Kutusuna Bağlan
+            Muzikors'a git
           </button>
 
           {/* Wi-Fi Info Card (CONDITIONAL) */}
