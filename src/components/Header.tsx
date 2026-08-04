@@ -62,8 +62,9 @@ export const Header: React.FC = () => {
 
       <div className="flex items-center gap-2">
         <button
+          id="tour-wallet-button"
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden active:border-[#D4AF37] active:scale-95 transition-all active:scale-95 flex items-center justify-center shadow-inner shrink-0"
+          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden active:border-[#D4AF37] active:scale-95 transition-all flex items-center justify-center shadow-inner shrink-0"
         >
           {user && user.avatar && !user.avatar.includes('googleusercontent') ? (
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />

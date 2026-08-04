@@ -78,6 +78,7 @@ export const WelcomeScreen: React.FC = () => {
         >
           {/* Main Huge QR Button */}
           <button
+            id="tour-qr-button"
             onClick={() => openModal('qr')}
             className="relative w-48 h-48 rounded-[3rem] bg-gradient-to-br from-[#1C130D] to-black border-2 border-[#D4AF37]/40 flex flex-col items-center justify-center gap-4 shadow-[0_0_60px_rgba(212,175,55,0.2)] active:shadow-[0_0_80px_rgba(212,175,55,0.4)] active:scale-95 transition-all duration-300 group overflow-hidden"
           >

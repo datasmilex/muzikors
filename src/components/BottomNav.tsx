@@ -38,6 +38,7 @@ export const BottomNav: React.FC = () => {
         {/* ŞARKI EKLE (FAB) - Floating Action Button overflowing the pill */}
         <div className="relative -top-8 flex flex-col items-center mx-2">
           <button
+            id="tour-add-song"
             onClick={() => openModal('search')}
             disabled={!isVenueBound}
             className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFDF73] to-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.5)] border-4 border-[#120C08] z-50 active:scale-95 transition-transform duration-100 will-change-transform ${

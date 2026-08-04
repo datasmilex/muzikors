@@ -243,14 +243,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [showToast]);
 
-  // ── ONBOARDING ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const seen = sessionStorage.getItem('muzikors_onboarding_shown');
-    if (!seen && !user) {
-      setActiveModal('howitworks');
-      sessionStorage.setItem('muzikors_onboarding_shown', 'true');
-    }
-  }, [user]);
+  // ── ONBOARDING (REMOVED) ────────────────────────────────────────────────────────────
+  // The 'howitworks' modal is no longer automatically shown on first load.
+  // Instead, the new interactive TutorialManager handles onboarding.
 
   // ── DEEP LINKING (APP LINKS) ──────────────────────────────────────────────
   useEffect(() => {

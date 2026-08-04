@@ -27,6 +27,7 @@ import { HappyHourBanner } from '../components/HappyHourBanner';
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
 import { WelcomeScreen } from '../components/WelcomeScreen';
+import { TutorialManager } from '../components/TutorialManager';
 import { useApp } from '../context/AppContext';
 
 const AppContent = () => {
@@ -53,6 +54,7 @@ const AppContent = () => {
         </>
       )}
 
+      <TutorialManager />
       <DrawerMenu />
       <LeaderboardModal />
       <CreditTopUpModal />

@@ -1,29 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Music, Menu, Wifi, Copy, Check, Store } from 'lucide-react';
+import { Music, Menu, Wifi, Copy, Check, Store, X } from 'lucide-react';
 
 export const GatewayScreen: React.FC = () => {
-  const { activeVenue, setHasEnteredGateway, showToast, openModal } = useApp();
+  const { activeVenue, setHasEnteredGateway, showToast } = useApp();
   const [copied, setCopied] = useState(false);
-  const [isCheckingCooldown, setIsCheckingCooldown] = useState(true);
 
-  useEffect(() => {
-    if (!activeVenue) return;
-    
-    const STORAGE_KEY = `lastSeenCafeMenu_${activeVenue.id}`;
-    const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
-    const lastSeen = localStorage.getItem(STORAGE_KEY);
-    const now = Date.now();
-
-    if (lastSeen && now - parseInt(lastSeen, 10) < COOLDOWN_MS) {
-      setHasEnteredGateway(true);
-    } else {
-      localStorage.setItem(STORAGE_KEY, now.toString());
-      setIsCheckingCooldown(false);
-    }
-  }, [activeVenue, setHasEnteredGateway]);
-
-  if (isCheckingCooldown || !activeVenue) return null;
+  if (!activeVenue) return null;
 
   const handleCopyPassword = () => {
     if (activeVenue.wifi_password) {
@@ -43,6 +26,14 @@ export const GatewayScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#120C08] p-4 relative overflow-hidden items-center">
+      {/* Close Button */}
+      <button 
+        onClick={() => setHasEnteredGateway(true)}
+        className="absolute top-6 right-6 z-50 p-2 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all shadow-lg backdrop-blur-sm"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
       {/* Background Glow */}
       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-[#120C08]/5 to-transparent pointer-events-none" />
 
