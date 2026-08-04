@@ -32,7 +32,6 @@ export const TutorialManager: React.FC = () => {
       showProgress: true,
       allowClose: true,
       doneBtnText: 'Bitir',
-      closeBtnText: 'Atla',
       nextBtnText: 'İleri',
       prevBtnText: 'Geri',
       progressText: '{{current}} / {{total}}',
@@ -60,7 +59,7 @@ export const TutorialManager: React.FC = () => {
             description: '<div class="space-y-3"><p>Buradan mevcut kredilerini görebilir ve dilediğin şarkıyı açabilirsin!</p><p>Hemen başlaman için sana <b>Ücretsiz 10 Kredi</b> hediye ediyoruz!</p><button id="btn-claim-tutorial" class="w-full py-2 mt-2 bg-[#D4AF37] text-black font-black rounded-xl active:scale-95 transition-transform">🎁 10 Kredi Hediyeni Al!</button></div>',
             side: 'left',
             align: 'start',
-            onPopoverRendered: (popover) => {
+            onPopoverRender: (popover) => {
               const btn = popover.wrapper.querySelector('#btn-claim-tutorial');
               if (btn) {
                 btn.addEventListener('click', async () => {

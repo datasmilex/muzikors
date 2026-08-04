@@ -44,6 +44,7 @@ interface AppContextType {
   showToast: (msg: string) => void;
   toggleAudioPlay: () => void;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  fetchProfileCredits: (userId: string) => Promise<{ real: number, promo: number }>;
   presentPremiumPaywall: () => Promise<void>;
 }
 
@@ -1240,7 +1241,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
-      hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall
+      hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall, fetchProfileCredits
     }}>
       {children}
     </AppContext.Provider>
