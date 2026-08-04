@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT,
   credits INTEGER DEFAULT 0 CHECK (credits >= 0),
+  promo_credits INTEGER DEFAULT 10 CHECK (promo_credits >= 0),
   full_name TEXT,
   avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -27,13 +28,14 @@ CREATE POLICY "Allow individual update on profiles"
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name, avatar_url, credits)
+  INSERT INTO public.profiles (id, email, full_name, avatar_url, credits, promo_credits)
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', 'Kullanıcı'),
     COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture', ''),
-    25 -- Automatic +25 Welcome Credits reward
+    0,
+    10 -- Automatic +10 Welcome Promo Credits reward
   );
   RETURN NEW;
 END;
