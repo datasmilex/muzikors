@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 import { FloatingEmojis, EmojiReaction } from './FloatingEmojis';
 
 export const NowPlayingSection: React.FC = () => {
-  const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user } = useApp();
+  const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user, openProfile } = useApp();
   const [reactions, setReactions] = React.useState<EmojiReaction[]>([]);
 
   React.useEffect(() => {
@@ -175,7 +175,12 @@ export const NowPlayingSection: React.FC = () => {
             {nowPlaying.artist}
           </p>
           
-          <div className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md">
+          <div 
+            className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md cursor-pointer hover:bg-white/10 transition-colors"
+            onClick={() => {
+              if (nowPlaying.requestedByUserId) openProfile(nowPlaying.requestedByUserId);
+            }}
+          >
             <User className="w-2.5 h-2.5 text-[#D4AF37]" />
             <span className="truncate tracking-wide flex items-center gap-1">
               İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy.replace(' VIP', '')}</strong>

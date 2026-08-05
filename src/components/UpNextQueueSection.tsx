@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, nowPlaying, voteTrack, openProtectedModal, user } = useApp();
+  const { queue, nowPlaying, voteTrack, openProfile, user } = useApp();
   const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -213,10 +213,16 @@ export const UpNextQueueSection: React.FC = () => {
                           <p className="text-[11px] text-[#D4AF37] font-semibold truncate mb-0.5">
                             {track.artist}
                           </p>
-                          <div className="flex items-center gap-2 text-[9px] text-amber-200/60 font-medium">
-                            <span className="flex items-center gap-1">
-                              <User className="w-2.5 h-2.5" />
-                              <span className="truncate max-w-[80px]">{getRequestedByLabel(track)}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-amber-200/60 font-medium">
+                            <span 
+                              className="flex items-center gap-1 cursor-pointer hover:text-amber-100 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (track.requestedByUserId) openProfile(track.requestedByUserId);
+                              }}
+                            >
+                              <User className="w-3 h-3" />
+                              <span className="truncate max-w-[100px]">{getRequestedByLabel(track)}</span>
                             </span>
                           </div>
                         </div>

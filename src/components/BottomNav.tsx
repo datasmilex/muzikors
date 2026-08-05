@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Info, Map, Plus, Tv, Trophy } from 'lucide-react';
+import { Info, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const BottomNav: React.FC = () => {
@@ -54,16 +54,15 @@ export const BottomNav: React.FC = () => {
           <span className="absolute -bottom-5 text-[10px] font-black text-[#D4AF37] tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Ekle</span>
         </div>
 
-        {/* TV Mesajı */}
+        {/* Akış */}
         <button
-          onClick={() => openModal('tvShoutout')}
-          disabled={!isVenueBound}
+          onClick={() => openModal('globalFeed')}
           className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'tvShoutout' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
-          } ${!isVenueBound ? 'opacity-30 cursor-not-allowed' : 'active:scale-90'}`}
+            activeModal === 'globalFeed' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
+          } active:scale-90`}
         >
-          <Tv className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'tvShoutout' ? 2.5 : 2} />
-          <span className="text-[9px] font-bold tracking-wider">Ekran</span>
+          <MessageCircle className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'globalFeed' ? 2.5 : 2} />
+          <span className="text-[9px] font-bold tracking-wider">Akış</span>
         </button>
 
         {/* Sıralamalar */}

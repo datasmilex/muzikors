@@ -122,11 +122,46 @@ export type ModalType =
   | 'campaigns'
   | 'terms'
   | 'daily_reward'
-  | 'tvShoutout'
+  | 'globalFeed'
   | 'venue_info'
   | 'premium_buy'
   | 'manage_subscription'
   | 'leaderboard';
+
+export interface SocialPost {
+  id: string;
+  user_id: string;
+  content: string;
+  likes_count: number;
+  comments_count: number;
+  created_at: string;
+  user_full_name?: string;
+  user_username?: string;
+  user_avatar_url?: string;
+  user_is_beta_tester?: boolean;
+  user_is_premium?: boolean;
+  has_liked?: boolean;
+}
+
+export interface SocialComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user_full_name?: string;
+  user_username?: string;
+  user_avatar_url?: string;
+  user_is_beta_tester?: boolean;
+  user_is_premium?: boolean;
+}
+
+export interface ProfileStats {
+  posts_count: number;
+  followers_count: number;
+  following_count: number;
+  is_following?: boolean;
+}
 
 export interface CooldownState {
   active: boolean;

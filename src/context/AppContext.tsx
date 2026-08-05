@@ -33,6 +33,8 @@ interface AppContextType {
   openModal: (modal: ModalType) => void;
   openProtectedModal: (modal: ModalType, reason?: string) => void;
   closeModal: () => void;
+  viewingProfileId: string | null;
+  openProfile: (userId?: string) => void;
 
   logout: () => Promise<void>;
   handleIyzicoPayment: (packageId: string) => void;
@@ -65,6 +67,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [viewingProfileId, setViewingProfileId] = useState<string | null>(null);
 
   const [hasEnteredGateway, setHasEnteredGateway] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
@@ -539,31 +542,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [user?.id]);
 
-  // ── BETA TESTER REWARD AUTO-CLAIM ─────────────────────────────────────────
-  useEffect(() => {
-    if (user?.is_beta_tester && !user?.beta_tester_reward_claimed && supabase) {
-      const claimBetaReward = async () => {
-        try {
-          const { data, error } = await supabase.rpc('claim_beta_tester_reward');
-          if (error) throw error;
-          
-          if (data && data.success) {
-            showToast(data.message);
-            confetti({
-              particleCount: 150,
-              spread: 100,
-              origin: { y: 0.6 },
-              colors: ['#A855F7', '#D8B4FE', '#FFFFFF']
-            });
-          }
-        } catch (err) {
-          console.error('[Beta Tester Claim Error]:', err);
-        }
-      };
-      
-      claimBetaReward();
-    }
-  }, [user?.is_beta_tester, user?.beta_tester_reward_claimed, supabase, showToast]);
+
 
   // ── SUPABASE REALTIME: SONG QUEUE (venue-isolated) ────────────────────────
   useEffect(() => {
@@ -857,17 +836,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCooldown((prev) => {
         if (prev.remainingSeconds <= 1) return { active: false, remainingSeconds: 0, lastRequestedAt: prev.lastRequestedAt };
         return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [cooldown.active, cooldown.remainingSeconds]);
-
   const openModal = useCallback((modal: ModalType) => { setLoginPromptReason(null); setActiveModal(modal); }, []);
+  const closeModal = useCallback(() => {
+    setActiveModal('none');
+    setViewingProfileId(null);
+    setPendingModal(null);
+    setLoginPromptReason(null);
+  }, []);
+
+  const openProfile = useCallback((id?: string) => {
+    setViewingProfileId(id || user?.id || null);
+    setActiveModal('profile');
+  }, [user?.id]);
+
   const openProtectedModal = useCallback((modal: ModalType, reason?: string) => {
     if (!user) { setPendingModal(modal); setLoginPromptReason(reason || 'Devam etmek icin giris yapin'); setActiveModal('login'); return; }
     setActiveModal(modal);
   }, [user]);
-  const closeModal = useCallback(() => { setActiveModal('none'); setPendingModal(null); setLoginPromptReason(null); }, []);
 
   const loginWithProvider = useCallback(async (provider: 'google') => {
     if (!supabase) return;
@@ -1270,7 +1255,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVenueBound, isVenueActive,
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
-      openModal, openProtectedModal, closeModal, loginWithProvider, logout,
+      openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall, fetchProfileCredits
     }}>

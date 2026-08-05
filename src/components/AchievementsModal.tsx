@@ -136,7 +136,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
       </div>
 
       {/* Claim button — only shows when unlocked but not yet claimed */}
-      {unlocked && !claimed && achievement.category !== 'special' && (
+      {unlocked && !claimed && (
         <motion.button
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,9 +174,9 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
   const isBetaTester = user?.is_beta_tester ?? false;
   const isBetaTesterRewardClaimed = user?.beta_tester_reward_claimed ?? false;
 
-  // Count unlocked but unclaimed (excluding special categories as they are auto-claimed)
+  // Count unlocked but unclaimed
   const pendingCount = ACHIEVEMENTS.filter(
-    a => a.category !== 'special' && isAchievementUnlocked(a, totalSongs, totalSpent, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
+    a => isAchievementUnlocked(a, totalSongs, totalSpent, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
   ).length;
 
   const handleClaim = useCallback(async (achievement: Achievement) => {
@@ -184,26 +184,45 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
     setClaimingId(achievement.id);
 
     try {
-      const { data, error } = await supabase.rpc('claim_achievement', {
-        p_user_id: user.id,
-        p_achievement_id: achievement.id,
-        p_reward_amount: achievement.reward,
-      });
+      if (achievement.id === 'beta_tester') {
+        const { data, error } = await supabase.rpc('claim_beta_tester_reward');
+        if (error) throw error;
+        
+        const result = data as { success: boolean; message?: string };
+        if (!result.success) {
+          showToast('Bu ödül zaten alınmış veya bir hata oluştu.');
+          return;
+        }
 
-      if (error) throw error;
+        // Update local state
+        setUser(prev => prev ? {
+          ...prev,
+          promo_credits: (prev.promo_credits ?? 0) + achievement.reward,
+          beta_tester_reward_claimed: true,
+        } as any : null);
 
-      const result = data as { success: boolean; reason?: string; reward?: number };
-      if (!result.success) {
-        showToast('Bu ödül zaten alınmış.');
-        return;
+      } else {
+        const { data, error } = await supabase.rpc('claim_achievement', {
+          p_user_id: user.id,
+          p_achievement_id: achievement.id,
+          p_reward_amount: achievement.reward,
+        });
+
+        if (error) throw error;
+
+        const result = data as { success: boolean; reason?: string; reward?: number };
+        if (!result.success) {
+          showToast('Bu ödül zaten alınmış.');
+          return;
+        }
+
+        // Update local state
+        setUser(prev => prev ? {
+          ...prev,
+          promo_credits: (prev.promo_credits ?? 0) + achievement.reward,
+          claimed_achievements: [...(claimedList), achievement.id],
+        } as any : null);
       }
-
-      // Update local state
-      setUser(prev => prev ? {
-        ...prev,
-        promo_credits: (prev.promo_credits ?? 0) + achievement.reward,
-        claimed_achievements: [...(claimedList), achievement.id],
-      } as any : null);
 
       // Confetti explosion 🎉
       confetti({

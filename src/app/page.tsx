@@ -20,7 +20,7 @@ import { InfoModals } from '../components/InfoModals';
 import { VenueInfoModal } from '../components/VenueInfoModal';
 import { DailyRewardModal } from '../components/DailyRewardModal';
 import { ToastNotification } from '../components/ToastNotification';
-import { TvShoutoutModal } from '../components/TvShoutoutModal';
+import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 
 import { HappyHourBanner } from '../components/HappyHourBanner';
@@ -28,6 +28,7 @@ import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
 import { WelcomeScreen } from '../components/WelcomeScreen';
 import { TutorialManager } from '../components/TutorialManager';
+import { BetaTesterWelcomeModal } from '../components/BetaTesterWelcomeModal';
 import { useApp } from '../context/AppContext';
 
 const AppContent = () => {
@@ -55,6 +56,7 @@ const AppContent = () => {
       )}
 
       <TutorialManager />
+      <BetaTesterWelcomeModal />
       <DrawerMenu />
       <LeaderboardModal />
       <CreditTopUpModal />
@@ -67,7 +69,7 @@ const AppContent = () => {
       <VenueInfoModal />
       <InfoModals />
       <DailyRewardModal />
-      <TvShoutoutModal />
+      <GlobalFeedView />
       <ToastNotification />
     </div>
   );
