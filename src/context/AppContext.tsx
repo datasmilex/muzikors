@@ -836,6 +836,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCooldown((prev) => {
         if (prev.remainingSeconds <= 1) return { active: false, remainingSeconds: 0, lastRequestedAt: prev.lastRequestedAt };
         return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown.active, cooldown.remainingSeconds]);
+
   const openModal = useCallback((modal: ModalType) => { setLoginPromptReason(null); setActiveModal(modal); }, []);
   const closeModal = useCallback(() => {
     setActiveModal('none');
