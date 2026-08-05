@@ -2,6 +2,14 @@
 -- MUZIKORS SOCIAL FEATURES MIGRATION
 -- ========================================================
 
+-- ========================================================
+-- 0. FIX EXISTING PROFILES TABLE
+-- ========================================================
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_beta_tester BOOLEAN DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS username TEXT;
+
+-- ========================================================
 -- 1. POSTS TABLE
 CREATE TABLE IF NOT EXISTS public.posts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -38,8 +46,18 @@ CREATE TABLE IF NOT EXISTS public.follows (
 );
 
 -- ========================================================
--- RLS POLICIES
+-- RLS POLICIES & PERMISSIONS
 -- ========================================================
+-- Grant basic table access so queries aren't rejected before RLS
+GRANT ALL ON public.posts TO authenticated;
+GRANT ALL ON public.posts TO anon;
+GRANT ALL ON public.post_likes TO authenticated;
+GRANT ALL ON public.post_likes TO anon;
+GRANT ALL ON public.post_comments TO authenticated;
+GRANT ALL ON public.post_comments TO anon;
+GRANT ALL ON public.follows TO authenticated;
+GRANT ALL ON public.follows TO anon;
+
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
