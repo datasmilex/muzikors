@@ -264,8 +264,8 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                         {comment.profiles?.is_premium && <ShieldCheck className="w-3 h-3 text-amber-400" />}
                       </div>
                       {(user?.id === comment.user_id || user?.id === post.user_id) && (
-                        <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 opacity-0 group-hover/comment:opacity-100 transition-opacity">
-                          <Trash2 className="w-3 h-3" />
+                        <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 transition-colors p-1">
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>

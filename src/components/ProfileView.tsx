@@ -682,7 +682,7 @@ export const ProfileView: React.FC = () => {
                     </div>
                   ) : (
                     posts.map(post => (
-                      <SocialPost key={post.id} post={post} />
+                      <SocialPost key={post.id} post={post} onPostUpdated={fetchProfileData} />
                     ))
                   )}
                 </div>
