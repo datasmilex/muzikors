@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { SocialPost as SocialPostType } from '../types';
 import { SocialPost } from './SocialPost';
+import { containsProfanity } from '../utils/profanity';
 
 export const GlobalFeedView: React.FC = () => {
   const { activeModal, closeModal, user, showToast, openProtectedModal, openProfile } = useApp();
@@ -72,6 +73,10 @@ export const GlobalFeedView: React.FC = () => {
     if (!content) return;
     if (content.length > 280) {
       showToast('Gönderi 280 karakterden uzun olamaz.');
+      return;
+    }
+    if (containsProfanity(content)) {
+      showToast('Gönderinizde uygunsuz kelimeler bulunuyor.');
       return;
     }
 

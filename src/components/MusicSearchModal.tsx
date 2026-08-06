@@ -113,8 +113,11 @@ export const MusicSearchModal: React.FC = () => {
         if (tracks.length > 0 && !selectedTrack) {
           setSelectedTrack(tracks[0]);
         }
-      } catch (err) {
-        console.error('[MusicSearch] Network/fetch exception:', err);
+      } catch (err: any) {
+        // Suppress expected 400 errors if venue hasn't connected Spotify
+        if (!err.message?.includes('non-2xx status code')) {
+          console.warn('[MusicSearch] Search info:', err.message);
+        }
         setSearchResults([]);
       } finally {
         setIsLoading(false);
