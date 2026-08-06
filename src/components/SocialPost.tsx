@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SocialPost as SocialPostType } from '../types';
-import { Heart, MessageCircle, ShieldCheck, CheckCircle, Send, Loader2 } from 'lucide-react';
+import { Heart, MessageCircle, ShieldCheck, CheckCircle, Send, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,6 +25,9 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   const [newComment, setNewComment] = useState('');
   const [isPostingComment, setIsPostingComment] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
+
+  const [showOptions, setShowOptions] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLike = async () => {
     if (!user) {
@@ -129,6 +132,38 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
     }
   };
 
+  const handleDeletePost = async () => {
+    if (!window.confirm("Bu gönderiyi silmek istediğinize emin misiniz?")) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from('posts').delete().eq('id', post.id);
+      if (error) throw error;
+      showToast('Gönderi silindi.');
+      setShowOptions(false);
+      onPostUpdated?.();
+    } catch (err) {
+      console.error(err);
+      showToast('Silinirken hata oluştu.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
+    try {
+      const { error } = await supabase.from('post_comments').delete().eq('id', commentId);
+      if (error) throw error;
+      showToast('Yorum silindi.');
+      setCommentsCount(c => Math.max(0, c - 1));
+      fetchComments();
+      onPostUpdated?.();
+    } catch (err) {
+      console.error(err);
+      showToast('Yorum silinirken hata oluştu.');
+    }
+  };
+
   return (
     <div className="bg-[#1C130D]/80 border border-[#D4AF37]/10 p-4 mb-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
       {/* Header: User Info */}
@@ -161,6 +196,23 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
             </div>
           </div>
         </div>
+
+        {/* Delete Post Menu */}
+        {user?.id === post.user_id && (
+          <div className="relative">
+            <button onClick={() => setShowOptions(!showOptions)} className="p-1 text-zinc-400 hover:text-white transition-colors">
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+            {showOptions && (
+              <div className="absolute right-0 top-full mt-1 bg-[#27272a] border border-white/10 rounded-lg shadow-xl overflow-hidden z-10 w-28 text-sm">
+                <button onClick={handleDeletePost} disabled={isDeleting} className="w-full text-left px-3 py-2 text-rose-500 font-bold hover:bg-white/5 disabled:opacity-50 flex items-center justify-between">
+                  Sil
+                  {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -205,10 +257,17 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                     className="w-7 h-7 rounded-full object-cover border border-[#D4AF37]/20"
                     onClick={() => onClickUser?.(comment.user_id)}
                   />
-                  <div className="flex flex-col bg-white/5 rounded-2xl rounded-tl-sm px-3 py-2 text-sm flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5" onClick={() => onClickUser?.(comment.user_id)}>
-                      <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-100">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
-                      {comment.profiles?.is_premium && <ShieldCheck className="w-3 h-3 text-amber-400" />}
+                  <div className="flex flex-col bg-white/5 rounded-2xl rounded-tl-sm px-3 py-2 text-sm flex-1 group/comment relative">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
+                        <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-100">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
+                        {comment.profiles?.is_premium && <ShieldCheck className="w-3 h-3 text-amber-400" />}
+                      </div>
+                      {(user?.id === comment.user_id || user?.id === post.user_id) && (
+                        <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                     <span className="text-zinc-300 font-medium whitespace-pre-wrap break-words text-[13px]">{comment.content}</span>
                   </div>
