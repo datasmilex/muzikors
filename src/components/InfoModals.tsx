@@ -103,15 +103,10 @@ export const InfoModals: React.FC = () => {
           <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar text-[13px] text-amber-200/80 leading-relaxed relative z-10">
             {activeModal === 'campaigns' && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-[#241911] to-[#1C130D] rounded-2xl p-4 border border-[#D4AF37]/40 shadow-[0_5px_15px_rgba(212,175,55,0.15)] relative overflow-hidden group active:-translate-y-1 transition-transform">
-                  <div className="absolute top-0 right-0 gold-gradient-bg text-black text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md uppercase tracking-wider">Kazanıldı</div>
-                  <h4 className="font-black text-white mb-2 mt-3 text-base flex items-center gap-2"><Gift className="w-5 h-5 text-[#D4AF37]"/> Google ile Giriş Ödülü</h4>
-                  <p className="font-medium text-amber-200/60 leading-relaxed">Muzikors'a katıldığın için hesabına +10 Hoş Geldin Kredisi tanımlandı! Dilediğin şarkıyı öne taşımak için hemen kullanabilirsin.</p>
-                </div>
-
-                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group active:-translate-y-1 transition-transform">
-                  <h4 className="font-black text-white mb-2 text-base flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400"/> VIP Kredi Bonusu</h4>
-                  <p className="font-medium text-amber-200/60 leading-relaxed">100 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+15</span>, 200 Kredi alımlarınızda <span className="text-emerald-400 font-bold">+40</span> Hediye Kredi otomatik hesabınıza tanımlanır.</p>
+                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group active:-translate-y-1 transition-transform text-center py-8">
+                  <Gift className="w-10 h-10 text-zinc-500 mx-auto mb-3 opacity-50" />
+                  <h4 className="font-black text-white mb-2 text-base">Çok Yakında</h4>
+                  <p className="font-medium text-amber-200/60 leading-relaxed">Yeni sürprizler ve fırsatlarla çok yakında buradayız. Takipte kalın!</p>
                 </div>
               </div>
             )}
@@ -247,15 +242,15 @@ export const InfoModals: React.FC = () => {
                 <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
                   <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">2</div>
                   <div>
-                    <h4 className="font-black text-white text-sm mb-1">Kredi Yükle & Şarkı Ara</h4>
-                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bakiye yükle, binlerce Spotify şarkısı arasından dilediğini seç.</p>
+                    <h4 className="font-black text-white text-sm mb-1">Şarkı Ara</h4>
+                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Binlerce Spotify şarkısı arasından dilediğini seç.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
                   <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">3</div>
                   <div>
                     <h4 className="font-black text-white text-sm mb-1">Şarkını Çaldır</h4>
-                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Sıraya gir, diğer dinleyicilerden oy alarak sıranı öne geçir ve şarkının keyfini çıkar.</p>
+                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Sıraya gir, tamamen ücretsiz olarak mekanın atmosferine sen de katıl!</p>
                   </div>
                 </div>
               </div>
@@ -337,11 +332,7 @@ export const InfoModals: React.FC = () => {
                       <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Hizmet Koşulları & İade Politikası</h4>
                       <div className="space-y-3 text-amber-200/70 text-xs font-medium leading-relaxed">
                         <p>
-                          Yüklenen krediler telifli içerik satın alma ücreti değil, mekân içi müzik kuyruğundaki <strong className="text-white">"Sıralama Önceliği Yazılım Bedeli"</strong>dir.
-                        </p>
-                        <div className="w-8 h-px bg-white/10" />
-                        <p className="text-orange-300 font-bold">
-                          ⚠️ Dijital hizmet anında ifa edildiğinden bakiye ve kredi harcamaları iade edilemez.
+                          Muzikors uygulamasının son kullanıcı tarafı <strong className="text-white">tamamen ücretsizdir</strong>. Müzik arama, istek gönderme ve diğer etkileşimler için hiçbir ücret talep edilmez.
                         </p>
                       </div>
                     </motion.div>
