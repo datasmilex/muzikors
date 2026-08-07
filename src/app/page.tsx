@@ -21,7 +21,6 @@ import { ToastNotification } from '../components/ToastNotification';
 import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 
-import { HappyHourBanner } from '../components/HappyHourBanner';
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
 import { WelcomeScreen } from '../components/WelcomeScreen';
@@ -43,7 +42,6 @@ const AppContent = () => {
       ) : (
         <>
           <Header />
-          <HappyHourBanner />
           <QuickActionsBanner />
           <VenueGuard>
             <NowPlayingSection />

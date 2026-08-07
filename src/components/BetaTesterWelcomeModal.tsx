@@ -7,7 +7,7 @@ import { Crown, Sparkles, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const BetaTesterWelcomeModal = () => {
-  const { user, fetchProfileCredits, showToast, hasEnteredGateway } = useApp();
+  const { user, showToast, hasEnteredGateway } = useApp();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +41,6 @@ export const BetaTesterWelcomeModal = () => {
           origin: { y: 0.6 },
           colors: ['#D4AF37', '#9333EA', '#FFFFFF']
         });
-        await fetchProfileCredits(user.id);
         setIsVisible(false);
       } else {
         showToast(data?.error || 'Ödül zaten alınmış.');

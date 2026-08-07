@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 
 export const TutorialManager: React.FC = () => {
-  const { user, openModal, showToast, fetchProfileCredits, isVenueBound, hasEnteredGateway } = useApp();
+  const { user, openModal, showToast, isVenueBound, hasEnteredGateway } = useApp();
   const driverRef = useRef<any>(null);
   const isRunning = useRef(false);
 
@@ -78,24 +78,8 @@ export const TutorialManager: React.FC = () => {
                   btn.innerHTML = 'Yükleniyor...';
                   btn.setAttribute('disabled', 'true');
 
-                  try {
-                    const { data, error } = await supabase.rpc('claim_tutorial_reward');
-                    if (error) throw error;
-                    
-                    if (data?.success) {
-                      showToast(data.message || '10 Promosyon Kredisi başarıyla yüklendi! 🎉');
-                      fetchProfileCredits(user.id);
-                      driverObj.moveNext();
-                    } else {
-                      showToast(data?.error || 'Ödül zaten alınmış.');
-                      driverObj.moveNext();
-                    }
-                  } catch (err) {
-                    console.error('Tutorial reward error:', err);
-                    showToast('Bir hata oluştu.');
-                    btn.innerHTML = '🎁 10 Kredi Hediyeni Al!';
-                    btn.removeAttribute('disabled');
-                  }
+                  showToast('Tebrikler, rehberi tamamladınız! 🎉');
+                  driverObj.moveNext();
                 });
               }
             }

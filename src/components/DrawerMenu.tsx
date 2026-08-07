@@ -24,7 +24,7 @@ import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, presentPremiumPaywall } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue } = useApp();
 
   const [isDj, setIsDj] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -170,7 +170,7 @@ export const DrawerMenu: React.FC = () => {
                   onClick={() => {
                     closeModal();
                     if (item.modal === 'premium_buy' as ModalType) {
-                      presentPremiumPaywall();
+                      showToast('Premium üyelik sistemi şu anda güncellenmektedir.');
                       return;
                     }
                     if (item.isProtected && !user) {

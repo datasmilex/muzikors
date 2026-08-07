@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { supabase } from '../lib/supabaseClient';
-import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
+// Removed formatter imports
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -45,8 +45,6 @@ interface AppContextType {
   showToast: (msg: string) => void;
   toggleAudioPlay: () => void;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
-  fetchProfileCredits: (userId: string) => Promise<{ real: number, promo: number }>;
-  presentPremiumPaywall: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -109,11 +107,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       document.body.style.overflow = '';
     };
   }, [activeModal]);
-
-  // ── FETCH PROFILE STATS & CREDITS DIRECTLY FROM DB ─────────────────────────
-  const fetchProfileCredits = useCallback(async (userId: string): Promise<{ real: number, promo: number }> => {
-    return { real: 0, promo: 0 };
-  }, []);
 
   // ── BIND VENUE: fetch from Supabase, persist to localStorage ─────────────
   const bindVenueById = useCallback(async (kafeId: string | number) => {
@@ -182,10 +175,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         has_spotify: !!(data.spotify_refresh_token),
         opening_time: data.opening_time || null,
         closing_time: data.closing_time || null,
-        is_happy_hour_active: data.is_happy_hour_active === true,
-        hh_start_time: data.hh_start_time || null,
-        hh_end_time: data.hh_end_time || null,
-        hh_discount_rate: data.hh_discount_rate || 0,
+        current_track_info: data.current_track_info || null
       };
 
       setActiveVenue(venue);
@@ -209,10 +199,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('Bir mekana bağlı değilsiniz.');
     }
   }, [showToast]);
-
-  // ── ONBOARDING (REMOVED) ────────────────────────────────────────────────────────────
-  // The 'howitworks' modal is no longer automatically shown on first load.
-  // Instead, the new interactive TutorialManager handles onboarding.
 
   // ── DEEP LINKING (APP LINKS) ──────────────────────────────────────────────
   useEffect(() => {
@@ -359,7 +345,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const parsed: Venue = JSON.parse(stored);
           if (parsed && parsed.id) {
             setActiveVenue(parsed);
-            // KÖK NEDEN ÇÖZÜMÜ 1: Sadece localStorage'dan okuma, arkadan güncelini de çek!
             bindVenueById(parsed.id);
           }
         } catch {
@@ -431,10 +416,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         // Close login modal after successful sign-in
+        const checkVenueAndCredits = async () => {
+          if (!authUser) return;
+          if (!isVenueBound) return;
+        };
         setActiveModal((prev) => (prev === 'login' ? 'none' : prev));
       }
-
-      const liveCredits = await fetchProfileCredits(authUser.id);
 
       setUser((prev) => ({
         ...(prev || ({} as any)),
@@ -463,7 +450,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfileCredits]);
+  }, []);
 
   // ── SUPABASE REALTIME: PROFILES ───────────────────────────────────────────
   useEffect(() => {
@@ -537,7 +524,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const { data: venueData, error: venueError } = await supabase
           .from('venues')
-          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_happy_hour_active, hh_start_time, hh_end_time, hh_discount_rate')
+          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info')
           .eq('id', targetVenueId)
           .single();
 
@@ -546,11 +533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...prev,
             explicit_filter_enabled: venueData.explicit_filter_enabled,
             allowed_genres: venueData.allowed_genres,
-            current_track_info: venueData.current_track_info,
-            is_happy_hour_active: venueData.is_happy_hour_active,
-            hh_start_time: venueData.hh_start_time,
-            hh_end_time: venueData.hh_end_time,
-            hh_discount_rate: venueData.hh_discount_rate,
+            current_track_info: venueData.current_track_info
           } : null);
         }
 
@@ -572,7 +555,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const elapsedMs = Date.now() - new Date(r.started_at).getTime();
             const durationMs = r.duration_ms ?? 210000;
             if (elapsedMs >= durationMs) {
-              // User App MUST NEVER mutate DB state. We simply hide it from UI if it's stuck.
               continue;
             }
           }
@@ -660,6 +642,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (payload) => {
           if (payload.new) {
             const row = payload.new as any;
+
             setActiveVenue((prev) =>
               prev
                 ? {
@@ -669,11 +652,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     is_paused: row.is_paused === true,
                     explicit_filter_enabled: row.explicit_filter_enabled === true,
                     allowed_genres: row.allowed_genres ?? prev.allowed_genres,
-                    current_track_info: row.current_track_info,
-                    is_happy_hour_active: row.is_happy_hour_active === true,
-                    hh_start_time: row.hh_start_time ?? prev.hh_start_time,
-                    hh_end_time: row.hh_end_time ?? prev.hh_end_time,
-                    hh_discount_rate: row.hh_discount_rate ?? prev.hh_discount_rate,
+                    current_track_info: row.current_track_info ?? prev.current_track_info,
                   }
                 : null
             );
@@ -849,19 +828,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Ödeme sistemi devre dışı bırakılmıştır.');
   }, [showToast]);
 
-  const presentPremiumPaywall = useCallback(async () => {
-    showToast('Premium üyelik sistemi şu anda güncellenmektedir.');
-  }, [showToast]);
-
-  const getGuestDeviceId = () => {
-    let guestId = localStorage.getItem('muzikors_guest_id');
-    if (!guestId) {
-      guestId = 'guest_' + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem('muzikors_guest_id', guestId);
-    }
-    return guestId;
-  };
-
   // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
   const requestTrack = useCallback(async (track: Track, isAnonymous?: boolean): Promise<boolean> => {
     // Venue guard
@@ -884,8 +850,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('Bu mekanda küfürlü / sansürsüz şarkı talebi engellenmiştir.');
       return false;
     }
-
-    const requiredCredits = 0;
 
     if (cooldown.active && !user?.isPremium) {
       const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
@@ -1003,7 +967,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           p_album_cover: track.albumCover || track.coverUrl || track.album_art || '',
           p_spotify_uri: targetSpotifyUri,
           p_duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
-          p_credits_spent: requiredCredits,
           p_requested_by_name: requestedByName,
           p_is_anonymous: isAnonymous || false
         });
@@ -1035,7 +998,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCooldown({ active: true, remainingSeconds: 30, lastRequestedAt: Date.now() });
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
     showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
-  }, [user, cooldown, nowPlaying, activeVenue, fetchProfileCredits, openProtectedModal, openModal, showToast, closeModal, supabase]);
+  }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase]);
 
   const voteTrack = useCallback(async (trackId: string) => {
     if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
@@ -1086,7 +1049,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('[voteTrack exception]', err);
       showToast('Oylama sirasinda bir hata olustu.');
     }
-  }, [user, fetchProfileCredits, openProtectedModal, openModal, showToast]);
+  }, [user, openProtectedModal, openModal, showToast]);
 
   const deleteAccount = useCallback(async () => {
     if (!supabase || !user) return;
@@ -1127,7 +1090,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
-      hasEnteredGateway, setHasEnteredGateway, presentPremiumPaywall, fetchProfileCredits
+      hasEnteredGateway, setHasEnteredGateway
     }}>
       {children}
     </AppContext.Provider>

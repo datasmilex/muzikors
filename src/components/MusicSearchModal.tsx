@@ -6,7 +6,7 @@ import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Pl
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
-import { formatDuration, getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
+import { formatDuration } from '../utils/formatters';
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -28,21 +28,10 @@ export const MusicSearchModal: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
 
-  const isHappyHourActive = isHappyHourNow(
-    activeVenue?.is_happy_hour_active || false,
-    activeVenue?.hh_start_time || null,
-    activeVenue?.hh_end_time || null
-  );
-  const hhDiscount = activeVenue?.hh_discount_rate || 0;
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-
-  // Derived selected track cost
-  const selectedDurMs = selectedTrack ? ((selectedTrack as any).duration_ms || selectedTrack.durationMs || (selectedTrack.duration ? selectedTrack.duration * 1000 : 0)) : 0;
-  const selectedBaseCost = getSongCreditCost(selectedDurMs);
-  const selectedFinalCost = selectedBaseCost === null ? null : (isHappyHourActive ? calculateDiscountedPrice(selectedBaseCost, hhDiscount) : selectedBaseCost);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
@@ -129,12 +118,6 @@ export const MusicSearchModal: React.FC = () => {
 
 
   
-
-  const formatDuration = (duration_ms: number) => {
-    const minutes = Math.floor(duration_ms / 60000);
-    const seconds = Math.floor((duration_ms % 60000) / 1000);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
 
   const formatCooldown = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -404,14 +387,11 @@ export const MusicSearchModal: React.FC = () => {
                   const zIndex = searchResults.length - idx;
                   const isSelected = selectedTrack?.id === track.id;
                   const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                  const baseCost = getSongCreditCost(durMs);
-                  const finalCost = baseCost === null ? null : (isHappyHourActive ? calculateDiscountedPrice(baseCost, hhDiscount) : baseCost);
                   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
                   const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
                   
-                  const isBlocked = finalCost === null || isExplicitBlocked;
-                  const canAfford = true;
+                  const isBlocked = isExplicitBlocked;
                                     return (
                     <div 
                       key={track.id}
@@ -420,7 +400,7 @@ export const MusicSearchModal: React.FC = () => {
                     >
                       <div
                         onClick={() => {
-                          if (isBlocked || cooldown.active || !canAfford || submittingTrackId === track.id) return;
+                          if (isBlocked || cooldown.active || submittingTrackId === track.id) return;
                           setSelectedTrack(track);
                         }}
                         className={`rounded-[1.2rem] p-2 flex items-center justify-between border transition-all duration-300 ${
@@ -456,8 +436,6 @@ export const MusicSearchModal: React.FC = () => {
                               </h4>
                               {isExplicitBlocked ? (
                                 <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
-                              ) : finalCost === null ? (
-                                <Clock className="w-3 h-3 text-red-400 shrink-0" />
                               ) : null}
                             </div>
                             <p className="text-[11px] font-semibold text-gray-400 truncate mt-0.5 leading-tight">
@@ -470,8 +448,6 @@ export const MusicSearchModal: React.FC = () => {
                         <div className="flex flex-col items-end justify-center shrink-0 pr-2">
                           {isExplicitBlocked ? (
                             <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">Engelli</span>
-                          ) : finalCost === null ? (
-                            <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">&gt;7 Dk</span>
                           ) : (
                             <div className="flex flex-col items-end gap-0.5">
                               
@@ -532,14 +508,14 @@ export const MusicSearchModal: React.FC = () => {
 
             <button
               onClick={() => handleConfirmRequest()}
-              disabled={!selectedTrack || cooldown.active || selectedFinalCost === null}
+              disabled={!selectedTrack || cooldown.active}
               className={`w-full py-4 px-6 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
-                cooldown.active || !selectedTrack || selectedFinalCost === null
+                cooldown.active || !selectedTrack
                   ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 shadow-none'
                   : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
               }`}
             >
-              <Coins className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
+              <Music className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
               {cooldown.active ? (
                 <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
               ) : (

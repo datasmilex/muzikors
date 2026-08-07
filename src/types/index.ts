@@ -57,10 +57,6 @@ export interface Venue {
   has_spotify?: boolean;
   opening_time?: string | null;
   closing_time?: string | null;
-  is_happy_hour_active?: boolean;
-  hh_start_time?: string | null;
-  hh_end_time?: string | null;
-  hh_discount_rate?: number;
   current_track_info?: {
     song_title: string;
     artist: string;
