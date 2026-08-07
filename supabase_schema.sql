@@ -17,9 +17,6 @@ CREATE TABLE public.profiles (
   full_name             TEXT,
   avatar_url            TEXT,
   email                 TEXT,
-  credits               INTEGER NOT NULL DEFAULT 0,
-  promo_credits         INTEGER NOT NULL DEFAULT 10,
-  lifetime_credits      INTEGER NOT NULL DEFAULT 0,
   total_songs_requested INTEGER NOT NULL DEFAULT 0,
   is_spotify_connected  BOOLEAN NOT NULL DEFAULT false,
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -45,7 +42,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (
-    id, full_name, avatar_url, email, credits, promo_credits, lifetime_credits, total_songs_requested, is_spotify_connected
+    id, full_name, avatar_url, email, total_songs_requested, is_spotify_connected
   )
   VALUES (
     NEW.id,
@@ -60,9 +57,6 @@ BEGIN
       ''
     ),
     NEW.email,
-    0,
-    10,
-    0,
     0,
     (NEW.raw_app_meta_data->>'provider' = 'spotify')
   )

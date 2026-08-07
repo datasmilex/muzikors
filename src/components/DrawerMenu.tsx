@@ -49,12 +49,10 @@ export const DrawerMenu: React.FC = () => {
   const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
-    { label: 'Muzikors Premium', icon: <Sparkles className="w-5 h-5 text-amber-300" />, modal: 'premium_buy', isProtected: true },
     { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
   ];
 
   const secondaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
-    { label: 'Abonelik Yönetimi', icon: <Coins className="w-5 h-5 text-[#D4AF37]" />, modal: 'manage_subscription', isProtected: true },
     { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
     { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
     { label: 'İletişim', icon: <MessageCircle className="w-5 h-5 text-[#D4AF37]" />, modal: 'contact' },
@@ -160,23 +158,7 @@ export const DrawerMenu: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between bg-[#120C08] p-3 rounded-xl border border-[#D4AF37]/10">
-                  <div className="flex items-center gap-2 text-[#D4AF37]">
-                    <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center">
-                      <Coins className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-black text-white">{user.credits + (user.promo_credits || 0)}</div>
-                      <div className="text-[9px] font-bold uppercase tracking-widest text-amber-200/50">Mevcut Kredi</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => openModal('topup')}
-                    className="px-3 py-1.5 rounded-lg gold-gradient-bg text-stone-950 font-black text-xs shadow-md active:scale-95 transition-all"
-                  >
-                    + Yükle
-                  </button>
-                </div>
+
               </div>
             )}
 

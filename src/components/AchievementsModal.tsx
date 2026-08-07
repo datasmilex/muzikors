@@ -26,7 +26,6 @@ const TIER_LABELS: Record<string, string> = {
 interface AchievementCardProps {
   achievement: Achievement;
   totalSongs: number;
-  totalSpent: number;
   claimedList: string[];
   pinnedList: string[];
   onClaim: (achievement: Achievement) => Promise<void>;
@@ -39,7 +38,6 @@ interface AchievementCardProps {
 const AchievementCard: React.FC<AchievementCardProps> = ({
   achievement,
   totalSongs,
-  totalSpent,
   claimedList,
   pinnedList,
   onClaim,
@@ -49,8 +47,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
   isBetaTesterRewardClaimed,
 }) => {
   const s = TIER_STYLES[achievement.tier];
-  const progress = getAchievementProgress(achievement, totalSongs, totalSpent, isBetaTester);
-  const unlocked = isAchievementUnlocked(achievement, totalSongs, totalSpent, isBetaTester);
+  const progress = getAchievementProgress(achievement, totalSongs, isBetaTester);
+  const unlocked = isAchievementUnlocked(achievement, totalSongs, isBetaTester);
   const claimed = isAchievementClaimed(achievement, claimedList, isBetaTesterRewardClaimed);
   const pinned = pinnedList.includes(achievement.id);
   const pct = Math.round((progress / achievement.target) * 100);
@@ -170,13 +168,12 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
   const claimedList: string[] = (user as any)?.claimed_achievements ?? [];
   const pinnedList: string[] = (user as any)?.pinned_achievements ?? [];
   const totalSongs = user?.totalSongsRequested ?? 0;
-  const totalSpent = (user as any)?.totalCreditsSpent ?? 0;
   const isBetaTester = user?.is_beta_tester ?? false;
   const isBetaTesterRewardClaimed = user?.beta_tester_reward_claimed ?? false;
 
   // Count unlocked but unclaimed
   const pendingCount = ACHIEVEMENTS.filter(
-    a => isAchievementUnlocked(a, totalSongs, totalSpent, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
+    a => isAchievementUnlocked(a, totalSongs, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
   ).length;
 
   const handleClaim = useCallback(async (achievement: Achievement) => {
@@ -197,7 +194,6 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
         // Update local state
         setUser(prev => prev ? {
           ...prev,
-          promo_credits: (prev.promo_credits ?? 0) + achievement.reward,
           beta_tester_reward_claimed: true,
         } as any : null);
 
@@ -219,7 +215,6 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
         // Update local state
         setUser(prev => prev ? {
           ...prev,
-          promo_credits: (prev.promo_credits ?? 0) + achievement.reward,
           claimed_achievements: [...(claimedList), achievement.id],
         } as any : null);
       }
@@ -330,11 +325,6 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
               </div>
               <div className="w-px h-8 bg-white/10" />
               <div className="flex-1 text-center">
-                <p className="text-[9px] font-bold text-amber-200/50 uppercase tracking-widest">Harcanan</p>
-                <p className="text-lg font-black text-white">{totalSpent.toLocaleString('tr-TR')} 💳</p>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="flex-1 text-center">
                 <p className="text-[9px] font-bold text-amber-200/50 uppercase tracking-widest">Tamamlanan</p>
                 <p className="text-lg font-black text-[#D4AF37]">
                   {claimedList.length}/{ACHIEVEMENTS.length}
@@ -359,7 +349,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   key={a.id}
                   achievement={a}
                   totalSongs={totalSongs}
-                  totalSpent={totalSpent}
+                  
                   claimedList={claimedList}
                   pinnedList={pinnedList}
                   onClaim={handleClaim}
@@ -370,23 +360,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                 />
               ))}
 
-              {/* Section: Kredi */}
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">💳 Kredi Görevleri</p>
-              {ACHIEVEMENTS.filter(a => a.category === 'spend').map(a => (
-                <AchievementCard
-                  key={a.id}
-                  achievement={a}
-                  totalSongs={totalSongs}
-                  totalSpent={totalSpent}
-                  claimedList={claimedList}
-                  pinnedList={pinnedList}
-                  onClaim={handleClaim}
-                  onTogglePin={handleTogglePin}
-                  isClaiming={claimingId === a.id}
-                  isBetaTester={isBetaTester}
-                  isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
-                />
-              ))}
+
 
               {/* Section: Özel */}
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">✨ Özel Başarımlar</p>
@@ -395,7 +369,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   key={a.id}
                   achievement={a}
                   totalSongs={totalSongs}
-                  totalSpent={totalSpent}
+                  
                   claimedList={claimedList}
                   pinnedList={pinnedList}
                   onClaim={handleClaim}

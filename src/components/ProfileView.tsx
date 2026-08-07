@@ -614,34 +614,11 @@ export const ProfileView: React.FC = () => {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                        {isOwnProfile && (
-                          <div className="col-span-2 bg-gradient-to-r from-[#241911] to-[#120C08] p-4 rounded-2xl border border-[#D4AF37]/30 shadow-[0_5px_15px_rgba(212,175,55,0.1)] flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center shadow-inner">
-                                <Zap className="w-5 h-5 text-stone-950 stroke-[3]" />
-                              </div>
-                              <div>
-                                <p className="text-[10px] font-bold text-amber-200/50 uppercase tracking-widest">Kredi Bakiyesi</p>
-                                <p className="text-2xl font-black text-white leading-none">
-                                  {user?.credits ?? 0}
-                                  {(user?.promo_credits ?? 0) > 0 && (
-                                    <span className="text-sm text-[#D4AF37] font-bold ml-1">+{user?.promo_credits} 🎁</span>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        <div className="bg-[#1C130D] p-3 rounded-2xl border border-white/5 flex flex-col gap-1">
+                      <div className="grid grid-cols-1 gap-3 mb-6 relative z-10">
+                        <div className="bg-[#1C130D] p-3 rounded-2xl border border-white/5 flex flex-col gap-1 items-center">
                           <Music className="w-4 h-4 text-[#D4AF37]" />
                           <p className="text-[9px] text-amber-200/50 font-bold uppercase tracking-widest">Toplam İstek</p>
                           <p className="text-xl font-black text-white">{currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}</p>
-                        </div>
-                        <div className="bg-[#1C130D] p-3 rounded-2xl border border-white/5 flex flex-col gap-1">
-                          <Award className="w-4 h-4 text-[#D4AF37]" />
-                          <p className="text-[9px] text-amber-200/50 font-bold uppercase tracking-widest">Toplam Kredi</p>
-                          <p className="text-xl font-black text-white">{currentProfile?.lifetimeCredits ?? currentProfile?.lifetime_credits ?? 0}</p>
                         </div>
                       </div>
                     </motion.div>

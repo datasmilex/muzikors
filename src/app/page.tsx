@@ -9,8 +9,6 @@ import { UpNextQueueSection } from '../components/UpNextQueueSection';
 import { VenueGuard } from '../components/VenueGuard';
 import { DrawerMenu } from '../components/DrawerMenu';
 import { BottomNav } from '../components/BottomNav';
-import { CreditTopUpModal } from '../components/CreditTopUpModal';
-import { IyzicoPaymentModal } from '../components/IyzicoPaymentModal';
 import { MusicSearchModal } from '../components/MusicSearchModal';
 import { ProfileView } from '../components/ProfileView';
 import { LoginModal } from '../components/LoginModal';
@@ -59,8 +57,6 @@ const AppContent = () => {
       <BetaTesterWelcomeModal />
       <DrawerMenu />
       <LeaderboardModal />
-      <CreditTopUpModal />
-      <IyzicoPaymentModal />
       <MusicSearchModal />
       <ProfileView />
       <LoginModal />

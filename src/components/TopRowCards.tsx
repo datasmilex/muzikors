@@ -9,30 +9,7 @@ export const TopRowCards: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-3 px-4 pt-3 pb-1">
-      <div className="grid grid-cols-2 gap-3">
-      <div className="glass-panel-gold rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden border border-[#D4AF37]/30 group active:border-[#D4AF37]/60 transition-all">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-1.5 text-xs text-amber-200/80 font-medium">
-            <Coins className="w-4 h-4 text-[#D4AF37] animate-bounce" />
-            <span>Kredi Miktarı</span>
-          </div>
-          <Sparkles className="w-3.5 h-3.5 text-amber-400/50" />
-        </div>
-
-        <div className="my-1">
-          <span className="text-2xl font-black tracking-tight text-white flex items-baseline gap-1">
-            {user ? user.credits + (user.promo_credits || 0) : 0} <span className="text-xs font-semibold text-[#D4AF37]">KREDİ</span>
-          </span>
-        </div>
-
-        <button
-          onClick={() => openModal('topup')}
-          className="mt-1 w-full py-1.5 px-2 rounded-xl gold-gradient-bg text-stone-950 font-bold text-xs flex items-center justify-center gap-1 active:brightness-110 active:scale-95 transition-all shadow-md"
-        >
-          <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Kredi Yükle</span>
-        </button>
-      </div>
+      <div className="grid grid-cols-1 gap-3">
 
       <button
         onClick={() => openModal('qr')}

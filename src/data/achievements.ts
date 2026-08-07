@@ -4,7 +4,7 @@
 //           'spend'  = total_credits_spent bazlı
 // tier: görsel kalite seviyesi ('bronze' | 'silver' | 'gold' | 'diamond')
 
-export type AchievementCategory = 'songs' | 'spend' | 'special';
+export type AchievementCategory = 'songs' | 'special';
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond';
 
 export interface Achievement {
@@ -65,53 +65,6 @@ const songAchievements: Achievement[] = [
   },
 ];
 
-// ─── Kredi Harcama Başarımları ────────────────────────────────────────────
-// "Atmosfer Yaratıcısı → Bonkör → Mekanın Sahibi → Altın Kalp"
-// hedefler: 100 → 500 → 2000 → 7500
-
-const spendAchievements: Achievement[] = [
-  {
-    id: 'spend_100',
-    emoji: '⚡',
-    title: 'Atmosfer Yaratıcısı',
-    description: '{target} kredi harcayarak mekanı hareketlendirdin.',
-    tier: 'bronze',
-    category: 'spend',
-    target: 100,
-    reward: 15,
-  },
-  {
-    id: 'spend_500',
-    emoji: '💎',
-    title: 'Bonkör',
-    description: '{target} kredi ile mekanın en cömert dinleyicisisin.',
-    tier: 'silver',
-    category: 'spend',
-    target: 500,
-    reward: 60,
-  },
-  {
-    id: 'spend_2000',
-    emoji: '🏆',
-    title: 'Mekanın Sahibi',
-    description: '{target} kredi — bu mekana ruhunu kattın.',
-    tier: 'gold',
-    category: 'spend',
-    target: 2000,
-    reward: 250,
-  },
-  {
-    id: 'spend_7500',
-    emoji: '🌟',
-    title: 'Altın Kalp',
-    description: '{target} kredi ile sen artık Muzikors\'un efsanesisin.',
-    tier: 'diamond',
-    category: 'spend',
-    target: 7500,
-    reward: 1000,
-  },
-];
-
 // ─── Özel Başarımlar (Special) ──────────────────────────────────────────────
 const specialAchievements: Achievement[] = [
   {
@@ -126,28 +79,26 @@ const specialAchievements: Achievement[] = [
   },
 ];
 
-export const ACHIEVEMENTS: Achievement[] = [...songAchievements, ...spendAchievements, ...specialAchievements];
+export const ACHIEVEMENTS: Achievement[] = [...songAchievements, ...specialAchievements];
 
 // ─── Yardımcı Fonksiyonlar ───────────────────────────────────────────────
 export function getAchievementProgress(
   achievement: Achievement,
   totalSongs: number,
-  totalSpent: number,
   isBetaTester: boolean = false
 ): number {
   if (achievement.id === 'beta_tester') return isBetaTester ? 1 : 0;
-  const current = achievement.category === 'songs' ? totalSongs : totalSpent;
+  const current = totalSongs;
   return Math.min(current, achievement.target);
 }
 
 export function isAchievementUnlocked(
   achievement: Achievement,
   totalSongs: number,
-  totalSpent: number,
   isBetaTester: boolean = false
 ): boolean {
   if (achievement.id === 'beta_tester') return isBetaTester;
-  return getAchievementProgress(achievement, totalSongs, totalSpent, isBetaTester) >= achievement.target;
+  return getAchievementProgress(achievement, totalSongs, isBetaTester) >= achievement.target;
 }
 
 export function isAchievementClaimed(

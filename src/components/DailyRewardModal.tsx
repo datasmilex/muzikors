@@ -1,97 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, CheckCircle2, Clock } from 'lucide-react';
+import { Gift, X, Sparkles, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { supabase } from '../lib/supabaseClient';
-import { isClaimedTodayTR, getSecondsUntilTRMidnight } from '../lib/timeHelpers';
 
 export const DailyRewardModal: React.FC = () => {
-  const { activeModal, closeModal, user, setUser, showToast } = useApp();
-  const [isClaiming, setIsClaiming] = useState(false);
-  
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [localClaimed, setLocalClaimed] = useState(false);
-
-  useEffect(() => {
-    setLocalClaimed(isClaimedTodayTR(user?.lastDailyClaim || null));
-  }, [user?.lastDailyClaim]);
-
-  // Handle countdown when claimed
-  useEffect(() => {
-    if (!localClaimed) {
-      setTimeLeft(null);
-      return;
-    }
-
-    // Initialize time left
-    setTimeLeft(getSecondsUntilTRMidnight());
-
-    const interval = setInterval(() => {
-      const seconds = getSecondsUntilTRMidnight();
-      if (seconds <= 0) {
-        clearInterval(interval);
-        setTimeLeft(null); 
-        setLocalClaimed(false); // 00:00:00'da butonu otomatik aktifleştir
-        
-        // Supabase tarafında ödül her halükarda geceyarısı sıfırlanıyor (veya 24h),
-        // Biz sadece client-side'da UI'ı açıyoruz. Müşteri F5 atarsa veya tekrar tıklarsa sorun olmaz.
-      } else {
-        setTimeLeft(seconds);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [localClaimed]);
-
-  
-
-  // Ensure user is logged in
-  if (!user) return null;
-
-  // Real-time calculation
-  const isButtonDisabled = localClaimed;
-
-  const formatTime = (totalSeconds: number) => {
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
-  const handleClaimReward = async () => {
-    if (isButtonDisabled || isClaiming) return;
-    setIsClaiming(true);
-
-    try {
-      const { data, error } = await supabase.rpc('claim_daily_reward');
-      
-      if (error) throw error;
-      
-      if (data?.success) {
-        showToast(data.message || '+2 Kredi hesabına eklendi!');
-        
-        // Update user state immediately with new lastDailyClaim
-        setUser(prev => prev ? {
-          ...prev,
-          credits: prev.credits + 2,
-          promo_credits: prev.isPremium ? (prev.promo_credits || 0) + 5 : prev.promo_credits,
-          lastDailyClaim: new Date().toISOString()
-        } : prev);
-        
-      } else {
-        showToast(data?.message || 'Ödül alınamadı.');
-      }
-    } catch (error) {
-      console.error('[DailyReward] Error:', error);
-      showToast('Ödül alınırken bir hata oluştu.');
-    } finally {
-      setIsClaiming(false);
-      // Let user see the timer starting instead of closing instantly
-      // setTimeout(closeModal, 1500); 
-    }
-  };
+  const { activeModal, closeModal } = useApp();
 
   return (
     <AnimatePresence>
@@ -127,50 +42,25 @@ export const DailyRewardModal: React.FC = () => {
           </button>
 
           <div className="flex justify-center mb-6 mt-4 relative z-10">
-            <div className="w-20 h-20 rounded-full border-[3px] border-[#D4AF37] bg-gradient-to-br from-[#D4AF37]/20 to-[#120C08] flex items-center justify-center relative shadow-[0_0_30px_rgba(212,175,55,0.3)]">
-              {isButtonDisabled ? (
-                <CheckCircle2 className="w-10 h-10 text-[#D4AF37] drop-shadow-md" />
-              ) : (
-                <Gift className="w-10 h-10 text-[#D4AF37] animate-bounce drop-shadow-md" />
-              )}
+            <div className="w-20 h-20 rounded-full border-[3px] border-zinc-600 bg-gradient-to-br from-zinc-800 to-[#120C08] flex items-center justify-center relative shadow-[0_0_30px_rgba(100,100,100,0.3)]">
+              <Gift className="w-10 h-10 text-zinc-500 drop-shadow-md" />
             </div>
           </div>
 
           <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md mb-2 relative z-10">
-            Günlük Ödül 🎁
+            Günlük Sürprizler
           </h2>
 
-          <p className="text-[13px] text-amber-200/60 font-medium mb-8 leading-relaxed relative z-10 px-2">
-            {isButtonDisabled
-              ? "Bugünkü ödülünü aldın! Yarın tekrar bekleriz."
-              : "Her gün giriş yap, bedava kredileri topla! Hemen +2 Kredini al."}
+          <p className="text-[13px] text-zinc-400 font-medium mb-8 leading-relaxed relative z-10 px-2">
+            Çok yakında yeni sürprizler ve hediyelerle burada olacağız. Takipte kal!
           </p>
 
           <button
-            disabled={isButtonDisabled || isClaiming}
-            onClick={handleClaimReward}
-            className={`w-full py-4 px-4 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 transition-all duration-300 relative z-10 shadow-[0_10px_30px_rgba(212,175,55,0.2)] group
-              ${isButtonDisabled
-                ? 'bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-not-allowed shadow-none'
-                : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
-              }
-            `}
+            disabled={true}
+            className="w-full py-4 px-4 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 transition-all duration-300 relative z-10 shadow-none bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-not-allowed group"
           >
-            {isClaiming ? (
-              <span className="animate-pulse tracking-wide">Bekleniyor...</span>
-            ) : isButtonDisabled ? (
-              <>
-                <Clock className="w-5 h-5" />
-                <span className="font-mono tracking-widest text-sm">
-                  {timeLeft !== null ? formatTime(timeLeft) : '00:00:00'}
-                </span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 group-active:scale-95 transition-transform" />
-                <span className="tracking-wide">Günlük Ödülünü Al</span>
-              </>
-            )}
+            <Clock className="w-5 h-5" />
+            <span className="tracking-wide text-sm uppercase">Çok Yakında</span>
           </button>
         </motion.div>
       </div>
@@ -179,3 +69,4 @@ export const DailyRewardModal: React.FC = () => {
     </AnimatePresence>
   );
 };
+

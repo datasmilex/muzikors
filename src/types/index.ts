@@ -9,7 +9,6 @@ export interface Track {
   duration?: number; // in seconds
   durationMs?: number;
   spotifyUri?: string;
-  creditCost: number;
   votes: number;
   requestedBy: string;
   requestedByUserId?: string;
@@ -77,11 +76,7 @@ export interface UserProfile {
   username: string;
   email: string;
   avatar: string;
-  credits: number;
-  promo_credits?: number;
   totalSongsRequested: number;
-  totalCreditsSpent?: number;
-  lifetimeCredits?: number;
   isSpotifyConnected?: boolean;
   loginMethod: 'google' | 'spotify';
   lastDailyClaim?: string;
@@ -94,22 +89,11 @@ export interface UserProfile {
   beta_tester_reward_claimed?: boolean;
 }
 
-export interface CreditPackage {
-  id: string;
-  credits: number;
-  bonusCredits: number;
-  priceTL: number;
-  oldPriceTL?: number;
-  isPopular?: boolean;
-  badge?: string;
-  description: string;
-}
+
 
 export type ModalType = 
   | 'none' 
   | 'login' 
-  | 'topup' 
-  | 'iyzico'
   | 'search' 
   | 'profile' 
   | 'drawer' 
@@ -124,8 +108,6 @@ export type ModalType =
   | 'daily_reward'
   | 'globalFeed'
   | 'venue_info'
-  | 'premium_buy'
-  | 'manage_subscription'
   | 'leaderboard';
 
 export interface SocialPost {

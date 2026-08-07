@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
-import { CREDIT_PACKAGES } from '../data/mockData';
 import { supabase } from '../lib/supabaseClient';
 import { getSongCreditCost, isHappyHourNow, calculateDiscountedPrice } from '../utils/formatters';
 import { App } from '@capacitor/app';
@@ -113,45 +112,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // ── FETCH PROFILE STATS & CREDITS DIRECTLY FROM DB ─────────────────────────
   const fetchProfileCredits = useCallback(async (userId: string): Promise<{ real: number, promo: number }> => {
-    if (!supabase) return { real: 0, promo: 0 };
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits, promo_credits, lifetime_credits, total_songs_requested, last_daily_claim, total_credits_spent, claimed_achievements, pinned_achievements, is_beta_tester, beta_tester_reward_claimed')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('[Credits] DB fetch error:', error.message);
-        return { real: 0, promo: 0 };
-      }
-
-      setUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              credits: data?.credits ?? prev.credits,
-              promo_credits: data?.promo_credits ?? prev.promo_credits,
-              lifetimeCredits: data?.lifetime_credits ?? prev.lifetimeCredits,
-              totalSongsRequested: data?.total_songs_requested ?? prev.totalSongsRequested,
-              lastDailyClaim: data?.last_daily_claim ?? prev.lastDailyClaim,
-              totalCreditsSpent: data?.total_credits_spent ?? prev.totalCreditsSpent ?? 0,
-              claimed_achievements: Array.isArray(data?.claimed_achievements) ? data.claimed_achievements : (prev.claimed_achievements ?? []),
-              pinned_achievements: Array.isArray(data?.pinned_achievements) ? data.pinned_achievements : (prev.pinned_achievements ?? []),
-              is_beta_tester: data?.is_beta_tester ?? prev.is_beta_tester,
-              beta_tester_reward_claimed: data?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
-            }
-          : null
-      );
-
-      return {
-        real: typeof data?.credits === 'number' ? data.credits : 0,
-        promo: typeof data?.promo_credits === 'number' ? data.promo_credits : 0
-      };
-    } catch (err) {
-      console.error('[Credits] Unexpected error:', err);
-      return { real: 0, promo: 0 };
-    }
+    return { real: 0, promo: 0 };
   }, []);
 
   // ── BIND VENUE: fetch from Supabase, persist to localStorage ─────────────
@@ -483,10 +444,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Use only custom (non-Google) avatar; empty string = show default icon
         avatar: customAvatarUrl,
         email: emailStr,
-        credits: liveCredits.real,
-        promo_credits: liveCredits.promo,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
-        lifetimeCredits: prev?.lifetimeCredits ?? liveCredits.real,
         last_username_update: dbLastUsernameUpdate || prev?.last_username_update,
         loginMethod: 'google',
       }));
@@ -518,14 +476,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           prev
             ? {
                 ...prev,
-                credits: typeof row?.credits === 'number' ? row.credits : prev.credits,
                 totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
-                lifetimeCredits: typeof row?.lifetime_credits === 'number' ? row.lifetime_credits : prev.lifetimeCredits,
                 lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
                 username: row?.username ? row.username : prev.username,
                 last_username_update: row?.last_username_update ?? prev.last_username_update,
                 avatar: row?.avatar_url ?? prev.avatar,
-                totalCreditsSpent: typeof row?.total_credits_spent === 'number' ? row.total_credits_spent : prev.totalCreditsSpent,
                 claimed_achievements: Array.isArray(row?.claimed_achievements) ? row.claimed_achievements : prev.claimed_achievements,
                 pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
                 is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
@@ -641,7 +596,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             spotifyUri: r.spotify_uri,
             durationMs: r.duration_ms ?? 210000,
             duration: Math.round((r.duration_ms ?? 210000) / 1000),
-            creditCost: r.credits_spent ?? 10,
             votes: r.votes ?? 0,
             requestedBy: r.requested_by_name || 'Misafir',
             requestedByUserId: r.requested_by_user_id,
@@ -666,7 +620,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
               durationMs: prev?.durationMs || 210000,
               duration: prev?.duration || 210,
-              creditCost: playingRow?.credits_spent ?? prev?.creditCost ?? 0,
               votes: playingRow?.votes ?? prev?.votes ?? 0,
               requestedBy: (isSameTrack && prev?.requestedByUserId) ? prev.requestedBy : (trackInfo.requested_by_name || 'Mekan Listesi'),
               requestedByUserId: (isSameTrack && prev?.requestedByUserId) ? prev.requestedByUserId : (trackInfo.requested_by_user_id || undefined),
@@ -783,7 +736,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           album_art: livePlaybackState.album_art || (prev as any)?.album_art || '',
           durationMs: livePlaybackState.duration_ms || prev?.durationMs || 210000,
           duration: Math.round((livePlaybackState.duration_ms || 210000) / 1000),
-          creditCost: prev?.creditCost || 0,
           votes: (livePlaybackState as any).votes || prev?.votes || 0,
           requestedBy: (livePlaybackState as any).requested_by_name || prev?.requestedBy || 'Mekan Fon Müziği',
           requestedByUserId: (livePlaybackState as any).requested_by_user_id || prev?.requestedByUserId || undefined,
@@ -894,39 +846,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [showToast, closeModal]);
 
   const handleIyzicoPayment = useCallback(async (packageId: string) => {
-    // SATIN AL BUTONUNA YETKİ KONTROLÜ (AUTH GUARD)
-    if (!user) {
-      showToast('Ödeme yapabilmek için lütfen önce giriş yapın.');
-      openProtectedModal('login');
-      return;
-    }
-    
-    // TODO: Bu aşamada Supabase Edge Function'a (örn: /create-iyzico-checkout) istek atılarak Iyzico'dan HTML snippet alınacak.
-    // Şimdilik test amaçlı sahte bir HTML formu yerleştiriyoruz. Sana Iyzico keyleri verildiğinde buraya gerçek API çağrısını ekleyeceğiz.
-    
-    // Fake Iyzico HTML Content
-    const fakeHtml = `
-      <div style="font-family: sans-serif; text-align: center; color: white; padding: 20px;">
-        <h3 style="color: #D4AF37;">Iyzico Güvenli Ödeme</h3>
-        <p style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;">Ödeme formu buraya yüklenecek.</p>
-        <button style="background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold;">(Simülasyon) Ödemeyi Tamamla</button>
-      </div>
-    `;
-    
-    setIyzicoHtml(fakeHtml);
-    openModal('iyzico');
-    
-  }, [user, openProtectedModal, openModal, showToast]);
+    showToast('Ödeme sistemi devre dışı bırakılmıştır.');
+  }, [showToast]);
 
   const presentPremiumPaywall = useCallback(async () => {
-    if (!user) {
-      showToast('Premium ayrıcalıklarını görmek için giriş yapmalısınız.');
-      openProtectedModal('login');
-      return;
-    }
-    
     showToast('Premium üyelik sistemi şu anda güncellenmektedir.');
-  }, [user, openProtectedModal, showToast]);
+  }, [showToast]);
 
   const getGuestDeviceId = () => {
     let guestId = localStorage.getItem('muzikors_guest_id');
@@ -960,43 +885,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    const trackDurationMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 210000);
-    const baseCredits = getSongCreditCost(trackDurationMs);
-    
-    if (baseCredits === null) {
-      showToast('7 dakikadan uzun sarkilar mekan akisi icin eklenemez!');
-      return false;
-    }
-
-    const isHappyHourActive = isHappyHourNow(
-      activeVenue?.is_happy_hour_active || false,
-      activeVenue?.hh_start_time || null,
-      activeVenue?.hh_end_time || null
-    );
-    const requiredCredits = isHappyHourActive 
-      ? calculateDiscountedPrice(baseCredits, activeVenue?.hh_discount_rate || 0) 
-      : baseCredits;
+    const requiredCredits = 0;
 
     if (cooldown.active && !user?.isPremium) {
       const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
       showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
-    }
-
-    let liveReal = 0;
-    let livePromo = 0;
-    if (user) {
-      const balances = await fetchProfileCredits(user.id);
-      liveReal = balances.real;
-      livePromo = balances.promo;
-    }
-
-    if (requiredCredits > 0 && liveReal < requiredCredits && livePromo < requiredCredits) {
-      if (!user) {
-        openProtectedModal('search', 'Şarkı eklemek için giriş yapın (Ücretli Şarkı)');
-        return false;
-      }
-      showToast(`Bu şarkı için ${requiredCredits} kredi gerekiyor. Yetersiz bakiye!`);
-      openModal('topup'); return false;
     }
 
 
@@ -1120,11 +1013,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           showToast(rpcErr.message || 'Şarkı eklenemedi.');
           return false;
         }
-
-        // Fetch fresh credits after successful ACID transaction
-        if (user) {
-          await fetchProfileCredits(user.id);
-        }
       }
     } catch (err: any) {
       console.error('[requestTrack Catch Error]', err);
@@ -1174,32 +1062,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
 
-      const balances = await fetchProfileCredits(user.id);
-      if (balances.real < 1 && balances.promo < 1) { showToast('Yetersiz kredi!'); openModal('topup'); return; }
-
-      let newReal = balances.real;
-      let newPromo = balances.promo;
-      let usedPromo = false;
-
-      if (balances.promo >= 1) {
-        newPromo -= 1;
-        usedPromo = true;
-      } else {
-        newReal -= 1;
-        usedPromo = false;
-      }
-
       const newVotesForUser = currentVotesForUser + 1;
 
       if (supabase) {
-        if (usedPromo) {
-          await supabase.from('profiles').update({ promo_credits: newPromo }).eq('id', user.id);
-          setUser(prev => prev ? { ...prev, promo_credits: newPromo } : null);
-        } else {
-          await supabase.from('profiles').update({ credits: newReal }).eq('id', user.id);
-          setUser(prev => prev ? { ...prev, credits: newReal } : null);
-        }
-        
         const { error: upsertErr } = await supabase.from('song_user_votes').upsert(
           { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
           { onConflict: 'user_id,song_id' }

@@ -417,8 +417,7 @@ export const MusicSearchModal: React.FC = () => {
                   const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
                   
                   const isBlocked = finalCost === null || isExplicitBlocked;
-                  const canAfford = ((user?.credits ?? 0) + (user?.promo_credits ?? 0)) >= (finalCost ?? 0);
-
+                  const canAfford = true;
                                     return (
                     <div 
                       key={track.id}
@@ -481,27 +480,8 @@ export const MusicSearchModal: React.FC = () => {
                             <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">&gt;7 Dk</span>
                           ) : (
                             <div className="flex flex-col items-end gap-0.5">
-                              {/* Cost Display */}
-                              <div className="flex items-center gap-1.5">
-                                {isHappyHourActive && baseCost !== finalCost && (
-                                  <span className="text-[10px] text-gray-500 font-bold line-through">
-                                    {baseCost}
-                                  </span>
-                                )}
-                                <span className={`text-xs font-black drop-shadow-md ${canAfford ? 'text-[#D4AF37]' : 'text-red-400'}`}>
-                                  {finalCost} <span className="text-[9px] opacity-80 uppercase tracking-wider">Kredi</span>
-                                </span>
-                              </div>
                               
-                              {/* Happy hour discount badge if applicable */}
-                              {isHappyHourActive && baseCost !== finalCost && (
-                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded shadow-sm">
-                                  %{hhDiscount} HH İndirimi
-                                </span>
-                              )}
-                              
-                              {/* Duration display instead of separate text */}
-                              {!isHappyHourActive && durMs > 0 && (
+                              {durMs > 0 && (
                                 <span className="text-[9px] font-semibold text-gray-500 tracking-wider">
                                   {formatDuration(durMs)}
                                 </span>
@@ -552,13 +532,7 @@ export const MusicSearchModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
-                    <span className="text-[10px] line-through opacity-50 mr-1 text-white block">{selectedBaseCost} Kredi</span>
-                  )}
-                  <span className="text-sm font-black text-[#D4AF37] block drop-shadow-md">{selectedFinalCost} Kredi</span>
-                  <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-wider">Bakiye: {user ? user.credits + (user.promo_credits || 0) : 0}</span>
-                </div>
+
               </div>
             )}
 
@@ -576,11 +550,7 @@ export const MusicSearchModal: React.FC = () => {
                 <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <span>Seçili Şarkıyı İste (</span>
-                  {isHappyHourActive && selectedBaseCost !== selectedFinalCost && (
-                    <span className="line-through opacity-50">{selectedBaseCost}</span>
-                  )}
-                  <span className={isHappyHourActive && selectedBaseCost !== selectedFinalCost ? "text-stone-800 font-extrabold" : "font-extrabold"}>{selectedFinalCost ?? 10} 🪙)</span>
+                  <span>Seçili Şarkıyı İste</span>
                 </div>
               )}
             </button>
