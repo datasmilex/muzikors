@@ -118,7 +118,7 @@ export const InfoModals: React.FC = () => {
                 </p>
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent my-4" />
                 <p className="leading-relaxed font-medium">
-                  Masadaki QR kodu tarayarak mekana bağlanın, favori Spotify şarkılarınızı arayın, kredilerinizle sıraya ekleyin ve mekanın atmosferine yön verin!
+                  Masadaki QR kodu tarayarak mekana bağlanın, favori Spotify şarkılarınızı arayın, tamamen ücretsiz olarak sıraya ekleyin ve mekanın atmosferine yön verin!
                 </p>
               </div>
             )}
