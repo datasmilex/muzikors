@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, X, Users, Store, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
+import { PremiumBadge } from './PremiumBadge';
 
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
@@ -191,7 +192,7 @@ export const LeaderboardModal: React.FC = () => {
                           <p className={`font-black truncate flex items-center gap-1.5 ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
                             {maskName(user.name)}
                             {isUserVip && (
-                              <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase tracking-wider shadow-[0_0_5px_rgba(251,191,36,0.5)]">VIP</span>
+                              <PremiumBadge className="w-3.5 h-3.5" />
                             )}
                           </p>
                           
@@ -259,6 +260,45 @@ export const LeaderboardModal: React.FC = () => {
                 <div className="text-center text-zinc-500 mt-10 font-medium">Henüz kayıt bulunamadı.</div>
               )
             )}
+
+            {/* Rewards Section */}
+            <div className="mt-8 mb-4 p-5 rounded-3xl bg-gradient-to-br from-[#241911] to-[#1C130D] border border-[#D4AF37]/30 shadow-[0_10px_30px_rgba(212,175,55,0.05)] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
+              <div className="flex items-center gap-2 mb-3 relative z-10">
+                <Trophy className="w-5 h-5 text-[#D4AF37]" />
+                <h3 className="font-black text-amber-100 tracking-tight text-lg drop-shadow-sm">Ayın Ödülleri</h3>
+              </div>
+              
+              <div className="space-y-3 relative z-10">
+                {activeTab === 'users' ? (
+                  <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
+                    <div className="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black shrink-0">1-3</div>
+                    <div>
+                      <p className="text-sm font-bold text-white mb-0.5">1 Aylık Ücretsiz Premium</p>
+                      <p className="text-xs text-amber-200/60 leading-snug">Liderlik tablosunda ilk 3'e giren kullanıcılara 1 aylık Muzikors Premium hediye!</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
+                      <div className="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.5)]">1</div>
+                      <div>
+                        <p className="text-sm font-bold text-white mb-0.5">Premium Plaket + Sponsorluk</p>
+                        <p className="text-xs text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi ve özel sosyal medya sponsorluğu.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
+                      <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center font-black text-slate-800 shrink-0">2-3</div>
+                      <div>
+                        <p className="text-sm font-bold text-white mb-0.5">Premium Plaket</p>
+                        <p className="text-xs text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi.</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
           </div>
         </motion.div>
       </div>

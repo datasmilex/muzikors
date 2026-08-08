@@ -7,9 +7,31 @@ import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, nowPlaying, voteTrack, openProfile, user } = useApp();
+  const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast } = useApp();
   const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
+  const [vetoingTrackId, setVetoingTrackId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleVeto = async (track: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (vetoingTrackId) return;
+    
+    // Check local limits immediately for UX, actual check in RPC
+    if (!user?.isPremium) {
+      showToast('Sadece Premium üyeler şarkı silebilir.');
+      return;
+    }
+    
+    if (track.requestedByUserId === user.id) {
+      showToast('Kendi şarkınızı silemezsiniz.');
+      return;
+    }
+
+    const isAnonymous = window.confirm('Şarkıyı silerken isminizi gizlemek ister misiniz? (Anonim Veto)');
+    setVetoingTrackId(track.id);
+    await vetoTrack(track.id, isAnonymous);
+    setVetoingTrackId(null);
+  };
 
   const handleVoteTrack = (trackId: string) => {
     if (votingCooldowns[trackId]) return;
@@ -126,12 +148,19 @@ export const UpNextQueueSection: React.FC = () => {
                         </p>
                       </div>
                     </div>
+                    </div>
                     {isFirst && (
                       <div className="flex items-center gap-1 text-[10px] text-amber-200/50 pr-2">
                         Tümünü Gör <ListMusic className="w-3 h-3" />
                       </div>
                     )}
                   </div>
+                  {/* Minified view message badge */}
+                  {track.message && (
+                    <div className="absolute -bottom-1 -right-1 bg-amber-600 text-black text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                      Mesajlı
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -229,27 +258,61 @@ export const UpNextQueueSection: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 pl-2 border-l border-[#D4AF37]/20 shrink-0 ml-1">
-                        <div className="text-center min-w-[32px]">
-                          <span className="block text-sm font-black text-[#D4AF37] drop-shadow-md">
-                            {track.votes}
-                          </span>
-                          <span className="text-[8px] text-amber-200/50 font-bold uppercase tracking-widest">
-                            Oy
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleVoteTrack(track.id)}
-                          disabled={votingCooldowns[track.id]}
-                          className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-300 group ${
-                            votingCooldowns[track.id] 
-                              ? 'bg-black/50 border-gray-600 text-gray-500 cursor-not-allowed'
-                              : 'bg-[#D4AF37]/10 active:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] active:scale-90'
-                          }`}
-                        >
-                          <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-active:-translate-y-0.5 fill-[#D4AF37]/30'}`} />
-                        </button>
+                        
+                        {/* Veto Button for Premium Users */}
+                        {user?.isPremium && track.requestedByUserId !== user.id && (
+                          <button
+                            onClick={(e) => handleVeto(track, e)}
+                            disabled={vetoingTrackId === track.id}
+                            title="Şarkıyı Sıradan Sil (Veto)"
+                            className={`p-2 rounded-xl flex items-center justify-center transition-all ${
+                              vetoingTrackId === track.id ? 'opacity-50' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 active:scale-90 border border-red-500/20'
+                            }`}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {track.isBoosted ? (
+                          <div className="text-center min-w-[32px] px-2 py-1 rounded-lg bg-gradient-to-br from-[#D4AF37] to-amber-500 shadow-md">
+                            <span className="block text-xs font-black text-black">VIP</span>
+                            <span className="text-[7px] text-black/80 font-bold uppercase tracking-widest leading-none">Boost</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-center min-w-[32px]">
+                              <span className="block text-sm font-black text-[#D4AF37] drop-shadow-md">
+                                {track.votes > 900000 ? 0 : track.votes}
+                              </span>
+                              <span className="text-[8px] text-amber-200/50 font-bold uppercase tracking-widest">
+                                Oy
+                              </span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleVoteTrack(track.id); }}
+                              disabled={votingCooldowns[track.id]}
+                              className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-300 group ${
+                                votingCooldowns[track.id] 
+                                  ? 'bg-black/50 border-gray-600 text-gray-500 cursor-not-allowed'
+                                  : 'bg-[#D4AF37]/10 active:bg-[#D4AF37]/20 border-[#D4AF37]/30 text-[#D4AF37] active:scale-90'
+                              }`}
+                            >
+                              <ThumbsUp className={`w-4 h-4 transition-transform ${votingCooldowns[track.id] ? 'fill-transparent' : 'group-active:-translate-y-0.5 fill-[#D4AF37]/30'}`} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
+                    
+                    {/* Track Message */}
+                    {track.message && (
+                      <div className="mt-2 w-full p-2.5 rounded-xl bg-amber-900/20 border border-amber-500/20 flex flex-col justify-center shadow-inner">
+                        <p className="text-xs text-amber-100/90 italic line-clamp-2">
+                          "{track.message}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
                   );
                 })}
               </div>

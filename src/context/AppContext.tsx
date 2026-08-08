@@ -38,7 +38,8 @@ interface AppContextType {
   logout: () => Promise<void>;
   handleIyzicoPayment: (packageId: string) => void;
   iyzicoHtml: string | null;
-  requestTrack: (track: Track, isAnonymous?: boolean) => Promise<boolean>;
+  requestTrack: (track: Track, isAnonymous?: boolean, isBoosted?: boolean, message?: string) => Promise<boolean>;
+  vetoTrack: (trackId: string, isAnonymous?: boolean) => Promise<boolean>;
   voteTrack: (trackId: string) => void;
   bindVenueById: (kafeId: string) => void;
   deleteAccount: () => void;
@@ -85,6 +86,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const userIdRef = useRef<string | null>(null);
+  const venueChannelRef = useRef<any>(null);
 
   // Derived venue state
   const isVenueBound = activeVenue !== null;
@@ -378,14 +380,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         url.includes('lh5.google') ||
         url.includes('lh6.google');
 
-      // Fetch existing profile — ONLY use DB avatar if it is a custom (non-Google) one
       let customAvatarUrl: string = '';
       let dbUsername: string | null = null;
       let dbLastUsernameUpdate: string | null = null;
+      let dbProfile: any = {};
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update')
+          .select('avatar_url, username, last_username_update, is_premium, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -394,6 +396,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           customAvatarUrl = raw && !isGooglePhoto(raw) ? raw : '';
           dbUsername = existingProfile.username || null;
           dbLastUsernameUpdate = existingProfile.last_username_update || null;
+          dbProfile = existingProfile;
         }
       }
 
@@ -433,6 +436,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: emailStr,
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
         last_username_update: dbLastUsernameUpdate || prev?.last_username_update,
+        isPremium: dbProfile.is_premium || false,
+        daily_songs_count: dbProfile.daily_songs_count || 0,
+        daily_votes_count: dbProfile.daily_votes_count || 0,
+        daily_boosts_count: dbProfile.daily_boosts_count || 0,
+        daily_vetoes_count: dbProfile.daily_vetoes_count || 0,
+        last_reset_date: dbProfile.last_reset_date || null,
         loginMethod: 'google',
       }));
     };
@@ -472,6 +481,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
                 is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
                 beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
+                isPremium: row?.is_premium ?? prev.isPremium,
+                daily_songs_count: typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count,
+                daily_votes_count: typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count,
+                daily_boosts_count: typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count,
+                daily_vetoes_count: typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count,
+                last_reset_date: row?.last_reset_date ?? prev.last_reset_date,
               }
             : null
         );
@@ -584,6 +599,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             requestedAt: 'Sirada',
             startedAt: r.started_at,
             isPlaying: r.status === 'playing',
+            isBoosted: r.is_boosted || false,
+            message: r.message || undefined
           };
         };
 
@@ -666,6 +683,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setLivePlaybackState(payload);
         }
       })
+      .on('broadcast', { event: 'veto_event' }, ({ payload }) => {
+        if (payload && user && payload.targetUserId === user.id) {
+          showToast(`Şarkınız (${payload.songName}) ${payload.deleterName} tarafından sıradan çıkarıldı. Şarkı hakkınız iade edildi.`);
+        }
+      })
       .on(
         'postgres_changes',
         {
@@ -685,6 +707,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.warn(`[Realtime] Connection issue: ${status}. Fallback interval will keep syncing.`);
         }
       });
+      
+    venueChannelRef.current = venueChannel;
 
     const fallbackInterval = setInterval(() => {
       fetchQueue();
@@ -829,7 +853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [showToast]);
 
   // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
-  const requestTrack = useCallback(async (track: Track, isAnonymous?: boolean): Promise<boolean> => {
+  const requestTrack = useCallback(async (track: Track, isAnonymous?: boolean, isBoosted?: boolean, message?: string): Promise<boolean> => {
     // Venue guard
     if (!activeVenue) {
       showToast('Şarkı istemek için önce bir QR kod okutun!');
@@ -968,12 +992,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           p_spotify_uri: targetSpotifyUri,
           p_duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
           p_requested_by_name: requestedByName,
-          p_is_anonymous: isAnonymous || false
+          p_is_anonymous: isAnonymous || false,
+          p_is_boosted: isBoosted || false,
+          p_message: message || null
         });
 
         if (rpcErr) {
           console.error('[requestTrack RPC Error]', rpcErr.message);
-          showToast(rpcErr.message || 'Şarkı eklenemedi.');
+          
+          // Limit notification logic
+          if (rpcErr.message.includes('limitinize ulaştınız')) {
+            showToast(rpcErr.message);
+          } else {
+            showToast(rpcErr.message || 'Şarkı eklenemedi.');
+          }
           return false;
         }
       }
@@ -999,6 +1031,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
     showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
   }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase]);
+
+  // ── VETO TRACK ────────────────────────────────────────────────────────
+  const vetoTrack = useCallback(async (trackId: string, isAnonymous?: boolean): Promise<boolean> => {
+    if (!user?.isPremium) {
+      showToast('Sadece Premium üyeler şarkı silebilir.');
+      return false;
+    }
+    try {
+      if (supabase) {
+        const { data, error: rpcErr } = await supabase.rpc('veto_track', {
+          p_queue_id: trackId,
+          p_is_anonymous: isAnonymous || false
+        });
+
+        if (rpcErr) {
+          showToast(rpcErr.message || 'Şarkı silinemedi.');
+          return false;
+        }
+
+        const dataPayload = data as any;
+        
+        // Broadcast veto event to target user
+        if (venueChannelRef.current && dataPayload && dataPayload.owner_id) {
+          venueChannelRef.current.send({
+            type: 'broadcast',
+            event: 'veto_event',
+            payload: {
+              targetUserId: dataPayload.owner_id,
+              songName: dataPayload.song_name,
+              deleterName: dataPayload.deleter_name,
+            }
+          });
+        }
+
+        showToast('Şarkı başarıyla sıradan silindi.');
+        // Remove locally immediately for better UX
+        setQueue(prev => prev.filter(q => q.id !== trackId));
+        return true;
+      }
+    } catch (err: any) {
+      showToast('Bir hata oluştu.');
+    }
+    return false;
+  }, [supabase, user, showToast]);
 
   const voteTrack = useCallback(async (trackId: string) => {
     if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
@@ -1089,7 +1165,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
-      handleIyzicoPayment, iyzicoHtml, requestTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+      handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway
     }}>
       {children}

@@ -6,6 +6,7 @@ import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Pl
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
+import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration } from '../utils/formatters';
 
 export const MusicSearchModal: React.FC = () => {
@@ -30,6 +31,9 @@ export const MusicSearchModal: React.FC = () => {
 
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isBoosted, setIsBoosted] = useState(false);
+  const [message, setMessage] = useState('');
+  const [estimatedWaitMs, setEstimatedWaitMs] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -125,19 +129,44 @@ export const MusicSearchModal: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handleConfirmRequest = (trackToRequest?: Track) => {
+  const handleConfirmRequest = async (trackToRequest?: Track) => {
     const target = trackToRequest || selectedTrack;
     if (target) {
       setConfirmingTrack(target);
       setIsAnonymous(false);
+      setIsBoosted(false);
+      setMessage('');
+      
+      // Calculate estimated wait time
+      if (activeVenue) {
+        try {
+          const { data, error } = await supabase
+            .from('queue')
+            .select('duration_ms')
+            .eq('venue_id', activeVenue.id)
+            .in('status', ['pending', 'queued', 'playing']);
+            
+          if (!error && data) {
+            const totalMs = data.reduce((acc, curr) => acc + (curr.duration_ms || 210000), 0);
+            setEstimatedWaitMs(totalMs);
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
     }
   };
 
   const handleFinalRequest = async () => {
     if (confirmingTrack && !submittingTrackId) {
+      if (message.trim().length > 0 && containsProfanity(message)) {
+        showToast('Lütfen küfür veya argo içeren kelimeler kullanmayın.');
+        return;
+      }
+      const finalMessage = message.trim().length > 0 ? maskProfanity(message) : undefined;
       setSubmittingTrackId(confirmingTrack.id);
       try {
-        const success = await requestTrack(confirmingTrack, isAnonymous);
+        const success = await requestTrack(confirmingTrack, isAnonymous, isBoosted, finalMessage);
         if (success) {
           setConfirmingTrack(null);
           closeModal();
@@ -235,6 +264,61 @@ export const MusicSearchModal: React.FC = () => {
                     <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
+
+                {/* Priority / Boost Toggle (VIP Feature) */}
+                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
+                      {!user?.isPremium && (
+                        <span className="text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">
+                      {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın en başına geçer)` : 'Sadece Premium üyeler için'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (!user?.isPremium) {
+                        showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
+                        return;
+                      }
+                      if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
+                        showToast('Günlük üste taşıma limitinize ulaştınız.');
+                        return;
+                      }
+                      setIsBoosted(!isBoosted);
+                    }}
+                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${
+                      !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-gray-800 opacity-50 cursor-not-allowed' :
+                      isBoosted ? 'bg-[#D4AF37]' : 'bg-gray-600'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* Message Input */}
+                <div className="bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner space-y-2">
+                  <p className="text-sm font-bold text-white tracking-wide">Not Ekle <span className="text-xs font-normal text-zinc-500">(İsteğe bağlı)</span></p>
+                  <input 
+                    type="text" 
+                    placeholder="Örn: Ayşe'nin doğum günü için..." 
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    maxLength={60}
+                    className="w-full bg-[#120C08] border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-zinc-600 focus:border-[#D4AF37]/50 focus:outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Estimated Time */}
+                {estimatedWaitMs > 0 && (
+                  <div className="flex items-center gap-2 justify-center text-xs text-zinc-400 mt-2">
+                    <Clock className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Sıranın tahmini bekleme süresi: <strong className="text-white">{Math.round(estimatedWaitMs / 60000)} dakika</strong></span>
+                  </div>
+                )}
 
                 {/* Consent Text */}
                 <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">

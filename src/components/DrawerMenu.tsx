@@ -16,7 +16,8 @@ import {
   Sparkles,
   Music,
   LogIn,
-  PlaySquare
+  PlaySquare,
+  Crown
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
@@ -46,8 +47,9 @@ export const DrawerMenu: React.FC = () => {
   const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
   const showRewardDot = !!user && !hasClaimedToday;
 
-  const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
+  const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean; isPremiumBtn?: boolean }[] = [
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
+    { label: 'Muzikors Premium', icon: <Crown className="w-5 h-5 text-[#D4AF37]" />, modal: 'premium', isPremiumBtn: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
     { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
   ];
@@ -179,10 +181,14 @@ export const DrawerMenu: React.FC = () => {
                       openModal(item.modal);
                     }
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-[#1A1A1A] border border-transparent active:border-[#D4AF37]/20 text-gray-300 font-bold text-sm transition-all group relative active:scale-[0.98]"
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-[#1A1A1A] border border-transparent active:border-[#D4AF37]/20 font-bold text-sm transition-all group relative active:scale-[0.98] ${
+                    item.isPremiumBtn 
+                      ? 'bg-gradient-to-r from-yellow-500/10 via-[#D4AF37]/20 to-amber-600/10 text-[#D4AF37] border-[#D4AF37]/30 shadow-inner' 
+                      : 'text-gray-300'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-active:border-[#D4AF37]/50 group-active:bg-[#D4AF37]/5 transition-colors relative shadow-inner">
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className={`w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-active:border-[#D4AF37]/50 group-active:bg-[#D4AF37]/5 transition-colors relative shadow-inner ${item.isPremiumBtn ? 'border-[#D4AF37]/50' : ''}`}>
                       {item.icon}
                       {item.showBadge && (
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#120C08] shadow-sm animate-pulse" />
@@ -190,7 +196,7 @@ export const DrawerMenu: React.FC = () => {
                     </div>
                     <span className="group-active:text-white transition-colors tracking-wide">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-600 group-active:text-[#D4AF37] group-active:translate-x-1 transition-all" />
+                  <ChevronRight className={`w-5 h-5 transition-all ${item.isPremiumBtn ? 'text-[#D4AF37]' : 'text-gray-600 group-active:text-[#D4AF37]'} group-active:translate-x-1`} />
                 </button>
               ))}
 

@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { PremiumBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
 import { AchievementsModal } from './AchievementsModal';
 import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed } from '../data/achievements';
@@ -538,7 +539,7 @@ export const ProfileView: React.FC = () => {
                             {currentProfile?.name || currentProfile?.full_name || 'Misafir Kullanıcı'}
                           </h2>
                           {(currentProfile?.is_premium || currentProfile?.isPremium) && (
-                            <ShieldCheck className="w-4 h-4 text-amber-400 drop-shadow-md" />
+                            <PremiumBadge className="w-4 h-4 ml-1" />
                           )}
                           {(currentProfile?.is_beta_tester || currentProfile?.isBetaTester) && (
                             <CheckCircle className="w-4 h-4 text-purple-400 drop-shadow-md" />

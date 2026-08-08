@@ -20,6 +20,8 @@ export interface Track {
   explicit?: boolean;
   is_explicit?: boolean;
   genres?: string[];
+  isBoosted?: boolean;
+  message?: string;
 }
 
 export interface Venue {
@@ -83,6 +85,11 @@ export interface UserProfile {
   pinned_achievements?: string[];
   is_beta_tester?: boolean;
   beta_tester_reward_claimed?: boolean;
+  daily_songs_count?: number;
+  daily_votes_count?: number;
+  daily_boosts_count?: number;
+  daily_vetoes_count?: number;
+  last_reset_date?: string;
 }
 
 
@@ -102,6 +109,7 @@ export type ModalType =
   | 'campaigns'
   | 'terms'
   | 'daily_reward'
+  | 'premium'
   | 'globalFeed'
   | 'venue_info'
   | 'leaderboard';

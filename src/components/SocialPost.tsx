@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { PremiumBadge } from './PremiumBadge';
 import { containsProfanity } from '../utils/profanity';
 
 interface SocialPostProps {
@@ -182,7 +183,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
               <span className="text-sm font-bold text-white group-hover:text-amber-100 transition-colors">
                 {post.user_full_name || 'Bilinmeyen Kullanıcı'}
               </span>
-              {post.user_is_premium && <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />}
+              {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-1" />}
               {post.user_is_beta_tester && <CheckCircle className="w-3.5 h-3.5 text-purple-400" />}
             </div>
             <div className="flex items-center gap-2">
@@ -261,7 +262,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                     <div className="flex items-center justify-between mb-0.5">
                       <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
                         <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-100">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
-                        {comment.profiles?.is_premium && <ShieldCheck className="w-3 h-3 text-amber-400" />}
+                        {comment.profiles?.is_premium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
                       </div>
                       {(user?.id === comment.user_id || user?.id === post.user_id) && (
                         <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 transition-colors p-1">
