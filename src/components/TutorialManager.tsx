@@ -7,25 +7,25 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 
 export const TutorialManager: React.FC = () => {
-  const { user, openModal, showToast, isVenueBound, hasEnteredGateway } = useApp();
+  const { user, openModal, showToast, isVenueBound, hasEnteredGateway, activeModal } = useApp();
   const driverRef = useRef<any>(null);
   const isRunning = useRef(false);
 
   useEffect(() => {
-    // Only run if the user has bound to a venue AND has entered the gateway
-    if (!isVenueBound || !hasEnteredGateway) return;
+    // Only run if the user has bound to a venue, entered gateway, AND no modal is open
+    if (!isVenueBound || !hasEnteredGateway || activeModal !== 'none') return;
 
     // Only run once per session/device if not completed
     const hasCompleted = localStorage.getItem('muzikors_tutorial_completed');
     if (hasCompleted || isRunning.current) return;
 
-    // Small delay to ensure DOM is ready
+    // Small delay to ensure DOM is ready and main screen is fully visible
     const timer = setTimeout(() => {
       startTutorial();
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [user, isVenueBound, hasEnteredGateway]);
+  }, [user, isVenueBound, hasEnteredGateway, activeModal]);
 
   const startTutorial = () => {
     if (isRunning.current) return;
@@ -34,6 +34,7 @@ export const TutorialManager: React.FC = () => {
     const driverObj = driver({
       showProgress: true,
       allowClose: true,
+      animate: true,
       doneBtnText: 'Bitir',
       nextBtnText: 'İleri',
       prevBtnText: 'Geri',
@@ -58,31 +59,10 @@ export const TutorialManager: React.FC = () => {
         {
           element: '#tour-wallet-button',
           popover: {
-            title: 'Cüzdan & Krediler 💳',
-            description: '<div class="space-y-3"><p>Buradan mevcut kredilerini görebilir ve dilediğin şarkıyı açabilirsin!</p><p>Hemen başlaman için sana <b>Ücretsiz 10 Kredi</b> hediye ediyoruz!</p><button id="btn-claim-tutorial" class="w-full py-2 mt-2 bg-[#D4AF37] text-black font-black rounded-xl active:scale-95 transition-transform">🎁 10 Kredi Hediyeni Al!</button></div>',
+            title: 'Kullanım Hakları 🎵',
+            description: '<div class="space-y-3"><p>Muzikors tamamen ücretsizdir!</p><p>Buradan kalan günlük şarkı açma, beğenme ve diğer etkileşim haklarını anlık olarak takip edebilirsin.</p><p class="text-[10px] text-amber-200/50">Hakların her gece 00:00\'da sıfırlanır.</p></div>',
             side: 'left',
-            align: 'start',
-            onPopoverRender: (popover) => {
-              const btn = popover.wrapper.querySelector('#btn-claim-tutorial');
-              if (btn) {
-                btn.addEventListener('click', async () => {
-                  if (!user) {
-                    driverObj.destroy();
-                    openModal('login');
-                    showToast('Hediyeni almak için giriş yapmalısın!');
-                    isRunning.current = false;
-                    return;
-                  }
-
-                  // Simulate loading state
-                  btn.innerHTML = 'Yükleniyor...';
-                  btn.setAttribute('disabled', 'true');
-
-                  showToast('Tebrikler, rehberi tamamladınız! 🎉');
-                  driverObj.moveNext();
-                });
-              }
-            }
+            align: 'start'
           }
         },
         {
@@ -119,6 +99,10 @@ export const TutorialManager: React.FC = () => {
 
   return (
     <style dangerouslySetInnerHTML={{ __html: `
+      @keyframes slideFadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
       .driver-popover {
         background-color: #120C08 !important;
         color: #FCEFD5 !important;
@@ -126,6 +110,7 @@ export const TutorialManager: React.FC = () => {
         border-radius: 1.5rem !important;
         box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15) !important;
         padding: 1.5rem !important;
+        animation: slideFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
       }
       .driver-popover-title {
         color: #D4AF37 !important;
