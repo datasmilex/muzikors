@@ -148,7 +148,6 @@ export const UpNextQueueSection: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    </div>
                     {isFirst && (
                       <div className="flex items-center gap-1 text-[10px] text-amber-200/50 pr-2">
                         Tümünü Gör <ListMusic className="w-3 h-3" />
@@ -207,14 +206,14 @@ export const UpNextQueueSection: React.FC = () => {
                 {filteredQueue.map((track, index) => {
                   const isFirst = index === 0;
                   return (
-                    <div
-                      key={track.id}
-                      className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-md transition-all ${
-                        isFirst
-                          ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_8px_20px_rgba(212,175,55,0.15)]'
-                          : 'border-white/5 bg-[#1A1A1A]/60'
-                      }`}
-                    >
+                    <div key={track.id} className="flex flex-col">
+                      <div
+                        className={`rounded-2xl p-3 flex items-center justify-between border backdrop-blur-md transition-all ${
+                          isFirst
+                            ? 'border-[#D4AF37]/50 bg-gradient-to-r from-[#241911] to-[#1C130D] shadow-[0_8px_20px_rgba(212,175,55,0.15)]'
+                            : 'border-white/5 bg-[#1A1A1A]/60'
+                        }`}
+                      >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-[11px] shrink-0 shadow-lg ${
                           isFirst ? 'gold-gradient-bg text-stone-950 scale-110' : 'bg-black/50 text-amber-200 border border-[#D4AF37]/30'
