@@ -78,12 +78,9 @@ export const LoginModal: React.FC = () => {
               Geceye Sen Yön Ver, İstediğin Şarkı Çalsın!
             </p>
 
-            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37]/10 to-transparent border border-[#D4AF37]/20">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="text-[10px] font-bold text-amber-200 uppercase tracking-wide">
-                Giriş Yapanlara +10 Hoş Geldin Kredisi!
-              </span>
-            </div>
+            <p className="text-zinc-400 text-sm mt-3 leading-relaxed">
+              Sevdiğin müzikleri çalmak için giriş yap.
+            </p>
           </div>
 
           {/* Action Area */}
