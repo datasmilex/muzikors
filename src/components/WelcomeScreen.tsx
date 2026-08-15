@@ -66,7 +66,7 @@ export const WelcomeScreen: React.FC = () => {
             </span>
           </h1>
           <p className="text-sm font-medium text-amber-200/50 mt-4 max-w-[260px] mx-auto leading-relaxed">
-            Müzikors'a bağlanan masanla şarkı isteklerini gönder, anın tadını çıkar.
+            Müzikors&apos;a bağlanan masanla şarkı isteklerini gönder, anın tadını çıkar.
           </p>
         </motion.div>
 

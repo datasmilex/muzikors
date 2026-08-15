@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useApp } from '../context/AppContext';
@@ -11,23 +11,7 @@ export const TutorialManager: React.FC = () => {
   const driverRef = useRef<any>(null);
   const isRunning = useRef(false);
 
-  useEffect(() => {
-    // Only run if the user has bound to a venue, entered gateway, AND no modal is open
-    if (!isVenueBound || !hasEnteredGateway || activeModal !== 'none') return;
-
-    // Only run once per session/device if not completed
-    const hasCompleted = localStorage.getItem('muzikors_tutorial_completed');
-    if (hasCompleted || isRunning.current) return;
-
-    // Small delay to ensure DOM is ready and main screen is fully visible
-    const timer = setTimeout(() => {
-      startTutorial();
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [user, isVenueBound, hasEnteredGateway, activeModal]);
-
-  const startTutorial = () => {
+  const startTutorial = useCallback(() => {
     if (isRunning.current) return;
     isRunning.current = true;
 
@@ -95,7 +79,23 @@ export const TutorialManager: React.FC = () => {
 
     driverRef.current = driverObj;
     driverObj.drive();
-  };
+  }, [openModal]);
+
+  useEffect(() => {
+    // Only run if the user has bound to a venue, entered gateway, AND no modal is open
+    if (!isVenueBound || !hasEnteredGateway || activeModal !== 'none') return;
+
+    // Only run once per session/device if not completed
+    const hasCompleted = localStorage.getItem('muzikors_tutorial_completed');
+    if (hasCompleted || isRunning.current) return;
+
+    // Small delay to ensure DOM is ready and main screen is fully visible
+    const timer = setTimeout(() => {
+      startTutorial();
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [user, isVenueBound, hasEnteredGateway, activeModal, startTutorial]);
 
   return (
     <style dangerouslySetInnerHTML={{ __html: `

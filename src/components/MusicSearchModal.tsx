@@ -94,7 +94,7 @@ export const MusicSearchModal: React.FC = () => {
           throw new Error(invokeError.message || 'Arama işlemi başarısız');
         }
 
-        let data: any = resData || {};
+        const data: any = resData || {};
 
         if (data.error) {
           throw new Error(data.error);

@@ -307,7 +307,7 @@ export const UpNextQueueSection: React.FC = () => {
                     {track.message && (
                       <div className="mt-2 w-full p-2.5 rounded-xl bg-amber-900/20 border border-amber-500/20 flex flex-col justify-center shadow-inner">
                         <p className="text-xs text-amber-100/90 italic line-clamp-2">
-                          "{track.message}"
+                          &ldquo;{track.message}&rdquo;
                         </p>
                       </div>
                     )}
