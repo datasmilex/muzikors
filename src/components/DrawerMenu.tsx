@@ -17,15 +17,18 @@ import {
   Music,
   LogIn,
   PlaySquare,
-  Crown
+  Crown,
+  Palette,
+  Check
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
+import { THEMES } from '../lib/theme';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, theme, setTheme } = useApp();
 
   const [isDj, setIsDj] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -266,6 +269,51 @@ export const DrawerMenu: React.FC = () => {
                 <div className="text-[9px] font-black bg-gray-800 text-gray-400 px-2.5 py-1 rounded-md shrink-0 uppercase tracking-widest border border-white/5">Pek Yakında</div>
               </button>
             </nav>
+
+            {/* Theme Selector Widget */}
+            <div className="mt-4 p-3 rounded-2xl bg-[#1A1A1A]/80 border border-[#D4AF37]/25 shadow-inner relative overflow-hidden">
+              <div className="flex items-center justify-between mb-2.5 px-0.5">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-[#D4AF37]" />
+                  <span className="text-xs font-black text-white tracking-wide">Tema & Görünüm</span>
+                </div>
+                <span className="text-[10px] font-bold text-amber-200/60 truncate max-w-[90px] text-right">
+                  {THEMES.find((t) => t.id === theme)?.name}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {THEMES.map((t) => {
+                  const isSelected = theme === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setTheme(t.id)}
+                      title={`${t.name} - ${t.subtitle}`}
+                      className={`group relative flex flex-col items-center gap-1 p-1 rounded-xl transition-all duration-200 cursor-pointer ${
+                        isSelected
+                          ? 'bg-white/10 border border-[#D4AF37]/60 shadow-[0_0_10px_rgba(212,175,55,0.25)] scale-105'
+                          : 'hover:bg-white/5 border border-transparent opacity-60 hover:opacity-100 active:scale-95'
+                      }`}
+                    >
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-md relative overflow-hidden transition-transform group-hover:scale-110"
+                        style={{
+                          background: `linear-gradient(135deg, ${t.accentColor} 50%, ${t.bgColor} 50%)`,
+                        }}
+                      >
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] stroke-[3]" />
+                        )}
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-300 truncate w-full text-center leading-none">
+                        {t.name.split(' ')[0]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-[#D4AF37]/20 text-center space-y-3 relative z-10 mt-4">

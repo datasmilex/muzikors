@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { supabase } from '../lib/supabaseClient';
+import { ThemeType, getStoredTheme, applyTheme } from '../lib/theme';
 // Removed formatter imports
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -15,6 +16,8 @@ const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 interface AppContextType {
   user: UserProfile | null;
   activeModal: ModalType;
+  theme: ThemeType;
+  setTheme: (theme: ThemeType) => void;
   activeVenue: Venue | null;
   kafeIdParam: string | null;
   isVenueBound: boolean;
@@ -57,6 +60,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>('none');
+  const [theme, setThemeState] = useState<ThemeType>('velvet');
   const [pendingModal, setPendingModal] = useState<ModalType | null>(null);
   const [loginPromptReason, setLoginPromptReason] = useState<string | null>(null);
   const [activeVenue, setActiveVenue] = useState<Venue | null>(null);
@@ -95,6 +99,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4500);
+  }, []);
+
+  // ── THEME INITIALIZATION & MANAGEMENT ─────────────────────────────────────
+  useEffect(() => {
+    const saved = getStoredTheme();
+    setThemeState(saved);
+    applyTheme(saved);
+  }, []);
+
+  const setTheme = useCallback((newTheme: ThemeType) => {
+    setThemeState(newTheme);
+    applyTheme(newTheme);
   }, []);
 
   // ── PREVENT BODY SCROLL WHEN MODAL IS ACTIVE ──────────────────────────────
@@ -1160,7 +1176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, setUser, activeModal, activeVenue, kafeIdParam,
+      user, setUser, activeModal, theme, setTheme, activeVenue, kafeIdParam,
       isVenueBound, isVenueActive,
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,

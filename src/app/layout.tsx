@@ -30,8 +30,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className="dark h-full bg-[#120C08]">
-      <body className={`${inter.className} min-h-full bg-[#120C08] text-[#FCEFD5] antialiased selection:bg-[#D4AF37] selection:text-black`}>
+    <html lang="tr" className="dark h-full" data-theme="velvet">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('muzikors_theme');
+                  if (saved) {
+                    document.documentElement.dataset.theme = saved;
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} min-h-full antialiased selection:bg-[#D4AF37] selection:text-black`}>
         {children}
       </body>
     </html>
