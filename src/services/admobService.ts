@@ -4,13 +4,16 @@ import type {
   AdMobRewardItem,
 } from '@capacitor-community/admob';
 
-// Google AdMob Rewarded Video Unit IDs
+// Google AdMob Unit IDs
 export const ADMOB_REWARDED_AD_UNIT_ID = 'ca-app-pub-6907017256187136/1915871376';
+export const ADMOB_FEED_AD_UNIT_ID = 'ca-app-pub-6907017256187136/3608277325';
 export const ADMOB_TEST_REWARDED_AD_UNIT_ID = 'ca-app-pub-3940256099942544/5224354917';
+export const ADMOB_TEST_BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111';
 
 class AdMobService {
   private isInitialized = false;
   private isAdPrepared = false;
+  private isBannerShowing = false;
   private adMobPlugin: any = null;
 
   private async getAdMob() {
@@ -41,7 +44,7 @@ class AdMobService {
           initializeForTesting: false,
         });
         this.isInitialized = true;
-        console.log('[AdMob] Initialized successfully');
+        console.log('[AdMob] Initialized successfully with Google Mobile Ads SDK');
         // Preload first rewarded ad
         this.prepareRewardedAd().catch(() => {});
       }
@@ -64,7 +67,7 @@ class AdMobService {
 
       await AdMob.prepareRewardVideoAd(options);
       this.isAdPrepared = true;
-      console.log('[AdMob] Reward video prepared');
+      console.log('[AdMob] Google Reward video prepared');
       return true;
     } catch (error) {
       console.warn('[AdMob] Prepare reward video error (falling back to test unit):', error);
@@ -93,7 +96,6 @@ class AdMobService {
     const isNative = Capacitor.isNativePlatform();
 
     if (!isNative) {
-      // Web fallback handled by custom modal timer
       console.log('[AdMob] Running on web platform fallback');
       return;
     }
@@ -112,13 +114,10 @@ class AdMobService {
         }
       }
 
-      let rewardEarned = false;
-
       const rewardListener = await AdMob.addListener(
         'onRewardedVideoReward',
         (reward: AdMobRewardItem) => {
-          console.log('[AdMob] User earned reward:', reward);
-          rewardEarned = true;
+          console.log('[AdMob] User earned reward from Google ad:', reward);
           onReward();
         }
       );
@@ -126,7 +125,7 @@ class AdMobService {
       const dismissListener = await AdMob.addListener(
         'onRewardedVideoAdDismissed',
         () => {
-          console.log('[AdMob] Reward video dismissed');
+          console.log('[AdMob] Google Reward video dismissed');
           this.isAdPrepared = false;
           rewardListener.remove();
           dismissListener.remove();
@@ -139,7 +138,7 @@ class AdMobService {
       const failedListener = await AdMob.addListener(
         'onRewardedVideoAdFailedToLoad',
         (info: any) => {
-          console.error('[AdMob] Reward video failed:', info);
+          console.error('[AdMob] Google Reward video failed to load:', info);
           this.isAdPrepared = false;
           rewardListener.remove();
           dismissListener.remove();
@@ -152,6 +151,58 @@ class AdMobService {
     } catch (error: any) {
       console.error('[AdMob] Show reward video failed:', error);
       if (onError) onError(error?.message || 'Reklam başlatılamadı.');
+    }
+  }
+
+  public async showFeedBanner(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) return;
+
+    try {
+      const AdMob = await this.getAdMob();
+      if (!AdMob) return;
+
+      const { BannerAdPosition, BannerAdSize } = await import('@capacitor-community/admob');
+      
+      await AdMob.showBanner({
+        adId: ADMOB_FEED_AD_UNIT_ID,
+        adSize: BannerAdSize.ADAPTIVE_BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
+        margin: 0,
+        isTesting: false,
+      });
+      this.isBannerShowing = true;
+      console.log('[AdMob] Live Google Feed Banner displayed');
+    } catch (err) {
+      console.warn('[AdMob] Live feed banner failed (trying fallback):', err);
+      try {
+        const AdMob = await this.getAdMob();
+        if (!AdMob) return;
+        const { BannerAdPosition, BannerAdSize } = await import('@capacitor-community/admob');
+        await AdMob.showBanner({
+          adId: ADMOB_TEST_BANNER_AD_UNIT_ID,
+          adSize: BannerAdSize.ADAPTIVE_BANNER,
+          position: BannerAdPosition.BOTTOM_CENTER,
+          margin: 0,
+          isTesting: true,
+        });
+        this.isBannerShowing = true;
+      } catch (fallbackErr) {
+        console.error('[AdMob] Fallback banner failed:', fallbackErr);
+      }
+    }
+  }
+
+  public async hideFeedBanner(): Promise<void> {
+    if (!Capacitor.isNativePlatform() || !this.isBannerShowing) return;
+
+    try {
+      const AdMob = await this.getAdMob();
+      if (AdMob) {
+        await AdMob.hideBanner();
+        this.isBannerShowing = false;
+      }
+    } catch (err) {
+      console.warn('[AdMob] Hide banner error:', err);
     }
   }
 }

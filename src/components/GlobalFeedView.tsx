@@ -7,6 +7,7 @@ import { SocialPost as SocialPostType } from '../types';
 import { SocialPost } from './SocialPost';
 import { NativeAdCard } from './NativeAdCard';
 import { containsProfanity } from '../utils/profanity';
+import { admobService } from '../services/admobService';
 
 export const GlobalFeedView: React.FC = () => {
   const { activeModal, closeModal, user, showToast, openProtectedModal, openProfile } = useApp();
@@ -62,7 +63,14 @@ export const GlobalFeedView: React.FC = () => {
   useEffect(() => {
     if (activeModal === 'globalFeed') {
       fetchPosts();
+      admobService.showFeedBanner().catch(() => {});
+    } else {
+      admobService.hideFeedBanner().catch(() => {});
     }
+
+    return () => {
+      admobService.hideFeedBanner().catch(() => {});
+    };
   }, [activeModal, fetchPosts]);
 
   const handleCreatePost = async () => {
