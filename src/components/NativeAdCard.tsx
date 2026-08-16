@@ -1,16 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, ExternalLink, Music2, Crown, Compass, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Capacitor } from '@capacitor/core';
 
 export const ADMOB_NATIVE_AD_UNIT_ID = 'ca-app-pub-6907017256187136/3608277325';
+export const ADSENSE_CLIENT_ID = 'ca-pub-6907017256187136';
+export const ADSENSE_SLOT_ID = '3608277325';
 
 interface NativeAdCardProps {
   variantIndex?: number;
 }
 
-const AD_CREATIVES = [
+const BACKUP_CREATIVES = [
   {
     title: 'Muzikors VIP Club & Sınırsız Müzik',
     sponsor: 'Muzikors Official',
@@ -51,8 +54,23 @@ const AD_CREATIVES = [
 
 export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) => {
   const { openModal } = useApp();
-  const creative = AD_CREATIVES[variantIndex % AD_CREATIVES.length];
+  const adRef = useRef<HTMLDivElement>(null);
+  const [adLoaded, setAdLoaded] = useState(false);
+  const creative = BACKUP_CREATIVES[variantIndex % BACKUP_CREATIVES.length];
   const IconComponent = creative.icon;
+
+  useEffect(() => {
+    // Only attempt on client-side
+    if (typeof window !== 'undefined') {
+      try {
+        const adsbygoogle = (window as any).adsbygoogle || [];
+        adsbygoogle.push({});
+        setAdLoaded(true);
+      } catch (e) {
+        console.warn('[AdSense/AdMob Native Slot push error]', e);
+      }
+    }
+  }, []);
 
   const handleAction = () => {
     if (creative.actionType === 'premium') {
@@ -67,22 +85,34 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
   };
 
   return (
-    <div className="bg-[#1C130D]/80 border border-[#D4AF37]/25 p-4 mb-4 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.3)] relative overflow-hidden group hover:border-[#D4AF37]/45 transition-all">
+    <div className="bg-[#1C130D]/80 border border-[#D4AF37]/25 p-3.5 mb-4 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.3)] relative overflow-hidden group hover:border-[#D4AF37]/45 transition-all">
       {/* Subtle Glow Background */}
       <div className="absolute top-0 right-0 w-36 h-36 bg-[#D4AF37]/5 rounded-full blur-2xl pointer-events-none" />
 
+      {/* Live Google Ad Unit (Real Ads that generate revenue) */}
+      <div ref={adRef} className="w-full overflow-hidden my-1 flex justify-center text-center">
+        <ins
+          className="adsbygoogle"
+          style={{ display: 'block', minHeight: '60px', width: '100%' }}
+          data-ad-client={ADSENSE_CLIENT_ID}
+          data-ad-slot={ADSENSE_SLOT_ID}
+          data-ad-format="fluid"
+          data-ad-layout-key="-fb+5w+4e-db+86"
+        />
+      </div>
+
       {/* Header with Sponsor badge */}
-      <div className="flex items-center justify-between mb-3 relative z-10">
+      <div className="flex items-center justify-between mb-2 relative z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/35 flex items-center justify-center text-[#D4AF37] shadow-inner shrink-0">
-            <IconComponent className="w-5 h-5 stroke-[2.2]" />
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent border border-[#D4AF37]/35 flex items-center justify-center text-[#D4AF37] shadow-inner shrink-0">
+            <IconComponent className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-black text-white">{creative.sponsor}</span>
               <Sparkles className="w-3 h-3 text-[#D4AF37]" />
             </div>
-            <span className="text-[10px] font-medium text-amber-200/50">Yerel Gelişmiş Tanıtım</span>
+            <span className="text-[10px] font-medium text-amber-200/50">Google Sponsorlu Reklam</span>
           </div>
         </div>
 
@@ -92,7 +122,7 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
       </div>
 
       {/* Body Content */}
-      <div className="mb-3.5 relative z-10">
+      <div className="mb-3 relative z-10">
         <h4 className="text-sm font-black text-white group-hover:text-amber-200 transition-colors">
           {creative.title}
         </h4>
@@ -104,7 +134,7 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
       {/* Action Button */}
       <div className="pt-2 border-t border-white/5 flex items-center justify-between relative z-10">
         <span className="text-[10px] font-bold text-amber-200/40 uppercase tracking-wider">
-          Muzikors Ads
+          AdMob • AdSense
         </span>
         <button
           onClick={handleAction}
