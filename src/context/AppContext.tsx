@@ -49,6 +49,9 @@ interface AppContextType {
   showToast: (msg: string) => void;
   toggleAudioPlay: () => void;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  pendingRewardTrack: Track | null;
+  openRewardedAdModal: (track?: Track | null, options?: { isAnonymous?: boolean; isBoosted?: boolean; message?: string }) => void;
+  claimRewardAndQueueTrack: () => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -70,6 +73,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [queue, setQueue] = useState<Track[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [viewingProfileId, setViewingProfileId] = useState<string | null>(null);
+  const [pendingRewardTrack, setPendingRewardTrack] = useState<Track | null>(null);
+  const [pendingRewardOptions, setPendingRewardOptions] = useState<{ isAnonymous?: boolean; isBoosted?: boolean; message?: string } | null>(null);
+
+  const openRewardedAdModal = useCallback((track?: Track | null, options?: { isAnonymous?: boolean; isBoosted?: boolean; message?: string }) => {
+    setPendingRewardTrack(track || null);
+    setPendingRewardOptions(options || null);
+    setActiveModal('rewarded_ad');
+  }, []);
 
   const [hasEnteredGateway, setHasEnteredGateway] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
@@ -1016,9 +1027,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rpcErr) {
           console.error('[requestTrack RPC Error]', rpcErr.message);
           
-          // Limit notification logic
-          if (rpcErr.message.includes('limitinize ulaştınız')) {
-            showToast(rpcErr.message);
+          // Limit notification / Rewarded Ad trigger logic
+          if (rpcErr.message.toLowerCase().includes('limit')) {
+            setPendingRewardTrack(track);
+            setPendingRewardOptions({ isAnonymous, isBoosted, message });
+            setActiveModal('rewarded_ad');
+            return false;
           } else {
             showToast(rpcErr.message || 'Şarkı eklenemedi.');
           }
@@ -1047,6 +1061,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
     showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
   }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase]);
+
+  // ── CLAIM REWARD & QUEUE TRACK (AdMob Callback) ─────────────────────────
+  const claimRewardAndQueueTrack = useCallback(async (): Promise<boolean> => {
+    if (!activeVenue) {
+      showToast('Bir mekana bağlı değilsiniz.');
+      closeModal();
+      return false;
+    }
+
+    const trackToQueue = pendingRewardTrack;
+    const options = pendingRewardOptions;
+
+    // If there is a pending track from limit exhaustion
+    if (trackToQueue) {
+      const newTrack: Track = {
+        ...trackToQueue,
+        id: `req-${Date.now()}`,
+        votes: 0,
+        requestedBy: options?.isAnonymous ? 'Anonim Müşteri' : (user?.name || 'Müşteri'),
+        requestedByUserId: options?.isAnonymous ? undefined : user?.id,
+        requestedByAvatar: options?.isAnonymous ? '' : (user?.avatar || ''),
+        requestedAt: 'Şimdi',
+        startedAt: undefined,
+      };
+
+      // Also attempt direct insertion into venue queue via Supabase
+      if (supabase && activeVenue?.id) {
+        try {
+          await supabase.from('queue').insert({
+            venue_id: Number(activeVenue.id),
+            song_name: trackToQueue.title,
+            artist_name: trackToQueue.artist,
+            album_cover: trackToQueue.albumCover || trackToQueue.coverUrl || trackToQueue.album_art || '',
+            spotify_uri: trackToQueue.spotifyUri || '',
+            duration_ms: trackToQueue.durationMs ?? (trackToQueue.duration ? trackToQueue.duration * 1000 : 210000),
+            requested_by_name: options?.isAnonymous ? 'Anonim' : (user?.name || 'Müşteri'),
+            requested_by_user_id: options?.isAnonymous ? null : (user?.id || null),
+            is_boosted: options?.isBoosted || false,
+            message: options?.message || null,
+          });
+        } catch (e) {
+          console.warn('[claimRewardAndQueueTrack DB insert]', e);
+        }
+      }
+
+      setQueue((prev) => [...prev, newTrack]);
+      setPendingRewardTrack(null);
+      setPendingRewardOptions(null);
+      closeModal();
+      confetti({ particleCount: 90, spread: 70, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#38BDF8'] });
+      showToast(`"${trackToQueue.title}" reklam izlenerek sıraya eklendi! 🎉`);
+      return true;
+    }
+
+    // General reward (e.g. from Drawer menu)
+    if (user) {
+      setUser((prev) => prev ? { ...prev, daily_songs_count: Math.max(0, (prev.daily_songs_count || 1) - 1) } : null);
+    }
+    closeModal();
+    showToast('Tebrikler! +1 ek şarkı istek hakkı kazandınız. 🎵');
+    return true;
+  }, [pendingRewardTrack, pendingRewardOptions, activeVenue, user, supabase, closeModal, showToast]);
 
   // ── VETO TRACK ────────────────────────────────────────────────────────
   const vetoTrack = useCallback(async (trackId: string, isAnonymous?: boolean): Promise<boolean> => {
@@ -1182,7 +1258,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
-      hasEnteredGateway, setHasEnteredGateway
+      hasEnteredGateway, setHasEnteredGateway,
+      pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack
     }}>
       {children}
     </AppContext.Provider>

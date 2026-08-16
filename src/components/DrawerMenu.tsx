@@ -28,7 +28,7 @@ import { ModalType } from '../types';
 import { THEMES } from '../lib/theme';
 
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, theme, setTheme } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, theme, setTheme, openRewardedAdModal } = useApp();
 
   const [isDj, setIsDj] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -251,22 +251,27 @@ export const DrawerMenu: React.FC = () => {
                 )}
               </AnimatePresence>
 
-              {/* Disabled Watch Ads Button */}
+              {/* Watch Ads & Earn Button */}
               <button
-                disabled={true}
-                onClick={() => showToast('Bu özellik çok yakında mobil uygulamamızla birlikte yayında olacaktır!')}
-                className="w-full flex items-center justify-between px-3 py-2.5 mt-3 rounded-xl bg-black/40 border border-white/5 opacity-60 cursor-not-allowed group relative"
+                onClick={() => {
+                  closeModal();
+                  openRewardedAdModal();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 mt-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#D4AF37]/10 to-transparent border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 active:scale-95 transition-all group relative cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-black/60 border border-white/10 flex items-center justify-center text-gray-500">
+                  <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] group-active:scale-105 transition-transform shadow-inner">
                     <PlaySquare className="w-4 h-4" />
                   </div>
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-bold text-gray-400">Reklam İzle & Kazan</span>
-                    <span className="text-[10px] font-medium text-gray-500 mt-0.5">Uygulamayı indirerek kazan.</span>
+                  <div className="flex flex-col items-start text-left">
+                    <span className="text-sm font-bold text-white group-active:text-[#D4AF37] transition-colors">Reklam İzle & Kazan</span>
+                    <span className="text-[10px] font-medium text-amber-200/60 mt-0.5">+1 Şarkı İstek Hakkı Al</span>
                   </div>
                 </div>
-                <div className="text-[9px] font-black bg-gray-800 text-gray-400 px-2.5 py-1 rounded-md shrink-0 uppercase tracking-widest border border-white/5">Pek Yakında</div>
+                <div className="text-[9px] font-black bg-[#D4AF37] text-stone-950 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wider shadow-sm flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>+1 Hak</span>
+                </div>
               </button>
             </nav>
 

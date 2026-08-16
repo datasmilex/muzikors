@@ -18,6 +18,7 @@ import { InfoModals } from '../components/InfoModals';
 import { VenueInfoModal } from '../components/VenueInfoModal';
 import { PremiumModal } from '../components/PremiumModal';
 import { DailyRewardModal } from '../components/DailyRewardModal';
+import { RewardedAdModal } from '../components/RewardedAdModal';
 import { ToastNotification } from '../components/ToastNotification';
 import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
@@ -64,6 +65,7 @@ const AppContent = () => {
       <VenueInfoModal />
       <InfoModals />
       <DailyRewardModal />
+      <RewardedAdModal />
       <PremiumModal />
       <GlobalFeedView />
       <ToastNotification />
