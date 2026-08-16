@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Sparkles, ExternalLink, Music2, Crown, Compass, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { Capacitor } from '@capacitor/core';
 
 export const ADMOB_NATIVE_AD_UNIT_ID = 'ca-app-pub-6907017256187136/3608277325';
 export const ADSENSE_CLIENT_ID = 'ca-pub-6907017256187136';
@@ -54,23 +53,8 @@ const BACKUP_CREATIVES = [
 
 export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) => {
   const { openModal } = useApp();
-  const adRef = useRef<HTMLDivElement>(null);
-  const [adLoaded, setAdLoaded] = useState(false);
   const creative = BACKUP_CREATIVES[variantIndex % BACKUP_CREATIVES.length];
   const IconComponent = creative.icon;
-
-  useEffect(() => {
-    // Only attempt on client-side
-    if (typeof window !== 'undefined') {
-      try {
-        const adsbygoogle = (window as any).adsbygoogle || [];
-        adsbygoogle.push({});
-        setAdLoaded(true);
-      } catch (e) {
-        console.warn('[AdSense/AdMob Native Slot push error]', e);
-      }
-    }
-  }, []);
 
   const handleAction = () => {
     if (creative.actionType === 'premium') {
@@ -89,18 +73,6 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
       {/* Subtle Glow Background */}
       <div className="absolute top-0 right-0 w-36 h-36 bg-[#D4AF37]/5 rounded-full blur-2xl pointer-events-none" />
 
-      {/* Live Google Ad Unit (Real Ads that generate revenue) */}
-      <div ref={adRef} className="w-full overflow-hidden my-1 flex justify-center text-center">
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block', minHeight: '60px', width: '100%' }}
-          data-ad-client={ADSENSE_CLIENT_ID}
-          data-ad-slot={ADSENSE_SLOT_ID}
-          data-ad-format="fluid"
-          data-ad-layout-key="-fb+5w+4e-db+86"
-        />
-      </div>
-
       {/* Header with Sponsor badge */}
       <div className="flex items-center justify-between mb-2 relative z-10">
         <div className="flex items-center gap-2.5">
@@ -112,7 +84,7 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
               <span className="text-xs font-black text-white">{creative.sponsor}</span>
               <Sparkles className="w-3 h-3 text-[#D4AF37]" />
             </div>
-            <span className="text-[10px] font-medium text-amber-200/50">Google Sponsorlu Reklam</span>
+            <span className="text-[10px] font-medium text-amber-200/50">Yerel Tanıtım & Fırsat</span>
           </div>
         </div>
 

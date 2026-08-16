@@ -32,12 +32,6 @@ export default function RootLayout({
   return (
     <html lang="tr" className="dark h-full" data-theme="velvet">
       <head>
-        {/* Google AdSense / AdMob Web Ad Engine */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6907017256187136"
-          crossOrigin="anonymous"
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
