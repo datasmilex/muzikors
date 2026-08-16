@@ -555,7 +555,7 @@ export const MusicSearchModal: React.FC = () => {
             </div>
 
           {/* Bottom Action Bar */}
-          <div className="shrink-0 pt-4 border-t border-[#D4AF37]/20 space-y-3 relative z-10 bg-[#120C08]/80 backdrop-blur-md">
+          <div className="shrink-0 pt-3 border-t border-[#D4AF37]/20 space-y-3 relative z-10 bg-transparent">
             {cooldown.active && (
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-[1rem] p-3 flex items-center justify-between text-xs text-amber-200 shadow-inner">
                 <div className="flex items-center gap-2">
@@ -569,7 +569,7 @@ export const MusicSearchModal: React.FC = () => {
             )}
 
             {selectedTrack && (
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#1C130D] to-[#120C08] rounded-[1.5rem] p-4 border border-[#D4AF37]/30 shadow-lg">
+              <div className="flex items-center justify-between bg-black/35 rounded-[1.5rem] p-3.5 border border-[#D4AF37]/30 shadow-lg backdrop-blur-sm">
                 <div className="flex items-center gap-3 min-w-0">
                   <img
                     src={selectedTrack.albumCover || selectedTrack.coverUrl || selectedTrack.album_art || '/logo.png'}
@@ -585,8 +585,6 @@ export const MusicSearchModal: React.FC = () => {
                     <p className="text-[11px] font-semibold text-[#D4AF37] truncate">{selectedTrack.artist}</p>
                   </div>
                 </div>
-
-
               </div>
             )}
 
