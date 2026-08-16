@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Crown, Sparkles, CheckCircle2, Music, Loader2, Video } from 'lucide-react';
+import { X, Play, Crown, Sparkles, CheckCircle2, Music, Loader2, Smartphone, ExternalLink } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { admobService } from '../services/admobService';
 import { Capacitor } from '@capacitor/core';
 import confetti from 'canvas-confetti';
+
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.muzikors.app';
 
 export const RewardedAdModal: React.FC = () => {
   const {
@@ -19,31 +21,23 @@ export const RewardedAdModal: React.FC = () => {
   } = useApp();
 
   const [isLoadingAd, setIsLoadingAd] = useState(false);
-  const [webCountdown, setWebCountdown] = useState<number | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     if (activeModal === 'rewarded_ad') {
       setIsCompleted(false);
-      setWebCountdown(null);
       setIsLoadingAd(false);
-      // Pre-initialize AdMob when modal opens
-      admobService.initialize().catch(() => {});
+      // Pre-initialize AdMob when modal opens on mobile
+      if (Capacitor.isNativePlatform()) {
+        admobService.initialize().catch(() => {});
+      }
     }
   }, [activeModal]);
-
-  // Web fallback countdown timer
-  useEffect(() => {
-    let timer: any;
-    if (webCountdown !== null && webCountdown > 0) {
-      timer = setTimeout(() => {
-        setWebCountdown((prev) => (prev !== null ? prev - 1 : null));
-      }, 1000);
-    } else if (webCountdown === 0) {
-      handleRewardSuccess();
-    }
-    return () => clearTimeout(timer);
-  }, [webCountdown]);
 
   if (activeModal !== 'rewarded_ad') return null;
 
@@ -62,16 +56,14 @@ export const RewardedAdModal: React.FC = () => {
   };
 
   const handleWatchAd = async () => {
-    setIsLoadingAd(true);
-
-    // If web browser, use interactive web simulated countdown
+    // If on web, redirect to Play Store / App download
     if (!Capacitor.isNativePlatform()) {
-      setIsLoadingAd(false);
-      setWebCountdown(5);
+      window.open(PLAY_STORE_URL, '_blank');
       return;
     }
 
     // Android / iOS native AdMob
+    setIsLoadingAd(true);
     try {
       await admobService.showRewardedAd(
         () => {
@@ -102,7 +94,7 @@ export const RewardedAdModal: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => !isLoadingAd && webCountdown === null && closeModal()}
+          onClick={() => !isLoadingAd && closeModal()}
           className="fixed inset-0 bg-black/80 backdrop-blur-md"
         />
 
@@ -118,7 +110,7 @@ export const RewardedAdModal: React.FC = () => {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-20 bg-[#D4AF37]/15 blur-3xl rounded-full pointer-events-none" />
 
           {/* Close button */}
-          {!isLoadingAd && webCountdown === null && (
+          {!isLoadingAd && (
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 p-2 rounded-full bg-white/5 active:bg-white/10 text-zinc-400 active:text-white transition-colors"
@@ -145,29 +137,11 @@ export const RewardedAdModal: React.FC = () => {
                   : '+1 ek şarkı hakkı hesabına eklendi!'}
               </p>
             </div>
-          ) : webCountdown !== null ? (
-            /* Web Video Simulator */
-            <div className="py-6 space-y-5">
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-[#D4AF37]/30 flex items-center justify-center mx-auto text-[#D4AF37] animate-pulse">
-                <Video className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-white">Sponsor Reklamı Oynatılıyor</h3>
-                <p className="text-xs text-amber-200/60 mt-1">Ödülünüz hazırlanıyor, lütfen bekleyin...</p>
-              </div>
-
-              {/* Countdown circle */}
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-12 h-12 rounded-full border-2 border-[#D4AF37] flex items-center justify-center text-xl font-black text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                  {webCountdown}
-                </div>
-              </div>
-            </div>
           ) : (
             <div className="space-y-5">
               {/* Header Icon */}
               <div className="w-14 h-14 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto text-stone-950 font-black shadow-[0_5px_20px_rgba(212,175,55,0.4)]">
-                <Sparkles className="w-7 h-7 stroke-[2.5]" />
+                {isNative ? <Sparkles className="w-7 h-7 stroke-[2.5]" /> : <Smartphone className="w-7 h-7 stroke-[2.5]" />}
               </div>
 
               {/* Title & Description */}
@@ -176,12 +150,16 @@ export const RewardedAdModal: React.FC = () => {
                   Günlük Şarkı Hakkın Doldu! 🎵
                 </h3>
                 <p className="text-xs text-amber-200/70 mt-1.5 leading-relaxed">
-                  {pendingRewardTrack ? (
-                    <>
-                      Seçtiğin <b className="text-white">"{pendingRewardTrack.title}"</b> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
-                    </>
+                  {isNative ? (
+                    pendingRewardTrack ? (
+                      <>
+                        Seçtiğin <b className="text-white">"{pendingRewardTrack.title}"</b> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
+                      </>
+                    ) : (
+                      'Kısa bir ödüllü video izleyerek anında +1 ek şarkı istek hakkı kazanabilirsin.'
+                    )
                   ) : (
-                    'Kısa bir ödüllü video izleyerek anında +1 ek şarkı istek hakkı kazanabilirsin.'
+                    'Reklam izleyerek ücretsiz şarkı hakkı kazanmak için **Muzikors Mobil Uygulaması** gereklidir.'
                   )}
                 </p>
               </div>
@@ -209,23 +187,34 @@ export const RewardedAdModal: React.FC = () => {
 
               {/* Actions */}
               <div className="space-y-2.5 pt-2">
-                <button
-                  onClick={handleWatchAd}
-                  disabled={isLoadingAd}
-                  className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_5px_20px_rgba(212,175,55,0.35)] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isLoadingAd ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Reklam Yükleniyor...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5 fill-current stroke-none" />
-                      <span>Reklamı İzle & Şarkıyı Çal</span>
-                    </>
-                  )}
-                </button>
+                {isNative ? (
+                  <button
+                    onClick={handleWatchAd}
+                    disabled={isLoadingAd}
+                    className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_5px_20px_rgba(212,175,55,0.35)] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isLoadingAd ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Reklam Yükleniyor...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-5 h-5 fill-current stroke-none" />
+                        <span>Reklamı İzle & Şarkıyı Çal</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleWatchAd}
+                    className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_5px_20px_rgba(212,175,55,0.35)] active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Smartphone className="w-5 h-5 stroke-[2.5]" />
+                    <span>Reklam İzlemek İçin Uygulamayı İndir</span>
+                    <ExternalLink className="w-4 h-4 ml-0.5 opacity-80" />
+                  </button>
+                )}
 
                 <button
                   onClick={() => {
@@ -240,7 +229,9 @@ export const RewardedAdModal: React.FC = () => {
               </div>
 
               <div className="text-[10px] text-amber-200/40 font-medium">
-                Ödüllü reklam tamamlandığında şarkınız otomatik sıraya girer.
+                {isNative
+                  ? 'Ödüllü reklam tamamlandığında şarkınız otomatik sıraya girer.'
+                  : 'Mobil uygulamamız ile sınırsız ödüllü reklam fırsatından yararlanabilirsiniz.'}
               </div>
             </div>
           )}
