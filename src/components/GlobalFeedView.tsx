@@ -5,7 +5,6 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { SocialPost as SocialPostType } from '../types';
 import { SocialPost } from './SocialPost';
-import { NativeAdCard } from './NativeAdCard';
 import { containsProfanity } from '../utils/profanity';
 import { admobService } from '../services/admobService';
 
@@ -223,16 +222,12 @@ export const GlobalFeedView: React.FC = () => {
                       <p className="text-xs text-zinc-600 mt-1">İlk paylaşan sen ol!</p>
                     </div>
                   ) : (
-                    posts.map((post, idx) => (
-                      <React.Fragment key={post.id}>
-                        <SocialPost 
-                          post={post} 
-                          onClickUser={handleUserClick} 
-                        />
-                        {(idx + 1) % 4 === 0 && (
-                          <NativeAdCard variantIndex={Math.floor(idx / 4)} />
-                        )}
-                      </React.Fragment>
+                    posts.map(post => (
+                      <SocialPost 
+                        key={post.id} 
+                        post={post} 
+                        onClickUser={handleUserClick} 
+                      />
                     ))
                   )}
                 </div>
