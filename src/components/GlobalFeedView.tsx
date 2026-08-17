@@ -5,8 +5,8 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { SocialPost as SocialPostType } from '../types';
 import { SocialPost } from './SocialPost';
+import { NativeAdCard } from './NativeAdCard';
 import { containsProfanity } from '../utils/profanity';
-import { admobService } from '../services/admobService';
 
 export const GlobalFeedView: React.FC = () => {
   const { activeModal, closeModal, user, showToast, openProtectedModal, openProfile } = useApp();
@@ -62,14 +62,7 @@ export const GlobalFeedView: React.FC = () => {
   useEffect(() => {
     if (activeModal === 'globalFeed') {
       fetchPosts();
-      admobService.showFeedBanner().catch(() => {});
-    } else {
-      admobService.hideFeedBanner().catch(() => {});
     }
-
-    return () => {
-      admobService.hideFeedBanner().catch(() => {});
-    };
   }, [activeModal, fetchPosts]);
 
   const handleCreatePost = async () => {
@@ -222,12 +215,16 @@ export const GlobalFeedView: React.FC = () => {
                       <p className="text-xs text-zinc-600 mt-1">İlk paylaşan sen ol!</p>
                     </div>
                   ) : (
-                    posts.map(post => (
-                      <SocialPost 
-                        key={post.id} 
-                        post={post} 
-                        onClickUser={handleUserClick} 
-                      />
+                    posts.map((post, idx) => (
+                      <React.Fragment key={post.id}>
+                        <SocialPost 
+                          post={post} 
+                          onClickUser={handleUserClick} 
+                        />
+                        {(idx + 1) % 4 === 0 && (
+                          <NativeAdCard variantIndex={Math.floor(idx / 4)} />
+                        )}
+                      </React.Fragment>
                     ))
                   )}
                 </div>
