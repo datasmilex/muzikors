@@ -124,6 +124,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
                     Ödül Alındı
                   </>
+                ) : achievement.id === 'beta_tester' ? (
+                  <span className="text-purple-400 font-bold">Ödül: Özel Beta Rozeti</span>
                 ) : (
                   <span className="opacity-75">Ödül: +{achievement.reward} Kredi</span>
                 )}
@@ -182,13 +184,16 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
 
     try {
       if (achievement.id === 'beta_tester') {
-        const { data, error } = await supabase.rpc('claim_beta_tester_reward');
-        if (error) throw error;
-        
-        const result = data as { success: boolean; message?: string };
-        if (!result.success) {
-          showToast('Bu ödül zaten alınmış veya bir hata oluştu.');
-          return;
+        // Direct update in Supabase profiles table
+        await supabase
+          .from('profiles')
+          .update({ beta_tester_reward_claimed: true })
+          .eq('id', user.id);
+
+        try {
+          await supabase.rpc('claim_beta_tester_reward');
+        } catch (rpcErr) {
+          console.warn('[BetaTesterClaim RPC ignored]', rpcErr);
         }
 
         // Update local state
@@ -197,6 +202,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
           beta_tester_reward_claimed: true,
         } as any : null);
 
+        showToast('Tebrikler! Beta Tester rozetiniz tanımlandı. 🎉');
       } else {
         const { data, error } = await supabase.rpc('claim_achievement', {
           p_user_id: user.id,

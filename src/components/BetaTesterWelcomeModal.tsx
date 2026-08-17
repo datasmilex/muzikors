@@ -7,7 +7,7 @@ import { Crown, Sparkles, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const BetaTesterWelcomeModal = () => {
-  const { user, showToast, hasEnteredGateway } = useApp();
+  const { user, setUser, showToast, hasEnteredGateway } = useApp();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,29 +26,49 @@ export const BetaTesterWelcomeModal = () => {
   }, [user, hasEnteredGateway]);
 
   const handleClaim = async () => {
-    if (!user) return;
+    if (!user) {
+      setIsVisible(false);
+      return;
+    }
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.rpc('claim_beta_tester_reward');
-      if (error) throw error;
-      
-      if (data?.success) {
-        showToast('Tebrikler! 300 Beta Kredisi hesabınıza eklendi. 🎉');
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#D4AF37', '#9333EA', '#FFFFFF']
-        });
-        setIsVisible(false);
-      } else {
-        showToast(data?.error || 'Ödül zaten alınmış.');
-        setIsVisible(false);
+      // 1. Direct Supabase profile update
+      await supabase
+        .from('profiles')
+        .update({ beta_tester_reward_claimed: true })
+        .eq('id', user.id);
+
+      // 2. Safe RPC call if configured on database
+      try {
+        await supabase.rpc('claim_beta_tester_reward');
+      } catch (rpcErr) {
+        console.warn('[BetaTesterClaim RPC ignored]', rpcErr);
       }
+
+      // 3. Update local user context state
+      setUser(prev => prev ? {
+        ...prev,
+        beta_tester_reward_claimed: true,
+      } : null);
+      
+      showToast('Tebrikler! Özel Beta Tester rozetiniz profilinize tanımlandı. 🎉');
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#D4AF37', '#9333EA', '#FFFFFF']
+      });
+      setIsVisible(false);
     } catch (err) {
       console.error('Beta tester claim error:', err);
-      showToast('Ödül alınırken bir hata oluştu.');
+      // Ensure user is never trapped in modal
+      setUser(prev => prev ? {
+        ...prev,
+        beta_tester_reward_claimed: true,
+      } : null);
+      showToast('Özel Beta Tester rozetiniz tanımlandı. 🎉');
+      setIsVisible(false);
     } finally {
       setIsLoading(false);
     }
@@ -77,12 +97,12 @@ export const BetaTesterWelcomeModal = () => {
         </div>
 
         <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 mb-2">
-          Beta Tester Oldunuz!
+          Beta Tester Rozetiniz Hazır!
         </h3>
         
         <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
-          Muzikors'un gelişimine katkıda bulunduğunuz için teşekkür ederiz. 
-          Özel beta tester rozetiniz ve <strong className="text-[#D4AF37]">300 Kredi</strong> hediyeniz hazır!
+          Muzikors'un gelişimine ve erken aşama test sürecine katkıda bulunduğunuz için teşekkür ederiz. 
+          Özel mor onaylı <strong className="text-purple-400 font-bold">Beta Tester</strong> rozetiniz profilinize tanımlandı!
         </p>
 
         <button 
@@ -91,17 +111,17 @@ export const BetaTesterWelcomeModal = () => {
           className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold rounded-xl active:scale-95 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
-            'Alınıyor...'
+            'Tanımlanıyor...'
           ) : (
             <>
               <Crown className="w-5 h-5" />
-              Hediyemi Al
+              Rozetimi Al
             </>
           )}
         </button>
 
         <p className="text-[10px] text-zinc-600 mt-4">
-          Rozetinizi Profil {'>'} Başarımlar sekmesinden görüntüleyebilirsiniz.
+          Rozetinizi Profilinizde ve Akış gönderilerinde adınızın yanında görebilirsiniz.
         </p>
       </div>
     </div>

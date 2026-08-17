@@ -65,7 +65,6 @@ const songAchievements: Achievement[] = [
   },
 ];
 
-// ─── Özel Başarımlar (Special) ──────────────────────────────────────────────
 const specialAchievements: Achievement[] = [
   {
     id: 'beta_tester',
@@ -74,8 +73,8 @@ const specialAchievements: Achievement[] = [
     description: 'Muzikors\'un erken aşama test sürecine katkıda bulundun.',
     tier: 'diamond',
     category: 'special',
-    target: 1, // Kilitli olup olmadığını özel mantıkla çözeceğiz
-    reward: 300,
+    target: 1,
+    reward: 0,
   },
 ];
 
