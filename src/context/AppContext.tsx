@@ -1158,6 +1158,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         showToast('Şarkı başarıyla sıradan silindi.');
+        // Update user daily vetoes count locally
+        setUser((prev) => prev ? { ...prev, daily_vetoes_count: (prev.daily_vetoes_count || 0) + 1 } : null);
         // Remove locally immediately for better UX
         setQueue(prev => prev.filter(q => q.id !== trackId));
         return true;
