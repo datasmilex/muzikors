@@ -5,7 +5,11 @@ import { Info, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const BottomNav: React.FC = () => {
-  const { openModal, isVenueBound, activeModal } = useApp();
+  const { openModal, isVenueBound, activeModal, user } = useApp();
+
+  const maxDailySongs = user?.isPremium ? 5 : 2;
+  const usedSongs = user?.daily_songs_count || 0;
+  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-sm z-50">
@@ -49,9 +53,18 @@ export const BottomNav: React.FC = () => {
               <span className="absolute inset-0 rounded-full border border-[#D4AF37] animate-ping opacity-40" style={{ animationDuration: '3s' }} />
             )}
             <Plus className="w-8 h-8 text-black stroke-[3] drop-shadow-md" />
+
+            {/* Kalan Şarkı Hakkı Rozeti */}
+            {user && isVenueBound && (
+              <span className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-stone-950 border border-[#D4AF37]/60 text-[10px] font-black text-[#D4AF37] shadow-lg shadow-black/80 whitespace-nowrap">
+                {remainingSongs}/{maxDailySongs}
+              </span>
+            )}
           </button>
           {/* Subtle label below FAB */}
-          <span className="absolute -bottom-5 text-[10px] font-black text-[#D4AF37] tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Ekle</span>
+          <span className="absolute -bottom-5 text-[10px] font-black text-[#D4AF37] tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] whitespace-nowrap">
+            {user && isVenueBound ? `${remainingSongs}/${maxDailySongs} Hak` : 'Ekle'}
+          </span>
         </div>
 
         {/* Akış */}

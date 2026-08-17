@@ -93,6 +93,10 @@ export const NowPlayingSection: React.FC = () => {
     );
   }
 
+  const maxDailySongs = user?.isPremium ? 5 : 2;
+  const usedSongs = user?.daily_songs_count || 0;
+  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
+
   // If no user track is currently playing or if it is Spotify background music
   if (!nowPlaying || (nowPlaying as any).isBackgroundMusic === true || nowPlaying.id === 'spotify-bg') {
     return (
@@ -109,9 +113,14 @@ export const NowPlayingSection: React.FC = () => {
           </div>
           <button
             onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
-            className="py-2.5 px-5 rounded-2xl gold-gradient-bg text-stone-950 font-black text-xs shadow-lg active:brightness-110 active:scale-95 transition-all"
+            className="py-2.5 px-5 rounded-2xl gold-gradient-bg text-stone-950 font-black text-xs shadow-lg active:brightness-110 active:scale-95 transition-all flex items-center gap-2"
           >
-            + Sıraya İlk Şarkıyı Ekle
+            <span>+ Sıraya İlk Şarkıyı Ekle</span>
+            {user && (
+              <span className="px-2 py-0.5 rounded-full bg-stone-950/20 text-stone-950 text-[10px] font-black border border-stone-950/15">
+                {remainingSongs}/{maxDailySongs} Hak
+              </span>
+            )}
           </button>
         </div>
       </div>

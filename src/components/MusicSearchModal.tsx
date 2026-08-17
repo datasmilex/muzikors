@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle } from 'lucide-react';
+import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
@@ -19,6 +19,10 @@ export const MusicSearchModal: React.FC = () => {
     cooldown,
     showToast,
   } = useApp();
+
+  const maxDailySongs = user?.isPremium ? 5 : 2;
+  const usedSongs = user?.daily_songs_count || 0;
+  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
@@ -344,10 +348,17 @@ export const MusicSearchModal: React.FC = () => {
                 <button
                   onClick={handleFinalRequest}
                   disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-95 transition-all group"
+                  className="w-full py-4 px-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-between shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-95 transition-all group"
                 >
-                  {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6 stroke-[3] group-active:scale-95 transition-transform" />}
-                  <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
+                  <div className="flex items-center gap-2.5">
+                    {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5 stroke-[3] group-active:scale-95 transition-transform" />}
+                    <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
+                  </div>
+                  {user && (
+                    <span className="text-xs font-black px-2.5 py-1 rounded-full bg-stone-950/20 text-stone-950 border border-stone-950/15">
+                      {remainingSongs}/{maxDailySongs} Hak
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -360,6 +371,16 @@ export const MusicSearchModal: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Music className="w-5 h-5 text-[#D4AF37]" />
                 <h2 className="text-xl font-black text-white tracking-tight">Müzik Arama</h2>
+                {user && (
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border flex items-center gap-1 shadow-sm ${
+                    user.isPremium
+                      ? 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40 shadow-[0_0_10px_rgba(212,175,55,0.25)]'
+                      : 'bg-white/10 text-zinc-300 border-white/15'
+                  }`}>
+                    {user.isPremium && <Crown className="w-3 h-3 text-[#D4AF37]" />}
+                    {remainingSongs}/{maxDailySongs} Hak
+                  </span>
+                )}
               </div>
 
               <button
@@ -591,19 +612,24 @@ export const MusicSearchModal: React.FC = () => {
             <button
               onClick={() => handleConfirmRequest()}
               disabled={!selectedTrack || cooldown.active}
-              className={`w-full py-4 px-6 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
+              className={`w-full py-4 px-5 rounded-[1.5rem] font-black text-base flex items-center justify-between shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
                 cooldown.active || !selectedTrack
                   ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 shadow-none'
                   : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
               }`}
             >
-              <Music className={`w-6 h-6 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
-              {cooldown.active ? (
-                <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
-              ) : (
-                <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2.5">
+                <Music className={`w-5 h-5 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
+                {cooldown.active ? (
+                  <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
+                ) : (
                   <span>Seçili Şarkıyı İste</span>
-                </div>
+                )}
+              </div>
+              {!cooldown.active && selectedTrack && user && (
+                <span className="text-xs font-black px-2.5 py-1 rounded-full bg-stone-950/20 text-stone-950 border border-stone-950/15">
+                  {remainingSongs}/{maxDailySongs} Hak
+                </span>
               )}
             </button>
           </div>
