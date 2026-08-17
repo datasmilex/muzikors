@@ -1169,53 +1169,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [supabase, user, showToast]);
 
   const voteTrack = useCallback(async (trackId: string) => {
-    if (!user) { openProtectedModal('search', 'Oy vermek icin giris yapin'); return; }
+    if (!user) {
+      openProtectedModal('search', 'Şarkıya oy vermek için lütfen giriş yapın.');
+      return;
+    }
+
+    const maxDailyVotes = user.isPremium ? 15 : 5;
+    const currentDailyVotes = user.daily_votes_count || 0;
+
+    if (currentDailyVotes >= maxDailyVotes) {
+      if (!user.isPremium) {
+        showToast('Günlük 5 beğeni hakkınız doldu. 15 beğeni hakkı için Premium’a geçebilirsiniz!');
+        openModal('premium');
+      } else {
+        showToast('Günlük 15 beğeni hakkınızı doldurdunuz. Yarın tekrar oy verebilirsiniz.');
+      }
+      return;
+    }
 
     try {
-      let currentVotesForUser = 0;
-      if (supabase) {
-        const { data: userVoteRow, error: voteFetchErr } = await supabase
-          .from('song_user_votes')
-          .select('vote_count')
-          .eq('user_id', user.id)
-          .eq('song_id', trackId)
-          .maybeSingle();
-        
-        if (voteFetchErr) {
-          console.error('[voteTrack fetch]', voteFetchErr.message);
-        }
-
-        currentVotesForUser = userVoteRow?.vote_count ?? 0;
-      }
-
-      if (currentVotesForUser >= 5) {
-        showToast('Bu şarkıyı en fazla 5 kez beğenebilirsiniz.');
-        return;
-      }
-
-      const newVotesForUser = currentVotesForUser + 1;
+      const newDailyVotes = currentDailyVotes + 1;
+      const remainingVotes = maxDailyVotes - newDailyVotes;
 
       if (supabase) {
-        const { error: upsertErr } = await supabase.from('song_user_votes').upsert(
-          { user_id: user.id, song_id: trackId, vote_count: newVotesForUser },
-          { onConflict: 'user_id,song_id' }
-        );
-        if (upsertErr) {
-          console.error('[voteTrack upsert]', upsertErr.message);
-        }
-        
+        // 1. Increment queue votes
         const { data: voteData } = await supabase.from('queue').select('votes').eq('id', trackId).single();
-        if (voteData) {
-          await supabase.from('queue').update({ votes: (voteData.votes ?? 1) + 1 }).eq('id', trackId);
+        const updatedVotes = (voteData?.votes ?? 0) + 1;
+        await supabase.from('queue').update({ votes: updatedVotes }).eq('id', trackId);
+
+        // 2. Update user daily_votes_count in profiles
+        await supabase.from('profiles').update({ daily_votes_count: newDailyVotes }).eq('id', user.id);
+
+        // 3. Log user vote in song_user_votes
+        try {
+          const { data: existingVote } = await supabase
+            .from('song_user_votes')
+            .select('vote_count')
+            .eq('user_id', user.id)
+            .eq('song_id', trackId)
+            .maybeSingle();
+
+          const count = (existingVote?.vote_count ?? 0) + 1;
+          await supabase.from('song_user_votes').upsert(
+            { user_id: user.id, song_id: trackId, vote_count: count },
+            { onConflict: 'user_id,song_id' }
+          );
+        } catch (vErr) {
+          console.warn('[song_user_votes log]', vErr);
         }
       }
 
-
+      // Update local context states
+      setUser((prev) => prev ? { ...prev, daily_votes_count: newDailyVotes } : null);
       setQueue((prev) => [...prev].map((t) => t.id === trackId ? { ...t, votes: t.votes + 1 } : t).sort((a, b) => b.votes - a.votes));
-      showToast(`Şarkı beğenildi! (Oy hakkınız: ${newVotesForUser}/5)`);
+
+      showToast(`Şarkı beğenildi! (Kalan beğeni hakkınız: ${remainingVotes}/${maxDailyVotes})`);
     } catch (err) {
       console.error('[voteTrack exception]', err);
-      showToast('Oylama sirasinda bir hata olustu.');
+      showToast('Oylama sırasında bir hata oluştu.');
     }
   }, [user, openProtectedModal, openModal, showToast]);
 
