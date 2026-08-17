@@ -327,9 +327,9 @@ export const MusicSearchModal: React.FC = () => {
                 {/* Consent Text */}
                 <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">
                   {isAnonymous ? (
-                    <p>"Şarkı isteğin TV ekranında ve panellerde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
+                    <p>"Şarkı isteğin uygulamada ve sıra listesinde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
                   ) : (
-                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak TV ekranında ve uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
+                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
                   )}
                 </div>
 
