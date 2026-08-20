@@ -418,6 +418,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
+          const todayInTurkey = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Europe/Istanbul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date());
+
+          const isNewDay = !existingProfile.last_reset_date || existingProfile.last_reset_date !== todayInTurkey;
+          if (isNewDay) {
+            existingProfile.daily_songs_count = 0;
+            existingProfile.daily_votes_count = 0;
+            existingProfile.daily_boosts_count = 0;
+            existingProfile.daily_vetoes_count = 0;
+            existingProfile.last_reset_date = todayInTurkey;
+
+            // Trigger DB reset in background
+            (async () => {
+              try {
+                await supabase.rpc('check_and_reset_daily_limits_self');
+              } catch (e) {
+                console.warn('[daily_limits_self]', e);
+              }
+            })();
+          }
+
           // Only keep the avatar if it is NOT a Google photo
           const raw = existingProfile.avatar_url || '';
           customAvatarUrl = raw && !isGooglePhoto(raw) ? raw : '';
@@ -479,13 +504,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (event === 'SIGNED_OUT') {
         setUser(null);
         userIdRef.current = null;
-        userIdRef.current = null;
       } else {
         handleSession(session, event);
       }
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  // ── MIDNIGHT TURKEY DAILY RESET TICKER ────────────────────────────────────
+  useEffect(() => {
+    if (!supabase) return;
+
+    const checkDailyReset = () => {
+      const todayInTurkey = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+
+      setUser((prev) => {
+        if (!prev) return null;
+        if (!prev.last_reset_date || prev.last_reset_date !== todayInTurkey) {
+          if (supabase) {
+            (async () => {
+              try {
+                await supabase.rpc('check_and_reset_daily_limits_self');
+              } catch (e) {
+                console.warn('[daily_limits_self ticker]', e);
+              }
+            })();
+          }
+          return {
+            ...prev,
+            daily_songs_count: 0,
+            daily_votes_count: 0,
+            daily_boosts_count: 0,
+            daily_vetoes_count: 0,
+            last_reset_date: todayInTurkey,
+          };
+        }
+        return prev;
+      });
+    };
+
+    checkDailyReset();
+    const interval = setInterval(checkDailyReset, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
   // ── SUPABASE REALTIME: PROFILES ───────────────────────────────────────────
@@ -495,6 +561,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .channel(`profiles:${user.id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
         const row = payload.new as any;
+        const todayInTurkey = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Istanbul',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(new Date());
+        const isNewDay = !row?.last_reset_date || row?.last_reset_date !== todayInTurkey;
+
         setUser((prev) =>
           prev
             ? {
@@ -509,11 +583,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
                 beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
                 isPremium: row?.is_premium ?? prev.isPremium,
-                daily_songs_count: typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count,
-                daily_votes_count: typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count,
-                daily_boosts_count: typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count,
-                daily_vetoes_count: typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count,
-                last_reset_date: row?.last_reset_date ?? prev.last_reset_date,
+                daily_songs_count: isNewDay ? 0 : (typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count),
+                daily_votes_count: isNewDay ? 0 : (typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count),
+                daily_boosts_count: isNewDay ? 0 : (typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count),
+                daily_vetoes_count: isNewDay ? 0 : (typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count),
+                last_reset_date: isNewDay ? todayInTurkey : (row?.last_reset_date ?? prev.last_reset_date),
               }
             : null
         );
