@@ -134,6 +134,7 @@ serve(async (req) => {
     spotifyParams.append('q', q);
     spotifyParams.append('type', 'track');
     spotifyParams.append('market', 'TR');
+    spotifyParams.append('limit', '10');
     
     const searchUrl = 'https://api.spotify.com/v1/search?' + spotifyParams.toString();
 
@@ -230,7 +231,7 @@ serve(async (req) => {
       };
     });
 
-    const finalTracks = tracks.slice(0, 15);
+    const finalTracks = tracks.slice(0, 10);
 
     return new Response(JSON.stringify({ tracks: finalTracks, total: data.tracks?.total ?? finalTracks.length }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

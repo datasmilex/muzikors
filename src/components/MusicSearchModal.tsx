@@ -28,7 +28,7 @@ export const MusicSearchModal: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'global' | 'history' | null>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'history' | null>('all');
   
   const [isSearching, setIsSearching] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
@@ -47,11 +47,7 @@ export const MusicSearchModal: React.FC = () => {
     
     let queryToFetch = searchQuery.trim();
     if (isDefaultSearch) {
-      if (activeTab === 'global') {
-        queryToFetch = 'top hits';
-      } else {
-        queryToFetch = 'yeni çıkanlar'; // all / default
-      }
+      queryToFetch = 'yeni çıkanlar'; // all / default
     }
 
     // Venue guard: if no spotify connection, block search
@@ -101,7 +97,7 @@ export const MusicSearchModal: React.FC = () => {
                 });
               }
             }
-            setSearchResults(uniqueTracks);
+            setSearchResults(uniqueTracks.slice(0, 10));
             if (!selectedTrack && uniqueTracks.length > 0) setSelectedTrack(uniqueTracks[0]);
             setIsLoading(false);
             return;
@@ -122,7 +118,7 @@ export const MusicSearchModal: React.FC = () => {
               coverUrl: t.album_cover,
               albumCover: t.album_cover,
             }));
-            setSearchResults(topTracks);
+            setSearchResults(topTracks.slice(0, 10));
             if (!selectedTrack) setSelectedTrack(topTracks[0]);
             setIsLoading(false);
             return;
@@ -150,9 +146,10 @@ export const MusicSearchModal: React.FC = () => {
 
         const tracks: Track[] = data.tracks ?? [];
         console.log(`[MusicSearch] Got ${tracks.length} tracks for "${queryToFetch}"`);
-        setSearchResults(tracks);
-        if (tracks.length > 0 && !selectedTrack) {
-          setSelectedTrack(tracks[0]);
+        const limitedTracks = tracks.slice(0, 10);
+        setSearchResults(limitedTracks);
+        if (limitedTracks.length > 0 && !selectedTrack) {
+          setSelectedTrack(limitedTracks[0]);
         }
       } catch (err: any) {
         // Suppress expected 400 errors if venue hasn't connected Spotify
@@ -501,19 +498,6 @@ export const MusicSearchModal: React.FC = () => {
                     }`}
                   >
                     Mekanın Tercihi
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('global');
-                      setSearchQuery('');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
-                      activeTab === 'global'
-                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
-                    }`}
-                  >
-                    Global Hits
                   </button>
                   <button
                     onClick={() => {
