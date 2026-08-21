@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, Gift, Check, CheckCircle2, ChevronLeft, Pin, PinOff } from 'lucide-react';
+import { X, Trophy, Gift, Check, CheckCircle2, ChevronLeft, Pin, PinOff, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   ACHIEVEMENTS,
@@ -14,6 +14,7 @@ import {
 } from '../data/achievements';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabaseClient';
+import { formatUserDisplayName } from '../utils/formatters';
 
 const TIER_LABELS: Record<string, string> = {
   bronze: 'Bronz',
@@ -28,11 +29,12 @@ interface AchievementCardProps {
   totalSongs: number;
   claimedList: string[];
   pinnedList: string[];
-  onClaim: (achievement: Achievement) => Promise<void>;
-  onTogglePin: (id: string) => void;
-  isClaiming: boolean;
+  onClaim?: (achievement: Achievement) => Promise<void>;
+  onTogglePin?: (id: string) => void;
+  isClaiming?: boolean;
   isBetaTester: boolean;
   isBetaTesterRewardClaimed: boolean;
+  isOwnProfile?: boolean;
 }
 
 const AchievementCard: React.FC<AchievementCardProps> = ({
@@ -42,9 +44,10 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
   pinnedList,
   onClaim,
   onTogglePin,
-  isClaiming,
+  isClaiming = false,
   isBetaTester,
   isBetaTesterRewardClaimed,
+  isOwnProfile = true,
 }) => {
   const s = TIER_STYLES[achievement.tier];
   const progress = getAchievementProgress(achievement, totalSongs, isBetaTester);
@@ -60,8 +63,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
       layout
       className={`relative rounded-2xl p-4 border transition-all duration-300 ${s.bg} ${s.border} ${unlocked && !claimed ? s.glow : ''} ${!unlocked ? 'opacity-60' : ''}`}
     >
-      {/* Pin button (top-right) — only visible when unlocked & claimed */}
-      {claimed && (
+      {/* Pin button (top-right) — only visible when unlocked & claimed on own profile */}
+      {isOwnProfile && claimed && onTogglePin && (
         <button
           onClick={() => onTogglePin(achievement.id)}
           className={`absolute top-3 right-3 p-1.5 rounded-full transition-all active:scale-90 ${
@@ -119,11 +122,20 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                 {progress.toLocaleString('tr-TR')} / {achievement.target.toLocaleString('tr-TR')}
               </span>
               <span className="text-[10px] font-bold text-amber-300/70">
-                {claimed ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
-                    Ödül Alındı
-                  </>
+                {!isOwnProfile ? (
+                  unlocked || claimed ? (
+                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Kazanıldı
+                    </span>
+                  ) : (
+                    <span className="text-zinc-500 font-bold flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" /> Kilitli
+                    </span>
+                  )
+                ) : claimed ? (
+                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Ödül Alındı
+                  </span>
                 ) : achievement.id === 'beta_tester' ? (
                   <span className="text-purple-400 font-bold">Ödül: Özel Beta Rozeti</span>
                 ) : (
@@ -135,8 +147,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
         </div>
       </div>
 
-      {/* Claim button — only shows when unlocked but not yet claimed */}
-      {unlocked && !claimed && (
+      {/* Claim button — only shows when unlocked but not yet claimed ON OWN PROFILE */}
+      {isOwnProfile && unlocked && !claimed && onClaim && (
         <motion.button
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -157,29 +169,42 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
 };
 
 // ─── Main Achievements Modal ─────────────────────────────────────────────────
-interface AchievementsModalProps {
+export interface AchievementsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  targetProfile?: any;
+  isOwnProfile?: boolean;
 }
 
-export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, onClose }) => {
+export const AchievementsModal: React.FC<AchievementsModalProps> = ({ 
+  isOpen, 
+  onClose,
+  targetProfile,
+  isOwnProfile = true,
+}) => {
   const { user, setUser, showToast } = useApp();
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [savingPin, setSavingPin] = useState(false);
 
-  const claimedList: string[] = (user as any)?.claimed_achievements ?? [];
-  const pinnedList: string[] = (user as any)?.pinned_achievements ?? [];
-  const totalSongs = user?.totalSongsRequested ?? 0;
-  const isBetaTester = user?.is_beta_tester ?? false;
-  const isBetaTesterRewardClaimed = user?.beta_tester_reward_claimed ?? false;
+  const activeProfile = isOwnProfile ? user : (targetProfile || user);
 
-  // Count unlocked but unclaimed
-  const pendingCount = ACHIEVEMENTS.filter(
+  const claimedList: string[] = (activeProfile as any)?.claimed_achievements ?? [];
+  const pinnedList: string[] = (activeProfile as any)?.pinned_achievements ?? [];
+  const totalSongs = activeProfile?.totalSongsRequested ?? activeProfile?.total_songs_requested ?? 0;
+  const isBetaTester = activeProfile?.is_beta_tester ?? activeProfile?.isBetaTester ?? false;
+  const isBetaTesterRewardClaimed = activeProfile?.beta_tester_reward_claimed ?? false;
+
+  // Count unlocked but unclaimed (only for own profile)
+  const pendingCount = isOwnProfile ? ACHIEVEMENTS.filter(
     a => isAchievementUnlocked(a, totalSongs, isBetaTester) && !isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
+  ).length : 0;
+
+  const completedCount = ACHIEVEMENTS.filter(
+    a => isAchievementUnlocked(a, totalSongs, isBetaTester) || isAchievementClaimed(a, claimedList, isBetaTesterRewardClaimed)
   ).length;
 
   const handleClaim = useCallback(async (achievement: Achievement) => {
-    if (!user || !supabase) return;
+    if (!isOwnProfile || !user || !supabase) return;
     setClaimingId(achievement.id);
 
     try {
@@ -241,10 +266,10 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
     } finally {
       setClaimingId(null);
     }
-  }, [user, claimedList, setUser, showToast]);
+  }, [isOwnProfile, user, claimedList, setUser, showToast]);
 
   const handleTogglePin = useCallback(async (achievementId: string) => {
-    if (!user || !supabase || savingPin) return;
+    if (!isOwnProfile || !user || !supabase || savingPin) return;
     setSavingPin(true);
 
     let newPinned: string[];
@@ -274,7 +299,9 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
     } finally {
       setSavingPin(false);
     }
-  }, [user, pinnedList, setUser, showToast, savingPin]);
+  }, [isOwnProfile, user, pinnedList, setUser, showToast, savingPin]);
+
+  const profileDisplayName = formatUserDisplayName(activeProfile?.username, activeProfile?.name || activeProfile?.full_name);
 
   return (
     <AnimatePresence>
@@ -310,7 +337,9 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-[#D4AF37]" />
-                  <h2 className="text-base font-black text-white tracking-tight">Başarımlar</h2>
+                  <h2 className="text-base font-black text-white tracking-tight">
+                    {isOwnProfile ? 'Başarımlarım' : `${profileDisplayName} Başarımları`}
+                  </h2>
                 </div>
                 {pendingCount > 0 && (
                   <span className="text-[10px] font-bold text-emerald-400 mt-0.5">
@@ -331,23 +360,32 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
               </div>
               <div className="w-px h-8 bg-white/10" />
               <div className="flex-1 text-center">
-                <p className="text-[9px] font-bold text-amber-200/50 uppercase tracking-widest">Tamamlanan</p>
+                <p className="text-[9px] font-bold text-amber-200/50 uppercase tracking-widest">Kazanılan</p>
                 <p className="text-lg font-black text-[#D4AF37]">
-                  {claimedList.length}/{ACHIEVEMENTS.length}
+                  {completedCount}/{ACHIEVEMENTS.length}
                 </p>
               </div>
             </div>
 
-            {/* Pin tip */}
-            <div className="flex items-center gap-2 px-5 py-2 bg-[#D4AF37]/5 border-b border-[#D4AF37]/10 shrink-0">
-              <Pin className="w-3.5 h-3.5 text-[#D4AF37]/70 shrink-0" />
-              <p className="text-[10px] text-amber-200/50 font-medium">
-                Kazandığın başarımları <span className="text-[#D4AF37] font-bold">profiline sabitle</span> (maks. 3 rozet)
-              </p>
-            </div>
+            {/* Pin tip — only for own profile */}
+            {isOwnProfile ? (
+              <div className="flex items-center gap-2 px-5 py-2 bg-[#D4AF37]/5 border-b border-[#D4AF37]/10 shrink-0">
+                <Pin className="w-3.5 h-3.5 text-[#D4AF37]/70 shrink-0" />
+                <p className="text-[10px] text-amber-200/50 font-medium">
+                  Kazandığın başarımları <span className="text-[#D4AF37] font-bold">profiline sabitle</span> (maks. 3 rozet)
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-5 py-2 bg-[#D4AF37]/5 border-b border-[#D4AF37]/10 shrink-0">
+                <Trophy className="w-3.5 h-3.5 text-[#D4AF37]/70 shrink-0" />
+                <p className="text-[10px] text-amber-200/50 font-medium">
+                  {profileDisplayName} kullanıcısının kilit açtığı ve kazandığı başarımlar
+                </p>
+              </div>
+            )}
 
             {/* Achievement Cards */}
-            <div className="overflow-y-auto flex-1 px-4 py-4 space-y-3 pb-8">
+            <div className="overflow-y-auto flex-1 px-4 py-4 space-y-3 pb-8 custom-scrollbar">
               {/* Section: Şarkı */}
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">🎵 Şarkı Görevleri</p>
               {ACHIEVEMENTS.filter(a => a.category === 'songs').map(a => (
@@ -355,18 +393,16 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   key={a.id}
                   achievement={a}
                   totalSongs={totalSongs}
-                  
                   claimedList={claimedList}
                   pinnedList={pinnedList}
-                  onClaim={handleClaim}
-                  onTogglePin={handleTogglePin}
+                  onClaim={isOwnProfile ? handleClaim : undefined}
+                  onTogglePin={isOwnProfile ? handleTogglePin : undefined}
                   isClaiming={claimingId === a.id}
                   isBetaTester={isBetaTester}
                   isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
+                  isOwnProfile={isOwnProfile}
                 />
               ))}
-
-
 
               {/* Section: Özel */}
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">✨ Özel Başarımlar</p>
@@ -375,14 +411,14 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({ isOpen, on
                   key={a.id}
                   achievement={a}
                   totalSongs={totalSongs}
-                  
                   claimedList={claimedList}
                   pinnedList={pinnedList}
-                  onClaim={handleClaim}
-                  onTogglePin={handleTogglePin}
+                  onClaim={isOwnProfile ? handleClaim : undefined}
+                  onTogglePin={isOwnProfile ? handleTogglePin : undefined}
                   isClaiming={false}
                   isBetaTester={isBetaTester}
                   isBetaTesterRewardClaimed={isBetaTesterRewardClaimed}
+                  isOwnProfile={isOwnProfile}
                 />
               ))}
             </div>

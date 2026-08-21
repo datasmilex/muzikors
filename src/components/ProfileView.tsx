@@ -575,13 +575,38 @@ export const ProfileView: React.FC = () => {
                             </button>
                           )}
                         </div>
+
+                        {/* ─── Pinned Achievements Badges ─── */}
+                        {(() => {
+                          const pinnedIds: string[] = (currentProfile as any)?.pinned_achievements ?? [];
+                          const pinned = ACHIEVEMENTS.filter(a => pinnedIds.includes(a.id));
+                          if (pinned.length === 0) return null;
+
+                          return (
+                            <div 
+                              onClick={() => setShowAchievements(true)}
+                              className="flex items-center justify-center gap-1.5 mt-3 flex-wrap cursor-pointer group"
+                              title="Tüm başarımları görüntüle"
+                            >
+                              {pinned.map(ach => (
+                                <div 
+                                  key={ach.id}
+                                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-[#D4AF37]/30 backdrop-blur-md shadow-sm group-hover:border-[#D4AF37]/60 group-active:scale-95 transition-all"
+                                >
+                                  <span className="text-xs">{ach.emoji}</span>
+                                  <span className="text-[10px] font-bold text-amber-200">{ach.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </>
                     )}
                   </div>
                 </div>
 
                 {/* ─── Social Stats ─── */}
-                <div className="flex justify-around items-center bg-[#1C130D] rounded-2xl border border-white/5 py-3 mt-6 mb-4 shadow-inner">
+                <div className="flex justify-around items-center bg-[#1C130D] rounded-2xl border border-white/5 py-3 mt-6 mb-3 shadow-inner">
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">{stats.posts_count}</span>
                     <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Gönderi</span>
@@ -598,14 +623,44 @@ export const ProfileView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ─── Technical Stats Toggle ─── */}
-                <button
-                  onClick={() => setShowTechnicalStats(!showTechnicalStats)}
-                  className="w-full py-2 px-4 rounded-xl border border-white/5 bg-white/5 text-zinc-400 font-bold text-[10px] uppercase tracking-widest mb-4 flex items-center justify-between"
-                >
-                  <span className="flex items-center gap-2"><Music className="w-3.5 h-3.5" /> İstatistikler</span>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showTechnicalStats ? 'rotate-90' : ''}`} />
-                </button>
+                {/* ─── Achievements & Stats Action Bar ─── */}
+                {(() => {
+                  const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
+                  const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
+                  const isProfileBetaTesterRewardClaimed = currentProfile?.beta_tester_reward_claimed ?? false;
+                  const userClaimedList: string[] = (currentProfile as any)?.claimed_achievements ?? [];
+                  const completedCount = ACHIEVEMENTS.filter(
+                    a => isAchievementUnlocked(a, totalSongsCount, isProfileBetaTester) || isAchievementClaimed(a, userClaimedList, isProfileBetaTesterRewardClaimed)
+                  ).length;
+
+                  return (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <button
+                        onClick={() => setShowAchievements(true)}
+                        className="py-2.5 px-3.5 rounded-xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#2A1D13] to-[#1C130D] text-[#D4AF37] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all group"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Trophy className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                          <span className="text-[11px] font-black text-amber-100">Başarımlar</span>
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                          {completedCount}/{ACHIEVEMENTS.length}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => setShowTechnicalStats(!showTechnicalStats)}
+                        className="py-2.5 px-3.5 rounded-xl border border-white/10 bg-white/5 text-zinc-300 font-bold text-xs flex items-center justify-between active:scale-95 transition-all"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Music className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span className="text-[11px] font-semibold">İstatistikler</span>
+                        </span>
+                        <ChevronRight className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showTechnicalStats ? 'rotate-90' : ''}`} />
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 <AnimatePresence>
                   {showTechnicalStats && (
@@ -615,7 +670,7 @@ export const ProfileView: React.FC = () => {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="grid grid-cols-1 gap-3 mb-6 relative z-10">
+                      <div className="grid grid-cols-1 gap-3 mb-4 relative z-10">
                         <div className="bg-[#1C130D] p-3 rounded-2xl border border-white/5 flex flex-col gap-1 items-center">
                           <Music className="w-4 h-4 text-[#D4AF37]" />
                           <p className="text-[9px] text-amber-200/50 font-bold uppercase tracking-widest">Toplam İstek</p>
@@ -727,7 +782,12 @@ export const ProfileView: React.FC = () => {
         </motion.div>
       </div>
 
-      <AchievementsModal isOpen={showAchievements} onClose={() => setShowAchievements(false)} />
+      <AchievementsModal 
+        isOpen={showAchievements} 
+        onClose={() => setShowAchievements(false)} 
+        targetProfile={currentProfile}
+        isOwnProfile={isOwnProfile}
+      />
       </>)}
     </AnimatePresence>
   );
