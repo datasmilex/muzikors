@@ -445,7 +445,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
+          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, claimed_achievements, pinned_achievements, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -523,9 +523,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Use only custom (non-Google) avatar; empty string = show default icon
         avatar: customAvatarUrl,
         email: emailStr,
-        totalSongsRequested: prev?.totalSongsRequested ?? 0,
+        totalSongsRequested: (dbProfile.total_songs_requested !== undefined && dbProfile.total_songs_requested !== null) ? Number(dbProfile.total_songs_requested) : (prev?.totalSongsRequested ?? 0),
         last_username_update: dbLastUsernameUpdate || prev?.last_username_update,
         isPremium: dbProfile.is_premium || false,
+        is_beta_tester: dbProfile.is_beta_tester ?? prev?.is_beta_tester ?? false,
+        beta_tester_reward_claimed: dbProfile.beta_tester_reward_claimed ?? prev?.beta_tester_reward_claimed ?? false,
+        claimed_achievements: dbProfile.claimed_achievements || prev?.claimed_achievements || [],
+        pinned_achievements: dbProfile.pinned_achievements || prev?.pinned_achievements || [],
         premium_until: dbProfile.premium_until || null,
         premium_activated_at: dbProfile.premium_activated_at || null,
         daily_songs_count: dbProfile.daily_songs_count || 0,
@@ -1168,6 +1172,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setQueue((prev) => [...prev, newTrack]);
+    setUser((prev) => prev ? {
+      ...prev,
+      totalSongsRequested: (prev.totalSongsRequested || 0) + 1,
+      daily_songs_count: (prev.daily_songs_count || 0) + 1,
+      daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0)
+    } : null);
     setCooldown({ active: true, remainingSeconds: 30, lastRequestedAt: Date.now() });
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
     showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;

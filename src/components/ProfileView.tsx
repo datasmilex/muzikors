@@ -145,7 +145,7 @@ const CropModal: React.FC<CropModalProps> = ({ imageSrc, onConfirm, onCancel }) 
 
 // ─── Main ProfileView ──────────────────────────────────────────────────────────
 export const ProfileView: React.FC = () => {
-  const { activeModal, closeModal, user, deleteAccount, logout, loginWithProvider, showToast, viewingProfileId, openProtectedModal } = useApp();
+  const { activeModal, closeModal, user, setUser, deleteAccount, logout, loginWithProvider, showToast, viewingProfileId, openProtectedModal } = useApp();
   
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -183,27 +183,39 @@ export const ProfileView: React.FC = () => {
   const currentProfile = isOwnProfile ? user : profileData;
 
   const fetchProfileData = useCallback(async () => {
-    if (!viewingProfileId) return;
+    const targetId = viewingProfileId || user?.id;
+    if (!targetId) return;
     if (activeModal !== 'profile') return;
     
     setIsLoadingProfile(true);
     try {
-      // 1. Fetch user info if not own
-      if (!isOwnProfile) {
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', viewingProfileId).single();
-        if (error) throw error;
+      // 1. Fetch user info from profiles
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', targetId).single();
+      if (!error && data) {
         setProfileData(data);
+        if (isOwnProfile) {
+          setUser(prev => prev ? {
+            ...prev,
+            name: data.full_name || prev.name,
+            username: data.username || prev.username,
+            totalSongsRequested: (data.total_songs_requested !== undefined && data.total_songs_requested !== null) ? Number(data.total_songs_requested) : prev.totalSongsRequested,
+            isPremium: data.is_premium ?? prev.isPremium,
+            is_beta_tester: data.is_beta_tester ?? prev.is_beta_tester,
+            claimed_achievements: data.claimed_achievements ?? prev.claimed_achievements,
+            pinned_achievements: data.pinned_achievements ?? prev.pinned_achievements,
+          } : null);
+        }
       }
 
       // 2. Fetch Stats via RPC
-      const { data: statsData, error: statsError } = await supabase.rpc('get_profile_stats', { p_user_id: viewingProfileId });
+      const { data: statsData, error: statsError } = await supabase.rpc('get_profile_stats', { p_user_id: targetId });
       if (!statsError && statsData) {
         setStats(statsData as any);
       }
 
       // 3. Fetch Follow state if logged in and looking at someone else
       if (!isOwnProfile && user) {
-        const { data: followData } = await supabase.from('follows').select('*').eq('follower_id', user.id).eq('following_id', viewingProfileId).single();
+        const { data: followData } = await supabase.from('follows').select('*').eq('follower_id', user.id).eq('following_id', targetId).single();
         setIsFollowingState(!!followData);
       }
 
