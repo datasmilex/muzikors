@@ -70,9 +70,9 @@ export const MusicSearchModal: React.FC = () => {
             return;
           }
           const { data: histData, error: histErr } = await supabase
-            .from('queue')
+            .from('song_requests_log')
             .select('song_name, artist_name, album_cover, spotify_uri, duration_ms, created_at')
-            .eq('requested_by_user_id', user.id)
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(25);
 
