@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Sparkles } from 'lucide-react';
+import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Sparkles, Store } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { formatDuration, formatUserDisplayName } from '../utils/formatters';
+import { formatDuration, formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
   const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast } = useApp();
@@ -46,6 +46,9 @@ export const UpNextQueueSection: React.FC = () => {
 
   const getRequestedByLabel = (track: any) => {
     if (user && track.requestedByUserId === user.id) return 'Sen';
+    if (isVenueOrBackgroundRequester(track.requestedBy, track.requestedByUserId)) {
+      return isBackgroundMusicRequester(track.requestedBy) ? '☕ Fon Müziği' : '👑 Mekan Sahibi';
+    }
     if (!track.requestedBy) return 'Misafir';
     if (track.requestedBy.startsWith('@') || track.requestedBy === 'Anonim' || track.requestedBy === 'Anonim Müşteri') {
       return track.requestedBy;
@@ -285,16 +288,25 @@ export const UpNextQueueSection: React.FC = () => {
                             {track.artist}
                           </p>
                           <div className="flex items-center gap-2 text-[10px] text-amber-200/60 font-medium">
-                            <span 
-                              className="flex items-center gap-1 cursor-pointer hover:text-amber-100 transition-colors"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (track.requestedByUserId) openProfile(track.requestedByUserId);
-                              }}
-                            >
-                              <User className="w-3 h-3" />
-                              <span className="truncate max-w-[100px]">{getRequestedByLabel(track)}</span>
-                            </span>
+                            {isVenueOrBackgroundRequester(track.requestedBy, track.requestedByUserId) ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/20 border border-[#D4AF37]/60 text-[9px] font-extrabold text-amber-100 shadow-[0_0_10px_rgba(212,175,55,0.25)] uppercase tracking-wide">
+                                <Store className="w-2.5 h-2.5 text-[#D4AF37] shrink-0" />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 font-extrabold">
+                                  {getRequestedByLabel(track)}
+                                </span>
+                              </span>
+                            ) : (
+                              <span 
+                                className="flex items-center gap-1 cursor-pointer hover:text-amber-100 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (track.requestedByUserId) openProfile(track.requestedByUserId);
+                                }}
+                              >
+                                <User className="w-3 h-3 text-[#D4AF37]/80" />
+                                <span className="truncate max-w-[100px]">{getRequestedByLabel(track)}</span>
+                              </span>
+                            )}
                             {user && track.requestedByUserId === user.id && (
                               <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-black border border-amber-500/40">
                                 ✨ Senin İsteğin

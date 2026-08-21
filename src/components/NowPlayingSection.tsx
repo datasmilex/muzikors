@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Play, Disc, User, Volume2, Music, Sparkles } from 'lucide-react';
+import { Play, Disc, User, Volume2, Music, Sparkles, Store, Radio } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { formatUserDisplayName } from '../utils/formatters';
+import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
 
 export const NowPlayingSection: React.FC = () => {
   const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user, openProfile } = useApp();
@@ -139,26 +139,48 @@ export const NowPlayingSection: React.FC = () => {
             {nowPlaying.artist}
           </p>
           
-          <div 
-            className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md cursor-pointer hover:bg-white/10 transition-colors"
-            onClick={() => {
-              if (nowPlaying.requestedByUserId) openProfile(nowPlaying.requestedByUserId);
-            }}
-          >
-            <User className="w-2.5 h-2.5 text-[#D4AF37]" />
-            <span className="truncate tracking-wide flex items-center gap-1">
-              İsteyen: <strong className="text-white">
-                {(user && nowPlaying.requestedByUserId === user.id) 
-                  ? 'Sen' 
-                  : (nowPlaying.requestedBy.startsWith('@') || nowPlaying.requestedBy.includes('.***') || nowPlaying.requestedBy === 'Anonim' || nowPlaying.requestedBy === 'Mekan' || nowPlaying.requestedBy === 'Mekan Sahibi' || nowPlaying.requestedBy === 'Mekan Listesi')
-                    ? nowPlaying.requestedBy.replace(' VIP', '')
-                    : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
-              </strong>
-              {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium)) && (
-                <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase ml-0.5 leading-none shadow-[0_0_5px_rgba(212,175,55,0.4)]">VIP</span>
-              )}
-            </span>
-          </div>
+          {/* Requester Badge */}
+          {(() => {
+            const isVenue = isVenueOrBackgroundRequester(nowPlaying.requestedBy, nowPlaying.requestedByUserId);
+            const isBgMusic = isBackgroundMusicRequester(nowPlaying.requestedBy) || (nowPlaying as any).isBackgroundMusic === true;
+
+            if (isVenue || isBgMusic) {
+              return (
+                <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2 rounded-full bg-gradient-to-r from-amber-500/20 via-[#2A1D13] to-amber-500/20 border border-[#D4AF37]/70 text-[10px] text-amber-100 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.25)]">
+                  <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span className="tracking-wider flex items-center gap-1.5 font-bold uppercase">
+                    <span className="text-amber-200/70 text-[9px]">Seçim:</span>
+                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 font-extrabold tracking-widest text-[10px]">
+                      {isBgMusic ? '☕ Mekan Fon Müziği' : '👑 Mekan Sahibi'}
+                    </strong>
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <div 
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-full bg-white/5 border border-white/10 text-[9px] text-amber-100 backdrop-blur-md cursor-pointer hover:bg-white/10 transition-colors"
+                onClick={() => {
+                  if (nowPlaying.requestedByUserId) openProfile(nowPlaying.requestedByUserId);
+                }}
+              >
+                <User className="w-2.5 h-2.5 text-[#D4AF37]" />
+                <span className="truncate tracking-wide flex items-center gap-1">
+                  İsteyen: <strong className="text-white">
+                    {(user && nowPlaying.requestedByUserId === user.id) 
+                      ? 'Sen' 
+                      : (nowPlaying.requestedBy.startsWith('@') || nowPlaying.requestedBy.includes('.***') || nowPlaying.requestedBy === 'Anonim')
+                        ? nowPlaying.requestedBy.replace(' VIP', '')
+                        : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
+                  </strong>
+                  {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium)) && (
+                    <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase ml-0.5 leading-none shadow-[0_0_5px_rgba(212,175,55,0.4)]">VIP</span>
+                  )}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Music Notes Floating Animation */}

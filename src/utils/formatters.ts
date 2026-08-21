@@ -24,3 +24,25 @@ export function formatUserDisplayName(username?: string | null, fullName?: strin
   }
   return `${trimmed.charAt(0).toUpperCase()}.***`;
 }
+
+export function isVenueOrBackgroundRequester(name?: string | null, userId?: string | null): boolean {
+  if (!name && !userId) return false;
+  const n = (name || '').toLowerCase();
+  const u = (userId || '').toLowerCase();
+  return (
+    n.includes('mekan') ||
+    n.includes('kafe') ||
+    n.includes('fon müz') ||
+    n.includes('fon muz') ||
+    n.includes('fon_müz') ||
+    u === 'cafe_owner' ||
+    u === 'venue' ||
+    u === 'admin'
+  );
+}
+
+export function isBackgroundMusicRequester(name?: string | null): boolean {
+  if (!name) return false;
+  const n = name.toLowerCase();
+  return n.includes('fon') || n.includes('liste') || n.includes('background') || n.includes('spotify-bg');
+}
