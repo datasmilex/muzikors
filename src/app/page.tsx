@@ -23,6 +23,7 @@ import { ToastNotification } from '../components/ToastNotification';
 import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 import { LyricsModal } from '../components/LyricsModal';
+import { MenuModal } from '../components/MenuModal';
 
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -64,6 +65,7 @@ const AppContent = () => {
       <QrScannerModal />
       <GpsMapModal />
       <VenueInfoModal />
+      <MenuModal />
       <InfoModals />
       <DailyRewardModal />
       <RewardedAdModal />

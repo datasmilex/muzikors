@@ -48,6 +48,7 @@ export interface Venue {
   contact_email?: string;
   logo_url?: string;
   menu_link?: string;
+  menu_type?: 'external' | 'native';
   wifi_name?: string;
   wifi_password?: string;
   terms_accepted?: boolean;
@@ -66,6 +67,27 @@ export interface Venue {
     spotify_track_id: string;
     requested_by_name: string;
   };
+}
+
+export interface MenuCategory {
+  id: string;
+  venue_id: number;
+  name: string;
+  order_index: number;
+  created_at: string;
+}
+
+export interface MenuItem {
+  id: string;
+  venue_id: number;
+  category_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  is_available: boolean;
+  order_index: number;
+  created_at: string;
 }
 
 export interface UserProfile {
@@ -95,8 +117,6 @@ export interface UserProfile {
   premium_activated_at?: string | null;
 }
 
-
-
 export type ModalType = 
   | 'none' 
   | 'login' 
@@ -117,7 +137,8 @@ export type ModalType =
   | 'venue_info'
   | 'leaderboard'
   | 'rewarded_ad'
-  | 'lyrics';
+  | 'lyrics'
+  | 'menu';
 
 export interface SocialPost {
   id: string;

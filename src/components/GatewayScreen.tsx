@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Music, Menu, Wifi, Copy, Check, Store, X } from 'lucide-react';
 
 export const GatewayScreen: React.FC = () => {
-  const { activeVenue, setHasEnteredGateway, showToast } = useApp();
+  const { activeVenue, setHasEnteredGateway, openModal, showToast } = useApp();
   const [copied, setCopied] = useState(false);
 
   if (!activeVenue) return null;
@@ -20,9 +20,10 @@ export const GatewayScreen: React.FC = () => {
   const wifiName = activeVenue.wifi_name || (activeVenue as any).wifi_ssid;
   const wifiPass = activeVenue.wifi_password || (activeVenue as any).wifi_pass;
   const menuUrl = activeVenue.menu_link || (activeVenue as any).menu_url;
+  const isNativeMenu = activeVenue.menu_type === 'native';
 
   const hasWifi = Boolean(wifiName?.trim()) || Boolean(wifiPass?.trim());
-  const hasMenu = Boolean(menuUrl?.trim());
+  const hasMenu = isNativeMenu || Boolean(menuUrl?.trim());
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#120C08] p-4 relative overflow-hidden items-center">
@@ -126,14 +127,27 @@ export const GatewayScreen: React.FC = () => {
           )}
 
           {hasMenu && (
-            <a
-              href={menuUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
-            >
-              📖 Dijital Menü
-            </a>
+            isNativeMenu ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setHasEnteredGateway(true);
+                  openModal('menu');
+                }}
+                className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group cursor-pointer"
+              >
+                📖 Dijital Menü
+              </button>
+            ) : (
+              <a
+                href={menuUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
+              >
+                📖 Dijital Menü
+              </a>
+            )
           )}
         </div>
       </div>

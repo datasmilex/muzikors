@@ -230,6 +230,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         wifi_name: data.wifi_name || data.wifi_ssid || '',
         wifi_password: data.wifi_password || data.wifi_pass || '',
         menu_link: data.menu_link || data.menu_url || '',
+        menu_type: data.menu_type || 'external',
         logo_url: data.logo_url || data.logo || '',
         spotify_client_id: data.spotify_client_id || null,
         has_spotify: !!(data.spotify_refresh_token),
