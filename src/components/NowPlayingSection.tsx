@@ -1,13 +1,37 @@
 'use client';
 
 import React from 'react';
-import { Play, Disc, User, Volume2, Music, Sparkles, Store, Radio } from 'lucide-react';
+import { Play, Disc, User, Volume2, Music, Sparkles, Store, Radio, ExternalLink, Mic2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
 export const NowPlayingSection: React.FC = () => {
-  const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user, openProfile } = useApp();
+  const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, openModal, activeVenue, user, openProfile, showToast } = useApp();
+
+  const handleOpenSpotify = async () => {
+    if (!nowPlaying) return;
+    const trackId = (nowPlaying.spotifyUri || nowPlaying.id || '').replace('spotify:track:', '');
+    const spotifyAppUrl = `spotify:track:${trackId}`;
+    const spotifyWebUrl = `https://open.spotify.com/track/${trackId}`;
+
+    showToast('Spotify açılıyor...');
+
+    try {
+      if (Capacitor.isNativePlatform()) {
+        window.location.href = spotifyAppUrl;
+        setTimeout(async () => {
+          await Browser.open({ url: spotifyWebUrl });
+        }, 800);
+      } else {
+        window.open(spotifyWebUrl, '_blank');
+      }
+    } catch (e) {
+      window.open(spotifyWebUrl, '_blank');
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -181,10 +205,33 @@ export const NowPlayingSection: React.FC = () => {
               </div>
             );
           })()}
+
+          {/* Action Buttons: 🟢 Spotify'da Aç & 📜 Şarkı Sözleri */}
+          <div className="w-full flex items-center justify-center gap-2 mt-3 mb-1">
+            {/* 🟢 Spotify'da Aç */}
+            <button
+              onClick={handleOpenSpotify}
+              className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#1DB954]/15 hover:bg-[#1DB954]/25 active:bg-[#1DB954]/30 border border-[#1DB954]/40 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm group"
+              title="Spotify'da Aç / Favorilere Ekle"
+            >
+              <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform text-[#1DB954]" />
+              <span className="text-[10px] font-black tracking-tight">Spotify'da Aç</span>
+            </button>
+
+            {/* 📜 Şarkı Sözleri */}
+            <button
+              onClick={() => openModal('lyrics')}
+              className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 active:bg-[#D4AF37]/30 border border-[#D4AF37]/40 text-amber-200 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm group"
+              title="Şarkı Sözlerini Gör"
+            >
+              <Mic2 className="w-3 h-3 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black tracking-tight">Şarkı Sözleri</span>
+            </button>
+          </div>
         </div>
 
         {/* Music Notes Floating Animation */}
-        <div className="w-full flex items-center justify-center gap-3 mb-2 h-8 overflow-hidden select-none">
+        <div className="w-full flex items-center justify-center gap-3 mb-1 h-6 overflow-hidden select-none">
           {['♩','♪','♫','♬','♩','♪'].map((note, i) => (
             <span
               key={i}

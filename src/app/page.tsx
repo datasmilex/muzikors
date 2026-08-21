@@ -22,6 +22,7 @@ import { RewardedAdModal } from '../components/RewardedAdModal';
 import { ToastNotification } from '../components/ToastNotification';
 import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
+import { LyricsModal } from '../components/LyricsModal';
 
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -68,6 +69,7 @@ const AppContent = () => {
       <RewardedAdModal />
       <PremiumModal />
       <GlobalFeedView />
+      <LyricsModal />
       <ToastNotification />
     </div>
   );

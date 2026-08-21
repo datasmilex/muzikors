@@ -115,7 +115,8 @@ export type ModalType =
   | 'globalFeed'
   | 'venue_info'
   | 'leaderboard'
-  | 'rewarded_ad';
+  | 'rewarded_ad'
+  | 'lyrics';
 
 export interface SocialPost {
   id: string;
