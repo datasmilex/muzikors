@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { PremiumBadge } from './PremiumBadge';
+import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { formatUserDisplayName } from '../utils/formatters';
 
 export const LeaderboardModal: React.FC = () => {
@@ -28,7 +28,7 @@ export const LeaderboardModal: React.FC = () => {
       if (activeTab === 'users') {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, full_name, username, avatar_url, total_songs_requested, is_premium')
+          .select('id, full_name, username, avatar_url, total_songs_requested, is_premium, is_beta_tester')
           .order('total_songs_requested', { ascending: false })
           .limit(50);
         
@@ -39,6 +39,7 @@ export const LeaderboardModal: React.FC = () => {
             username: p.username || null,
             avatar: p.avatar_url,
             is_premium: p.is_premium || false,
+            is_beta_tester: p.is_beta_tester || false,
             total_songs_requested: p.total_songs_requested || 0
           }));
           setUsers(list);
@@ -212,7 +213,9 @@ export const LeaderboardModal: React.FC = () => {
                 users.map((user, idx) => {
                   const zIndex = users.length - idx;
                   const isTop = idx === 0;
-                  const isUserVip = currentUser?.id === user.id && currentUser?.isPremium;
+                  const isUserVip = user.is_premium || (currentUser?.id === user.id && currentUser?.isPremium);
+                  const isUserBeta = user.is_beta_tester || (currentUser?.id === user.id && currentUser?.is_beta_tester);
+                  const isCurrentLoggedUser = currentUser?.id === user.id;
                   
                   return (
                     <div 
@@ -222,7 +225,7 @@ export const LeaderboardModal: React.FC = () => {
                     >
                       <div className={`flex items-center gap-4 p-4 rounded-3xl border backdrop-blur-xl shadow-[0_-5px_15px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.5)] ${
                         isTop ? 'bg-gradient-to-r from-[#2A1D13] to-[#1C130D] border-[#D4AF37]/50' : 'bg-[#120C08]/95 border-[#D4AF37]/20 active:border-[#D4AF37]/40'
-                      } ${isUserVip ? 'border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]' : ''}`}>
+                      } ${isCurrentLoggedUser ? 'border-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.2)]' : ''}`}>
                         <div className={`w-10 h-10 flex-none flex items-center justify-center font-black text-xl rounded-full shadow-lg ${
                           idx + 1 === 1 ? 'gold-gradient-bg text-black' : 
                           idx + 1 === 2 ? 'bg-slate-300 text-slate-800' : 
@@ -233,8 +236,8 @@ export const LeaderboardModal: React.FC = () => {
                         </div>
                         
                         <div className="relative group shrink-0">
-                          <div className={`absolute -inset-0.5 rounded-full blur opacity-30 animate-pulse ${isUserVip ? 'bg-gradient-to-r from-amber-300 via-[#D4AF37] to-amber-300' : 'bg-gradient-to-r from-[#D4AF37] to-amber-600'}`} />
-                          <div className={`relative w-12 h-12 rounded-full border-2 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.2)] ${isUserVip ? 'border-amber-400 shadow-[0_0_20px_rgba(252,211,77,0.4)]' : 'border-[#D4AF37]/50'}`}>
+                          <div className={`absolute -inset-0.5 rounded-full blur opacity-30 animate-pulse ${isUserVip ? 'bg-gradient-to-r from-amber-300 via-[#D4AF37] to-amber-300' : isUserBeta ? 'bg-gradient-to-r from-purple-500 to-indigo-500' : 'bg-gradient-to-r from-[#D4AF37] to-amber-600'}`} />
+                          <div className={`relative w-12 h-12 rounded-full border-2 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.2)] ${isUserVip ? 'border-amber-400 shadow-[0_0_20px_rgba(252,211,77,0.4)]' : isUserBeta ? 'border-purple-400/70 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'border-[#D4AF37]/50'}`}>
                             <img
                               src={user.avatar || '/logo.png'}
                               alt={user.name}
@@ -249,12 +252,14 @@ export const LeaderboardModal: React.FC = () => {
                         
                         <div className="flex-1 min-w-0">
                           <p className={`font-black truncate flex items-center gap-1.5 ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
-                            {formatUserDisplayName(user.username, user.name)}
+                            <span className="truncate">{formatUserDisplayName(user.username, user.name)}</span>
                             {isUserVip && (
-                              <PremiumBadge className="w-3.5 h-3.5" />
+                              <PremiumBadge className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                            {isUserBeta && (
+                              <BetaTesterBadge className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </p>
-                          
                         </div>
                         
                         <div className="flex-none px-4 py-2 rounded-2xl bg-black/50 border border-[#D4AF37]/20 flex flex-col items-center justify-center shadow-inner">

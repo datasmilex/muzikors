@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { PremiumBadge } from './PremiumBadge';
+import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
 import { AchievementsModal } from './AchievementsModal';
 import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed } from '../data/achievements';
@@ -542,7 +542,7 @@ export const ProfileView: React.FC = () => {
                             <PremiumBadge className="w-4 h-4 ml-1" />
                           )}
                           {(currentProfile?.is_beta_tester || currentProfile?.isBetaTester) && (
-                            <CheckCircle className="w-4 h-4 text-purple-400 drop-shadow-md" />
+                            <BetaTesterBadge className="w-4 h-4 ml-1" />
                           )}
                         </div>
                         <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">

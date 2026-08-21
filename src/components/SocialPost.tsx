@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { PremiumBadge } from './PremiumBadge';
+import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { containsProfanity } from '../utils/profanity';
 
 interface SocialPostProps {
@@ -184,7 +184,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                 {post.user_full_name || 'Bilinmeyen Kullanıcı'}
               </span>
               {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-1" />}
-              {post.user_is_beta_tester && <CheckCircle className="w-3.5 h-3.5 text-purple-400" />}
+              {post.user_is_beta_tester && <BetaTesterBadge className="w-3.5 h-3.5 ml-1" />}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-medium text-amber-200/50">
