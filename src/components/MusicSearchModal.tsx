@@ -108,7 +108,7 @@ export const MusicSearchModal: React.FC = () => {
         }
 
         if (isDefaultSearch && activeTab === 'top10') {
-          // TOP 10 ŞARKILAR: RPC üzerinden son 30 günün en çok istenenleri getir
+          // TOP 10 ŞARKILAR: RPC üzerinden en çok istenenleri getir
           const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: Number(activeVenue.id) });
           if (!topError && topData && topData.length > 0) {
             const topTracks: Track[] = topData.map((t: any) => ({
@@ -117,6 +117,10 @@ export const MusicSearchModal: React.FC = () => {
               artist: t.artist_name,
               coverUrl: t.album_cover,
               albumCover: t.album_cover,
+              spotifyUri: t.spotify_uri || (t.track_id?.startsWith('spotify:track:') ? t.track_id : ''),
+              durationMs: t.duration_ms || 210000,
+              requestedBy: `${t.request_count} kez istendi`,
+              votes: 0,
             }));
             setSearchResults(topTracks.slice(0, 10));
             if (!selectedTrack) setSelectedTrack(topTracks[0]);
