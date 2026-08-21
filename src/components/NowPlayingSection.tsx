@@ -5,6 +5,7 @@ import { Play, Disc, User, Volume2, Music, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { FloatingEmojis, EmojiReaction } from './FloatingEmojis';
+import { formatUserDisplayName } from '../utils/formatters';
 
 export const NowPlayingSection: React.FC = () => {
   const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user, openProfile } = useApp();
@@ -201,7 +202,13 @@ export const NowPlayingSection: React.FC = () => {
           >
             <User className="w-2.5 h-2.5 text-[#D4AF37]" />
             <span className="truncate tracking-wide flex items-center gap-1">
-              İsteyen: <strong className="text-white">{(user && nowPlaying.requestedByUserId === user.id) ? 'Sen' : nowPlaying.requestedBy.replace(' VIP', '')}</strong>
+              İsteyen: <strong className="text-white">
+                {(user && nowPlaying.requestedByUserId === user.id) 
+                  ? 'Sen' 
+                  : (nowPlaying.requestedBy.startsWith('@') || nowPlaying.requestedBy.includes('.***') || nowPlaying.requestedBy === 'Anonim' || nowPlaying.requestedBy === 'Mekan' || nowPlaying.requestedBy === 'Mekan Sahibi' || nowPlaying.requestedBy === 'Mekan Listesi')
+                    ? nowPlaying.requestedBy.replace(' VIP', '')
+                    : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
+              </strong>
               {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium)) && (
                 <span className="text-[8px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1 py-0.5 rounded-[3px] uppercase ml-0.5 leading-none shadow-[0_0_5px_rgba(212,175,55,0.4)]">VIP</span>
               )}

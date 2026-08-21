@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
 import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
-import { formatDuration } from '../utils/formatters';
+import { formatDuration, formatUserDisplayName } from '../utils/formatters';
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -373,7 +373,7 @@ export const MusicSearchModal: React.FC = () => {
                   {isAnonymous ? (
                     <p>"Şarkı isteğin uygulamada ve sıra listesinde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
                   ) : (
-                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{user?.name ? user.name.split(' ').map((n, i, arr) => i === arr.length - 1 ? n.charAt(0) + '.***' : n).join(' ') : 'Müşteri'}</b> olarak uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
+                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b> olarak uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
                   )}
                 </div>
 

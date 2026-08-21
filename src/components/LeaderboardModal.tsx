@@ -6,6 +6,7 @@ import { Trophy, X, Users, Store, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge } from './PremiumBadge';
+import { formatUserDisplayName } from '../utils/formatters';
 
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
@@ -26,7 +27,7 @@ export const LeaderboardModal: React.FC = () => {
       if (activeTab === 'users') {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url, total_songs_requested')
+          .select('id, full_name, username, avatar_url, total_songs_requested, is_premium')
           .order('total_songs_requested', { ascending: false })
           .limit(50);
         
@@ -34,7 +35,9 @@ export const LeaderboardModal: React.FC = () => {
           const list = profiles.map((p: any) => ({
             id: p.id,
             name: p.full_name || 'Kullanıcı',
+            username: p.username || null,
             avatar: p.avatar_url,
+            is_premium: p.is_premium || false,
             total_songs_requested: p.total_songs_requested || 0
           }));
           setUsers(list);
@@ -65,18 +68,6 @@ export const LeaderboardModal: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  
-
-  const maskName = (name: string) => {
-    if (!name) return 'Anonim Müşteri';
-    const parts = name.trim().split(' ');
-    if (parts.length > 1) {
-      const lastName = parts.pop();
-      return `${parts.join(' ')} ${lastName?.charAt(0)}.***`;
-    }
-    return `${name.charAt(0)}.***`;
   };
 
   return (
@@ -190,7 +181,7 @@ export const LeaderboardModal: React.FC = () => {
                         
                         <div className="flex-1 min-w-0">
                           <p className={`font-black truncate flex items-center gap-1.5 ${isTop ? 'text-lg text-white' : 'text-base text-gray-200'}`}>
-                            {maskName(user.name)}
+                            {formatUserDisplayName(user.username, user.name)}
                             {isUserVip && (
                               <PremiumBadge className="w-3.5 h-3.5" />
                             )}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { formatDuration } from '../utils/formatters';
+import { formatDuration, formatUserDisplayName } from '../utils/formatters';
 
 export const UpNextQueueSection: React.FC = () => {
   const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast } = useApp();
@@ -46,7 +46,14 @@ export const UpNextQueueSection: React.FC = () => {
 
   const getRequestedByLabel = (track: any) => {
     if (user && track.requestedByUserId === user.id) return 'Sen';
-    return track.requestedBy;
+    if (!track.requestedBy) return 'Misafir';
+    if (track.requestedBy.startsWith('@') || track.requestedBy === 'Anonim' || track.requestedBy === 'Anonim Müşteri') {
+      return track.requestedBy;
+    }
+    if (track.requestedBy.includes('.***')) {
+      return track.requestedBy;
+    }
+    return formatUserDisplayName(null, track.requestedBy);
   };
 
   const filteredQueue = queue.filter(track => {

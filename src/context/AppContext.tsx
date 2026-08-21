@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { ThemeType, getStoredTheme, applyTheme } from '../lib/theme';
-// Removed formatter imports
+import { formatUserDisplayName } from '../utils/formatters';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -1108,18 +1108,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const requestUserId = user?.id || null;
     
-    // Name Masking Logic
+    // Name Masking & Username Logic
     let requestedByName = 'Müşteri';
     if (isAnonymous && user?.isPremium) {
       requestedByName = 'Anonim';
-    } else if (user?.name) {
-      const parts = user.name.trim().split(' ');
-      if (parts.length > 1) {
-        const lastName = parts.pop();
-        requestedByName = `${parts.join(' ')} ${lastName?.charAt(0)}.***`;
-      } else {
-        requestedByName = `${user.name.charAt(0)}.***`;
-      }
+    } else if (user) {
+      requestedByName = formatUserDisplayName(user.username, user.name);
     }
 
     if (user?.isPremium && !isAnonymous) {
