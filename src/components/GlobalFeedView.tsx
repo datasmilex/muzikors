@@ -26,7 +26,7 @@ export const GlobalFeedView: React.FC = () => {
         .from('posts')
         .select(`
           id, content, created_at, likes_count, comments_count, user_id,
-          profiles:user_id ( full_name, username, avatar_url, is_premium, is_beta_tester ),
+          profiles:user_id ( full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester ),
           post_likes ( user_id )
         `)
         .order('created_at', { ascending: false })
@@ -44,6 +44,7 @@ export const GlobalFeedView: React.FC = () => {
         user_full_name: row.profiles?.full_name,
         user_username: row.profiles?.username,
         user_avatar_url: row.profiles?.avatar_url,
+        user_avatar_frame: row.profiles?.avatar_frame || 'none',
         user_is_beta_tester: row.profiles?.is_beta_tester,
         user_is_premium: row.profiles?.is_premium,
         has_liked: user ? row.post_likes.some((like: any) => like.user_id === user.id) : false,

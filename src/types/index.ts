@@ -83,6 +83,7 @@ export interface UserProfile {
   last_username_update?: string;
   claimed_achievements?: string[];
   pinned_achievements?: string[];
+  avatar_frame?: string;
   is_beta_tester?: boolean;
   beta_tester_reward_claimed?: boolean;
   daily_songs_count?: number;
@@ -128,6 +129,7 @@ export interface SocialPost {
   user_full_name?: string;
   user_username?: string;
   user_avatar_url?: string;
+  user_avatar_frame?: string;
   user_is_beta_tester?: boolean;
   user_is_premium?: boolean;
   has_liked?: boolean;

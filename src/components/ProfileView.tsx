@@ -2,12 +2,13 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle } from 'lucide-react';
+import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
 import { AchievementsModal } from './AchievementsModal';
-import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed } from '../data/achievements';
+import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed, AVATAR_FRAMES, isFrameUnlocked } from '../data/achievements';
+import { AvatarFrame } from './AvatarFrame';
 import { supabase } from '../lib/supabaseClient';
 import { SocialPost as SocialPostType, ProfileStats } from '../types';
 import { SocialPost } from './SocialPost';
@@ -151,6 +152,7 @@ export const ProfileView: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editUsername, setEditUsername] = useState('');
   const [editAvatar, setEditAvatar] = useState('');
+  const [selectedFrame, setSelectedFrame] = useState<string>('none');
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -181,6 +183,8 @@ export const ProfileView: React.FC = () => {
 
   const isOwnProfile = !viewingProfileId || viewingProfileId === user?.id;
   const currentProfile = isOwnProfile ? user : profileData;
+  const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
+  const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
 
   const fetchProfileData = useCallback(async () => {
     const targetId = viewingProfileId || user?.id;
@@ -203,6 +207,7 @@ export const ProfileView: React.FC = () => {
             is_beta_tester: data.is_beta_tester ?? prev.is_beta_tester,
             claimed_achievements: data.claimed_achievements ?? prev.claimed_achievements,
             pinned_achievements: data.pinned_achievements ?? prev.pinned_achievements,
+            avatar_frame: data.avatar_frame ?? prev.avatar_frame ?? 'none',
           } : null);
         }
       }
@@ -322,6 +327,7 @@ export const ProfileView: React.FC = () => {
     const currentAvatar = user?.avatar || '';
     const isGoogleAvatar = currentAvatar.includes('googleusercontent.com') || currentAvatar.includes('google.com');
     setEditAvatar(isGoogleAvatar ? '' : currentAvatar);
+    setSelectedFrame(user?.avatar_frame || 'none');
     setIsEditing(true);
   };
 
@@ -382,13 +388,22 @@ export const ProfileView: React.FC = () => {
           }
         }
       }
-      const updates: any = { avatar_url: editAvatar };
+      const updates: any = { avatar_url: editAvatar, avatar_frame: selectedFrame };
       if (newUsername !== user.username) {
         updates.username = newUsername;
         updates.last_username_update = new Date().toISOString();
       }
       const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
       if (error) throw error;
+      
+      setUser(prev => prev ? {
+        ...prev,
+        avatar: editAvatar,
+        avatar_frame: selectedFrame,
+        username: newUsername !== user.username ? newUsername : prev.username,
+        last_username_update: newUsername !== user.username ? updates.last_username_update : prev.last_username_update,
+      } : null);
+
       showToast('Profiliniz başarıyla güncellendi!');
       setIsEditing(false);
     } catch (err: any) {
@@ -454,21 +469,23 @@ export const ProfileView: React.FC = () => {
                 {/* ─── Avatar & Basic Info ─── */}
                 <div className="flex flex-col items-center">
                   <div className="relative mb-3 mt-2">
-                    <div className="w-24 h-24 rounded-full border-2 border-[#D4AF37]/50 overflow-hidden bg-[#1C130D] shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                      {(() => {
-                        const av = isEditing ? editAvatar : currentProfile?.avatar || currentProfile?.avatar_url;
-                        const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
-                        return av && !isGoogle ? (
-                          <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <User className="w-10 h-10 text-[#D4AF37]/40" />
-                          </div>
-                        );
-                      })()}
-                    </div>
+                    <AvatarFrame frameId={isEditing ? selectedFrame : (currentProfile?.avatar_frame || 'none')} size="2xl">
+                      <div className="w-full h-full bg-[#1C130D] flex items-center justify-center">
+                        {(() => {
+                          const av = isEditing ? editAvatar : currentProfile?.avatar || currentProfile?.avatar_url;
+                          const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
+                          return av && !isGoogle ? (
+                            <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <User className="w-10 h-10 text-[#D4AF37]/40" />
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </AvatarFrame>
                     {uploadingAvatar && (
-                      <div className="absolute inset-0 rounded-full bg-black/70 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full bg-black/70 flex items-center justify-center z-20">
                         <Loader2 className="w-6 h-6 text-[#D4AF37] animate-spin" />
                       </div>
                     )}
@@ -510,6 +527,65 @@ export const ProfileView: React.FC = () => {
                                 </button>
                               </div>
                             ))}
+                          </div>
+                        </div>
+
+                        {/* Profil Çerçeveleri (Avatar Frames) */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[10px] text-amber-200/40 font-bold uppercase tracking-widest">Profil Çerçevesi Seç</p>
+                            <span className="text-[10px] text-zinc-500 font-semibold">Başarımlarla Açılır</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar text-left">
+                            {AVATAR_FRAMES.map((frame) => {
+                              const isUnlocked = isFrameUnlocked(frame.id, totalSongsCount, isProfileBetaTester);
+                              const isSelected = selectedFrame === frame.id;
+                              return (
+                                <div
+                                  key={frame.id}
+                                  onClick={() => {
+                                    if (isUnlocked) {
+                                      setSelectedFrame(frame.id);
+                                    } else {
+                                      showToast(frame.description || 'Bu çerçeve henüz kilitli.');
+                                    }
+                                  }}
+                                  className={`p-2.5 rounded-2xl border transition-all flex items-center gap-2.5 cursor-pointer relative overflow-hidden ${
+                                    isSelected
+                                      ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                                      : isUnlocked
+                                      ? 'bg-white/5 border-white/10 hover:border-white/20'
+                                      : 'bg-white/5 border-white/5 opacity-40'
+                                  }`}
+                                >
+                                  <div className="shrink-0">
+                                    <AvatarFrame frameId={frame.id} size="xs" showOrnament={false}>
+                                      <div className={`w-full h-full bg-gradient-to-tr ${frame.previewGradient} flex items-center justify-center text-[10px]`}>
+                                        {frame.ornamentEmoji || '👤'}
+                                      </div>
+                                    </AvatarFrame>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1">
+                                      <span className={`text-[11px] font-bold truncate ${isSelected ? 'text-amber-200' : 'text-white'}`}>
+                                        {frame.name}
+                                      </span>
+                                    </div>
+                                    <span className="text-[9px] text-zinc-400 block truncate">
+                                      {isUnlocked ? (isSelected ? 'Kuşanıldı' : 'Açık') : 'Kilitli'}
+                                    </span>
+                                  </div>
+                                  {!isUnlocked && (
+                                    <Lock className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                                  )}
+                                  {isSelected && (
+                                    <div className="w-4 h-4 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shrink-0">
+                                      <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 

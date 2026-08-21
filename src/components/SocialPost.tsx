@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { containsProfanity } from '../utils/profanity';
+import { AvatarFrame } from './AvatarFrame';
 
 interface SocialPostProps {
   post: SocialPostType;
@@ -72,7 +73,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
         .from('post_comments')
         .select(`
           id, content, created_at, user_id,
-          profiles:user_id ( full_name, username, avatar_url, is_premium, is_beta_tester )
+          profiles:user_id ( full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester )
         `)
         .eq('post_id', post.id)
         .order('created_at', { ascending: true });
@@ -173,11 +174,13 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
           className="flex items-center gap-3 cursor-pointer group"
           onClick={() => onClickUser?.(post.user_id)}
         >
-          <img 
-            src={post.user_avatar_url || "https://ui-avatars.com/api/?name=" + (post.user_full_name || 'U') + "&background=27272a&color=fff"} 
-            alt={post.user_full_name} 
-            className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]/30 group-active:scale-95 transition-transform"
-          />
+          <AvatarFrame frameId={post.user_avatar_frame} size="md">
+            <img 
+              src={post.user_avatar_url || "https://ui-avatars.com/api/?name=" + (post.user_full_name || 'U') + "&background=27272a&color=fff"} 
+              alt={post.user_full_name} 
+              className="w-full h-full object-cover group-active:scale-95 transition-transform"
+            />
+          </AvatarFrame>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-bold text-white group-hover:text-amber-100 transition-colors">
@@ -251,18 +254,22 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
           ) : comments.length > 0 ? (
             <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
               {comments.map((comment: any) => (
-                <div key={comment.id} className="flex gap-2">
-                  <img 
-                    src={comment.profiles?.avatar_url || "https://ui-avatars.com/api/?name=" + (comment.profiles?.full_name || 'U') + "&background=27272a&color=fff"}
-                    alt={comment.profiles?.full_name}
-                    className="w-7 h-7 rounded-full object-cover border border-[#D4AF37]/20"
-                    onClick={() => onClickUser?.(comment.user_id)}
-                  />
+                <div key={comment.id} className="flex gap-2 items-start">
+                  <div className="cursor-pointer shrink-0" onClick={() => onClickUser?.(comment.user_id)}>
+                    <AvatarFrame frameId={comment.profiles?.avatar_frame} size="xs">
+                      <img 
+                        src={comment.profiles?.avatar_url || "https://ui-avatars.com/api/?name=" + (comment.profiles?.full_name || 'U') + "&background=27272a&color=fff"}
+                        alt={comment.profiles?.full_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </AvatarFrame>
+                  </div>
                   <div className="flex flex-col bg-white/5 rounded-2xl rounded-tl-sm px-3 py-2 text-sm flex-1 group/comment relative">
                     <div className="flex items-center justify-between mb-0.5">
                       <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
                         <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-100">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
                         {comment.profiles?.is_premium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
+                        {comment.profiles?.is_beta_tester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
                       </div>
                       {(user?.id === comment.user_id || user?.id === post.user_id) && (
                         <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 transition-colors p-1">
@@ -281,11 +288,13 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
 
           {/* New Comment Input */}
           <div className="flex items-center gap-2 mt-1">
-            <img 
-              src={user?.avatar || "https://ui-avatars.com/api/?name=" + (user?.name || 'U') + "&background=27272a&color=fff"} 
-              className="w-8 h-8 rounded-full border border-white/10" 
-              alt="You" 
-            />
+            <AvatarFrame frameId={user?.avatar_frame} size="xs">
+              <img 
+                src={user?.avatar || "https://ui-avatars.com/api/?name=" + (user?.name || 'U') + "&background=27272a&color=fff"} 
+                className="w-full h-full object-cover" 
+                alt="You" 
+              />
+            </AvatarFrame>
             <div className="flex-1 flex items-center bg-white/5 border border-white/10 rounded-full pr-1 pl-3 h-9">
               <input 
                 type="text" 

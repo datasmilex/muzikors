@@ -3,6 +3,7 @@
 import React from 'react';
 import { Menu, User, QrCode } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { AvatarFrame } from './AvatarFrame';
 
 export const Header: React.FC = () => {
   const { openModal, activeVenue, user, isVenueBound, isVenueActive } = useApp();
@@ -64,14 +65,18 @@ export const Header: React.FC = () => {
         <button
           id="tour-wallet-button"
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="relative w-10 h-10 rounded-full border-2 border-[#D4AF37]/30 p-0.5 bg-black overflow-hidden active:border-[#D4AF37] active:scale-95 transition-all flex items-center justify-center shadow-inner shrink-0"
+          className="relative active:scale-95 transition-all flex items-center justify-center shrink-0"
         >
-          {user && user.avatar && !user.avatar.includes('googleusercontent') ? (
-            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-full" />
-          ) : (
-            <User className="w-5 h-5 text-[#D4AF37]" />
-          )}
-          {user && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-black shadow-[0_0_8px_#10b981]" />}
+          <AvatarFrame frameId={user?.avatar_frame} size="md">
+            <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
+              {user && user.avatar && !user.avatar.includes('googleusercontent') ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-[#D4AF37]" />
+              )}
+            </div>
+          </AvatarFrame>
+          {user && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-black shadow-[0_0_8px_#10b981] z-20" />}
         </button>
       </div>
     </header>

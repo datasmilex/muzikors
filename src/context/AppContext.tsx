@@ -445,7 +445,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, claimed_achievements, pinned_achievements, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
+          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, claimed_achievements, pinned_achievements, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -530,6 +530,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         beta_tester_reward_claimed: dbProfile.beta_tester_reward_claimed ?? prev?.beta_tester_reward_claimed ?? false,
         claimed_achievements: dbProfile.claimed_achievements || prev?.claimed_achievements || [],
         pinned_achievements: dbProfile.pinned_achievements || prev?.pinned_achievements || [],
+        avatar_frame: dbProfile.avatar_frame || prev?.avatar_frame || 'none',
         premium_until: dbProfile.premium_until || null,
         premium_activated_at: dbProfile.premium_activated_at || null,
         daily_songs_count: dbProfile.daily_songs_count || 0,

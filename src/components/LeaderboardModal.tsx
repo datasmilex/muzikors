@@ -7,6 +7,7 @@ import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { formatUserDisplayName } from '../utils/formatters';
+import { AvatarFrame } from './AvatarFrame';
 
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
@@ -28,7 +29,7 @@ export const LeaderboardModal: React.FC = () => {
       if (activeTab === 'users') {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, full_name, username, avatar_url, total_songs_requested, is_premium, is_beta_tester')
+          .select('id, full_name, username, avatar_url, avatar_frame, total_songs_requested, is_premium, is_beta_tester')
           .order('total_songs_requested', { ascending: false })
           .limit(50);
         
@@ -38,6 +39,7 @@ export const LeaderboardModal: React.FC = () => {
             name: p.full_name || 'Kullanıcı',
             username: p.username || null,
             avatar: p.avatar_url,
+            avatar_frame: p.avatar_frame || 'none',
             is_premium: p.is_premium || false,
             is_beta_tester: p.is_beta_tester || false,
             total_songs_requested: p.total_songs_requested || 0
@@ -236,8 +238,7 @@ export const LeaderboardModal: React.FC = () => {
                         </div>
                         
                         <div className="relative group shrink-0">
-                          <div className={`absolute -inset-0.5 rounded-full blur opacity-30 animate-pulse ${isUserVip ? 'bg-gradient-to-r from-amber-300 via-[#D4AF37] to-amber-300' : isUserBeta ? 'bg-gradient-to-r from-purple-500 to-indigo-500' : 'bg-gradient-to-r from-[#D4AF37] to-amber-600'}`} />
-                          <div className={`relative w-12 h-12 rounded-full border-2 overflow-hidden shadow-[0_0_15px_rgba(212,175,55,0.2)] ${isUserVip ? 'border-amber-400 shadow-[0_0_20px_rgba(252,211,77,0.4)]' : isUserBeta ? 'border-purple-400/70 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'border-[#D4AF37]/50'}`}>
+                          <AvatarFrame frameId={user.avatar_frame} size="lg">
                             <img
                               src={user.avatar || '/logo.png'}
                               alt={user.name}
@@ -247,7 +248,7 @@ export const LeaderboardModal: React.FC = () => {
                               }}
                               className="w-full h-full object-cover"
                             />
-                          </div>
+                          </AvatarFrame>
                         </div>
                         
                         <div className="flex-1 min-w-0">
