@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode } from 'lucide-react';
+import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { formatDuration } from '../utils/formatters';
@@ -59,6 +59,12 @@ export const UpNextQueueSection: React.FC = () => {
     return true;
   });
 
+  // Calculate user's active song in queue
+  const myQueueIndex = filteredQueue.findIndex(t => user && t.requestedByUserId === user.id);
+  const myNextTrack = myQueueIndex !== -1 ? filteredQueue[myQueueIndex] : null;
+  const myTrackPosition = myQueueIndex + 1;
+  const estimatedWaitMins = myTrackPosition * 3;
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -75,6 +81,36 @@ export const UpNextQueueSection: React.FC = () => {
   return (
     <>
       <div className="px-4 py-2 pb-32">
+        {/* User's Next Track Live Countdown Banner */}
+        {myNextTrack && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-[#2A1D13] via-[#1C130D] to-[#120C08] border border-[#D4AF37]/50 shadow-[0_0_20px_rgba(212,175,55,0.2)] flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0 shadow-inner">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                    Sıradaki Şarkın
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#D4AF37] text-stone-950 text-[9px] font-black shadow-sm">
+                    {myTrackPosition}. Sırada
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-white truncate mt-0.5">{myNextTrack.title}</h4>
+                <p className="text-[10px] text-amber-200/70 font-semibold flex items-center gap-1 mt-0.5">
+                  <Clock className="w-3 h-3 text-[#D4AF37]" />
+                  <span>Tahmini Çalma: ~{estimatedWaitMins} dk sonra</span>
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex items-center gap-2.5">
             <ListMusic className="w-5 h-5 text-[#D4AF37]" />
@@ -252,6 +288,11 @@ export const UpNextQueueSection: React.FC = () => {
                               <User className="w-3 h-3" />
                               <span className="truncate max-w-[100px]">{getRequestedByLabel(track)}</span>
                             </span>
+                            {user && track.requestedByUserId === user.id && (
+                              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-black border border-amber-500/40">
+                                ✨ Senin İsteğin
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

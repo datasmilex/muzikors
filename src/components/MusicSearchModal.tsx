@@ -28,7 +28,7 @@ export const MusicSearchModal: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'global' | null>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'global' | 'history' | null>('all');
   
   const [isSearching, setIsSearching] = useState(false);
   const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
@@ -67,6 +67,50 @@ export const MusicSearchModal: React.FC = () => {
     
     const timer = setTimeout(async () => {
       try {
+        if (isDefaultSearch && activeTab === 'history') {
+          if (!user?.id) {
+            setSearchResults([]);
+            setIsLoading(false);
+            return;
+          }
+          const { data: histData, error: histErr } = await supabase
+            .from('queue')
+            .select('song_name, artist_name, album_cover, spotify_uri, duration_ms, created_at')
+            .eq('requested_by_user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(25);
+
+          if (!histErr && histData && histData.length > 0) {
+            const seen = new Set<string>();
+            const uniqueTracks: Track[] = [];
+            for (const h of histData) {
+              const key = h.spotify_uri || `${h.song_name}_${h.artist_name}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                uniqueTracks.push({
+                  id: h.spotify_uri || `hist_${Math.random()}`,
+                  title: h.song_name,
+                  artist: h.artist_name,
+                  albumCover: h.album_cover,
+                  coverUrl: h.album_cover,
+                  spotifyUri: h.spotify_uri,
+                  durationMs: h.duration_ms,
+                  requestedBy: 'Sen',
+                  requestedAt: h.created_at,
+                  votes: 0,
+                });
+              }
+            }
+            setSearchResults(uniqueTracks);
+            if (!selectedTrack && uniqueTracks.length > 0) setSelectedTrack(uniqueTracks[0]);
+            setIsLoading(false);
+            return;
+          }
+          setSearchResults([]);
+          setIsLoading(false);
+          return;
+        }
+
         if (isDefaultSearch && activeTab === 'top10') {
           // TOP 10 ŞARKILAR: RPC üzerinden son 30 günün en çok istenenleri getir
           const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: Number(activeVenue.id) });
@@ -471,6 +515,20 @@ export const MusicSearchModal: React.FC = () => {
                   >
                     Global Hits
                   </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab('history');
+                      setSearchQuery('');
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start flex items-center gap-1.5 ${
+                      activeTab === 'history'
+                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
+                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Son İstediklerim</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -480,13 +538,25 @@ export const MusicSearchModal: React.FC = () => {
               {isLoading ? (
                 <div className="text-center py-16 text-amber-200/60 flex flex-col items-center justify-center space-y-4">
                   <Loader2 className="w-10 h-10 text-[#D4AF37] animate-spin" />
-                  <p className="text-xs font-bold uppercase tracking-widest">Spotify Müzikleri Aranıyor...</p>
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    {activeTab === 'history' ? 'Geçmiş İstekleriniz Yükleniyor...' : 'Spotify Müzikleri Aranıyor...'}
+                  </p>
                 </div>
               ) : searchResults.length === 0 ? (
-                <div className="text-center py-16 text-amber-200/40">
-                  <Music className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
-                  <p className="text-sm font-semibold">Aramanıza uygun Spotify şarkısı bulunamadı</p>
-                </div>
+                activeTab === 'history' ? (
+                  <div className="text-center py-16 text-amber-200/40">
+                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
+                    <p className="text-sm font-bold text-white">Henüz geçmiş istek kaydınız yok</p>
+                    <p className="text-xs text-zinc-400 mt-1 max-w-xs mx-auto">
+                      Beğendiğiniz şarkıları aratarak ilk isteğinizi yapın, sık çaldırdıklarınız burada biriksin!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-16 text-amber-200/40">
+                    <Music className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
+                    <p className="text-sm font-semibold">Aramanıza uygun Spotify şarkısı bulunamadı</p>
+                  </div>
+                )
               ) : (
                 searchResults.map((track, idx) => {
                   const zIndex = searchResults.length - idx;

@@ -102,6 +102,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const userIdRef = useRef<string | null>(null);
   const venueChannelRef = useRef<any>(null);
+  const lastNotifiedTrackRef = useRef<string | null>(null);
 
   // Derived venue state
   const isVenueBound = activeVenue !== null;
@@ -111,6 +112,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4500);
   }, []);
+
+  // ── "MY SONG IS PLAYING" REALTIME NOTIFICATION & HAPTIC VIBRATION ───────────
+  useEffect(() => {
+    if (!nowPlaying || !user?.id) return;
+    const isMyTrack = nowPlaying.requestedByUserId === user.id || (user.name && nowPlaying.requestedBy && nowPlaying.requestedBy.toLowerCase().includes(user.name.toLowerCase()));
+    
+    if (isMyTrack && nowPlaying.id && nowPlaying.id !== 'spotify-bg' && lastNotifiedTrackRef.current !== nowPlaying.id) {
+      lastNotifiedTrackRef.current = nowPlaying.id;
+      
+      // Haptic Vibration feedback
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([300, 150, 300]);
+        } catch (e) {}
+      }
+
+      // Celebratory Toast
+      showToast(`🎉 İstediğin Şarkı Başladı! "${nowPlaying.title}" şu an mekanda çalıyor! Arkana yaslan ve keyfini çıkar ✨`);
+
+      // Browser Notification if permitted
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('🎶 İstediğin Şarkı Mekanda Çalıyor!', {
+            body: `"${nowPlaying.title} - ${nowPlaying.artist}" şu an başladı!`,
+            icon: nowPlaying.albumCover || '/logo.png'
+          });
+        } catch (e) {}
+      }
+    }
+  }, [nowPlaying?.id, nowPlaying?.title, user?.id, user?.name, showToast]);
 
   // ── THEME INITIALIZATION & MANAGEMENT ─────────────────────────────────────
   useEffect(() => {

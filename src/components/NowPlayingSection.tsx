@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Play, Disc, User, Volume2, Music } from 'lucide-react';
+import { Play, Disc, User, Volume2, Music, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { FloatingEmojis, EmojiReaction } from './FloatingEmojis';
@@ -150,12 +150,21 @@ export const NowPlayingSection: React.FC = () => {
       
       <div className="relative z-10 px-4 pt-4 pb-2 flex flex-col items-center">
         {/* Header Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 rounded-full bg-black/40 border border-[#D4AF37]/30 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-          <Disc className={`w-3 h-3 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
-          <span className="text-[9px] font-black tracking-[0.2em] gold-gradient-text uppercase">
-            Şu An Çalıyor
-          </span>
-        </div>
+        {user && nowPlaying.requestedByUserId === user.id ? (
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 mb-3 rounded-full bg-gradient-to-r from-amber-500/30 via-yellow-500/20 to-amber-500/30 border border-[#D4AF37] backdrop-blur-md shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-pulse">
+            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
+            <span className="text-[10px] font-black tracking-wider text-amber-200 uppercase">
+              🎉 Senin Şarkın Çalıyor!
+            </span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 rounded-full bg-black/40 border border-[#D4AF37]/30 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+            <Disc className={`w-3 h-3 text-[#D4AF37] ${isPlayingAudio ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
+            <span className="text-[9px] font-black tracking-[0.2em] gold-gradient-text uppercase">
+              Şu An Çalıyor
+            </span>
+          </div>
+        )}
 
         {/* Hero Album Art */}
         <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-[1.5rem] overflow-hidden border border-[#D4AF37]/40 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.3)] mb-4 group">
