@@ -605,11 +605,13 @@ export const ProfileView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ─── Social Stats ─── */}
+                {/* ─── Profile Stats ─── */}
                 <div className="flex justify-around items-center bg-[#1C130D] rounded-2xl border border-white/5 py-3 mt-6 mb-3 shadow-inner">
                   <div className="flex flex-col items-center flex-1">
-                    <span className="text-sm font-black text-white">{stats.posts_count}</span>
-                    <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Gönderi</span>
+                    <span className="text-sm font-black text-white">
+                      {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
+                    </span>
+                    <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Toplam İstek</span>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
                   <div className="flex flex-col items-center flex-1">
@@ -623,7 +625,7 @@ export const ProfileView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ─── Achievements & Stats Action Bar ─── */}
+                {/* ─── Achievements Action Button ─── */}
                 {(() => {
                   const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
                   const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
@@ -634,52 +636,20 @@ export const ProfileView: React.FC = () => {
                   ).length;
 
                   return (
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <button
-                        onClick={() => setShowAchievements(true)}
-                        className="py-2.5 px-3.5 rounded-xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#2A1D13] to-[#1C130D] text-[#D4AF37] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all group"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <Trophy className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
-                          <span className="text-[11px] font-black text-amber-100">Başarımlar</span>
-                        </span>
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                          {completedCount}/{ACHIEVEMENTS.length}
-                        </span>
-                      </button>
-
-                      <button
-                        onClick={() => setShowTechnicalStats(!showTechnicalStats)}
-                        className="py-2.5 px-3.5 rounded-xl border border-white/10 bg-white/5 text-zinc-300 font-bold text-xs flex items-center justify-between active:scale-95 transition-all"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <Music className="w-3.5 h-3.5 text-[#D4AF37]" />
-                          <span className="text-[11px] font-semibold">İstatistikler</span>
-                        </span>
-                        <ChevronRight className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showTechnicalStats ? 'rotate-90' : ''}`} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setShowAchievements(true)}
+                      className="w-full py-2.5 px-4 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#2A1D13] via-[#1C130D] to-[#2A1D13] text-[#D4AF37] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-black text-amber-100">Başarımlar & Rozetler</span>
+                      </span>
+                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                        {completedCount} / {ACHIEVEMENTS.length} Kazanıldı
+                      </span>
+                    </button>
                   );
                 })()}
-
-                <AnimatePresence>
-                  {showTechnicalStats && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-1 gap-3 mb-4 relative z-10">
-                        <div className="bg-[#1C130D] p-3 rounded-2xl border border-white/5 flex flex-col gap-1 items-center">
-                          <Music className="w-4 h-4 text-[#D4AF37]" />
-                          <p className="text-[9px] text-amber-200/50 font-bold uppercase tracking-widest">Toplam İstek</p>
-                          <p className="text-xl font-black text-white">{currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 {/* ─── Social Feed ─── */}
                 <div className="mt-2 relative">
