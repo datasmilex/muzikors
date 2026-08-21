@@ -90,6 +90,8 @@ export interface UserProfile {
   daily_boosts_count?: number;
   daily_vetoes_count?: number;
   last_reset_date?: string;
+  premium_until?: string | null;
+  premium_activated_at?: string | null;
 }
 
 

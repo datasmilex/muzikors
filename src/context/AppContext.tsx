@@ -414,7 +414,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date')
+          .select('avatar_url, username, last_username_update, is_premium, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -441,6 +441,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 console.warn('[daily_limits_self]', e);
               }
             })();
+          }
+
+          // Check VIP 1-month expiration
+          const isPremiumValid = !!existingProfile.is_premium && (!existingProfile.premium_until || new Date(existingProfile.premium_until).getTime() > Date.now());
+          if (existingProfile.is_premium && !isPremiumValid) {
+            existingProfile.is_premium = false;
           }
 
           // Only keep the avatar if it is NOT a Google photo
@@ -489,6 +495,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         totalSongsRequested: prev?.totalSongsRequested ?? 0,
         last_username_update: dbLastUsernameUpdate || prev?.last_username_update,
         isPremium: dbProfile.is_premium || false,
+        premium_until: dbProfile.premium_until || null,
+        premium_activated_at: dbProfile.premium_activated_at || null,
         daily_songs_count: dbProfile.daily_songs_count || 0,
         daily_votes_count: dbProfile.daily_votes_count || 0,
         daily_boosts_count: dbProfile.daily_boosts_count || 0,
@@ -582,7 +590,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
                 is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
                 beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
-                isPremium: row?.is_premium ?? prev.isPremium,
+                isPremium: (row?.is_premium !== undefined)
+                  ? (!!row.is_premium && (!row?.premium_until || new Date(row.premium_until).getTime() > Date.now()))
+                  : prev.isPremium,
+                premium_until: row?.premium_until !== undefined ? row.premium_until : prev.premium_until,
+                premium_activated_at: row?.premium_activated_at !== undefined ? row.premium_activated_at : prev.premium_activated_at,
                 daily_songs_count: isNewDay ? 0 : (typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count),
                 daily_votes_count: isNewDay ? 0 : (typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count),
                 daily_boosts_count: isNewDay ? 0 : (typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count),
