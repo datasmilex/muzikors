@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, X, Users, Store, Loader2 } from 'lucide-react';
+import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge } from './PremiumBadge';
@@ -11,6 +11,7 @@ import { formatUserDisplayName } from '../utils/formatters';
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
   const [activeTab, setActiveTab] = useState<'users' | 'venues'>('users');
+  const [showRewards, setShowRewards] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [venues, setVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -133,9 +134,76 @@ export const LeaderboardModal: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-0 flex flex-col custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-0 flex flex-col custom-scrollbar">
+            {/* ─── Expandable Monthly Rewards Accordion at Top ─── */}
+            <div className="mb-4">
+              <button
+                onClick={() => setShowRewards(!showRewards)}
+                className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#1C130D] to-amber-500/15 border border-[#D4AF37]/40 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shadow-inner">
+                    <Gift className="w-4 h-4 text-[#D4AF37] group-hover:rotate-12 transition-transform" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-xs font-black text-amber-100 uppercase tracking-wide flex items-center gap-1.5">
+                      <span>{activeTab === 'users' ? 'Ayın Kullanıcı Ödülleri' : 'Ayın Kafe Ödülleri'}</span>
+                    </h4>
+                    <p className="text-[10px] text-amber-200/60 font-medium">İlk 3'e girenlerin kazanacağı ödüller</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-amber-300">
+                    {showRewards ? 'Gizle' : 'Görüntüle'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-[#D4AF37] transition-transform duration-300 ${showRewards ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {showRewards && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-2.5 p-3.5 rounded-2xl bg-[#1C130D] border border-[#D4AF37]/30 space-y-2 shadow-inner">
+                      {activeTab === 'users' ? (
+                        <div className="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                          <div className="w-7 h-7 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black text-xs shrink-0 shadow-md">1-3</div>
+                          <div>
+                            <p className="text-xs font-bold text-white mb-0.5">1 Aylık Ücretsiz Premium</p>
+                            <p className="text-[11px] text-amber-200/60 leading-snug">Liderlik tablosunda ilk 3'e giren kullanıcılara 1 aylık Muzikors Premium hediye!</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                            <div className="w-7 h-7 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black text-xs shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.4)]">1</div>
+                            <div>
+                              <p className="text-xs font-bold text-white mb-0.5">Premium Plaket + Sponsorluk</p>
+                              <p className="text-[11px] text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi ve özel sosyal medya sponsorluğu.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                            <div className="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center font-black text-slate-800 text-xs shrink-0">2-3</div>
+                            <div>
+                              <p className="text-xs font-bold text-white mb-0.5">Premium Plaket</p>
+                              <p className="text-[11px] text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi.</p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center space-y-3">
+              <div className="h-full flex flex-col items-center justify-center space-y-3 py-12">
                 <Loader2 className="w-10 h-10 animate-spin text-[#D4AF37]" />
                 <span className="text-xs font-bold text-amber-200/50 uppercase tracking-widest">Veriler Yükleniyor...</span>
               </div>
@@ -251,44 +319,6 @@ export const LeaderboardModal: React.FC = () => {
                 <div className="text-center text-zinc-500 mt-10 font-medium">Henüz kayıt bulunamadı.</div>
               )
             )}
-
-            {/* Rewards Section */}
-            <div className="mt-8 mb-4 p-5 rounded-3xl bg-gradient-to-br from-[#241911] to-[#1C130D] border border-[#D4AF37]/30 shadow-[0_10px_30px_rgba(212,175,55,0.05)] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-3xl rounded-full pointer-events-none" />
-              <div className="flex items-center gap-2 mb-3 relative z-10">
-                <Trophy className="w-5 h-5 text-[#D4AF37]" />
-                <h3 className="font-black text-amber-100 tracking-tight text-lg drop-shadow-sm">Ayın Ödülleri</h3>
-              </div>
-              
-              <div className="space-y-3 relative z-10">
-                {activeTab === 'users' ? (
-                  <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
-                    <div className="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black shrink-0">1-3</div>
-                    <div>
-                      <p className="text-sm font-bold text-white mb-0.5">1 Aylık Ücretsiz Premium</p>
-                      <p className="text-xs text-amber-200/60 leading-snug">Liderlik tablosunda ilk 3'e giren kullanıcılara 1 aylık Muzikors Premium hediye!</p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
-                      <div className="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center font-black text-black shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.5)]">1</div>
-                      <div>
-                        <p className="text-sm font-bold text-white mb-0.5">Premium Plaket + Sponsorluk</p>
-                        <p className="text-xs text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi ve özel sosyal medya sponsorluğu.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border border-white/5">
-                      <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center font-black text-slate-800 shrink-0">2-3</div>
-                      <div>
-                        <p className="text-sm font-bold text-white mb-0.5">Premium Plaket</p>
-                        <p className="text-xs text-amber-200/60 leading-snug">Ahşap Muzikors Premium Plaketi.</p>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
             
           </div>
         </motion.div>
