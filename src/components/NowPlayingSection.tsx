@@ -4,63 +4,10 @@ import React from 'react';
 import { Play, Disc, User, Volume2, Music, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { FloatingEmojis, EmojiReaction } from './FloatingEmojis';
 import { formatUserDisplayName } from '../utils/formatters';
 
 export const NowPlayingSection: React.FC = () => {
   const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, activeVenue, user, openProfile } = useApp();
-  const [reactions, setReactions] = React.useState<EmojiReaction[]>([]);
-
-  React.useEffect(() => {
-    if (!activeVenue || !nowPlaying || nowPlaying.id === 'spotify-bg') return;
-
-    const channel = supabase.channel(`track_reactions_${activeVenue.id}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'track_reactions',
-        filter: `venue_id=eq.${activeVenue.id}`
-      }, (payload) => {
-        // Only show if it's the current track
-        if (payload.new.track_id === nowPlaying.id) {
-          const newReaction: EmojiReaction = {
-            id: payload.new.id || Math.random().toString(),
-            emoji: payload.new.reaction,
-            x: 20 + Math.random() * 60, // random x position between 20% and 80%
-          };
-          setReactions(prev => [...prev, newReaction]);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [activeVenue, nowPlaying]);
-
-  const handleSendReaction = async (emoji: string) => {
-    if (!activeVenue || !nowPlaying || nowPlaying.id === 'spotify-bg') return;
-
-    // Ekranda hemen göster (Optimistic UI)
-    const optimisticReaction: EmojiReaction = {
-      id: Math.random().toString(),
-      emoji,
-      x: 20 + Math.random() * 60,
-    };
-    setReactions(prev => [...prev, optimisticReaction]);
-
-    // Veritabanına yaz
-    await supabase.from('track_reactions').insert({
-      venue_id: activeVenue.id,
-      track_id: nowPlaying.id,
-      user_id: user?.id || null,
-      reaction: emoji
-    });
-  };
-
-  const removeReaction = (id: string) => {
-    setReactions(prev => prev.filter(r => r.id !== id));
-  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -147,8 +94,6 @@ export const NowPlayingSection: React.FC = () => {
       {/* Cinematic Mesh Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/20 via-[#120C08]/80 to-[#120C08] z-0 blur-2xl opacity-70 pointer-events-none" />
       
-      <FloatingEmojis reactions={reactions} onComplete={removeReaction} />
-      
       <div className="relative z-10 px-4 pt-4 pb-2 flex flex-col items-center">
         {/* Header Badge */}
         {user && nowPlaying.requestedByUserId === user.id ? (
@@ -232,21 +177,6 @@ export const NowPlayingSection: React.FC = () => {
             </span>
           ))}
         </div>
-
-        {/* EMOJI REACTIONS */}
-        {nowPlaying.id !== 'spotify-bg' && (
-          <div className="mt-2 flex items-center justify-center gap-4 bg-black/30 px-4 py-2 rounded-full border border-white/5 backdrop-blur-lg">
-            {['🔥', '❤️', '👏', '😍', '💃'].map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => handleSendReaction(emoji)}
-                className="text-xl sm:text-2xl active:scale-125 active:scale-90 transition-transform drop-shadow-xl"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        )}
 
       </div>
     </div>
