@@ -1033,7 +1033,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
 
     const venueId = parseInt(activeVenue.id, 10);
-    const targetSpotifyUri = track.spotifyUri || `spotify:track:${track.id}`;
+    let targetSpotifyUri = track.spotifyUri || (track.id && !track.id.startsWith('hist_') && !track.id.startsWith('top_') ? `spotify:track:${track.id}` : '');
+
+    // Fallback: If targetSpotifyUri is missing or invalid, resolve from Spotify
+    if (!targetSpotifyUri || !targetSpotifyUri.startsWith('spotify:track:')) {
+      try {
+        const { data: searchRes } = await supabase.functions.invoke('spotify-search', {
+          body: { q: `${track.title} ${track.artist}`, venueId: activeVenue.id }
+        });
+        const found = searchRes?.tracks?.[0];
+        if (found?.id) {
+          targetSpotifyUri = found.spotifyUri || `spotify:track:${found.id}`;
+          track.spotifyUri = targetSpotifyUri;
+          if (found.albumCover || found.coverUrl) {
+            track.albumCover = found.albumCover || found.coverUrl;
+            track.coverUrl = found.coverUrl || found.albumCover;
+          }
+          if (found.durationMs) {
+            track.durationMs = found.durationMs;
+          }
+        }
+      } catch (searchErr) {
+        console.warn('[requestTrack Spotify fallback error]', searchErr);
+      }
+    }
+
+    if (!targetSpotifyUri) {
+      targetSpotifyUri = `spotify:track:${track.id}`;
+    }
 
     // ── DUPLICATE TRACK CHECK ────────────────────────────────────────────
     if (supabase) {

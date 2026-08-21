@@ -74,31 +74,72 @@ export const MusicSearchModal: React.FC = () => {
             .select('song_name, artist_name, album_cover, spotify_uri, duration_ms, created_at')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
-            .limit(25);
+            .limit(30);
 
           if (!histErr && histData && histData.length > 0) {
             const seen = new Set<string>();
-            const uniqueTracks: Track[] = [];
+            const uniqueHistory: Array<any> = [];
             for (const h of histData) {
-              const key = h.spotify_uri || `${h.song_name}_${h.artist_name}`;
-              if (!seen.has(key)) {
+              const key = `${(h.song_name || '').trim().toLowerCase()}_${(h.artist_name || '').trim().toLowerCase()}`;
+              if (!seen.has(key) && h.song_name) {
                 seen.add(key);
-                uniqueTracks.push({
-                  id: h.spotify_uri || `hist_${Math.random()}`,
-                  title: h.song_name,
-                  artist: h.artist_name,
-                  albumCover: h.album_cover,
-                  coverUrl: h.album_cover,
-                  spotifyUri: h.spotify_uri,
-                  durationMs: h.duration_ms,
-                  requestedBy: 'Sen',
-                  requestedAt: h.created_at,
-                  votes: 0,
-                });
+                uniqueHistory.push(h);
               }
             }
-            setSearchResults(uniqueTracks.slice(0, 10));
-            if (!selectedTrack && uniqueTracks.length > 0) setSelectedTrack(uniqueTracks[0]);
+
+            const rawTracks: Track[] = uniqueHistory.slice(0, 10).map((h) => {
+              const spotifyId = h.spotify_uri?.replace('spotify:track:', '') || '';
+              return {
+                id: spotifyId || `hist_${Math.random()}`,
+                title: h.song_name,
+                artist: h.artist_name,
+                albumCover: h.album_cover || '',
+                coverUrl: h.album_cover || '',
+                spotifyUri: h.spotify_uri || '',
+                durationMs: h.duration_ms || 210000,
+                requestedBy: 'Sen',
+                requestedAt: h.created_at,
+                votes: 0,
+              };
+            });
+
+            // Parallel Spotify metadata enrichment for any history song lacking Spotify URI or album cover
+            if (activeVenue?.id) {
+              const enrichedTracks = await Promise.all(
+                rawTracks.map(async (track) => {
+                  if (track.spotifyUri && track.albumCover && !track.albumCover.includes('unsplash')) {
+                    return track;
+                  }
+                  try {
+                    const searchRes = await supabase.functions.invoke('spotify-search', {
+                      body: { q: `${track.title} ${track.artist}`, venueId: activeVenue.id }
+                    });
+                    const found = searchRes?.data?.tracks?.[0];
+                    if (found) {
+                      return {
+                        ...track,
+                        id: found.id || track.id,
+                        spotifyUri: found.spotifyUri || (found.id ? `spotify:track:${found.id}` : track.spotifyUri),
+                        albumCover: found.albumCover || found.coverUrl || track.albumCover,
+                        coverUrl: found.coverUrl || found.albumCover || track.coverUrl,
+                        durationMs: found.durationMs || track.durationMs,
+                      };
+                    }
+                  } catch (e) {
+                    console.warn('[History track Spotify enrichment warning]', e);
+                  }
+                  return track;
+                })
+              );
+
+              setSearchResults(enrichedTracks);
+              if (!selectedTrack && enrichedTracks.length > 0) setSelectedTrack(enrichedTracks[0]);
+              setIsLoading(false);
+              return;
+            }
+
+            setSearchResults(rawTracks);
+            if (!selectedTrack && rawTracks.length > 0) setSelectedTrack(rawTracks[0]);
             setIsLoading(false);
             return;
           }
