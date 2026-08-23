@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ExternalLink, Music2, Crown, Compass, Volume2 } from 'lucide-react';
+import { ExternalLink, Music2, Crown, Compass, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const ADMOB_NATIVE_AD_UNIT_ID = 'ca-app-pub-6907017256187136/3608277325';
@@ -82,7 +82,6 @@ export const NativeAdCard: React.FC<NativeAdCardProps> = ({ variantIndex = 0 }) 
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-black text-white">{creative.sponsor}</span>
-              <Sparkles className="w-3 h-3 text-[#D4AF37]" />
             </div>
             <span className="text-[10px] font-medium text-amber-200/50">Yerel Tanıtım & Fırsat</span>
           </div>

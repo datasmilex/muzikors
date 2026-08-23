@@ -423,7 +423,7 @@ export const MusicSearchModal: React.FC = () => {
                 {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
                   <div className="bg-[#D4AF37]/10 rounded-2xl p-4 border border-[#D4AF37]/25 text-[11px] leading-relaxed text-amber-200/90 mt-4">
                     <p>
-                      <b className="text-[#D4AF37]">🎵 Küçük Bir Rica:</b> Mekânın müzik konsepti ve ambiyansı ağırlıklı olarak <span className="font-black text-white">{activeVenue.allowed_genres.join(', ')}</span> tarzındadır. Mekandaki herkesin keyif alması için bu tarza yakın parçalar seçmenizi rica ederiz. Keyifli dinlemeler! ✨
+                      <b className="text-[#D4AF37]">🎵 Küçük Bir Rica:</b> Mekânın müzik konsepti ve ambiyansı ağırlıklı olarak <span className="font-black text-white">{activeVenue.allowed_genres.join(', ')}</span> tarzındadır. Mekandaki herkesin keyif alması için bu tarza yakın parçalar seçmenizi rica ederiz. Keyifli dinlemeler!
                     </p>
                   </div>
                 )}

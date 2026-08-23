@@ -8,7 +8,7 @@ import {
   Search,
   Loader2,
   Coffee,
-  Sparkles,
+  BookOpen,
   Layers,
   Store,
   AlertCircle
@@ -142,7 +142,7 @@ export const MenuModal: React.FC = () => {
                   {activeVenue?.venue_name || activeVenue?.name || 'Mekân Menüsü'}
                 </h2>
                 <span className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
-                  <Sparkles className="w-3 h-3" /> Dijital Menü
+                  <BookOpen className="w-3 h-3" /> Dijital Menü
                 </span>
               </div>
             </div>

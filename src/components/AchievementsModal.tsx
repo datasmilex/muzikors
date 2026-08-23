@@ -405,7 +405,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
               ))}
 
               {/* Section: Özel */}
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">✨ Özel Başarımlar</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 mt-4">🏆 Özel Başarımlar</p>
               {ACHIEVEMENTS.filter(a => a.category === 'special').map(a => (
                 <AchievementCard
                   key={a.id}

@@ -129,7 +129,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // Celebratory Toast
-      showToast(`🎉 İstediğin Şarkı Başladı! "${nowPlaying.title}" şu an mekanda çalıyor! Arkana yaslan ve keyfini çıkar ✨`);
+      showToast(`🎉 İstediğin Şarkı Başladı! "${nowPlaying.title}" şu an mekanda çalıyor! Arkana yaslan ve keyfini çıkar`);
 
       // Browser Notification if permitted
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {

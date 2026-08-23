@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Crown, Sparkles, CheckCircle2, Music, Loader2, Smartphone, ExternalLink } from 'lucide-react';
+import { X, Play, Crown, Gift, CheckCircle2, Music, Loader2, Smartphone, ExternalLink } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { admobService } from '../services/admobService';
 import { Capacitor } from '@capacitor/core';
@@ -141,7 +141,7 @@ export const RewardedAdModal: React.FC = () => {
             <div className="space-y-5">
               {/* Header Icon */}
               <div className="w-14 h-14 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto text-stone-950 font-black shadow-[0_5px_20px_rgba(212,175,55,0.4)]">
-                {isNative ? <Sparkles className="w-7 h-7 stroke-[2.5]" /> : <Smartphone className="w-7 h-7 stroke-[2.5]" />}
+                {isNative ? <Gift className="w-7 h-7 stroke-[2.5]" /> : <Smartphone className="w-7 h-7 stroke-[2.5]" />}
               </div>
 
               {/* Title & Description */}

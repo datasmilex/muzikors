@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Music, X, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Music, X, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const LoginModal: React.FC = () => {

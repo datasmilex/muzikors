@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { X, Check, Star, Crown, Ghost, ThumbsUp, Music, ArrowUpCircle, ShieldOff } from 'lucide-react';
+import { X, Check, Crown, Ghost, ThumbsUp, Music, ArrowUpCircle, ShieldOff } from 'lucide-react';
 
 export const PremiumModal: React.FC = () => {
   const { activeModal, closeModal, user, showToast } = useApp();
@@ -105,8 +105,8 @@ export const PremiumModal: React.FC = () => {
               onClick={handleSubscribe}
               className="w-full py-4 rounded-2xl font-black text-lg bg-gradient-to-r from-yellow-500 via-[#D4AF37] to-amber-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2"
             >
+              <Crown className="w-5 h-5 fill-black" />
               <span>Sadece 60 TL / Ay</span>
-              <Star className="w-5 h-5 fill-black" />
             </button>
             <p className="text-[10px] text-center text-zinc-500 mt-3 px-4">
               Abonelikleriniz Google Play hesabınız üzerinden yönetilir. İstediğiniz zaman iptal edebilirsiniz.

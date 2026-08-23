@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Coins, QrCode, PlusCircle, Sparkles, Store } from 'lucide-react';
+import { Coins, QrCode, PlusCircle, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const TopRowCards: React.FC = () => {

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Zap, Music, Trash2, LogOut, Sparkles, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle, Lock } from 'lucide-react';
+import { X, User, Zap, Music, Trash2, LogOut, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';

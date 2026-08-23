@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Sparkles, Store } from 'lucide-react';
+import { ListMusic, ThumbsUp, Flame, User, Clock, Coins, X, QrCode, Music, Store } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { formatDuration, formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
@@ -100,7 +100,7 @@ export const UpNextQueueSection: React.FC = () => {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0 shadow-inner">
-                <Sparkles className="w-5 h-5 animate-pulse" />
+                <Music className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export const UpNextQueueSection: React.FC = () => {
                             )}
                             {user && track.requestedByUserId === user.id && (
                               <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-black border border-amber-500/40">
-                                ✨ Senin İsteğin
+                                Senin İsteğin
                               </span>
                             )}
                           </div>

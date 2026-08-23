@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Play, Disc, User, Volume2, Music, Sparkles, Store, Radio, ExternalLink, Mic2 } from 'lucide-react';
+import { Play, Disc, User, Volume2, Music, Store, Radio, ExternalLink, Mic2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
@@ -122,9 +122,9 @@ export const NowPlayingSection: React.FC = () => {
         {/* Header Badge */}
         {user && nowPlaying.requestedByUserId === user.id ? (
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 mb-3 rounded-full bg-gradient-to-r from-amber-500/30 via-yellow-500/20 to-amber-500/30 border border-[#D4AF37] backdrop-blur-md shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-pulse">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
+            <Music className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10px] font-black tracking-wider text-amber-200 uppercase">
-              🎉 Senin Şarkın Çalıyor!
+              Senin Şarkın Çalıyor!
             </span>
           </div>
         ) : (
@@ -228,23 +228,6 @@ export const NowPlayingSection: React.FC = () => {
               <span className="text-[10px] font-black tracking-tight">Şarkı Sözleri</span>
             </button>
           </div>
-        </div>
-
-        {/* Music Notes Floating Animation */}
-        <div className="w-full flex items-center justify-center gap-3 mb-1 h-6 overflow-hidden select-none">
-          {['♩','♪','♫','♬','♩','♪'].map((note, i) => (
-            <span
-              key={i}
-              className={`text-[#D4AF37] font-bold drop-shadow-[0_0_8px_rgba(212,175,55,0.9)] select-none pointer-events-none ${isPlayingAudio ? 'animate-bounce' : 'opacity-20'}`}
-              style={{
-                fontSize: `${10 + (i % 3) * 4}px`,
-                animationDuration: `${0.6 + i * 0.15}s`,
-                animationDelay: `${i * 0.1}s`,
-              }}
-            >
-              {note}
-            </span>
-          ))}
         </div>
 
       </div>

@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Coins,
   LogOut,
-  Sparkles,
+  Tag,
   Music,
   LogIn,
   PlaySquare,
@@ -54,7 +54,7 @@ export const DrawerMenu: React.FC = () => {
     { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
     { label: 'Muzikors Premium', icon: <Crown className="w-5 h-5 text-[#D4AF37]" />, modal: 'premium', isPremiumBtn: true },
     { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
-    { label: 'Kampanyalar', icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
+    { label: 'Kampanyalar', icon: <Tag className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
   ];
 
   const secondaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
@@ -115,7 +115,7 @@ export const DrawerMenu: React.FC = () => {
               <div className="my-4 p-4 rounded-2xl bg-gradient-to-br from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 space-y-3 text-center shadow-[0_10px_30px_rgba(212,175,55,0.1)] relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/5 blur-2xl rounded-full pointer-events-none" />
                 <div className="flex flex-col items-center justify-center gap-2 relative z-10">
-                  <Sparkles className="w-6 h-6 text-[#D4AF37] animate-pulse" />
+                  <Music className="w-6 h-6 text-[#D4AF37]" />
                   <span className="text-sm font-black text-white tracking-wide">Giriş Yap ve Müziği Yönet!</span>
                   <span className="text-[11px] text-amber-200/60 font-medium">Favori şarkılarını öne çıkar</span>
                 </div>
@@ -269,7 +269,6 @@ export const DrawerMenu: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-[9px] font-black bg-[#D4AF37] text-stone-950 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wider shadow-sm flex items-center gap-1">
-                  <Sparkles className="w-2.5 h-2.5" />
                   <span>+1 Hak</span>
                 </div>
               </button>

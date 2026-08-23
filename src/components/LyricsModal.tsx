@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mic2, Search, ExternalLink, Loader2, Music, Sparkles } from 'lucide-react';
+import { X, Mic2, Search, ExternalLink, Loader2, Music } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';

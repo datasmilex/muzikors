@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, Clock } from 'lucide-react';
+import { Gift, X, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const DailyRewardModal: React.FC = () => {

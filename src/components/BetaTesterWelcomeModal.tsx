@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { Crown, Sparkles, X } from 'lucide-react';
+import { Crown, Award, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const BetaTesterWelcomeModal = () => {
@@ -93,7 +93,7 @@ export const BetaTesterWelcomeModal = () => {
         </button>
 
         <div className="w-16 h-16 bg-gradient-to-tr from-purple-600 to-fuchsia-500 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-          <Sparkles className="w-8 h-8 text-white" />
+          <Award className="w-8 h-8 text-white" />
         </div>
 
         <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 mb-2">
