@@ -1,6 +1,6 @@
 {
   "name": "muzikors-temp",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -21,6 +21,7 @@
     "@supabase/supabase-js": "^2.110.8",
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
+    "cordova-plugin-purchase": "^13.18.0",
     "date-fns": "^4.4.0",
     "driver.js": "^1.8.0",
     "framer-motion": "^12.42.2",
