@@ -262,6 +262,21 @@ export const VenueOwnerModal: React.FC = () => {
                       </div>
                     )}
 
+                    {/* Pricing Breakdown Card */}
+                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider block">Aylık Kafe Abonelik Bedeli</span>
+                        <div className="flex items-baseline gap-1.5 mt-0.5">
+                          <span className="text-lg font-black text-[#D4AF37]">1.199 ₺</span>
+                          <span className="text-xs text-zinc-400 font-normal">/ ay</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[11px] font-bold text-amber-200/90 block">1.000 TL + KDV</span>
+                        <span className="text-[10px] text-zinc-500">Google Play Faturalandırma</span>
+                      </div>
+                    </div>
+
                     {/* Payment CTA */}
                     <button
                       onClick={() => handleSubscribe(venue.id)}
@@ -277,7 +292,7 @@ export const VenueOwnerModal: React.FC = () => {
                         <>
                           <Store className="w-4 h-4" />
                           <span>
-                            {isExpired ? 'Aboneliği Başlat & Yayını Aç (Aylık)' : 'Aboneliği 1 Ay Uzat (Google Play)'}
+                            {isExpired ? '1.199 ₺ ile Başlat (1.000 TL + KDV)' : '1.199 ₺ ile 1 Ay Uzat (Google Play)'}
                           </span>
                         </>
                       )}
