@@ -16,7 +16,6 @@ import {
   Loader2,
   Plus,
   RefreshCw,
-  Power,
   ShieldCheck
 } from 'lucide-react';
 import { iapService } from '../services/iapService';
@@ -93,22 +92,6 @@ export const VenueOwnerModal: React.FC = () => {
       showToast(e.message || 'Ödeme başlatılamadı.');
     } finally {
       setProcessingVenueId(null);
-    }
-  };
-
-  const handleToggleActive = async (venue: OwnedVenue) => {
-    try {
-      const nextActive = !venue.is_active;
-      const { error } = await supabase
-        .from('venues')
-        .update({ is_active: nextActive })
-        .eq('id', venue.id);
-
-      if (error) throw error;
-      showToast(`Mekan ${nextActive ? 'açıldı ve istek almaya başladı' : 'geçici olarak kapatıldı'}.`);
-      await fetchOwnedVenues();
-    } catch (e: any) {
-      showToast('Durum güncellenirken hata oluştu.');
     }
   };
 
@@ -299,25 +282,13 @@ export const VenueOwnerModal: React.FC = () => {
                     </button>
 
                     {/* Quick Tools */}
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-zinc-400">
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-end text-xs text-zinc-400">
                       <button
                         onClick={() => handleCopyPanelLink(venue.slug)}
-                        className="hover:text-white flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                        className="hover:text-white flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer text-xs"
                       >
                         <Copy className="w-3.5 h-3.5 text-[#D4AF37]" />
-                        <span>Paneli Linki</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleToggleActive(venue)}
-                        className={`flex items-center gap-1.5 py-1 px-2.5 rounded-lg border transition-colors cursor-pointer ${
-                          venue.is_active
-                            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25 hover:bg-emerald-500/20'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'
-                        }`}
-                      >
-                        <Power className="w-3.5 h-3.5" />
-                        <span>{venue.is_active ? 'Mekan Açık' : 'Mekan Kapalı'}</span>
+                        <span>Kafe Paneli Linkini Kopyala</span>
                       </button>
                     </div>
                   </div>
