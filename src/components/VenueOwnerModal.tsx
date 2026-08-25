@@ -43,7 +43,7 @@ export const VenueOwnerModal: React.FC = () => {
 
   // Link manual venue state
   const [isLinking, setIsLinking] = useState(false);
-  const [linkSlug, setLinkSlug] = useState('');
+  const [linkUsername, setLinkUsername] = useState('');
   const [linkPassword, setLinkPassword] = useState('');
   const [linkSubmitting, setLinkSubmitting] = useState(false);
 
@@ -122,37 +122,24 @@ export const VenueOwnerModal: React.FC = () => {
 
   const handleLinkVenue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!linkSlug.trim() || !linkPassword.trim()) {
-      showToast('Lütfen mekan adresi (slug) ve şifrenizi girin.');
+    if (!linkUsername.trim() || !linkPassword.trim()) {
+      showToast('Lütfen kafe kullanıcı adı ve şifrenizi girin.');
       return;
     }
 
     setLinkSubmitting(true);
     try {
-      // Find venue by slug
-      const { data: vData, error: vErr } = await supabase
-        .from('venues')
-        .select('id, venue_name')
-        .eq('slug', linkSlug.trim().toLowerCase())
-        .single();
-
-      if (vErr || !vData) {
-        showToast('Mekan bulunamadı. Lütfen slug adresini kontrol edin.');
-        setLinkSubmitting(false);
-        return;
-      }
-
-      const { data, error } = await supabase.rpc('link_venue_owner_self', {
-        p_venue_id: vData.id,
+      const { data, error } = await supabase.rpc('link_venue_by_credentials_self', {
+        p_username: linkUsername.trim(),
         p_password: linkPassword.trim()
       });
 
       if (error) {
         showToast('Yetkilendirme başarısız: ' + error.message);
       } else {
-        showToast(`"${vData.venue_name}" başarıyla hesabınıza bağlandı! 🎉`);
+        showToast(`"${data?.venue_name || 'Mekan'}" başarıyla hesabınıza bağlandı! 🎉`);
         setIsLinking(false);
-        setLinkSlug('');
+        setLinkUsername('');
         setLinkPassword('');
         await fetchOwnedVenues();
       }
@@ -357,24 +344,24 @@ export const VenueOwnerModal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-zinc-400 block mb-1">Mekan Slug Adresi (Örn: kadikoy-moda-kafe)</label>
+                  <label className="text-[11px] text-zinc-400 block mb-1">Kafe Paneli Kullanıcı Adı</label>
                   <input
                     type="text"
-                    value={linkSlug}
-                    onChange={(e) => setLinkSlug(e.target.value)}
-                    placeholder="ornek-kafe-slug"
+                    value={linkUsername}
+                    onChange={(e) => setLinkUsername(e.target.value)}
+                    placeholder="Kafe kullanıcı adınız (örn: demokafe)"
                     className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:border-[#D4AF37] focus:outline-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-zinc-400 block mb-1">Kafe Giriş Şifresi</label>
+                  <label className="text-[11px] text-zinc-400 block mb-1">Kafe Paneli Şifresi</label>
                   <input
                     type="password"
                     value={linkPassword}
                     onChange={(e) => setLinkPassword(e.target.value)}
-                    placeholder="Kafe şifreniz"
+                    placeholder="Kafe giriş şifreniz"
                     className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:border-[#D4AF37] focus:outline-none"
                     required
                   />
@@ -385,7 +372,7 @@ export const VenueOwnerModal: React.FC = () => {
                   disabled={linkSubmitting}
                   className="w-full py-2.5 rounded-xl gold-gradient-bg text-black font-black text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {linkSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Doğrula ve Bağla'}
+                  {linkSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Giriş Yap ve Mekanı Bağla'}
                 </button>
               </form>
             )}
