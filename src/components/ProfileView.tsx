@@ -186,10 +186,12 @@ export const ProfileView: React.FC = () => {
   const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
   const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
 
+  const currentUserId = user?.id;
+
   const fetchProfileData = useCallback(async () => {
-    const targetId = viewingProfileId || user?.id;
-    if (!targetId) return;
     if (activeModal !== 'profile') return;
+    const targetId = viewingProfileId || currentUserId;
+    if (!targetId) return;
     
     setIsLoadingProfile(true);
     try {
@@ -197,19 +199,6 @@ export const ProfileView: React.FC = () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', targetId).single();
       if (!error && data) {
         setProfileData(data);
-        if (isOwnProfile) {
-          setUser(prev => prev ? {
-            ...prev,
-            name: data.full_name || prev.name,
-            username: data.username || prev.username,
-            totalSongsRequested: (data.total_songs_requested !== undefined && data.total_songs_requested !== null) ? Number(data.total_songs_requested) : prev.totalSongsRequested,
-            isPremium: data.is_premium ?? prev.isPremium,
-            is_beta_tester: data.is_beta_tester ?? prev.is_beta_tester,
-            claimed_achievements: data.claimed_achievements ?? prev.claimed_achievements,
-            pinned_achievements: data.pinned_achievements ?? prev.pinned_achievements,
-            avatar_frame: data.avatar_frame ?? prev.avatar_frame ?? 'none',
-          } : null);
-        }
       }
 
       // 2. Fetch Stats via RPC
@@ -219,8 +208,8 @@ export const ProfileView: React.FC = () => {
       }
 
       // 3. Fetch Follow state if logged in and looking at someone else
-      if (!isOwnProfile && user) {
-        const { data: followData } = await supabase.from('follows').select('*').eq('follower_id', user.id).eq('following_id', targetId).single();
+      if (!isOwnProfile && currentUserId) {
+        const { data: followData } = await supabase.from('follows').select('*').eq('follower_id', currentUserId).eq('following_id', targetId).single();
         setIsFollowingState(!!followData);
       }
 
@@ -229,10 +218,10 @@ export const ProfileView: React.FC = () => {
         .from('posts')
         .select(`
           id, content, created_at, likes_count, comments_count, user_id,
-          profiles:user_id ( full_name, username, avatar_url, is_premium, is_beta_tester ),
+          profiles:user_id ( full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester ),
           post_likes ( user_id )
         `)
-        .eq('user_id', viewingProfileId)
+        .eq('user_id', targetId)
         .order('created_at', { ascending: false });
         
       if (!postsError && postsData) {
@@ -246,9 +235,10 @@ export const ProfileView: React.FC = () => {
           user_full_name: row.profiles?.full_name,
           user_username: row.profiles?.username,
           user_avatar_url: row.profiles?.avatar_url,
+          user_avatar_frame: row.profiles?.avatar_frame || 'none',
           user_is_beta_tester: row.profiles?.is_beta_tester,
           user_is_premium: row.profiles?.is_premium,
-          has_liked: user ? row.post_likes.some((like: any) => like.user_id === user.id) : false,
+          has_liked: currentUserId ? row.post_likes.some((like: any) => like.user_id === currentUserId) : false,
         })));
       }
     } catch (err) {
@@ -257,11 +247,13 @@ export const ProfileView: React.FC = () => {
     } finally {
       setIsLoadingProfile(false);
     }
-  }, [viewingProfileId, isOwnProfile, user, activeModal, showToast]);
+  }, [viewingProfileId, currentUserId, isOwnProfile, activeModal, showToast]);
 
   useEffect(() => {
-    fetchProfileData();
-  }, [fetchProfileData]);
+    if (activeModal === 'profile') {
+      fetchProfileData();
+    }
+  }, [activeModal, viewingProfileId, currentUserId]);
 
   const handleFollowToggle = async () => {
     if (!user) {
