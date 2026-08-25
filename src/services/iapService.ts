@@ -4,9 +4,11 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from '../lib/supabaseClient';
 
 export const PREMIUM_PRODUCT_ID = 'muzikors_premium';
+export const KAFE_PRODUCT_ID = 'kafe_abonelik';
 
 class IAPService {
   private isInitialized = false;
+  private activePendingVenueId: number | null = null;
   private onPurchaseSuccessCallback: (() => void) | null = null;
   private onPurchaseErrorCallback: ((error: string) => void) | null = null;
 
@@ -14,12 +16,8 @@ class IAPService {
     onSuccess?: () => void,
     onError?: (err: string) => void
   ) {
-    if (this.onPurchaseSuccessCallback === null && onSuccess) {
-      this.onPurchaseSuccessCallback = onSuccess;
-    }
-    if (this.onPurchaseErrorCallback === null && onError) {
-      this.onPurchaseErrorCallback = onError;
-    }
+    if (onSuccess) this.onPurchaseSuccessCallback = onSuccess;
+    if (onError) this.onPurchaseErrorCallback = onError;
 
     if (!Capacitor.isNativePlatform()) {
       console.log('[IAPService] Web platform detected, native Google Play Billing disabled.');
@@ -37,11 +35,16 @@ class IAPService {
 
       const store = CdvPurchase.store;
 
-      // Register Google Play Subscription
+      // Register Google Play Subscriptions
       store.register([
         {
           type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
           id: PREMIUM_PRODUCT_ID,
+          platform: CdvPurchase.Platform.GOOGLE_PLAY,
+        },
+        {
+          type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+          id: KAFE_PRODUCT_ID,
           platform: CdvPurchase.Platform.GOOGLE_PLAY,
         },
       ]);
@@ -51,17 +54,30 @@ class IAPService {
         .approved(async (transaction: any) => {
           console.log('[IAPService] Transaction approved:', transaction);
           try {
-            // Verify & activate in Supabase
-            const { data, error } = await supabase.rpc('activate_subscription_self', {
-              p_product_id: PREMIUM_PRODUCT_ID,
-              p_order_id: transaction.transactionId || null,
-              p_purchase_token: transaction.purchaseToken || null,
-            });
+            const productId = transaction.products?.[0]?.id || transaction.id;
 
-            if (error) {
-              console.error('[IAPService] Error activating in Supabase:', error);
+            if (productId === KAFE_PRODUCT_ID || this.activePendingVenueId !== null) {
+              const targetVenueId = this.activePendingVenueId;
+              if (targetVenueId) {
+                const { data, error } = await supabase.rpc('activate_venue_subscription_self', {
+                  p_venue_id: targetVenueId,
+                  p_product_id: KAFE_PRODUCT_ID,
+                  p_order_id: transaction.transactionId || null,
+                  p_purchase_token: transaction.purchaseToken || null,
+                });
+                if (error) console.error('[IAPService] Error activating venue subscription in Supabase:', error);
+                else console.log('[IAPService] Venue subscription activated:', data);
+              }
+              this.activePendingVenueId = null;
             } else {
-              console.log('[IAPService] Premium activated successfully:', data);
+              // User VIP Premium
+              const { data, error } = await supabase.rpc('activate_subscription_self', {
+                p_product_id: PREMIUM_PRODUCT_ID,
+                p_order_id: transaction.transactionId || null,
+                p_purchase_token: transaction.purchaseToken || null,
+              });
+              if (error) console.error('[IAPService] Error activating user premium in Supabase:', error);
+              else console.log('[IAPService] Premium activated successfully:', data);
             }
 
             // Finish the transaction with Google Play (Acknowledge)
@@ -94,6 +110,15 @@ class IAPService {
   }
 
   public async subscribe(): Promise<{ success: boolean; message?: string }> {
+    return this.orderProduct(PREMIUM_PRODUCT_ID);
+  }
+
+  public async subscribeVenue(venueId: number): Promise<{ success: boolean; message?: string }> {
+    this.activePendingVenueId = venueId;
+    return this.orderProduct(KAFE_PRODUCT_ID);
+  }
+
+  private async orderProduct(productId: string): Promise<{ success: boolean; message?: string }> {
     if (!Capacitor.isNativePlatform()) {
       return {
         success: false,
@@ -108,18 +133,16 @@ class IAPService {
       }
 
       const store = CdvPurchase.store;
-      const product = store.get(PREMIUM_PRODUCT_ID);
+      const product = store.get(productId);
 
       if (!product) {
-        // Try initializing if not registered
         await this.initialize();
       }
 
-      const readyProduct = store.get(PREMIUM_PRODUCT_ID);
+      const readyProduct = store.get(productId);
       const offer = readyProduct?.getOffer();
 
       if (!offer) {
-        // Fallback direct order
         const fallbackOffer = readyProduct?.offers?.[0];
         if (fallbackOffer) {
           await store.order(fallbackOffer);
@@ -129,10 +152,10 @@ class IAPService {
       }
 
       const result = await store.order(offer);
-      console.log('[IAPService] Order initiated:', result);
+      console.log('[IAPService] Order initiated for product:', productId, result);
       return { success: true };
     } catch (err: any) {
-      console.error('[IAPService] Subscribe error:', err);
+      console.error('[IAPService] Order error:', err);
       return {
         success: false,
         message: err.message || 'Ödeme başlatılırken bir hata oluştu.',

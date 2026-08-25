@@ -24,6 +24,7 @@ import { GlobalFeedView } from '../components/GlobalFeedView';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 import { LyricsModal } from '../components/LyricsModal';
 import { MenuModal } from '../components/MenuModal';
+import { VenueOwnerModal } from '../components/VenueOwnerModal';
 
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -66,6 +67,7 @@ const AppContent = () => {
       <GpsMapModal />
       <VenueInfoModal />
       <MenuModal />
+      <VenueOwnerModal />
       <InfoModals />
       <DailyRewardModal />
       <RewardedAdModal />

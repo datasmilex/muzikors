@@ -138,7 +138,8 @@ export type ModalType =
   | 'leaderboard'
   | 'rewarded_ad'
   | 'lyrics'
-  | 'menu';
+  | 'menu'
+  | 'venue_owner';
 
 export interface SocialPost {
   id: string;
