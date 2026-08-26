@@ -58,16 +58,14 @@ class IAPService {
 
             if (productId === KAFE_PRODUCT_ID || this.activePendingVenueId !== null) {
               const targetVenueId = this.activePendingVenueId;
-              if (targetVenueId) {
-                const { data, error } = await supabase.rpc('activate_venue_subscription_self', {
-                  p_venue_id: targetVenueId,
-                  p_product_id: KAFE_PRODUCT_ID,
-                  p_order_id: transaction.transactionId || null,
-                  p_purchase_token: transaction.purchaseToken || null,
-                });
-                if (error) console.error('[IAPService] Error activating venue subscription in Supabase:', error);
-                else console.log('[IAPService] Venue subscription activated:', data);
-              }
+              const { data, error } = await supabase.rpc('activate_venue_subscription_self', {
+                p_venue_id: targetVenueId || null,
+                p_product_id: KAFE_PRODUCT_ID,
+                p_order_id: transaction.transactionId || null,
+                p_purchase_token: transaction.purchaseToken || null,
+              });
+              if (error) console.error('[IAPService] Error activating venue subscription in Supabase:', error);
+              else console.log('[IAPService] Venue subscription activated successfully:', data);
               this.activePendingVenueId = null;
             } else {
               // User VIP Premium
