@@ -18,20 +18,20 @@
     --theme-text-muted: rgba(252, 239, 213, 0.65);
   }
 
-  [data-theme="onyx"] {
-    --theme-bg: #000000;
-    --theme-bg-rgb: 0, 0, 0;
-    --theme-card: #0D0D0D;
-    --theme-card-rgb: 13, 13, 13;
-    --theme-card-alt: #161616;
-    --theme-card-alt-rgb: 22, 22, 22;
-    --theme-primary: #F59E0B;
-    --theme-primary-rgb: 245, 158, 11;
-    --theme-primary-light: #FB923C;
-    --theme-primary-dark: #D97706;
-    --theme-glow: rgba(245, 158, 11, 0.35);
-    --theme-text: #FEF3C7;
-    --theme-text-muted: rgba(254, 243, 199, 0.65);
+  [data-theme="crema"] {
+    --theme-bg: #1E1712;
+    --theme-bg-rgb: 30, 23, 18;
+    --theme-card: #2B211A;
+    --theme-card-rgb: 43, 33, 26;
+    --theme-card-alt: #382C23;
+    --theme-card-alt-rgb: 56, 44, 35;
+    --theme-primary: #E5B869;
+    --theme-primary-rgb: 229, 184, 105;
+    --theme-primary-light: #F5D8A4;
+    --theme-primary-dark: #C99745;
+    --theme-glow: rgba(229, 184, 105, 0.35);
+    --theme-text: #FFF8EB;
+    --theme-text-muted: rgba(255, 248, 235, 0.70);
   }
 
   [data-theme="emerald"] {

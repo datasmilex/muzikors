@@ -1,4 +1,4 @@
-export type ThemeType = 'velvet' | 'onyx' | 'emerald' | 'ruby' | 'sapphire';
+export type ThemeType = 'velvet' | 'crema' | 'emerald' | 'ruby' | 'sapphire';
 
 export interface ThemeConfig {
   id: ThemeType;
@@ -21,13 +21,13 @@ export const THEMES: ThemeConfig[] = [
     badgeBg: 'bg-[#D4AF37]',
   },
   {
-    id: 'onyx',
-    name: 'Onyx Amber',
-    subtitle: 'OLED Siyah & Kehribar',
-    accentColor: '#F59E0B',
-    bgColor: '#000000',
-    gradient: 'from-[#FB923C] to-[#F59E0B]',
-    badgeBg: 'bg-[#F59E0B]',
+    id: 'crema',
+    name: 'Crema Gold',
+    subtitle: 'Yumuşak Krema & Şampanya',
+    accentColor: '#E5B869',
+    bgColor: '#1E1712',
+    gradient: 'from-[#F5D8A4] to-[#E5B869]',
+    badgeBg: 'bg-[#E5B869]',
   },
   {
     id: 'emerald',
