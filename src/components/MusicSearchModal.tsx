@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown } from 'lucide-react';
+import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown, Ban, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
@@ -27,6 +27,7 @@ export const MusicSearchModal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [showBlockedSongs, setShowBlockedSongs] = useState(false);
   
   const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'history' | null>('all');
   
@@ -40,6 +41,35 @@ export const MusicSearchModal: React.FC = () => {
   const [estimatedWaitMs, setEstimatedWaitMs] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
+
+  const isTrackExplicit = (track: Track) => {
+    return (
+      track.explicit === true ||
+      (track as any).is_explicit === true ||
+      containsProfanity(track.title) ||
+      containsProfanity(track.artist)
+    );
+  };
+
+  const allowedTracks = searchResults.filter(
+    (track) => !isExplicitFilterActive || !isTrackExplicit(track)
+  );
+
+  const blockedTracks = searchResults.filter(
+    (track) => isExplicitFilterActive && isTrackExplicit(track)
+  );
+
+  useEffect(() => {
+    if (allowedTracks.length > 0) {
+      if (!selectedTrack || !allowedTracks.some(t => t.id === selectedTrack.id)) {
+        setSelectedTrack(allowedTracks[0]);
+      }
+    } else {
+      setSelectedTrack(null);
+    }
+  }, [searchResults, activeVenue?.explicit_filter_enabled]);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
@@ -558,79 +588,182 @@ export const MusicSearchModal: React.FC = () => {
                         {activeTab === 'history' ? 'Geçmiş İstekler Yükleniyor...' : 'Şarkılar Aranıyor...'}
                       </p>
                     </div>
-                  ) : searchResults.length === 0 ? (
+                  ) : allowedTracks.length === 0 && blockedTracks.length === 0 ? (
                     <div className="text-center py-16 text-neutral-500">
                       <Music className="w-10 h-10 mx-auto mb-2 opacity-30 text-[var(--theme-primary)]" />
                       <p className="text-xs font-semibold">Sonuç bulunamadı</p>
                     </div>
                   ) : (
-                    searchResults.map((track) => {
-                      const isSelected = selectedTrack?.id === track.id;
-                      const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                      const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
-                      const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
-                      const isBlocked = isExplicitFilterActive && isExplicitTrack;
-                      const isTooLongForFree = !user?.isPremium && durMs > 240000;
-                      const isTooLongOverall = durMs > 420000;
+                    <>
+                      {/* Empty Allowed notice if only blocked tracks exist */}
+                      {allowedTracks.length === 0 && blockedTracks.length > 0 && (
+                        <div className="text-center py-6 px-4 text-neutral-400 space-y-2 bg-rose-500/[0.03] border border-rose-500/10 rounded-2xl my-2">
+                          <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+                            <Ban className="w-4 h-4" />
+                          </div>
+                          <p className="text-xs font-bold text-neutral-200">Uygun Şarkı Bulunamadı</p>
+                          <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
+                            Aramanızla eşleşen {blockedTracks.length} şarkı mekanın aile ve sansür filtresine takıldı.
+                          </p>
+                        </div>
+                      )}
 
-                      return (
-                        <div
-                          key={track.id}
-                          onClick={() => {
-                            if (isBlocked || (cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
-                            setSelectedTrack(track);
-                          }}
-                          className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
-                              : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                              <img
-                                src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                                alt={track.title}
-                                className="w-full h-full object-cover"
-                              />
-                              {isSelected && (
-                                <div className="absolute inset-0 bg-[var(--theme-primary)]/50 flex items-center justify-center backdrop-blur-xs">
-                                  <Check className="w-4 h-4 text-black stroke-[3]" />
+                      {/* Allowed Tracks */}
+                      {allowedTracks.map((track) => {
+                        const isSelected = selectedTrack?.id === track.id;
+                        const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
+                        const isExplicitTrack = isTrackExplicit(track);
+                        const isTooLongForFree = !user?.isPremium && durMs > 240000;
+                        const isTooLongOverall = durMs > 420000;
+
+                        return (
+                          <div
+                            key={track.id}
+                            onClick={() => {
+                              if ((cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
+                              setSelectedTrack(track);
+                            }}
+                            className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
+                                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                                <img
+                                  src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                                  alt={track.title}
+                                  className="w-full h-full object-cover"
+                                />
+                                {isSelected && (
+                                  <div className="absolute inset-0 bg-[var(--theme-primary)]/50 flex items-center justify-center backdrop-blur-xs">
+                                    <Check className="w-4 h-4 text-black stroke-[3]" />
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <h4 className="text-xs font-bold truncate text-white">
+                                    {track.title}
+                                  </h4>
+                                  {isExplicitTrack && (
+                                    <span className="text-[8px] font-black px-1 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 uppercase" title="Explicit (Sansürsüz İçerik)">
+                                      E
+                                    </span>
+                                  )}
+                                  {isTooLongOverall ? (
+                                    <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
+                                      &gt;7 dk
+                                    </span>
+                                  ) : isTooLongForFree ? (
+                                    <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
+                                      👑 VIP (4+ dk)
+                                    </span>
+                                  ) : null}
                                 </div>
+                                <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
+                                  {track.artist}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="shrink-0 pl-2 text-right">
+                              {durMs > 0 && (
+                                <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
+                                  {formatDuration(durMs)}
+                                </span>
                               )}
                             </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <h4 className="text-xs font-bold truncate text-white">
-                                  {track.title}
-                                </h4>
-                                {isTooLongOverall ? (
-                                  <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
-                                    &gt;7 dk
-                                  </span>
-                                ) : isTooLongForFree ? (
-                                  <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
-                                    👑 VIP (4+ dk)
-                                  </span>
-                                ) : null}
-                              </div>
-                              <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
-                                {track.artist}
-                              </p>
-                            </div>
                           </div>
+                        );
+                      })}
 
-                          <div className="shrink-0 pl-2 text-right">
-                            {durMs > 0 && (
-                              <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
-                                {formatDuration(durMs)}
+                      {/* Collapsible Blocked / Filtered Tracks Section */}
+                      {blockedTracks.length > 0 && (
+                        <div className="pt-2 pb-1 space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowBlockedSongs(prev => !prev)}
+                            className="w-full py-2 px-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] flex items-center justify-between text-xs text-neutral-400 hover:text-neutral-200 transition-all active:scale-[0.99] cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                              <span className="font-bold text-[11px] text-neutral-300">
+                                Filtrelenen Şarkılar ({blockedTracks.length})
                               </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-neutral-500 font-medium">
+                              <span>{showBlockedSongs ? 'Gizle' : 'Göster'}</span>
+                              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showBlockedSongs ? 'rotate-180' : ''}`} />
+                            </div>
+                          </button>
+
+                          <AnimatePresence>
+                            {showBlockedSongs && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="space-y-1.5 overflow-hidden"
+                              >
+                                <div className="px-2.5 py-1 text-[10px] text-neutral-400 flex items-center gap-1.5 bg-rose-500/[0.04] border border-rose-500/10 rounded-xl">
+                                  <Ban className="w-3 h-3 text-rose-400 shrink-0" />
+                                  <span>Mekanın sansür filtresi aktif olduğu için bu şarkılar çalınamaz.</span>
+                                </div>
+                                {blockedTracks.map((track) => {
+                                  const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
+                                  return (
+                                    <div
+                                      key={track.id}
+                                      onClick={() => showToast('Bu şarkı mekanın sansür filtresi nedeniyle çalınamaz.')}
+                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-rose-500/15 bg-rose-500/[0.02] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
+                                    >
+                                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10 grayscale">
+                                          <img
+                                            src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                                            alt={track.title}
+                                            className="w-full h-full object-cover"
+                                          />
+                                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                            <Ban className="w-3.5 h-3.5 text-rose-400" />
+                                          </div>
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
+                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                            <h4 className="text-xs font-bold truncate text-neutral-300">
+                                              {track.title}
+                                            </h4>
+                                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase flex items-center gap-0.5">
+                                              <Ban className="w-2.5 h-2.5" /> Mekanda Çalınamaz
+                                            </span>
+                                          </div>
+                                          <p className="text-[10px] text-neutral-500 font-medium truncate mt-0.5">
+                                            {track.artist}
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      <div className="shrink-0 pl-2 text-right">
+                                        {durMs > 0 && (
+                                          <span className="text-[10px] font-mono font-bold text-neutral-500">
+                                            {formatDuration(durMs)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </motion.div>
                             )}
-                          </div>
+                          </AnimatePresence>
                         </div>
-                      );
-                    })
+                      )}
+                    </>
                   )}
                 </div>
 
