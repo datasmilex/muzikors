@@ -14,7 +14,7 @@ export const BottomNav: React.FC = () => {
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 pointer-events-none">
       {/* Floating Island Container */}
-      <div className="relative flex items-center justify-between bg-[var(--theme-card)]/95 backdrop-blur-2xl border border-white/[0.12] rounded-[2rem] px-4 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_var(--theme-glow)] pointer-events-auto transition-all duration-300">
+      <div className="relative flex items-center justify-between bg-[var(--theme-card)]/95 backdrop-blur-2xl border border-white/[0.12] rounded-[2rem] px-4 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.95)] pointer-events-auto transition-all duration-300">
         
         {/* Kafe Bilgileri */}
         <button

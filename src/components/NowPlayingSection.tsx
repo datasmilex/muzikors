@@ -117,12 +117,12 @@ export const NowPlayingSection: React.FC = () => {
     <div className="relative w-full px-4 pt-2 pb-2 overflow-hidden">
       {/* Ambient Artwork Glow with smooth gradient fade */}
       <div 
-        className="absolute inset-0 bg-cover bg-center blur-3xl opacity-15 pointer-events-none scale-125 transition-all duration-1000 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
+        className="absolute inset-0 bg-cover bg-center blur-3xl opacity-10 pointer-events-none scale-110 transition-all duration-1000 [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_60%)]"
         style={{ backgroundImage: albumSrc ? `url(${albumSrc})` : undefined }}
       />
       
       {/* Main Elevated Player Card */}
-      <div className="relative z-10 w-full rounded-3xl bg-[var(--theme-card)] border border-white/[0.08] p-4 sm:p-5 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_30px_var(--theme-glow)] flex flex-col items-center transition-all duration-300">
+      <div className="relative z-10 w-full rounded-3xl bg-[var(--theme-card)] border border-white/[0.08] p-4 sm:p-5 shadow-[0_16px_40px_rgba(0,0,0,0.85)] flex flex-col items-center transition-all duration-300">
         
         {/* Top Status Header */}
         <div className="w-full flex items-center justify-between mb-4">

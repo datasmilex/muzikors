@@ -775,7 +775,7 @@ export const ProfileView: React.FC = () => {
                   <div className="mt-6 border-t border-white/[0.08] pt-5 space-y-3">
                     {/* Theme Switcher in Profile */}
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
-                      <div className="flex items-center justify-between mb-3 px-0.5">
+                      <div className="flex items-center justify-between mb-3 px-1">
                         <div className="flex items-center gap-2">
                           <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
                           <span className="text-xs font-bold text-white">Renk Teması</span>
@@ -785,7 +785,7 @@ export const ProfileView: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-5 gap-2">
+                      <div className="grid grid-cols-5 gap-1.5">
                         {THEMES.map((t) => {
                           const isSelected = theme === t.id;
                           return (
@@ -793,7 +793,7 @@ export const ProfileView: React.FC = () => {
                               key={t.id}
                               onClick={() => setTheme(t.id)}
                               title={`${t.name} - ${t.subtitle}`}
-                              className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all cursor-pointer ${
+                              className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all cursor-pointer ${
                                 isSelected
                                   ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
                                   : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
@@ -807,8 +807,8 @@ export const ProfileView: React.FC = () => {
                                   <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
                                 )}
                               </div>
-                              <span className="text-[9px] font-bold text-neutral-300 truncate w-full text-center leading-none">
-                                {t.name.split(' ')[0]}
+                              <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
+                                {t.name}
                               </span>
                             </button>
                           );

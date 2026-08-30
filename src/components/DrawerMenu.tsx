@@ -264,7 +264,7 @@ export const DrawerMenu: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-5 gap-1.5">
+                <div className="grid grid-cols-5 gap-1">
                   {THEMES.map((t) => {
                     const isSelected = theme === t.id;
                     return (
@@ -286,8 +286,8 @@ export const DrawerMenu: React.FC = () => {
                             <Check className="w-3 h-3 text-black stroke-[3]" />
                           )}
                         </div>
-                        <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none">
-                          {t.name.split(' ')[0]}
+                        <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
+                          {t.name}
                         </span>
                       </button>
                     );
