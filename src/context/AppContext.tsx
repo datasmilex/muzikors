@@ -757,6 +757,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // PRIMARY SOURCE OF TRUTH FOR NOW PLAYING: venues.current_track_info
         if (venueData?.current_track_info) {
           const trackInfo = venueData.current_track_info;
+          const trackDurationMs = trackInfo.duration_ms || (trackInfo.duration ? trackInfo.duration * 1000 : (playingRow?.duration_ms || 210000));
+          const trackDurationSec = Math.round(trackDurationMs / 1000);
+          const trackStartedAt = trackInfo.started_at || (trackInfo.progress_ms ? new Date(Date.now() - trackInfo.progress_ms).toISOString() : (trackInfo.updated_at || playingRow?.started_at || null));
+
+          if (trackInfo.progress_ms) {
+            setAudioProgress(Math.min(trackDurationSec, Math.floor(trackInfo.progress_ms / 1000)));
+          } else if (trackStartedAt) {
+            const elapsed = Math.max(0, Math.floor((Date.now() - new Date(trackStartedAt).getTime()) / 1000));
+            setAudioProgress(Math.min(trackDurationSec, elapsed));
+          }
+
           setNowPlaying(prev => {
             const isSameTrack = prev?.title === trackInfo.song_title || prev?.id === trackInfo.spotify_track_id;
             return {
@@ -767,23 +778,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               coverUrl: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
               album_art: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
               spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
-              durationMs: prev?.durationMs || 210000,
-              duration: prev?.duration || 210,
+              durationMs: trackDurationMs,
+              duration: trackDurationSec,
               votes: playingRow?.votes ?? prev?.votes ?? 0,
-              requestedBy: (isSameTrack && prev?.requestedByUserId) ? prev.requestedBy : (trackInfo.requested_by_name || 'Mekan Listesi'),
+              requestedBy: (isSameTrack && prev?.requestedByUserId) ? prev.requestedBy : (trackInfo.requested_by_name || 'Mekan Fon Müziği'),
               requestedByUserId: (isSameTrack && prev?.requestedByUserId) ? prev.requestedByUserId : (trackInfo.requested_by_user_id || undefined),
               requestedAt: 'Canli',
-              isPlaying: true,
+              startedAt: trackStartedAt,
+              isPlaying: trackInfo.is_playing !== false,
             };
           });
-          setIsPlayingAudio(true);
+          setIsPlayingAudio(trackInfo.is_playing !== false);
         } else if (playingRow) {
           // Fallback if current_track_info is not yet available but we have a playing queue item
-          setNowPlaying({ ...toTrack(playingRow), requestedAt: 'Canli' });
+          const parsed = toTrack(playingRow);
+          setNowPlaying({ ...parsed, requestedAt: 'Canli' });
+          if (parsed.startedAt) {
+            const elapsed = Math.max(0, Math.floor((Date.now() - new Date(parsed.startedAt).getTime()) / 1000));
+            setAudioProgress(Math.min(parsed.duration || 180, elapsed));
+          }
           setIsPlayingAudio(true);
         } else {
           setNowPlaying(null);
           setIsPlayingAudio(false);
+          setAudioProgress(0);
         }
 
         setQueue(upcomingRows.map(toTrack));
@@ -831,6 +849,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .on('broadcast', { event: 'playback_state' }, ({ payload }) => {
         if (payload) {
           setLivePlaybackState(payload);
+          if (payload.progress_ms !== undefined) {
+            const durSec = Math.round((payload.duration_ms || 210000) / 1000);
+            setAudioProgress(Math.min(durSec, Math.floor(payload.progress_ms / 1000)));
+          }
         }
       })
       .on('broadcast', { event: 'veto_event' }, ({ payload }) => {
@@ -893,46 +915,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           requestedBy: (livePlaybackState as any).requested_by_name || prev?.requestedBy || 'Mekan Fon Müziği',
           requestedByUserId: (livePlaybackState as any).requested_by_user_id || prev?.requestedByUserId || undefined,
           requestedAt: prev?.requestedAt || 'Canli',
-          isPlaying: livePlaybackState.is_playing,
+          isPlaying: livePlaybackState.is_playing !== false,
         };
       }
       return prev;
     });
-    setIsPlayingAudio(livePlaybackState.is_playing);
+    setIsPlayingAudio(livePlaybackState.is_playing !== false);
   }, [livePlaybackState]);
 
-  // ── AUDIO PROGRESS TIMER & HARD DELETE FINISHED SONGS ────────────────────
+  // ── LIVE AUDIO PROGRESS TICKER ────────────────────────────────────────────
   useEffect(() => {
-    if (!isPlayingAudio || !nowPlaying) return;
+    if (!nowPlaying) {
+      setAudioProgress(0);
+      return;
+    }
 
     const timer = setInterval(() => {
-      let elapsedSec = 0;
+      const trackDurationSec = nowPlaying.duration || (nowPlaying.durationMs ? Math.round(nowPlaying.durationMs / 1000) : 180);
 
-      if (nowPlaying.id === 'spotify-bg' && livePlaybackState) {
-        const elapsedMs = livePlaybackState.progress_ms + (livePlaybackState.is_playing ? Date.now() - livePlaybackState.updated_at : 0);
-        elapsedSec = Math.min(Math.round(livePlaybackState.duration_ms / 1000), Math.floor(elapsedMs / 1000));
-      } else if (nowPlaying.startedAt) {
-        const elapsedMs = Math.max(0, Date.now() - new Date(nowPlaying.startedAt).getTime());
-        elapsedSec = Math.floor(elapsedMs / 1000);
-      } else {
-        setAudioProgress((prev) => prev + 1);
-        return;
-      }
+      setAudioProgress((prev) => {
+        let currentSec = prev + 1;
 
-      setAudioProgress(elapsedSec);
-      const trackDurationSec = nowPlaying.duration ?? 180;
+        // Priority 1: If livePlaybackState broadcast is active
+        if (livePlaybackState && livePlaybackState.updated_at) {
+          const timeSinceUpdate = livePlaybackState.is_playing ? Date.now() - Number(livePlaybackState.updated_at) : 0;
+          const calculatedMs = (livePlaybackState.progress_ms || 0) + timeSinceUpdate;
+          currentSec = Math.floor(calculatedMs / 1000);
+        }
+        // Priority 2: If we have a reliable startedAt timestamp
+        else if (nowPlaying.startedAt) {
+          const elapsedMs = Math.max(0, Date.now() - new Date(nowPlaying.startedAt).getTime());
+          currentSec = Math.floor(elapsedMs / 1000);
+        }
 
-      if (nowPlaying.id !== 'spotify-bg' && elapsedSec >= trackDurationSec) {
-        // User App NEVER transitions queue state. It only visually clears the active playback
-        // until Realtime syncs the true state from Kafe Paneli or Spotify API.
-        setNowPlaying(null);
-        setIsPlayingAudio(false);
-        setAudioProgress(0);
-      }
+        return Math.min(trackDurationSec, Math.max(0, currentSec));
+      });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isPlayingAudio, nowPlaying, queue, livePlaybackState]);
+  }, [nowPlaying?.id, nowPlaying?.title, nowPlaying?.startedAt, livePlaybackState]);
 
   // ── COOLDOWN TIMER ───────────────────────────────────────────────────────
   useEffect(() => {

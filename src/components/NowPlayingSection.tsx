@@ -98,16 +98,14 @@ export const NowPlayingSection: React.FC = () => {
     );
   }
 
-  const durationSec = nowPlaying.duration || 180;
+  const durationSec = nowPlaying.duration || (nowPlaying.durationMs ? Math.round(nowPlaying.durationMs / 1000) : 180);
   let currentElapsed = audioProgress;
 
-  if (nowPlaying.id !== 'spotify-bg' && nowPlaying.startedAt) {
+  if (nowPlaying.startedAt && (!audioProgress || audioProgress === 0)) {
     const elapsedMs = Math.max(0, Date.now() - new Date(nowPlaying.startedAt).getTime());
     currentElapsed = Math.min(durationSec, Math.floor(elapsedMs / 1000));
-  } else if (nowPlaying.id !== 'spotify-bg' && !nowPlaying.startedAt) {
-    currentElapsed = 0;
   } else {
-    currentElapsed = Math.min(durationSec, audioProgress);
+    currentElapsed = Math.min(durationSec, Math.max(0, audioProgress));
   }
 
   const progressPercent = durationSec > 0 ? Math.min(100, (currentElapsed / durationSec) * 100) : 0;
