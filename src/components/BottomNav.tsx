@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Info, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
+import { Store, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const BottomNav: React.FC = () => {
@@ -12,81 +12,82 @@ export const BottomNav: React.FC = () => {
   const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-sm z-50">
-      {/* Floating Pill Container */}
-      <div className="relative flex items-center justify-between bg-black/75 backdrop-blur border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.15)]">
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 pointer-events-none">
+      {/* Floating Island Container */}
+      <div className="relative flex items-center justify-between bg-[#141318]/95 backdrop-blur-2xl border border-white/[0.12] rounded-[2rem] px-4 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(245,158,11,0.1)] pointer-events-auto">
         
         {/* Kafe Bilgileri */}
         <button
           onClick={() => openModal('venue_info')}
           disabled={!isVenueBound}
-          className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'venue_info' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
+          className={`flex flex-col items-center justify-center w-12 py-1 transition-all ${
+            activeModal === 'venue_info' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
           } ${!isVenueBound ? 'opacity-30 cursor-not-allowed' : 'active:scale-90'}`}
         >
-          <Info className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'venue_info' ? 2.5 : 2} />
-          <span className="text-[9px] font-bold tracking-wider">Kafe</span>
+          <Store className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'venue_info' ? 2.5 : 2} />
+          <span className="text-[10px] font-bold tracking-tight">Mekan</span>
+          {activeModal === 'venue_info' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
         </button>
 
         {/* Harita */}
         <button
           onClick={() => openModal('map')}
-          className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'map' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
+          className={`flex flex-col items-center justify-center w-12 py-1 transition-all ${
+            activeModal === 'map' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
           } active:scale-90`}
         >
           <Map className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'map' ? 2.5 : 2} />
-          <span className="text-[9px] font-bold tracking-wider">Harita</span>
+          <span className="text-[10px] font-bold tracking-tight">Harita</span>
+          {activeModal === 'map' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
         </button>
 
-        {/* ŞARKI EKLE (FAB) - Floating Action Button overflowing the pill */}
-        <div className="relative -top-8 flex flex-col items-center mx-2">
+        {/* Center Primary Action Button: ŞARKI İSTE (FAB) */}
+        <div className="relative -top-6 flex flex-col items-center mx-1">
           <button
             id="tour-add-song"
             onClick={() => openModal('search')}
             disabled={!isVenueBound}
-            className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FFDF73] to-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.5)] border-4 border-[#120C08] z-50 active:scale-95 transition-transform duration-100 will-change-transform ${
-              !isVenueBound ? 'opacity-50 cursor-not-allowed grayscale' : ''
+            className={`group relative flex items-center justify-center w-15 h-15 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 shadow-[0_8px_25px_rgba(245,158,11,0.5)] border-4 border-[#070604] z-50 active:scale-95 transition-all duration-200 ${
+              !isVenueBound ? 'opacity-40 cursor-not-allowed grayscale' : 'hover:scale-105'
             }`}
           >
-            {isVenueBound && (
-              <span className="absolute inset-0 rounded-full border border-[#D4AF37] animate-ping opacity-40" style={{ animationDuration: '3s' }} />
-            )}
-            <Plus className="w-8 h-8 text-black stroke-[3] drop-shadow-md" />
+            <Plus className="w-7 h-7 text-black stroke-[3] group-hover:rotate-90 transition-transform duration-300" />
 
-            {/* Kalan Şarkı Hakkı Rozeti */}
+            {/* Remaining Song Rights Badge */}
             {user && isVenueBound && (
-              <span className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-stone-950 border border-[#D4AF37]/60 text-[10px] font-black text-[#D4AF37] shadow-lg shadow-black/80 whitespace-nowrap">
+              <span className="absolute -top-2 px-2 py-0.5 rounded-full bg-[#070604] border border-amber-400/60 text-[9px] font-black text-amber-300 shadow-md whitespace-nowrap">
                 {remainingSongs}/{maxDailySongs}
               </span>
             )}
           </button>
-          {/* Subtle label below FAB */}
-          <span className="absolute -bottom-5 text-[10px] font-black text-[#D4AF37] tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] whitespace-nowrap">
-            {user && isVenueBound ? `${remainingSongs}/${maxDailySongs} Hak` : 'Ekle'}
+          
+          <span className="text-[10px] font-black text-amber-400 tracking-wider uppercase drop-shadow-md mt-1">
+            İstek
           </span>
         </div>
 
         {/* Akış */}
         <button
           onClick={() => openModal('globalFeed')}
-          className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'globalFeed' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
+          className={`flex flex-col items-center justify-center w-12 py-1 transition-all ${
+            activeModal === 'globalFeed' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
           } active:scale-90`}
         >
           <MessageCircle className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'globalFeed' ? 2.5 : 2} />
-          <span className="text-[9px] font-bold tracking-wider">Akış</span>
+          <span className="text-[10px] font-bold tracking-tight">Akış</span>
+          {activeModal === 'globalFeed' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
         </button>
 
         {/* Sıralamalar */}
         <button
           onClick={() => openModal('leaderboard')}
-          className={`flex flex-col items-center justify-center w-12 transition-all ${
-            activeModal === 'leaderboard' ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 active:text-zinc-300'
+          className={`flex flex-col items-center justify-center w-12 py-1 transition-all ${
+            activeModal === 'leaderboard' ? 'text-amber-400' : 'text-neutral-400 hover:text-neutral-200'
           } active:scale-90`}
         >
           <Trophy className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'leaderboard' ? 2.5 : 2} />
-          <span className="text-[9px] font-bold tracking-wider">Sıralama</span>
+          <span className="text-[10px] font-bold tracking-tight">Sıralama</span>
+          {activeModal === 'leaderboard' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
         </button>
       </div>
     </div>

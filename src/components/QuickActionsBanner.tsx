@@ -2,25 +2,27 @@
 
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { QrCode } from 'lucide-react';
+import { QrCode, Sparkles } from 'lucide-react';
 
 export const QuickActionsBanner: React.FC = () => {
-  const { user, openModal } = useApp();
+  const { user, openModal, isVenueBound } = useApp();
 
   if (!user) return null;
 
   return (
-    <div className="w-full px-4 py-2 flex items-center justify-between bg-transparent z-20 relative">
-      <div className="flex-1 flex items-center justify-between gap-3">
-
-
-        {/* QR Scanner Button */}
+    <div className="w-full px-4 pt-1 pb-0 flex items-center justify-between bg-transparent z-20 relative">
+      <div className="flex-1 flex items-center justify-between gap-2">
         <button
           onClick={() => openModal('qr')}
-          className="w-full flex items-center justify-center gap-2 h-10 px-4 rounded-full bg-[#D4AF37]/90 backdrop-blur-sm text-black font-black text-sm active:scale-95 transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] border border-[#D4AF37]"
+          className="w-full flex items-center justify-between h-9 px-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] active:scale-95 transition-all text-xs font-semibold text-neutral-300"
         >
-          <QrCode className="w-4 h-4" strokeWidth={2.5} />
-          <span>QR Okut</span>
+          <div className="flex items-center gap-2">
+            <QrCode className="w-3.5 h-3.5 text-amber-400" />
+            <span>{isVenueBound ? 'Masa / QR Değiştir' : 'Masa QR Okut'}</span>
+          </div>
+          <span className="text-[10px] font-bold text-amber-400/80 uppercase tracking-wider">
+            Tara
+          </span>
         </button>
       </div>
     </div>

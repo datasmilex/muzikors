@@ -38,7 +38,7 @@ const AppContent = () => {
   const showGateway = isVenueBound && !hasEnteredGateway;
 
   return (
-    <div className="w-full max-w-md min-h-screen bg-[#0A0A0A] flex flex-col relative shadow-[0_0_50px_rgba(212,175,55,0.1)] border-x border-[#D4AF37]/10 overflow-x-hidden app-bg-gradient">
+    <div className="w-full max-w-md min-h-screen bg-[#070604] flex flex-col relative shadow-[0_0_80px_rgba(0,0,0,0.9)] border-x border-white/[0.06] overflow-x-hidden">
       
       {!isVenueBound ? (
         <WelcomeScreen />
@@ -82,7 +82,7 @@ const AppContent = () => {
 export default function Home() {
   return (
     <AppProvider>
-      <main className="min-h-screen bg-[#120C08] text-[#FCEFD5] flex justify-center selection:bg-[#D4AF37] selection:text-black">
+      <main className="min-h-screen bg-[#040403] text-white flex justify-center selection:bg-amber-400 selection:text-black">
         <AppContent />
       </main>
     </AppProvider>
