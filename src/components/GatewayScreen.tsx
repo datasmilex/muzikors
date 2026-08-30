@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Music, Menu, Wifi, Copy, Check, Store, X } from 'lucide-react';
+import { Music, Menu, Wifi, Copy, Check, Store, X, BookOpen } from 'lucide-react';
 
 export const GatewayScreen: React.FC = () => {
   const { activeVenue, setHasEnteredGateway, openModal, showToast } = useApp();
@@ -26,7 +26,7 @@ export const GatewayScreen: React.FC = () => {
   const hasMenu = isNativeMenu || Boolean(menuUrl?.trim());
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#070604] p-4 relative overflow-hidden items-center text-white">
+    <div className="flex-1 flex flex-col min-h-screen bg-[var(--theme-bg)] p-4 relative overflow-hidden items-center text-white transition-colors duration-300">
       {/* Close Button */}
       <button 
         onClick={() => setHasEnteredGateway(true)}
@@ -38,8 +38,8 @@ export const GatewayScreen: React.FC = () => {
       {/* Header: Minimal Powered by Muzikors */}
       <div className="w-full flex justify-center pt-8 pb-4 relative z-10">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08]">
-          <Music className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">Powered by Muzikors</span>
+          <Music className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+          <span className="text-[10px] font-black tracking-widest text-[var(--theme-primary-light)] uppercase">Powered by Muzikors</span>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export const GatewayScreen: React.FC = () => {
         {/* Profile Card */}
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="w-28 h-28 rounded-3xl border border-amber-400/30 p-1 flex items-center justify-center bg-[#141318] shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative">
+            <div className="w-28 h-28 rounded-3xl border border-[var(--theme-primary)]/30 p-1 flex items-center justify-center bg-[var(--theme-card)] shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative">
               {activeVenue.logo_url?.trim() ? (
                 <img 
                   src={activeVenue.logo_url} 
@@ -57,16 +57,16 @@ export const GatewayScreen: React.FC = () => {
                   className="w-full h-full object-cover rounded-2xl z-10"
                 />
               ) : (
-                <Store className="w-12 h-12 text-amber-400/60 z-10" />
+                <Store className="w-12 h-12 text-[var(--theme-primary)]/60 z-10" />
               )}
             </div>
-            <div className="absolute -bottom-1.5 -right-1.5 bg-amber-400 w-8 h-8 rounded-full flex items-center justify-center border-2 border-[#070604] shadow-md">
+            <div className="absolute -bottom-1.5 -right-1.5 bg-[var(--theme-primary)] w-8 h-8 rounded-full flex items-center justify-center border-2 border-[var(--theme-bg)] shadow-md">
               <Check className="w-4 h-4 text-black stroke-[3]" />
             </div>
           </div>
           <div className="text-center space-y-1">
             <h1 className="text-xl font-black text-white tracking-tight">{activeVenue.venue_name}</h1>
-            <p className="text-[11px] text-amber-400 font-bold tracking-widest uppercase">Hoş Geldiniz</p>
+            <p className="text-[11px] text-[var(--theme-primary-light)] font-bold tracking-widest uppercase">Hoş Geldiniz</p>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ export const GatewayScreen: React.FC = () => {
         <div className="w-full space-y-4">
           <button
             onClick={() => setHasEnteredGateway(true)}
-            className="w-full h-14 rounded-2xl bg-amber-400 text-black font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all"
+            className="w-full h-14 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all"
           >
             <Music className="w-5 h-5" />
             Muzikors'a Başla
@@ -82,9 +82,9 @@ export const GatewayScreen: React.FC = () => {
 
           {/* Wi-Fi Info Card (CONDITIONAL) */}
           {hasWifi && (
-            <div className="w-full bg-[#141318] border border-white/[0.08] rounded-2xl p-4 text-center space-y-3 shadow-sm">
+            <div className="w-full bg-[var(--theme-card-alt)] border border-white/[0.08] rounded-2xl p-4 text-center space-y-3 shadow-sm">
               <div className="flex items-center justify-center gap-2 pb-2 border-b border-white/[0.06]">
-                <Wifi className="w-4 h-4 text-amber-400" />
+                <Wifi className="w-4 h-4 text-[var(--theme-primary)]" />
                 <h3 className="text-xs font-bold text-white tracking-wider uppercase">Mekân Wi-Fi Bilgileri</h3>
               </div>
               
@@ -100,7 +100,7 @@ export const GatewayScreen: React.FC = () => {
                   <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/[0.04]">
                     <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Şifre</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-amber-300 font-mono font-bold tracking-wider">{wifiPass}</span>
+                      <span className="text-xs text-white font-mono font-bold tracking-wider">{wifiPass}</span>
                       <button 
                         onClick={() => {
                           if (wifiPass) {
@@ -110,7 +110,7 @@ export const GatewayScreen: React.FC = () => {
                             setTimeout(() => setCopied(false), 2000);
                           }
                         }}
-                        className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 transition-all active:scale-90"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
                         title="Şifreyi Kopyala"
                       >
                         {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -122,26 +122,26 @@ export const GatewayScreen: React.FC = () => {
             </div>
           )}
 
+          {/* Menu Button (CONDITIONAL) */}
           {hasMenu && (
             isNativeMenu ? (
               <button
                 type="button"
-                onClick={() => {
-                  setHasEnteredGateway(true);
-                  openModal('menu');
-                }}
-                className="w-full h-12 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm cursor-pointer"
+                onClick={() => openModal('menu')}
+                className="w-full h-14 rounded-2xl bg-[var(--theme-card-alt)] hover:bg-[var(--theme-card)] border border-[var(--theme-primary)]/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm cursor-pointer"
               >
-                <span>📖 Dijital Menü</span>
+                <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
+                <span>Dijital Menüyü İncele</span>
               </button>
             ) : (
               <a
                 href={menuUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                className="w-full h-14 rounded-2xl bg-[var(--theme-card-alt)] hover:bg-[var(--theme-card)] border border-[var(--theme-primary)]/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm"
               >
-                <span>📖 Dijital Menü</span>
+                <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
+                <span>Dijital Menüyü İncele</span>
               </a>
             )
           )}

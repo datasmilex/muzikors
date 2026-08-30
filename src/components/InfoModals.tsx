@@ -64,12 +64,12 @@ export const InfoModals: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-sm bg-[#0d0c11] rounded-3xl p-5 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[85vh] flex flex-col justify-between border border-white/[0.1]"
+            className="relative w-full max-w-sm bg-[var(--theme-card)] rounded-3xl p-5 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[85vh] flex flex-col justify-between border border-white/[0.1]"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4 relative z-10 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400 shadow-inner">
+                <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)] shadow-inner">
                   {activeModal === 'campaigns' && <Gift className="w-4 h-4" />}
                   {activeModal === 'about' && <Info className="w-4 h-4" />}
                   {activeModal === 'partners' && <Handshake className="w-4 h-4" />}
@@ -101,8 +101,8 @@ export const InfoModals: React.FC = () => {
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar text-xs text-neutral-300 leading-relaxed relative z-10">
               {activeModal === 'campaigns' && (
                 <div className="space-y-3">
-                  <div className="bg-[#141318] rounded-2xl p-5 border border-white/[0.08] text-center py-8">
-                    <Gift className="w-8 h-8 text-amber-400 mx-auto mb-2 opacity-60" />
+                  <div className="bg-[var(--theme-card-alt)] rounded-2xl p-5 border border-white/[0.08] text-center py-8">
+                    <Gift className="w-8 h-8 text-[var(--theme-primary)] mx-auto mb-2 opacity-60" />
                     <h4 className="font-bold text-white mb-1 text-sm">Çok Yakında</h4>
                     <p className="text-xs text-neutral-400 leading-relaxed">Özel fırsatlar ve kampanyalarla çok yakında buradayız.</p>
                   </div>
@@ -110,9 +110,9 @@ export const InfoModals: React.FC = () => {
               )}
 
               {activeModal === 'about' && (
-                <div className="space-y-3 bg-[#141318] rounded-2xl p-4 border border-white/[0.08]">
+                <div className="space-y-3 bg-[var(--theme-card-alt)] rounded-2xl p-4 border border-white/[0.08]">
                   <p className="leading-relaxed">
-                    <strong className="text-amber-400 text-base font-black block mb-1">Muzikors</strong> Mekanlarda müzik seçimini müşterilere sunan yeni nesil dijital jukebox platformudur.
+                    <strong className="text-[var(--theme-primary)] text-base font-black block mb-1">Muzikors</strong> Mekanlarda müzik seçimini müşterilere sunan yeni nesil dijital jukebox platformudur.
                   </p>
                   <div className="h-px w-full bg-white/[0.08] my-3" />
                   <p className="leading-relaxed text-neutral-400">
@@ -124,7 +124,7 @@ export const InfoModals: React.FC = () => {
               {activeModal === 'partners' && (
                 <div>
                   {partnerSubmitted ? (
-                    <div className="text-center py-6 space-y-3 bg-[#141318] rounded-2xl p-4 border border-emerald-500/20">
+                    <div className="text-center py-6 space-y-3 bg-[var(--theme-card-alt)] rounded-2xl p-4 border border-emerald-500/20">
                       <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-sm">
                         <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                       </div>
@@ -201,10 +201,10 @@ export const InfoModals: React.FC = () => {
               )}
 
               {activeModal === 'contact' && (
-                <div className="space-y-4 text-center py-4 bg-[#141318] rounded-2xl border border-white/[0.08]">
+                <div className="space-y-4 text-center py-4 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
                   <div>
                     <p className="font-bold text-white text-sm mb-1">Destek &amp; İletişim</p>
-                    <p className="text-amber-400 font-mono text-xs font-bold bg-black/40 py-1.5 px-3 rounded-lg inline-block border border-white/5">destek@muzikors.com</p>
+                    <p className="text-[var(--theme-primary)] font-mono text-xs font-bold bg-black/40 py-1.5 px-3 rounded-lg inline-block border border-white/5">destek@muzikors.com</p>
                   </div>
                   <div className="pt-3 border-t border-white/[0.06] space-y-2 px-4">
                     <a
@@ -229,22 +229,22 @@ export const InfoModals: React.FC = () => {
 
               {activeModal === 'howitworks' && (
                 <div className="space-y-2.5">
-                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
-                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">1</div>
+                  <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">1</div>
                     <div>
                       <h4 className="font-bold text-white text-xs mb-0.5">Masa QR Okut</h4>
                       <p className="text-neutral-400 text-[11px] leading-snug">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine bağlan.</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
-                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">2</div>
+                  <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">2</div>
                     <div>
                       <h4 className="font-bold text-white text-xs mb-0.5">Şarkı Ara</h4>
                       <p className="text-neutral-400 text-[11px] leading-snug">Binlerce Spotify şarkısı arasından dilediğini seç.</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
-                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">3</div>
+                  <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">3</div>
                     <div>
                       <h4 className="font-bold text-white text-xs mb-0.5">Şarkını Çaldır</h4>
                       <p className="text-neutral-400 text-[11px] leading-snug">Sıraya ekle ve mekanın atmosferini şekillendir!</p>
@@ -255,37 +255,37 @@ export const InfoModals: React.FC = () => {
 
               {activeModal === 'terms' && (
                 <div className="space-y-3">
-                  <div className="flex bg-[#141318] p-1 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar">
+                  <div className="flex bg-[var(--theme-card-alt)] p-1 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar">
                     <button 
                       onClick={() => setActiveLegalTab('kvkk')} 
-                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'kvkk' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'kvkk' ? 'bg-[var(--theme-primary)] text-black' : 'text-white/60'}`}
                     >
                       KVKK
                     </button>
                     <button 
                       onClick={() => setActiveLegalTab('consent')} 
-                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'consent' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'consent' ? 'bg-[var(--theme-primary)] text-black' : 'text-white/60'}`}
                     >
                       Açık Rıza
                     </button>
                     <button 
                       onClick={() => setActiveLegalTab('cookie')} 
-                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'cookie' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'cookie' ? 'bg-[var(--theme-primary)] text-black' : 'text-white/60'}`}
                     >
                       Çerez
                     </button>
                     <button 
                       onClick={() => setActiveLegalTab('terms')} 
-                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'terms' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'terms' ? 'bg-[var(--theme-primary)] text-black' : 'text-white/60'}`}
                     >
                       Koşullar
                     </button>
                   </div>
 
-                  <div className="bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08] space-y-3 min-h-[220px]">
+                  <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08] space-y-3 min-h-[220px]">
                     {activeLegalTab === 'kvkk' && (
                       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
-                        <h4 className="font-bold text-amber-400 text-xs">KVKK Aydınlatma Metni</h4>
+                        <h4 className="font-bold text-[var(--theme-primary)] text-xs">KVKK Aydınlatma Metni</h4>
                         <p><strong className="text-white block">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.</p>
                         <p><strong className="text-white block">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, istek geçmişi.</p>
                         <p><strong className="text-white block">Haklar:</strong> Kullanıcı dilediği an hesabını ve verilerini silebilir.</p>

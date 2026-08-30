@@ -123,11 +123,11 @@ export const PremiumModal: React.FC = () => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[#0d0c11] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/[0.1] flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-md bg-[var(--theme-card)] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/[0.1] flex flex-col max-h-[90vh]"
         >
           {/* Header Graphic */}
-          <div className="relative p-6 pb-4 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[#141318]">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mb-3 shadow-inner">
+          <div className="relative p-6 pb-4 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[var(--theme-card)]">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center text-[var(--theme-primary)] mb-3 shadow-inner">
               <Crown className="w-7 h-7" />
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">
@@ -135,8 +135,8 @@ export const PremiumModal: React.FC = () => {
             </h2>
             
             {/* Free Trial Highlight Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-amber-400/15 border border-amber-400/30">
-              <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30">
+              <span className="text-[10px] font-black text-[var(--theme-primary-light)] uppercase tracking-wider">
                 İlk 3 Gün Ücretsiz Deneme!
               </span>
             </div>
@@ -152,7 +152,7 @@ export const PremiumModal: React.FC = () => {
           {/* Benefits list */}
           <div className="p-5 overflow-y-auto custom-scrollbar space-y-2.5">
             {benefits.map((benefit, idx) => (
-              <div key={idx} className="flex gap-3.5 items-start bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
+              <div key={idx} className="flex gap-3.5 items-start bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
                 <div className="p-2 rounded-xl bg-black/40 border border-white/5 shrink-0 mt-0.5">
                   {benefit.icon}
                 </div>
@@ -165,11 +165,11 @@ export const PremiumModal: React.FC = () => {
           </div>
 
           {/* Footer & Subscribe CTA */}
-          <div className="p-5 border-t border-white/[0.08] bg-[#0d0c11]">
+          <div className="p-5 border-t border-white/[0.08] bg-[var(--theme-card)]">
             <button
               onClick={handleSubscribe}
               disabled={isProcessing}
-              className="w-full py-3.5 rounded-2xl font-black text-xs bg-amber-400 hover:bg-amber-300 text-black shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl font-black text-xs bg-[var(--theme-primary)] text-black shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isProcessing ? (
                 <>

@@ -94,17 +94,17 @@ export const LeaderboardModal: React.FC = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md h-[82vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[#0d0c11] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
+            className="relative w-full max-w-md h-[82vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
           >
             {/* Header */}
             <div className="flex-none p-5 flex items-center justify-between border-b border-white/[0.08] relative z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400 shadow-inner">
+                <div className="w-10 h-10 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)] shadow-inner">
                   <Trophy className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-black text-white tracking-tight">Liderlik Tablosu</h2>
-                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">En Çok Şarkı Çaldıranlar</span>
+                  <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider">En Çok Şarkı Çaldıranlar</span>
                 </div>
               </div>
               <button
@@ -117,11 +117,11 @@ export const LeaderboardModal: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex-none flex items-center p-1.5 mx-5 mt-4 bg-[#141318] rounded-2xl border border-white/[0.08]">
+            <div className="flex-none flex items-center p-1.5 mx-5 mt-4 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
               <button
                 onClick={() => setActiveTab('users')}
                 className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'users' ? 'bg-amber-400 text-black shadow-md' : 'text-white/60 hover:text-white'
+                  activeTab === 'users' ? 'bg-[var(--theme-primary)] text-black shadow-md' : 'text-white/60 hover:text-white'
                 }`}
               >
                 <Users className="w-3.5 h-3.5" /> Kullanıcılar
@@ -129,7 +129,7 @@ export const LeaderboardModal: React.FC = () => {
               <button
                 onClick={() => setActiveTab('venues')}
                 className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'venues' ? 'bg-amber-400 text-black shadow-md' : 'text-white/60 hover:text-white'
+                  activeTab === 'venues' ? 'bg-[var(--theme-primary)] text-black shadow-md' : 'text-white/60 hover:text-white'
                 }`}
               >
                 <Store className="w-3.5 h-3.5" /> Mekanlar
@@ -142,10 +142,10 @@ export const LeaderboardModal: React.FC = () => {
               <div className="mb-2">
                 <button
                   onClick={() => setShowRewards(!showRewards)}
-                  className="w-full p-3 rounded-2xl bg-[#141318] border border-white/[0.08] hover:border-amber-400/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
+                  className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                    <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
                       <Gift className="w-3.5 h-3.5" />
                     </div>
                     <div className="text-left">
@@ -156,10 +156,10 @@ export const LeaderboardModal: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-amber-400">
+                    <span className="text-[10px] font-bold text-[var(--theme-primary)]">
                       {showRewards ? 'Gizle' : 'Gör'}
                     </span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-amber-400 transition-transform ${showRewards ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 text-[var(--theme-primary)] transition-transform ${showRewards ? 'rotate-180' : ''}`} />
                   </div>
                 </button>
 
@@ -172,10 +172,10 @@ export const LeaderboardModal: React.FC = () => {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 p-3 rounded-2xl bg-[#141318] border border-white/[0.08] space-y-2">
+                      <div className="mt-2 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] space-y-2">
                         {activeTab === 'users' ? (
                           <div className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                            <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center font-black text-black text-[10px] shrink-0">1-3</div>
+                            <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">1-3</div>
                             <div>
                               <p className="text-xs font-bold text-white mb-0.5">1 Aylık Muzikors Premium</p>
                               <p className="text-[10px] text-neutral-400 leading-snug">Liderlik tablosunda ilk 3&apos;e giren kullanıcılara ücretsiz Premium hediye!</p>
@@ -198,7 +198,7 @@ export const LeaderboardModal: React.FC = () => {
 
               {loading ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-3 py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                  <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />
                   <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Yükleniyor...</span>
                 </div>
               ) : activeTab === 'users' ? (
@@ -214,14 +214,14 @@ export const LeaderboardModal: React.FC = () => {
                         key={user.id}
                         className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
                           isCurrentLoggedUser
-                            ? 'bg-[#17151e] border-amber-400/40 shadow-sm'
+                            ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
                             : isTop
-                            ? 'bg-[#17151e] border-amber-400/30'
+                            ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30'
                             : 'bg-white/[0.02] border-white/[0.06]'
                         }`}
                       >
                         <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
-                          idx + 1 === 1 ? 'bg-amber-400 text-black' : 
+                          idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
                           idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
                           idx + 1 === 3 ? 'bg-amber-700 text-white' : 
                           'bg-white/10 text-neutral-400'
@@ -252,7 +252,7 @@ export const LeaderboardModal: React.FC = () => {
                         </div>
 
                         <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
-                          <span className="text-xs font-black text-amber-400">{user.total_songs_requested || 0}</span>
+                          <span className="text-xs font-black text-[var(--theme-primary)]">{user.total_songs_requested || 0}</span>
                           <span className="text-[8px] font-bold text-neutral-500 uppercase">İstek</span>
                         </div>
                       </div>
@@ -270,11 +270,11 @@ export const LeaderboardModal: React.FC = () => {
                       <div
                         key={venue.id}
                         className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
-                          isTop ? 'bg-[#17151e] border-amber-400/30' : 'bg-white/[0.02] border-white/[0.06]'
+                          isTop ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30' : 'bg-white/[0.02] border-white/[0.06]'
                         }`}
                       >
                         <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
-                          idx + 1 === 1 ? 'bg-amber-400 text-black' : 
+                          idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
                           idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
                           idx + 1 === 3 ? 'bg-amber-700 text-white' : 
                           'bg-white/10 text-neutral-400'

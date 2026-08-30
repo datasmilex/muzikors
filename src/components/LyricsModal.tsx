@@ -151,7 +151,7 @@ export const LyricsModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-          className="relative w-full max-w-md h-[86vh] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
+          className="relative w-full max-w-md h-[86vh] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
         >
           {/* Handle */}
           <div className="flex justify-center pt-0 pb-2 shrink-0">
@@ -161,7 +161,7 @@ export const LyricsModal: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between pb-3 pt-1 border-b border-white/[0.08] shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+              <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
                 <Mic2 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -186,12 +186,12 @@ export const LyricsModal: React.FC = () => {
           <div className="flex-1 overflow-y-auto py-4 px-1 custom-scrollbar space-y-3">
             {isLoading ? (
               <div className="h-full flex flex-col items-center justify-center space-y-3 py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />
                 <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Sözler aranıyor...</span>
               </div>
             ) : isInstrumental ? (
               <div className="text-center py-16 space-y-2.5">
-                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center mx-auto text-amber-400">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center mx-auto text-[var(--theme-primary)]">
                   <Music className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-white">Enstrümantal Eser</h3>
@@ -201,7 +201,7 @@ export const LyricsModal: React.FC = () => {
               </div>
             ) : lyrics ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-[#141318] border border-white/[0.06]">
+                <div className="p-4 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.06]">
                   <pre className="text-xs font-medium text-neutral-200 leading-relaxed whitespace-pre-wrap font-sans text-center tracking-wide">
                     {lyrics}
                   </pre>

@@ -61,9 +61,9 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
   return (
     <motion.div
       layout
-      className={`relative rounded-2xl p-4 border transition-all duration-300 bg-[#141318] ${
+      className={`relative rounded-2xl p-4 border transition-all duration-300 bg-[var(--theme-card-alt)] ${
         unlocked && !claimed
-          ? 'border-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+          ? 'border-[var(--theme-primary)]/30 shadow-[0_0_15px_var(--theme-glow)]'
           : 'border-white/[0.08]'
       } ${!unlocked ? 'opacity-60' : ''}`}
     >
@@ -73,7 +73,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
           onClick={() => onTogglePin(achievement.id)}
           className={`absolute top-3 right-3 p-1.5 rounded-full transition-all active:scale-90 ${
             pinned
-              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+              ? 'bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30'
               : 'bg-white/[0.04] text-neutral-400 hover:text-white'
           }`}
           title={pinned ? 'Profili Kaldır' : 'Profile Sabitle'}
@@ -86,14 +86,14 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
         {/* Emoji Badge */}
         <div
           className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center text-2xl border bg-white/[0.03] ${
-            unlocked ? 'border-amber-400/30 shadow-sm' : 'border-white/[0.06]'
+            unlocked ? 'border-[var(--theme-primary)]/30 shadow-sm' : 'border-white/[0.06]'
           } relative`}
         >
           <span className={`${!unlocked ? 'grayscale opacity-40' : ''}`}>
             {achievement.emoji}
           </span>
           {claimed && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#141318] flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[var(--theme-card)] flex items-center justify-center">
               <Check className="w-2.5 h-2.5 text-black stroke-[3]" />
             </div>
           )}
@@ -329,7 +329,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md bg-[#0d0c11] rounded-t-[2.5rem] sm:rounded-3xl z-10 flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
+            className="relative w-full max-w-md bg-[var(--theme-card)] rounded-t-[2.5rem] sm:rounded-3xl z-10 flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
             style={{ maxHeight: '90vh' }}
           >
             {/* Handle */}
@@ -342,7 +342,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
               </button>
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-amber-400" />
+                  <Trophy className="w-4 h-4 text-[var(--theme-primary)]" />
                   <h2 className="text-sm font-black text-white tracking-tight">
                     {isOwnProfile ? 'Başarımlarım' : `${profileDisplayName} Başarımları`}
                   </h2>
@@ -359,7 +359,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
             </div>
 
             {/* Stats Summary Bar */}
-            <div className="flex items-center gap-3 px-5 py-2.5 bg-[#141318] border-b border-white/[0.06] shrink-0">
+            <div className="flex items-center gap-3 px-5 py-2.5 bg-[var(--theme-card-alt)] border-b border-white/[0.06] shrink-0">
               <div className="flex-1 text-center">
                 <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Şarkı İstek</p>
                 <p className="text-base font-black text-white">{totalSongs.toLocaleString('tr-TR')}</p>
@@ -367,7 +367,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
               <div className="w-px h-6 bg-white/10" />
               <div className="flex-1 text-center">
                 <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Kazanılan</p>
-                <p className="text-base font-black text-amber-400">
+                <p className="text-base font-black text-[var(--theme-primary-light)]">
                   {completedCount}/{ACHIEVEMENTS.length}
                 </p>
               </div>

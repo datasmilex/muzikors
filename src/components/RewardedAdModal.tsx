@@ -104,7 +104,7 @@ export const RewardedAdModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-sm rounded-3xl bg-[#0d0c11] border border-white/[0.1] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
+          className="relative w-full max-w-sm rounded-3xl bg-[var(--theme-card)] border border-white/[0.1] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
         >
           {/* Close button */}
           {!isLoadingAd && (
@@ -137,7 +137,7 @@ export const RewardedAdModal: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {/* Header Icon */}
-              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center mx-auto text-amber-400 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center mx-auto text-[var(--theme-primary)] shadow-inner">
                 {isNative ? <Gift className="w-6 h-6" /> : <Smartphone className="w-6 h-6" />}
               </div>
 
@@ -163,7 +163,7 @@ export const RewardedAdModal: React.FC = () => {
 
               {/* Track Preview Card if track is pending */}
               {pendingRewardTrack && (
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#141318] border border-white/[0.08] text-left">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] text-left">
                   {pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl ? (
                     <img
                       src={pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl}
@@ -171,7 +171,7 @@ export const RewardedAdModal: React.FC = () => {
                       className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-amber-400 shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-[var(--theme-primary)] shrink-0">
                       <Music className="w-5 h-5" />
                     </div>
                   )}
@@ -188,7 +188,7 @@ export const RewardedAdModal: React.FC = () => {
                   <button
                     onClick={handleWatchAd}
                     disabled={isLoadingAd}
-                    className="w-full py-3 px-4 rounded-2xl bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all disabled:opacity-50"
                   >
                     {isLoadingAd ? (
                       <>
@@ -205,7 +205,7 @@ export const RewardedAdModal: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleWatchAd}
-                    className="w-full py-3 px-4 rounded-2xl bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
                   >
                     <Smartphone className="w-4 h-4" />
                     <span>Uygulamayı İndir & İzle</span>
@@ -220,7 +220,7 @@ export const RewardedAdModal: React.FC = () => {
                   }}
                   className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                 >
-                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <Crown className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <span>Premium'a Geç (Reklamsız)</span>
                 </button>
               </div>

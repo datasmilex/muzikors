@@ -122,7 +122,7 @@ export const MenuModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-          className="relative w-full max-w-md h-[90vh] sm:h-[680px] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
+          className="relative w-full max-w-md h-[90vh] sm:h-[680px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
         >
           {/* Handle */}
           <div className="flex justify-center pt-3 pb-1 shrink-0">
@@ -130,16 +130,16 @@ export const MenuModal: React.FC = () => {
           </div>
 
           {/* Header */}
-          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.08] bg-[#141318]">
+          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.08] bg-[var(--theme-card)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
                 <UtensilsCrossed className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-base font-black text-white tracking-tight leading-tight">
                   {activeVenue?.venue_name || activeVenue?.name || 'Mekân Menüsü'}
                 </h2>
-                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
+                <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
                   <BookOpen className="w-3 h-3" /> Dijital Menü
                 </span>
               </div>
@@ -154,7 +154,7 @@ export const MenuModal: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="p-4 pb-2 bg-[#0d0c11]">
+          <div className="p-4 pb-2 bg-[var(--theme-card)]">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -162,7 +162,7 @@ export const MenuModal: React.FC = () => {
                 placeholder="Menüde ürün veya lezzet ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141318] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/50 transition-all"
+                className="w-full bg-[var(--theme-card-alt)] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)]/50 transition-all"
               />
               {searchQuery && (
                 <button
@@ -182,7 +182,7 @@ export const MenuModal: React.FC = () => {
                 onClick={() => setSelectedCategoryId('all')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
                   selectedCategoryId === 'all'
-                    ? 'bg-amber-400 text-black shadow-sm'
+                    ? 'bg-[var(--theme-primary)] text-black shadow-sm'
                     : 'bg-white/[0.04] text-neutral-400 hover:text-white'
                 }`}
               >
@@ -199,7 +199,7 @@ export const MenuModal: React.FC = () => {
                     onClick={() => setSelectedCategoryId(cat.id)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-amber-400 text-black shadow-sm'
+                        ? 'bg-[var(--theme-primary)] text-black shadow-sm'
                         : 'bg-white/[0.04] text-neutral-400 hover:text-white'
                     }`}
                   >
@@ -217,7 +217,7 @@ export const MenuModal: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar pb-10">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />
                 <p className="text-xs font-bold tracking-wider uppercase">Menü yükleniyor...</p>
               </div>
             ) : items.length === 0 ? (
@@ -246,7 +246,7 @@ export const MenuModal: React.FC = () => {
                     key={item.id}
                     className={`relative rounded-2xl border p-3 transition-all flex gap-3 overflow-hidden ${
                       isAvailable
-                        ? 'bg-[#141318] border-white/[0.08] shadow-sm'
+                        ? 'bg-[var(--theme-card-alt)] border-white/[0.08] shadow-sm'
                         : 'bg-black/40 border-white/5 opacity-50'
                     }`}
                   >
@@ -261,7 +261,7 @@ export const MenuModal: React.FC = () => {
                           }`}
                         />
                       ) : (
-                        <Coffee className="w-6 h-6 text-amber-400" />
+                        <Coffee className="w-6 h-6 text-[var(--theme-primary)]" />
                       )}
 
                       {/* Tükendi Rozeti */}

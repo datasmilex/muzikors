@@ -37,12 +37,12 @@ export const LoginModal: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-sm bg-[#0d0c11] border border-white/[0.1] rounded-3xl p-6 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
+            className="relative w-full max-w-sm bg-[var(--theme-card)] border border-white/[0.1] rounded-3xl p-6 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/25 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[10px] font-bold text-[var(--theme-primary-light)] uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                 <span>Güvenli Giriş</span>
               </div>
               <button
@@ -56,15 +56,15 @@ export const LoginModal: React.FC = () => {
 
             {/* Alert Banner */}
             {loginPromptReason && (
-              <div className="mb-4 bg-amber-400/10 border border-amber-400/25 rounded-2xl p-3 flex items-start gap-2.5 text-amber-200 text-xs font-medium leading-relaxed">
-                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="mb-4 bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-2xl p-3 flex items-start gap-2.5 text-[var(--theme-primary-light)] text-xs font-medium leading-relaxed">
+                <AlertCircle className="w-4 h-4 text-[var(--theme-primary)] shrink-0 mt-0.5" />
                 <span>{loginPromptReason}</span>
               </div>
             )}
 
             {/* Hero Icon & Title */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center shadow-inner mb-3 p-2.5">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center shadow-inner mb-3 p-2.5">
                 <img src="/logo.png" alt="Muzikors Logo" className="w-full h-full object-contain" />
               </div>
 

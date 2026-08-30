@@ -163,7 +163,7 @@ export const GpsMapModal: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-          className="relative w-full max-w-md h-[88vh] sm:h-[680px] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
+          className="relative w-full max-w-md h-[88vh] sm:h-[680px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
         >
           {/* Handle */}
           <div className="flex justify-center pt-0 pb-2 shrink-0">
@@ -174,7 +174,7 @@ export const GpsMapModal: React.FC = () => {
           <div className="shrink-0 pb-3 border-b border-white/[0.08] relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <h2 className="text-base font-black text-white tracking-tight">Yakın Mekanlar</h2>
@@ -187,7 +187,7 @@ export const GpsMapModal: React.FC = () => {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            {locError && <p className="text-[10px] text-amber-400/80 font-medium mt-1.5 px-0.5">{locError}</p>}
+            {locError && <p className="text-[10px] text-[var(--theme-primary-light)] font-medium mt-1.5 px-0.5">{locError}</p>}
           </div>
 
           {/* Search Input */}
@@ -199,7 +199,7 @@ export const GpsMapModal: React.FC = () => {
                 placeholder="Mekan adı, ilçe veya adres ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141318] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs text-white font-medium focus:outline-none focus:border-amber-400/50 transition-colors"
+                className="w-full bg-[var(--theme-card-alt)] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs text-white font-medium focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors"
               />
               {searchQuery && (
                 <button 
@@ -213,10 +213,10 @@ export const GpsMapModal: React.FC = () => {
           </div>
 
           {/* Toggle Map/List */}
-          <div className="flex bg-[#141318] p-1 rounded-xl mt-3 mb-2 shrink-0 border border-white/10 relative z-10">
+          <div className="flex bg-[var(--theme-card-alt)] p-1 rounded-xl mt-3 mb-2 shrink-0 border border-white/10 relative z-10">
             <button
               onClick={() => setViewMode('list')}
-              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'list' ? 'bg-amber-400 text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
+              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'list' ? 'bg-[var(--theme-primary)] text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               <List className="w-3.5 h-3.5" /> Liste
             </button>
@@ -251,7 +251,7 @@ export const GpsMapModal: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider">Yükleniyor...</span>
               </div>
             ) : viewMode === 'map' ? (
-              <div className="w-full h-full bg-[#141318] rounded-2xl overflow-hidden border border-white/[0.08] relative">
+              <div className="w-full h-full bg-[var(--theme-card-alt)] rounded-2xl overflow-hidden border border-white/[0.08] relative">
                 {userLoc && (
                   <Map 
                     defaultCenter={[userLoc.lat, userLoc.lng]} 
@@ -273,7 +273,7 @@ export const GpsMapModal: React.FC = () => {
                           className="flex flex-col items-center group cursor-pointer"
                           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
                         >
-                          <div className="w-8 h-8 rounded-full bg-amber-400 text-black flex items-center justify-center font-bold shadow-md border-2 border-[#0d0c11]">
+                          <div className="w-8 h-8 rounded-full bg-[var(--theme-primary)] text-black flex items-center justify-center font-bold shadow-md border-2 border-[var(--theme-card)]">
                             <Store className="w-4 h-4" />
                           </div>
                           <div className="bg-black/90 px-2 py-1 rounded-md text-[10px] font-bold text-white mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-full whitespace-nowrap border border-white/10 shadow-lg pointer-events-none">
@@ -295,19 +295,19 @@ export const GpsMapModal: React.FC = () => {
                     : '';
 
                   return (
-                    <div key={v.id} className="bg-[#141318] border border-white/[0.08] p-3 rounded-2xl flex items-center gap-3 relative shadow-sm">
+                    <div key={v.id} className="bg-[var(--theme-card-alt)] border border-white/[0.08] p-3 rounded-2xl flex items-center gap-3 relative shadow-sm">
                       <div className="w-11 h-11 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
                         {v.logo ? (
                           <img src={v.logo} alt={v.name} className="w-full h-full object-cover" />
                         ) : (
-                          <Store className="w-5 h-5 text-amber-400" />
+                          <Store className="w-5 h-5 text-[var(--theme-primary)]" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-white text-xs truncate">{v.name}</h4>
                         <p className="text-[10px] font-medium text-neutral-400 truncate mt-0.5">{v.address || `${v.district}, ${v.city}`}</p>
                         {distFormatted && (
-                          <span className="inline-flex items-center gap-1 mt-1 bg-black/40 text-amber-400 px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase border border-white/5">
+                          <span className="inline-flex items-center gap-1 mt-1 bg-black/40 text-[var(--theme-primary-light)] px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase border border-white/5">
                             <Navigation className="w-2.5 h-2.5" />
                             {distFormatted}
                           </span>
@@ -320,7 +320,7 @@ export const GpsMapModal: React.FC = () => {
                             closeModal();
                             showToast('Mekana bağlanıldı!');
                           }}
-                          className="w-9 h-9 rounded-xl bg-amber-400 text-black flex items-center justify-center active:scale-95 transition-all shadow-sm"
+                          className="w-9 h-9 rounded-xl bg-[var(--theme-primary)] text-black flex items-center justify-center active:scale-95 transition-all shadow-sm"
                           title="Mekana Git"
                         >
                           <Store className="w-4 h-4" />
@@ -328,7 +328,7 @@ export const GpsMapModal: React.FC = () => {
                         {v.latitude && v.longitude && (
                           <button
                             onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
-                            className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-amber-400 active:scale-95 transition-all"
+                            className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[var(--theme-primary)] active:scale-95 transition-all"
                             title="Yol Tarifi"
                           >
                             <Navigation className="w-4 h-4" />
@@ -338,7 +338,7 @@ export const GpsMapModal: React.FC = () => {
                     </div>
                   );
                 }) : (
-                  <div className="bg-[#141318] rounded-2xl p-6 text-center border border-white/[0.08] flex flex-col items-center justify-center space-y-2">
+                  <div className="bg-[var(--theme-card-alt)] rounded-2xl p-6 text-center border border-white/[0.08] flex flex-col items-center justify-center space-y-2">
                     <Store className="w-6 h-6 text-neutral-500 mb-1" />
                     <div>
                       <h4 className="text-xs font-bold text-white mb-0.5">Mekan Bulunamadı</h4>

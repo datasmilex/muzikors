@@ -19,71 +19,71 @@
     --theme-primary-rgb: 245, 158, 11;
     --theme-primary-light: #FBBF24;
     --theme-primary-dark: #D97706;
-    --theme-glow: rgba(245, 158, 11, 0.35);
+    --theme-glow: rgba(245, 158, 11, 0.45);
     --theme-text: #FFFFFF;
     --theme-text-muted: rgba(255, 255, 255, 0.65);
   }
 
   [data-theme="crema"] {
-    --theme-bg: #0A0806;
-    --theme-bg-rgb: 10, 8, 6;
-    --theme-card: #191510;
-    --theme-card-rgb: 25, 21, 16;
-    --theme-card-alt: #262018;
-    --theme-card-alt-rgb: 38, 32, 24;
+    --theme-bg: #0C0A07;
+    --theme-bg-rgb: 12, 10, 7;
+    --theme-card: #1C1712;
+    --theme-card-rgb: 28, 23, 18;
+    --theme-card-alt: #2B231B;
+    --theme-card-alt-rgb: 43, 35, 27;
     --theme-primary: #F3D573;
     --theme-primary-rgb: 243, 213, 115;
     --theme-primary-light: #F8E7A8;
     --theme-primary-dark: #D4AF37;
-    --theme-glow: rgba(243, 213, 115, 0.35);
+    --theme-glow: rgba(243, 213, 115, 0.45);
     --theme-text: #FFF8EB;
     --theme-text-muted: rgba(255, 248, 235, 0.70);
   }
 
   [data-theme="emerald"] {
-    --theme-bg: #020C07;
-    --theme-bg-rgb: 2, 12, 7;
-    --theme-card: #071A11;
-    --theme-card-rgb: 7, 26, 17;
-    --theme-card-alt: #0D261B;
-    --theme-card-alt-rgb: 13, 38, 27;
+    --theme-bg: #020F08;
+    --theme-bg-rgb: 2, 15, 8;
+    --theme-card: #071D12;
+    --theme-card-rgb: 7, 29, 18;
+    --theme-card-alt: #0D2C1C;
+    --theme-card-alt-rgb: 13, 44, 28;
     --theme-primary: #10B981;
     --theme-primary-rgb: 16, 185, 129;
     --theme-primary-light: #34D399;
     --theme-primary-dark: #059669;
-    --theme-glow: rgba(16, 185, 129, 0.35);
+    --theme-glow: rgba(16, 185, 129, 0.45);
     --theme-text: #ECFDF5;
     --theme-text-muted: rgba(236, 253, 245, 0.65);
   }
 
   [data-theme="ruby"] {
-    --theme-bg: #0C0205;
-    --theme-bg-rgb: 12, 2, 5;
-    --theme-card: #1A070C;
-    --theme-card-rgb: 26, 7, 12;
-    --theme-card-alt: #280C13;
-    --theme-card-alt-rgb: 40, 12, 19;
+    --theme-bg: #0F0307;
+    --theme-bg-rgb: 15, 3, 7;
+    --theme-card: #1C080E;
+    --theme-card-rgb: 28, 8, 14;
+    --theme-card-alt: #2A0D16;
+    --theme-card-alt-rgb: 42, 13, 22;
     --theme-primary: #F43F5E;
     --theme-primary-rgb: 244, 63, 94;
     --theme-primary-light: #FB7185;
     --theme-primary-dark: #E11D48;
-    --theme-glow: rgba(244, 63, 94, 0.35);
+    --theme-glow: rgba(244, 63, 94, 0.45);
     --theme-text: #FFE4E6;
     --theme-text-muted: rgba(255, 228, 230, 0.65);
   }
 
   [data-theme="sapphire"] {
-    --theme-bg: #030810;
-    --theme-bg-rgb: 3, 8, 16;
-    --theme-card: #091321;
-    --theme-card-rgb: 9, 19, 33;
-    --theme-card-alt: #0F1F35;
-    --theme-card-alt-rgb: 15, 31, 53;
+    --theme-bg: #030814;
+    --theme-bg-rgb: 3, 8, 20;
+    --theme-card: #0A1224;
+    --theme-card-rgb: 10, 18, 36;
+    --theme-card-alt: #101E38;
+    --theme-card-alt-rgb: 16, 30, 56;
     --theme-primary: #38BDF8;
     --theme-primary-rgb: 56, 189, 248;
     --theme-primary-light: #7DD3FC;
     --theme-primary-dark: #0284C7;
-    --theme-glow: rgba(56, 189, 248, 0.35);
+    --theme-glow: rgba(56, 189, 248, 0.45);
     --theme-text: #E0F2FE;
     --theme-text-muted: rgba(224, 242, 254, 0.65);
   }
@@ -94,8 +94,40 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     overflow-x: hidden;
     touch-action: manipulation;
-    transition: background-color 0.25s ease, color 0.25s ease;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+}
+
+.theme-bg {
+  background-color: var(--theme-bg) !important;
+}
+
+.theme-card {
+  background-color: var(--theme-card) !important;
+}
+
+.theme-card-alt {
+  background-color: var(--theme-card-alt) !important;
+}
+
+.theme-primary-bg {
+  background-color: var(--theme-primary) !important;
+}
+
+.theme-primary-text {
+  color: var(--theme-primary) !important;
+}
+
+.theme-primary-border {
+  border-color: var(--theme-primary) !important;
+}
+
+.theme-fab-gradient {
+  background: linear-gradient(135deg, var(--theme-primary-light), var(--theme-primary), var(--theme-primary-dark)) !important;
+}
+
+.theme-glow-shadow {
+  box-shadow: 0 8px 25px var(--theme-glow) !important;
 }
 
 /* Custom Glassmorphism & Aesthetics */

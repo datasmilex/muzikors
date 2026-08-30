@@ -437,7 +437,7 @@ export const ProfileView: React.FC = () => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-              className="relative w-full max-w-md bg-[#0d0c11] rounded-t-[2.5rem] overflow-y-auto max-h-[92vh] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.9)] pointer-events-auto custom-scrollbar"
+              className="relative w-full max-w-md bg-[var(--theme-card)] rounded-t-[2.5rem] overflow-y-auto max-h-[92vh] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.9)] pointer-events-auto custom-scrollbar"
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-1">
@@ -454,7 +454,7 @@ export const ProfileView: React.FC = () => {
           <div className="px-5 pt-2 pb-10">
             {isLoadingProfile && !isOwnProfile && !profileData ? (
                <div className="flex flex-col items-center justify-center py-20">
-                 <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                 <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />
                </div>
             ) : (
               <>
@@ -462,7 +462,7 @@ export const ProfileView: React.FC = () => {
                 <div className="flex flex-col items-center">
                   <div className="relative mb-3 mt-2">
                     <AvatarFrame frameId={isEditing ? selectedFrame : (currentProfile?.avatar_frame || 'none')} size="2xl">
-                      <div className="w-full h-full bg-[#141318] border border-white/10 flex items-center justify-center rounded-full overflow-hidden shadow-inner">
+                      <div className="w-full h-full bg-[var(--theme-card-alt)] border border-white/10 flex items-center justify-center rounded-full overflow-hidden shadow-inner">
                         {(() => {
                           const av = isEditing ? editAvatar : currentProfile?.avatar || currentProfile?.avatar_url;
                           const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
@@ -470,7 +470,7 @@ export const ProfileView: React.FC = () => {
                             <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <User className="w-10 h-10 text-amber-400/40" />
+                              <User className="w-10 h-10 text-[var(--theme-primary)]/40" />
                             </div>
                           );
                         })()}
@@ -478,7 +478,7 @@ export const ProfileView: React.FC = () => {
                     </AvatarFrame>
                     {uploadingAvatar && (
                       <div className="absolute inset-0 rounded-full bg-black/70 flex items-center justify-center z-20">
-                        <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-[var(--theme-primary)] animate-spin" />
                       </div>
                     )}
                   </div>
@@ -589,7 +589,7 @@ export const ProfileView: React.FC = () => {
                               type="text"
                               value={editUsername}
                               onChange={(e) => setEditUsername(e.target.value)}
-                              className="w-full bg-[#141318] border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-amber-400/50 transition-colors"
+                              className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors"
                               placeholder="kullanici_adi"
                             />
                           </div>
@@ -686,7 +686,7 @@ export const ProfileView: React.FC = () => {
                 </div>
 
                 {/* ─── Profile Stats ─── */}
-                <div className="flex justify-around items-center bg-[#141318] rounded-2xl border border-white/[0.08] py-3 mt-5 mb-3 shadow-inner">
+                <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 mt-5 mb-3 shadow-inner">
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">
                       {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
@@ -718,13 +718,13 @@ export const ProfileView: React.FC = () => {
                   return (
                     <button
                       onClick={() => setShowAchievements(true)}
-                      className="w-full py-2.5 px-4 rounded-2xl border border-amber-400/25 bg-[#141318] text-amber-300 font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
+                      className="w-full py-2.5 px-4 rounded-2xl border border-[var(--theme-primary)]/25 bg-[var(--theme-card-alt)] text-[var(--theme-primary-light)] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
                     >
                       <span className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                        <Trophy className="w-4 h-4 text-[var(--theme-primary)] group-hover:scale-110 transition-transform" />
                         <span className="text-xs font-black text-white">Başarımlar & Rozetler</span>
                       </span>
-                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
+                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30">
                         {completedCount} / {ACHIEVEMENTS.length} Kazanıldı
                       </span>
                     </button>
@@ -736,7 +736,7 @@ export const ProfileView: React.FC = () => {
                   <h3 className="text-sm font-black text-white mb-4 border-b border-white/[0.08] pb-2">Gönderiler</h3>
                   
                   {isOwnProfile && (
-                    <div className="bg-[#141318] rounded-2xl p-4 border border-white/[0.08] mb-4 shadow-inner">
+                    <div className="bg-[var(--theme-card-alt)] rounded-2xl p-4 border border-white/[0.08] mb-4 shadow-inner">
                       <textarea
                         placeholder="Yeni gönderi paylaş..."
                         value={newPostContent}
@@ -751,7 +751,7 @@ export const ProfileView: React.FC = () => {
                         <button
                           onClick={handleCreatePost}
                           disabled={isPosting || !newPostContent.trim()}
-                          className="bg-amber-400 text-black px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
+                          className="bg-[var(--theme-primary)] text-black px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
                         >
                           {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Paylaş'}
                         </button>
@@ -774,13 +774,13 @@ export const ProfileView: React.FC = () => {
                 {isOwnProfile && (
                   <div className="mt-6 border-t border-white/[0.08] pt-5 space-y-3">
                     {/* Theme Switcher in Profile */}
-                    <div className="p-3.5 rounded-2xl bg-[#141318] border border-white/[0.08]">
+                    <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
                       <div className="flex items-center justify-between mb-3 px-0.5">
                         <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4 text-amber-400" />
+                          <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
                           <span className="text-xs font-bold text-white">Renk Teması</span>
                         </div>
-                        <span className="text-[10px] font-bold text-amber-300">
+                        <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
                           {THEMES.find((t) => t.id === theme)?.name}
                         </span>
                       </div>
@@ -795,7 +795,7 @@ export const ProfileView: React.FC = () => {
                               title={`${t.name} - ${t.subtitle}`}
                               className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all cursor-pointer ${
                                 isSelected
-                                  ? 'bg-white/10 border border-amber-400/60 shadow-sm'
+                                  ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
                                   : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
                               }`}
                             >

@@ -83,7 +83,7 @@ export const BetaTesterWelcomeModal = () => {
         onClick={() => setIsVisible(false)}
       />
       
-      <div className="relative w-full max-w-sm bg-[#0d0c11] border border-white/[0.1] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-sm bg-[var(--theme-card)] border border-white/[0.1] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
         
         <button 
           onClick={() => setIsVisible(false)}
@@ -92,7 +92,7 @@ export const BetaTesterWelcomeModal = () => {
           <X className="w-4 h-4" />
         </button>
 
-        <div className="w-14 h-14 bg-amber-400/10 border border-amber-400/25 rounded-2xl flex items-center justify-center mb-4 text-amber-400 shadow-inner">
+        <div className="w-14 h-14 bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-2xl flex items-center justify-center mb-4 text-[var(--theme-primary)] shadow-inner">
           <Award className="w-7 h-7" />
         </div>
 
@@ -101,13 +101,13 @@ export const BetaTesterWelcomeModal = () => {
         </h3>
         
         <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
-          Muzikors'un gelişimine katkıda bulunduğunuz için teşekkür ederiz! Özel <span className="text-amber-400 font-bold">Beta Tester</span> rozetini hemen profilinize ekleyin.
+          Muzikors'un gelişimine katkıda bulunduğunuz için teşekkür ederiz! Özel <span className="text-[var(--theme-primary-light)] font-bold">Beta Tester</span> rozetini hemen profilinize ekleyin.
         </p>
 
         <button 
           onClick={handleClaim}
           disabled={isLoading}
-          className="w-full py-3.5 px-6 rounded-2xl bg-amber-400 text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3.5 px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <span className="inline-block animate-spin mr-2">⏳</span>

@@ -47,7 +47,7 @@ export const VenueInfoModal: React.FC = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md h-[85vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[#0d0c11] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] z-10"
+            className="relative w-full max-w-md h-[85vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] z-10"
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1 shrink-0">
@@ -57,7 +57,7 @@ export const VenueInfoModal: React.FC = () => {
             {/* Header */}
             <div className="flex-none px-5 py-3 flex items-center justify-between border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-amber-400" />
+                <Store className="w-4 h-4 text-[var(--theme-primary)]" />
                 <h2 className="text-base font-black tracking-tight text-white">Mekân Bilgileri</h2>
               </div>
               <button
@@ -72,7 +72,7 @@ export const VenueInfoModal: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-5 flex flex-col items-center space-y-6 pb-20 custom-scrollbar">
               {/* Logo Section */}
               <div className="flex flex-col items-center space-y-3">
-                <div className="w-24 h-24 rounded-full border border-amber-400/30 p-1 flex items-center justify-center bg-[#141318] shadow-lg overflow-hidden relative">
+                <div className="w-24 h-24 rounded-full border border-[var(--theme-primary)]/30 p-1 flex items-center justify-center bg-[var(--theme-card-alt)] shadow-lg overflow-hidden relative">
                   {(activeVenue as any).logo_url?.trim() ? (
                     <img 
                       src={(activeVenue as any).logo_url} 
@@ -80,7 +80,7 @@ export const VenueInfoModal: React.FC = () => {
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <Store className="w-10 h-10 text-amber-400" />
+                    <Store className="w-10 h-10 text-[var(--theme-primary)]" />
                   )}
                 </div>
                 <div className="text-center space-y-1">
@@ -89,7 +89,7 @@ export const VenueInfoModal: React.FC = () => {
                   </h1>
                   {hasWorkingHours && (
                     <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-neutral-300 text-xs font-semibold">
-                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                       <span>{openingTime} - {closingTime}</span>
                     </div>
                   )}
@@ -103,9 +103,9 @@ export const VenueInfoModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => openModal('menu')}
-                      className="w-full py-3.5 rounded-2xl bg-[#141318] hover:bg-[#1a1820] border border-amber-400/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm cursor-pointer"
+                      className="w-full py-3.5 rounded-2xl bg-[var(--theme-card-alt)] hover:bg-[var(--theme-card)] border border-[var(--theme-primary)]/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm cursor-pointer"
                     >
-                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
                       <span>Dijital Menüyü İncele</span>
                     </button>
                   ) : (
@@ -113,18 +113,18 @@ export const VenueInfoModal: React.FC = () => {
                       href={menuUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3.5 rounded-2xl bg-[#141318] hover:bg-[#1a1820] border border-amber-400/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm"
+                      className="w-full py-3.5 rounded-2xl bg-[var(--theme-card-alt)] hover:bg-[var(--theme-card)] border border-[var(--theme-primary)]/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm"
                     >
-                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
                       <span>Dijital Menüyü İncele</span>
                     </a>
                   )
                 )}
 
                 {hasWifi && (
-                  <div className="w-full bg-[#141318] border border-white/[0.08] rounded-2xl p-4 shadow-sm">
+                  <div className="w-full bg-[var(--theme-card-alt)] border border-white/[0.08] rounded-2xl p-4 shadow-sm">
                     <div className="flex items-center gap-2 mb-3.5 border-b border-white/[0.06] pb-2.5">
-                      <Wifi className="w-4 h-4 text-amber-400" />
+                      <Wifi className="w-4 h-4 text-[var(--theme-primary)]" />
                       <h3 className="text-xs font-black text-white uppercase tracking-wider">Wi-Fi Bilgileri</h3>
                     </div>
                     
@@ -140,7 +140,7 @@ export const VenueInfoModal: React.FC = () => {
                         <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
                           <span className="text-[10px] text-neutral-400 font-bold uppercase">Şifre</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-amber-400 font-mono font-bold">{wifiPass}</span>
+                            <span className="text-xs text-white font-mono font-bold">{wifiPass}</span>
                             <button 
                               onClick={() => {
                                 navigator.clipboard.writeText(wifiPass);
@@ -148,7 +148,7 @@ export const VenueInfoModal: React.FC = () => {
                                 showToast('Wi-Fi Şifresi Kopyalandı!');
                                 setTimeout(() => setCopied(false), 2000);
                               }}
-                              className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 transition-colors"
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
                               title="Şifreyi Kopyala"
                             >
                               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -161,8 +161,8 @@ export const VenueInfoModal: React.FC = () => {
                 )}
                 
                 {!hasMenu && !hasWifi && (
-                  <div className="text-center p-6 bg-[#141318] rounded-2xl border border-white/[0.08]">
-                    <p className="text-neutral-400 text-xs font-medium">Bu mekân için henüz ek bilgi girilmemiş.</p>
+                  <div className="text-center p-6 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
+                    <p className="text-xs text-neutral-400">Bu mekân için henüz ek bilgi eklenmemiş.</p>
                   </div>
                 )}
               </div>

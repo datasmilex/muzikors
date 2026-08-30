@@ -167,7 +167,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   };
 
   return (
-    <div className="bg-[#141318] border border-white/[0.08] p-4 mb-3 rounded-2xl shadow-sm">
+    <div className="bg-[var(--theme-card-alt)] border border-white/[0.08] p-4 mb-3 rounded-2xl shadow-sm">
       {/* Header: User Info */}
       <div className="flex items-start justify-between mb-3">
         <div 
@@ -183,7 +183,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
           </AvatarFrame>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">
+              <span className="text-xs font-bold text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
                 {post.user_full_name || 'Bilinmeyen Kullanıcı'}
               </span>
               {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-0.5" />}
@@ -208,7 +208,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {showOptions && (
-              <div className="absolute right-0 top-full mt-1 bg-[#1c1a24] border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-28 text-xs">
+              <div className="absolute right-0 top-full mt-1 bg-[var(--theme-card)] border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-28 text-xs">
                 <button onClick={handleDeletePost} disabled={isDeleting} className="w-full text-left px-3 py-2 text-rose-400 font-bold hover:bg-white/5 disabled:opacity-50 flex items-center justify-between">
                   Sil
                   {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -267,7 +267,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                   <div className="flex flex-col bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-tl-sm px-3 py-2 text-xs flex-1 group/comment relative">
                     <div className="flex items-center justify-between mb-0.5">
                       <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
-                        <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-300">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
+                        <span className="font-bold text-white text-xs cursor-pointer hover:text-[var(--theme-primary-light)]">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
                         {comment.profiles?.is_premium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
                         {comment.profiles?.is_beta_tester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
                       </div>
@@ -313,7 +313,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
               <button 
                 onClick={handlePostComment}
                 disabled={!newComment.trim() || isPostingComment}
-                className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-black disabled:opacity-50 transition-all active:scale-90"
+                className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center text-black disabled:opacity-50 transition-all active:scale-90"
               >
                 {isPostingComment ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3 -ml-0.5" />}
               </button>

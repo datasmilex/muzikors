@@ -174,13 +174,13 @@ export const AVATAR_FRAMES: AvatarFrameConfig[] = [
   },
   {
     id: 'beta_tester',
-    name: 'Kuantum Siber Altın',
+    name: 'Kuantum Siber Neon',
     requiredAchievementId: 'beta_tester',
-    glowClass: 'shadow-[0_0_20px_rgba(245,158,11,0.8)] ring-2 ring-amber-500',
-    borderClass: 'border-2 border-amber-400',
+    glowClass: 'shadow-[0_0_20px_var(--theme-glow)] ring-2 ring-[var(--theme-primary)]',
+    borderClass: 'border-2 border-[var(--theme-primary-light)]',
     ornamentEmoji: '🧪',
-    previewGradient: 'from-amber-500 via-yellow-400 to-amber-600',
-    description: 'Muzikors Beta Tester takımına özel kuantum siber altın çerçeve.',
+    previewGradient: 'from-[var(--theme-primary-dark)] via-[var(--theme-primary)] to-[var(--theme-primary-light)]',
+    description: 'Muzikors Beta Tester takımına özel temaya duyarlı kuantum çerçeve.',
   },
 ];
 
