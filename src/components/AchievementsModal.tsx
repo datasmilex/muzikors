@@ -61,7 +61,11 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
   return (
     <motion.div
       layout
-      className={`relative rounded-2xl p-4 border transition-all duration-300 ${s.bg} ${s.border} ${unlocked && !claimed ? s.glow : ''} ${!unlocked ? 'opacity-60' : ''}`}
+      className={`relative rounded-2xl p-4 border transition-all duration-300 bg-[#141318] ${
+        unlocked && !claimed
+          ? 'border-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+          : 'border-white/[0.08]'
+      } ${!unlocked ? 'opacity-60' : ''}`}
     >
       {/* Pin button (top-right) — only visible when unlocked & claimed on own profile */}
       {isOwnProfile && claimed && onTogglePin && (
@@ -69,8 +73,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
           onClick={() => onTogglePin(achievement.id)}
           className={`absolute top-3 right-3 p-1.5 rounded-full transition-all active:scale-90 ${
             pinned
-              ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
-              : 'bg-white/5 text-gray-500 active:text-gray-300'
+              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+              : 'bg-white/[0.04] text-neutral-400 hover:text-white'
           }`}
           title={pinned ? 'Profili Kaldır' : 'Profile Sabitle'}
         >
@@ -81,65 +85,67 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
       <div className="flex items-start gap-3">
         {/* Emoji Badge */}
         <div
-          className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-3xl border ${s.bg} ${s.border} ${unlocked ? s.glow : ''} relative`}
+          className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center text-2xl border bg-white/[0.03] ${
+            unlocked ? 'border-amber-400/30 shadow-sm' : 'border-white/[0.06]'
+          } relative`}
         >
           <span className={`${!unlocked ? 'grayscale opacity-40' : ''}`}>
             {achievement.emoji}
           </span>
           {claimed && (
-            <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#0A0A0A] flex items-center justify-center">
-              <Check className="w-3 h-3 text-white stroke-[3]" />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#141318] flex items-center justify-center">
+              <Check className="w-2.5 h-2.5 text-black stroke-[3]" />
             </div>
           )}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0 pr-6">
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            <h3 className={`text-sm font-black leading-tight ${unlocked ? 'text-white' : 'text-gray-400'}`}>
+          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+            <h3 className={`text-xs font-bold leading-tight ${unlocked ? 'text-white' : 'text-neutral-400'}`}>
               {achievement.title}
             </h3>
-            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${s.badge}`}>
+            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider ${s.badge}`}>
               {TIER_LABELS[achievement.tier]}
             </span>
           </div>
-          <p className="text-[11px] text-gray-400 font-medium leading-relaxed mb-2">
+          <p className="text-[11px] text-neutral-400 font-normal leading-relaxed mb-2">
             {description}
           </p>
 
           {/* Progress bar */}
           <div className="space-y-1">
-            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
               <motion.div
-                className={`h-full rounded-full ${s.progressFill}`}
+                className="h-full rounded-full bg-amber-400"
                 initial={{ width: 0 }}
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
               />
             </div>
-            <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-bold ${s.text}`}>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="font-bold text-neutral-400">
                 {progress.toLocaleString('tr-TR')} / {achievement.target.toLocaleString('tr-TR')}
               </span>
-              <span className="text-[10px] font-bold text-amber-300/70">
+              <span className="font-bold text-neutral-300">
                 {!isOwnProfile ? (
                   unlocked || claimed ? (
                     <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Kazanıldı
+                      <CheckCircle2 className="w-3 h-3" /> Kazanıldı
                     </span>
                   ) : (
-                    <span className="text-zinc-500 font-bold flex items-center gap-1">
-                      <Lock className="w-3.5 h-3.5" /> Kilitli
+                    <span className="text-neutral-500 font-bold flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> Kilitli
                     </span>
                   )
                 ) : claimed ? (
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Ödül Alındı
+                    <CheckCircle2 className="w-3 h-3" /> Ödül Alındı
                   </span>
                 ) : achievement.id === 'beta_tester' ? (
-                  <span className="text-purple-400 font-bold">Ödül: Özel Beta Rozeti</span>
+                  <span className="text-purple-300 font-bold">Ödül: Özel Beta Rozeti</span>
                 ) : (
-                  <span className="opacity-75">Ödül: +{achievement.reward} Kredi</span>
+                  <span className="text-amber-300">Ödül: +{achievement.reward} Kredi</span>
                 )}
               </span>
             </div>
@@ -154,13 +160,13 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           onClick={() => onClaim(achievement)}
           disabled={isClaiming}
-          className={`w-full mt-3 py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all active:scale-95 ${
+          className={`w-full mt-3 py-2 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all active:scale-95 ${
             isClaiming
-              ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-[#D4AF37] to-[#E5A93B] text-stone-950 shadow-[0_4px_15px_rgba(212,175,55,0.4)] animate-pulse'
+              ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+              : 'bg-amber-400 text-black shadow-md'
           }`}
         >
-          <Gift className="w-4 h-4" />
+          <Gift className="w-3.5 h-3.5" />
           {isClaiming ? 'İşleniyor...' : `Ödülü Al (+${achievement.reward} Kredi)`}
         </motion.button>
       )}

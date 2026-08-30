@@ -104,103 +104,100 @@ export const RewardedAdModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-sm rounded-[2rem] bg-[#120C08] border border-[#D4AF37]/40 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(212,175,55,0.2)] glass-panel-gold overflow-hidden"
+          className="relative w-full max-w-sm rounded-3xl bg-[#0d0c11] border border-white/[0.1] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
         >
-          {/* Decorative Glow Elements */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-20 bg-[#D4AF37]/15 blur-3xl rounded-full pointer-events-none" />
-
           {/* Close button */}
           {!isLoadingAd && (
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/5 active:bg-white/10 text-zinc-400 active:text-white transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
               aria-label="Kapat"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
 
           {isCompleted ? (
-            <div className="py-8 space-y-4">
+            <div className="py-6 space-y-3">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-                className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 shadow-sm"
               >
-                <CheckCircle2 className="w-10 h-10" />
+                <CheckCircle2 className="w-8 h-8" />
               </motion.div>
-              <h3 className="text-xl font-black text-white tracking-tight">Ödülün Tanımlandı! 🎉</h3>
-              <p className="text-xs text-amber-200/70 font-medium">
+              <h3 className="text-base font-black text-white tracking-tight">Ödülün Tanımlandı! 🎉</h3>
+              <p className="text-xs text-neutral-300">
                 {pendingRewardTrack
                   ? `"${pendingRewardTrack.title}" sıraya ekleniyor...`
                   : '+1 ek şarkı hakkı hesabına eklendi!'}
               </p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Header Icon */}
-              <div className="w-14 h-14 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto text-stone-950 font-black shadow-[0_5px_20px_rgba(212,175,55,0.4)]">
-                {isNative ? <Gift className="w-7 h-7 stroke-[2.5]" /> : <Smartphone className="w-7 h-7 stroke-[2.5]" />}
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center mx-auto text-amber-400 shadow-inner">
+                {isNative ? <Gift className="w-6 h-6" /> : <Smartphone className="w-6 h-6" />}
               </div>
 
               {/* Title & Description */}
               <div>
-                <h3 className="text-xl font-black text-white tracking-tight">
+                <h3 className="text-base font-black text-white tracking-tight">
                   Günlük Şarkı Hakkın Doldu! 🎵
                 </h3>
-                <p className="text-xs text-amber-200/70 mt-1.5 leading-relaxed">
+                <p className="text-xs text-neutral-400 mt-1.5 leading-relaxed">
                   {isNative ? (
                     pendingRewardTrack ? (
                       <>
-                        Seçtiğin <b className="text-white">"{pendingRewardTrack.title}"</b> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
+                        Seçtiğin <strong className="text-white">"{pendingRewardTrack.title}"</strong> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
                       </>
                     ) : (
                       'Kısa bir ödüllü video izleyerek anında +1 ek şarkı istek hakkı kazanabilirsin.'
                     )
                   ) : (
-                    'Reklam izleyerek ücretsiz şarkı hakkı kazanmak için **Muzikors Mobil Uygulaması** gereklidir.'
+                    'Reklam izleyerek ücretsiz şarkı hakkı kazanmak için Muzikors mobil uygulaması gereklidir.'
                   )}
                 </p>
               </div>
 
               {/* Track Preview Card if track is pending */}
               {pendingRewardTrack && (
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/50 border border-[#D4AF37]/20 text-left shadow-inner">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#141318] border border-white/[0.08] text-left">
                   {pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl ? (
                     <img
                       src={pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl}
                       alt={pendingRewardTrack.title}
-                      className="w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0 shadow-md"
+                      className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-[#D4AF37] shrink-0">
-                      <Music className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-amber-400 shrink-0">
+                      <Music className="w-5 h-5" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-black text-white truncate">{pendingRewardTrack.title}</h4>
-                    <p className="text-xs text-amber-200/60 truncate">{pendingRewardTrack.artist}</p>
+                    <h4 className="text-xs font-bold text-white truncate">{pendingRewardTrack.title}</h4>
+                    <p className="text-[10px] text-neutral-400 truncate">{pendingRewardTrack.artist}</p>
                   </div>
                 </div>
               )}
 
               {/* Actions */}
-              <div className="space-y-2.5 pt-2">
+              <div className="space-y-2 pt-1">
                 {isNative ? (
                   <button
                     onClick={handleWatchAd}
                     disabled={isLoadingAd}
-                    className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_5px_20px_rgba(212,175,55,0.35)] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 px-4 rounded-2xl bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all disabled:opacity-50"
                   >
                     {isLoadingAd ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Reklam Yükleniyor...</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-5 h-5 fill-current stroke-none" />
+                        <Play className="w-4 h-4 fill-current stroke-none" />
                         <span>Reklamı İzle & Şarkıyı Çal</span>
                       </>
                     )}
@@ -208,11 +205,11 @@ export const RewardedAdModal: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleWatchAd}
-                    className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_5px_20px_rgba(212,175,55,0.35)] active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-3 px-4 rounded-2xl bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
                   >
-                    <Smartphone className="w-5 h-5 stroke-[2.5]" />
-                    <span>Reklam İzlemek İçin Uygulamayı İndir</span>
-                    <ExternalLink className="w-4 h-4 ml-0.5 opacity-80" />
+                    <Smartphone className="w-4 h-4" />
+                    <span>Uygulamayı İndir & İzle</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
                   </button>
                 )}
 
@@ -221,18 +218,18 @@ export const RewardedAdModal: React.FC = () => {
                     closeModal();
                     openModal('premium');
                   }}
-                  className="w-full py-3 px-4 rounded-xl bg-white/5 border border-[#D4AF37]/30 text-[#D4AF37] font-bold text-xs flex items-center justify-center gap-2 active:bg-white/10 active:scale-95 transition-all shadow-inner"
+                  className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                 >
-                  <Crown className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Premium'a Geç (Reklamsız & 5 İstek)</span>
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Premium'a Geç (Reklamsız)</span>
                 </button>
               </div>
 
-              <div className="text-[10px] text-amber-200/40 font-medium">
+              <p className="text-[10px] text-neutral-500 font-medium">
                 {isNative
                   ? 'Ödüllü reklam tamamlandığında şarkınız otomatik sıraya girer.'
                   : 'Mobil uygulamamız ile sınırsız ödüllü reklam fırsatından yararlanabilirsiniz.'}
-              </div>
+              </p>
             </div>
           )}
         </motion.div>

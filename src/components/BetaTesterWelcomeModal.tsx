@@ -83,41 +83,38 @@ export const BetaTesterWelcomeModal = () => {
         onClick={() => setIsVisible(false)}
       />
       
-      <div className="relative w-full max-w-sm bg-[#120C08] border border-amber-500/30 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-sm bg-[#0d0c11] border border-white/[0.1] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
         
         <button 
           onClick={() => setIsVisible(false)}
-          className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="w-16 h-16 bg-gradient-to-tr from-amber-600 to-yellow-500 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(245,158,11,0.35)]">
-          <Award className="w-8 h-8 text-black" />
+        <div className="w-14 h-14 bg-amber-400/10 border border-amber-400/25 rounded-2xl flex items-center justify-center mb-4 text-amber-400 shadow-inner">
+          <Award className="w-7 h-7" />
         </div>
 
-        <h3 className="text-2xl font-black text-white mb-2">
+        <h3 className="text-lg font-black text-white mb-2 tracking-tight">
           Beta Tester Rozetiniz Hazır!
         </h3>
         
-        <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
-          Muzikors'un gelişimine ve erken aşama test sürecine katkıda bulunduğunuz için teşekkür ederiz. 
-          Özel onaylı <strong className="text-amber-400 font-bold">Beta Tester</strong> rozetiniz profilinize tanımlandı!
+        <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
+          Muzikors'un gelişimine katkıda bulunduğunuz için teşekkür ederiz! Özel <span className="text-amber-400 font-bold">Beta Tester</span> rozetini hemen profilinize ekleyin.
         </p>
 
         <button 
           onClick={handleClaim}
           disabled={isLoading}
-          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold rounded-xl active:scale-95 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.45)] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-3.5 px-6 rounded-2xl bg-amber-400 text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
         >
           {isLoading ? (
-            'Tanımlanıyor...'
+            <span className="inline-block animate-spin mr-2">⏳</span>
           ) : (
-            <>
-              <Crown className="w-5 h-5 text-black" />
-              Rozetimi Al
-            </>
+            <Crown className="w-4 h-4" />
           )}
+          <span>Rozeti Al ve Başla</span>
         </button>
 
         <p className="text-[10px] text-zinc-600 mt-4">

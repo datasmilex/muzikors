@@ -114,15 +114,15 @@ export const NowPlayingSection: React.FC = () => {
   const albumSrc = nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || '';
 
   return (
-    <div className="relative w-full px-4 pt-3 pb-2 overflow-hidden">
-      {/* Ambient Artwork Glow */}
+    <div className="relative w-full px-4 pt-2 pb-2 overflow-hidden">
+      {/* Ambient Artwork Glow with smooth gradient fade */}
       <div 
-        className="absolute inset-0 bg-cover bg-center blur-3xl opacity-20 pointer-events-none scale-150 transition-all duration-1000"
+        className="absolute inset-0 bg-cover bg-center blur-3xl opacity-15 pointer-events-none scale-125 transition-all duration-1000 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
         style={{ backgroundImage: albumSrc ? `url(${albumSrc})` : undefined }}
       />
       
       {/* Main Elevated Player Card */}
-      <div className="relative z-10 w-full rounded-3xl bg-[#141318]/90 border border-white/[0.08] backdrop-blur-2xl p-4 sm:p-5 shadow-[0_12px_40px_rgba(0,0,0,0.7)] flex flex-col items-center">
+      <div className="relative z-10 w-full rounded-3xl bg-[#141318] border border-white/[0.08] p-4 sm:p-5 shadow-[0_12px_40px_rgba(0,0,0,0.7)] flex flex-col items-center">
         
         {/* Top Status Header */}
         <div className="w-full flex items-center justify-between mb-4">

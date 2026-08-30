@@ -167,7 +167,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   };
 
   return (
-    <div className="bg-[#1C130D]/80 border border-[#D4AF37]/10 p-4 mb-3 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+    <div className="bg-[#141318] border border-white/[0.08] p-4 mb-3 rounded-2xl shadow-sm">
       {/* Header: User Info */}
       <div className="flex items-start justify-between mb-3">
         <div 
@@ -176,25 +176,25 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
         >
           <AvatarFrame frameId={post.user_avatar_frame} size="md">
             <img 
-              src={post.user_avatar_url || "https://ui-avatars.com/api/?name=" + (post.user_full_name || 'U') + "&background=27272a&color=fff"} 
+              src={post.user_avatar_url || "https://ui-avatars.com/api/?name=" + (post.user_full_name || 'U') + "&background=141318&color=fff"} 
               alt={post.user_full_name} 
               className="w-full h-full object-cover group-active:scale-95 transition-transform"
             />
           </AvatarFrame>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-white group-hover:text-amber-100 transition-colors">
+              <span className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">
                 {post.user_full_name || 'Bilinmeyen Kullanıcı'}
               </span>
-              {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-1" />}
-              {post.user_is_beta_tester && <BetaTesterBadge className="w-3.5 h-3.5 ml-1" />}
+              {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-0.5" />}
+              {post.user_is_beta_tester && <BetaTesterBadge className="w-3.5 h-3.5 ml-0.5" />}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-amber-200/50">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-medium text-neutral-400">
                 {post.user_username || '@misafir'}
               </span>
-              <span className="text-[10px] text-zinc-600 font-medium">•</span>
-              <span className="text-[10px] text-zinc-500 font-medium">
+              <span className="text-[10px] text-neutral-600 font-medium">•</span>
+              <span className="text-[10px] text-neutral-500 font-medium">
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: tr })}
               </span>
             </div>
@@ -204,12 +204,12 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
         {/* Delete Post Menu */}
         {user?.id === post.user_id && (
           <div className="relative">
-            <button onClick={() => setShowOptions(!showOptions)} className="p-1 text-zinc-400 hover:text-white transition-colors">
-              <MoreHorizontal className="w-5 h-5" />
+            <button onClick={() => setShowOptions(!showOptions)} className="p-1 text-neutral-400 hover:text-white transition-colors">
+              <MoreHorizontal className="w-4 h-4" />
             </button>
             {showOptions && (
-              <div className="absolute right-0 top-full mt-1 bg-[#27272a] border border-white/10 rounded-lg shadow-xl overflow-hidden z-10 w-28 text-sm">
-                <button onClick={handleDeletePost} disabled={isDeleting} className="w-full text-left px-3 py-2 text-rose-500 font-bold hover:bg-white/5 disabled:opacity-50 flex items-center justify-between">
+              <div className="absolute right-0 top-full mt-1 bg-[#1c1a24] border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-28 text-xs">
+                <button onClick={handleDeletePost} disabled={isDeleting} className="w-full text-left px-3 py-2 text-rose-400 font-bold hover:bg-white/5 disabled:opacity-50 flex items-center justify-between">
                   Sil
                   {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                 </button>
@@ -220,86 +220,86 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
       </div>
 
       {/* Content */}
-      <div className="mb-4 text-sm text-zinc-200 leading-relaxed font-medium whitespace-pre-wrap break-words px-1">
+      <div className="mb-3.5 text-xs text-neutral-200 leading-relaxed font-normal whitespace-pre-wrap break-words px-0.5">
         {post.content}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-6 px-1 border-t border-white/5 pt-3">
+      <div className="flex items-center gap-5 px-0.5 border-t border-white/[0.06] pt-2.5">
         <button 
           onClick={handleLike}
           disabled={isLiking}
-          className={`flex items-center gap-2 transition-colors active:scale-90 ${
-            hasLiked ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-200'
+          className={`flex items-center gap-1.5 transition-colors active:scale-95 text-xs font-bold ${
+            hasLiked ? 'text-rose-500' : 'text-neutral-400 hover:text-white'
           }`}
         >
-          <Heart className={`w-5 h-5 ${hasLiked ? 'fill-rose-500' : ''}`} />
-          <span className="text-xs font-bold">{likesCount > 0 ? likesCount : ''}</span>
+          <Heart className={`w-4 h-4 ${hasLiked ? 'fill-rose-500' : ''}`} />
+          <span>{likesCount > 0 ? likesCount : ''}</span>
         </button>
 
         <button 
           onClick={handleComment}
-          className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 transition-colors active:scale-90"
+          className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition-colors active:scale-95 text-xs font-bold"
         >
-          <MessageCircle className="w-5 h-5" />
-          <span className="text-xs font-bold">{commentsCount > 0 ? commentsCount : ''}</span>
+          <MessageCircle className="w-4 h-4" />
+          <span>{commentsCount > 0 ? commentsCount : ''}</span>
         </button>
       </div>
 
       {/* Comments Section */}
       {showComments && (
-        <div className="mt-4 pt-3 border-t border-white/5 flex flex-col gap-3">
+        <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col gap-2.5">
           {isLoadingComments ? (
-            <div className="text-center py-2"><Loader2 className="w-4 h-4 animate-spin mx-auto text-zinc-500" /></div>
+            <div className="text-center py-2"><Loader2 className="w-4 h-4 animate-spin mx-auto text-neutral-400" /></div>
           ) : comments.length > 0 ? (
-            <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
               {comments.map((comment: any) => (
                 <div key={comment.id} className="flex gap-2 items-start">
                   <div className="cursor-pointer shrink-0" onClick={() => onClickUser?.(comment.user_id)}>
                     <AvatarFrame frameId={comment.profiles?.avatar_frame} size="xs">
                       <img 
-                        src={comment.profiles?.avatar_url || "https://ui-avatars.com/api/?name=" + (comment.profiles?.full_name || 'U') + "&background=27272a&color=fff"}
+                        src={comment.profiles?.avatar_url || "https://ui-avatars.com/api/?name=" + (comment.profiles?.full_name || 'U') + "&background=141318&color=fff"}
                         alt={comment.profiles?.full_name}
                         className="w-full h-full object-cover"
                       />
                     </AvatarFrame>
                   </div>
-                  <div className="flex flex-col bg-white/5 rounded-2xl rounded-tl-sm px-3 py-2 text-sm flex-1 group/comment relative">
+                  <div className="flex flex-col bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-tl-sm px-3 py-2 text-xs flex-1 group/comment relative">
                     <div className="flex items-center justify-between mb-0.5">
                       <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
-                        <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-100">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
+                        <span className="font-bold text-white text-xs cursor-pointer hover:text-amber-300">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
                         {comment.profiles?.is_premium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
                         {comment.profiles?.is_beta_tester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
                       </div>
                       {(user?.id === comment.user_id || user?.id === post.user_id) && (
-                        <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-500 hover:text-rose-500 transition-colors p-1">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={() => handleDeleteComment(comment.id)} className="text-neutral-500 hover:text-rose-400 transition-colors p-0.5">
+                          <Trash2 className="w-3 h-3" />
                         </button>
                       )}
                     </div>
-                    <span className="text-zinc-300 font-medium whitespace-pre-wrap break-words text-[13px]">{comment.content}</span>
+                    <span className="text-neutral-300 font-normal whitespace-pre-wrap break-words text-xs">{comment.content}</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center text-xs text-zinc-500 py-2">Henüz yorum yok. İlk yorumu sen yap!</div>
+            <div className="text-center text-[11px] text-neutral-500 py-1">Henüz yorum yok. İlk yorumu sen yap!</div>
           )}
 
           {/* New Comment Input */}
           <div className="flex items-center gap-2 mt-1">
             <AvatarFrame frameId={user?.avatar_frame} size="xs">
               <img 
-                src={user?.avatar || "https://ui-avatars.com/api/?name=" + (user?.name || 'U') + "&background=27272a&color=fff"} 
+                src={user?.avatar || "https://ui-avatars.com/api/?name=" + (user?.name || 'U') + "&background=141318&color=fff"} 
                 className="w-full h-full object-cover" 
                 alt="You" 
               />
             </AvatarFrame>
-            <div className="flex-1 flex items-center bg-white/5 border border-white/10 rounded-full pr-1 pl-3 h-9">
+            <div className="flex-1 flex items-center bg-white/[0.04] border border-white/10 rounded-full pr-1 pl-3 h-8">
               <input 
                 type="text" 
                 placeholder="Yorum yaz..." 
-                className="bg-transparent border-none outline-none text-sm text-white flex-1 placeholder:text-zinc-600"
+                className="bg-transparent border-none outline-none text-xs text-white flex-1 placeholder:text-neutral-500"
                 value={newComment}
                 onChange={e => setNewComment(e.target.value)}
                 onKeyDown={e => {
@@ -313,9 +313,9 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
               <button 
                 onClick={handlePostComment}
                 disabled={!newComment.trim() || isPostingComment}
-                className="w-7 h-7 rounded-full bg-[#D4AF37] flex items-center justify-center text-black disabled:opacity-50 transition-all active:scale-90"
+                className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-black disabled:opacity-50 transition-all active:scale-90"
               >
-                {isPostingComment ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5 -ml-0.5" />}
+                {isPostingComment ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3 -ml-0.5" />}
               </button>
             </div>
           </div>

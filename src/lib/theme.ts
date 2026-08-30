@@ -5,6 +5,8 @@ export interface ThemeConfig {
   name: string;
   subtitle: string;
   accentColor: string;
+  accentLight: string;
+  accentDark: string;
   bgColor: string;
   cardColor: string;
   gradient: string;
@@ -19,6 +21,8 @@ export const THEMES: ThemeConfig[] = [
     name: 'Velvet Gold',
     subtitle: 'Espresso & Sıcak Altın',
     accentColor: '#F59E0B',
+    accentLight: '#FBBF24',
+    accentDark: '#D97706',
     bgColor: '#070604',
     cardColor: '#141318',
     gradient: 'from-amber-400 to-yellow-500',
@@ -31,18 +35,22 @@ export const THEMES: ThemeConfig[] = [
     name: 'Crema Gold',
     subtitle: 'Yumuşak Krema & Şampanya',
     accentColor: '#F3D573',
+    accentLight: '#F8E7A8',
+    accentDark: '#D4AF37',
     bgColor: '#0A0806',
     cardColor: '#191510',
-    gradient: 'from-[#F5D8A4] to-[#E5B869]',
+    gradient: 'from-[#F8E7A8] to-[#D4AF37]',
     badgeBg: 'bg-[#F3D573] text-black',
     textAccent: 'text-[#F3D573]',
     glowColor: 'rgba(243, 213, 115, 0.4)',
   },
   {
     id: 'emerald',
-    name: 'Emerald Caz',
+    name: 'Emerald Jazz',
     subtitle: 'Derin Zümrüt & Neon',
     accentColor: '#10B981',
+    accentLight: '#34D399',
+    accentDark: '#059669',
     bgColor: '#020C07',
     cardColor: '#071A11',
     gradient: 'from-emerald-400 to-teal-500',
@@ -55,6 +63,8 @@ export const THEMES: ThemeConfig[] = [
     name: 'Ruby Noir',
     subtitle: 'Mürdüm & Yakut Kırmızısı',
     accentColor: '#F43F5E',
+    accentLight: '#FB7185',
+    accentDark: '#E11D48',
     bgColor: '#0C0205',
     cardColor: '#1A070C',
     gradient: 'from-rose-400 to-red-500',
@@ -67,6 +77,8 @@ export const THEMES: ThemeConfig[] = [
     name: 'Sapphire Night',
     subtitle: 'Okyanus & Safir Mavisi',
     accentColor: '#38BDF8',
+    accentLight: '#7DD3FC',
+    accentDark: '#0284C7',
     bgColor: '#030810',
     cardColor: '#091321',
     gradient: 'from-sky-400 to-blue-500',
@@ -99,7 +111,12 @@ export function applyTheme(theme: ThemeType) {
   document.documentElement.style.setProperty('--theme-bg', config.bgColor);
   document.documentElement.style.setProperty('--theme-card', config.cardColor);
   document.documentElement.style.setProperty('--theme-primary', config.accentColor);
+  document.documentElement.style.setProperty('--theme-primary-light', config.accentLight);
+  document.documentElement.style.setProperty('--theme-primary-dark', config.accentDark);
   document.documentElement.style.setProperty('--theme-glow', config.glowColor);
+  if (document.body) {
+    document.body.style.backgroundColor = config.bgColor;
+  }
 
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);

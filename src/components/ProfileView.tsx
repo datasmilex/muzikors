@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Zap, Music, Trash2, LogOut, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle, Lock } from 'lucide-react';
+import { X, User, Zap, Music, Trash2, LogOut, Award, ShieldCheck, ChevronRight, Upload, Loader2, Check, CropIcon, Trophy, Heart, Users, CheckCircle, MessageCircle, Lock, Palette } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { THEMES } from '../lib/theme';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
 import { AchievementsModal } from './AchievementsModal';
@@ -146,7 +147,7 @@ const CropModal: React.FC<CropModalProps> = ({ imageSrc, onConfirm, onCancel }) 
 
 // ─── Main ProfileView ──────────────────────────────────────────────────────────
 export const ProfileView: React.FC = () => {
-  const { activeModal, closeModal, user, setUser, deleteAccount, logout, loginWithProvider, showToast, viewingProfileId, openProtectedModal } = useApp();
+  const { activeModal, closeModal, user, setUser, deleteAccount, logout, loginWithProvider, showToast, viewingProfileId, openProtectedModal, theme, setTheme } = useApp();
   
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -771,13 +772,56 @@ export const ProfileView: React.FC = () => {
 
                 {/* Settings / Auth Actions for Own Profile */}
                 {isOwnProfile && (
-                  <div className="mt-8 border-t border-white/[0.08] pt-5 space-y-2">
+                  <div className="mt-6 border-t border-white/[0.08] pt-5 space-y-3">
+                    {/* Theme Switcher in Profile */}
+                    <div className="p-3.5 rounded-2xl bg-[#141318] border border-white/[0.08]">
+                      <div className="flex items-center justify-between mb-3 px-0.5">
+                        <div className="flex items-center gap-2">
+                          <Palette className="w-4 h-4 text-amber-400" />
+                          <span className="text-xs font-bold text-white">Renk Teması</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-amber-300">
+                          {THEMES.find((t) => t.id === theme)?.name}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-2">
+                        {THEMES.map((t) => {
+                          const isSelected = theme === t.id;
+                          return (
+                            <button
+                              key={t.id}
+                              onClick={() => setTheme(t.id)}
+                              title={`${t.name} - ${t.subtitle}`}
+                              className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-white/10 border border-amber-400/60 shadow-sm'
+                                  : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
+                              }`}
+                            >
+                              <div
+                                className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
+                                style={{ backgroundColor: t.accentColor }}
+                              >
+                                {isSelected && (
+                                  <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
+                                )}
+                              </div>
+                              <span className="text-[9px] font-bold text-neutral-300 truncate w-full text-center leading-none">
+                                {t.name.split(' ')[0]}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     {!user ? (
                       <button
                         onClick={() => { closeModal(); loginWithProvider('google'); }}
-                        className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-sm flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-lg"
+                        className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
                       >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24">
                           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
@@ -786,24 +830,24 @@ export const ProfileView: React.FC = () => {
                         Google ile Giriş Yap
                       </button>
                     ) : (
-                      <>
+                      <div className="space-y-2 pt-1">
                         <button
                           onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
-                          className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center gap-2.5 active:scale-95 transition-all"
+                          className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                         >
-                          <LogOut className="w-4 h-4 text-neutral-400" />
+                          <LogOut className="w-3.5 h-3.5 text-neutral-400" />
                           Çıkış Yap
                         </button>
                         <button
                           onClick={() => setShowConfirmDelete(true)}
-                          className="w-full py-3 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center gap-2.5 active:scale-95 transition-all"
+                          className="w-full py-2.5 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                           Hesabı Sil
                         </button>
 
                         {showConfirmDelete && (
-                          <div className="p-4 rounded-2xl bg-red-950/40 border border-red-700/40 space-y-3 mt-2">
+                          <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-3 mt-2">
                             <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
                             <div className="flex gap-2">
                               <button
@@ -821,7 +865,7 @@ export const ProfileView: React.FC = () => {
                             </div>
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 )}
