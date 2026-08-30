@@ -420,7 +420,7 @@ export const MusicSearchModal: React.FC = () => {
                     {isAnonymous ? (
                       <p>Şarkı isteğin uygulamada <b className="text-white">Anonim</b> olarak yayınlanacaktır.</p>
                     ) : (
-                      <p>Şarkı isteğin isminle (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) birlikte yayınlanacaktır.</p>
+                      <p>Şarkı isteğin uygulamada (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) olarak yayınlanacaktır.</p>
                     )}
                   </div>
                 </div>
