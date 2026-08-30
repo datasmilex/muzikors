@@ -1025,12 +1025,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    if (cooldown.active && !user?.isPremium) {
-      const m = Math.floor(cooldown.remainingSeconds / 60); const s = cooldown.remainingSeconds % 60;
-      showToast(`Anti-Spam aktif! ${m}:${s < 10 ? '0' : ''}${s} bekleyin.`); return false;
+    // Anti-spam cooldown check (Standard: 4 minutes, Premium: 0s)
+    if (cooldown.active && !user?.isPremium && cooldown.remainingSeconds > 0) {
+      const m = Math.floor(cooldown.remainingSeconds / 60);
+      const s = cooldown.remainingSeconds % 60;
+      showToast(`Anti-Spam aktif! Tekrar şarkı eklemek için ${m > 0 ? `${m} dk ` : ''}${s} sn bekleyin. (Premium ile bekleme süresi 0 sn ⚡)`);
+      return false;
     }
-
-
 
     const venueId = parseInt(activeVenue.id, 10);
     let targetSpotifyUri = track.spotifyUri || (track.id && !track.id.startsWith('hist_') && !track.id.startsWith('top_') ? `spotify:track:${track.id}` : '');
@@ -1062,8 +1063,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       targetSpotifyUri = `spotify:track:${track.id}`;
     }
 
-    // ── DUPLICATE TRACK CHECK ────────────────────────────────────────────
+    // ── SONG DURATION CHECK (Standard max 4 mins / 240s, Premium max 7 mins / 420s) ──
+    const songDurationMs = track.durationMs ?? (track.duration ? track.duration * 1000 : 210000);
+    const songDurationSec = Math.round(songDurationMs / 1000);
+    const durMins = Math.floor(songDurationSec / 60);
+    const durSecs = songDurationSec % 60;
+    const durFormatted = `${durMins}:${durSecs < 10 ? '0' : ''}${durSecs}`;
+
+    if (user?.isPremium) {
+      if (songDurationMs > 420000) {
+        showToast(`Bu şarkı 7 dakikadan uzun (${durFormatted}). Mekan akışını korumak için en fazla 7 dakikalık şarkılar eklenebilir.`);
+        return false;
+      }
+    } else {
+      if (songDurationMs > 240000) {
+        showToast(`Bu şarkı 4 dakikadan uzun (${durFormatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz 👑`);
+        return false;
+      }
+    }
+
+    // ── 1-HOUR DUPLICATE GUARD FOR SAME VENUE ──────────────────────────────
     if (supabase) {
+      // 1. Check if already queued/playing
       const { data: existingTrack } = await supabase
         .from('queue')
         .select('id, status')
@@ -1073,7 +1094,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .maybeSingle();
 
       if (existingTrack) {
-        showToast('Bu şarkı zaten sırada veya çalıyor!');
+        showToast('Bu şarkı şu an zaten sırada veya çalıyor!');
+        return false;
+      }
+
+      // 2. Check if requested in this venue within the last 1 hour
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: recentLog } = await supabase
+        .from('song_requests_log')
+        .select('created_at, song_name')
+        .eq('venue_id', venueId)
+        .eq('spotify_uri', targetSpotifyUri)
+        .gte('created_at', oneHourAgo)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (recentLog?.created_at) {
+        const diffMs = (new Date(recentLog.created_at).getTime() + 60 * 60 * 1000) - Date.now();
+        const remainingMins = Math.max(1, Math.ceil(diffMs / (60 * 1000)));
+        showToast(`"${track.title}" bu mekanda kısa süre önce çalındı/istendi. Müzik çeşitliliğini korumak için ${remainingMins} dakika sonra tekrar isteyebilirsiniz 🎵`);
         return false;
       }
     }
@@ -1096,8 +1136,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (closeTotal <= openTotal) {
         closeTotal += 24 * 60; // Kapanışa 1 tam gün ekle
         
-        // Eğer şu an saat gece yarısını geçmişse (örn 01:00) ve açılış saatinden küçükse
-        // Kontrol edilen saati de ertesi güne taşı (24 saat ekle)
         if (currentTotal < openTotal) {
           checkTotal += 24 * 60;
         }
@@ -1119,7 +1157,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // ── QUEUE LIMIT CHECK ────────────────────────────────────────────────
     if (supabase) {
-      const songDurationMs = track.durationMs ?? (track.duration ? track.duration * 1000 : 210000);
       const { data: limitCheck, error: limitErr } = await supabase.rpc('check_queue_availability', {
         p_venue_id: venueId,
         p_new_song_duration_ms: songDurationMs
@@ -1161,7 +1198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           p_artist_name: track.artist,
           p_album_cover: track.albumCover || track.coverUrl || track.album_art || '',
           p_spotify_uri: targetSpotifyUri,
-          p_duration_ms: track.durationMs ?? (track.duration ? track.duration * 1000 : 210000),
+          p_duration_ms: songDurationMs,
           p_requested_by_name: requestedByName,
           p_is_anonymous: isAnonymous || false,
           p_is_boosted: isBoosted || false,
@@ -1207,9 +1244,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       daily_songs_count: (prev.daily_songs_count || 0) + 1,
       daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0)
     } : null);
-    setCooldown({ active: true, remainingSeconds: 30, lastRequestedAt: Date.now() });
+
+    // Cooldown logic: 0s for Premium, 4 minutes (240s) for Free users
+    if (user?.isPremium) {
+      setCooldown({ active: false, remainingSeconds: 0, lastRequestedAt: Date.now() });
+    } else {
+      setCooldown({ active: true, remainingSeconds: 240, lastRequestedAt: Date.now() });
+    }
+
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#FCEFD5'] });
-    showToast(`"${track.title}" siraya eklendi!`); closeModal(); return true;
+    showToast(`"${track.title}" sıraya eklendi!`);
+    closeModal();
+    return true;
   }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase]);
 
   // ── CLAIM REWARD & QUEUE TRACK (AdMob Callback) ─────────────────────────

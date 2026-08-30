@@ -222,6 +222,19 @@ export const MusicSearchModal: React.FC = () => {
   const handleConfirmRequest = async (trackToRequest?: Track) => {
     const target = trackToRequest || selectedTrack;
     if (target) {
+      const durMs = (target as any).duration_ms || target.durationMs || (target.duration ? target.duration * 1000 : 0);
+      const formatted = formatDuration(durMs);
+
+      if (durMs > 420000) {
+        showToast(`Bu şarkı 7 dakikadan uzun (${formatted}). Mekan akışını korumak için en fazla 7 dakikalık şarkılar eklenebilir.`);
+        return;
+      }
+
+      if (!user?.isPremium && durMs > 240000) {
+        showToast(`Bu şarkı 4 dakikadan uzun (${formatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz 👑`);
+        return;
+      }
+
       setConfirmingTrack(target);
       setIsAnonymous(false);
       setIsBoosted(false);
@@ -557,12 +570,14 @@ export const MusicSearchModal: React.FC = () => {
                       const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
                       const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
                       const isBlocked = isExplicitFilterActive && isExplicitTrack;
+                      const isTooLongForFree = !user?.isPremium && durMs > 240000;
+                      const isTooLongOverall = durMs > 420000;
 
                       return (
                         <div
                           key={track.id}
                           onClick={() => {
-                            if (isBlocked || cooldown.active || submittingTrackId === track.id) return;
+                            if (isBlocked || (cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
                             setSelectedTrack(track);
                           }}
                           className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
@@ -586,18 +601,29 @@ export const MusicSearchModal: React.FC = () => {
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <h4 className="text-xs font-bold truncate text-white">
-                                {track.title}
-                              </h4>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <h4 className="text-xs font-bold truncate text-white">
+                                  {track.title}
+                                </h4>
+                                {isTooLongOverall ? (
+                                  <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
+                                    &gt;7 dk
+                                  </span>
+                                ) : isTooLongForFree ? (
+                                  <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
+                                    👑 VIP (4+ dk)
+                                  </span>
+                                ) : null}
+                              </div>
                               <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
                                 {track.artist}
                               </p>
                             </div>
                           </div>
 
-                          <div className="shrink-0 pl-2">
+                          <div className="shrink-0 pl-2 text-right">
                             {durMs > 0 && (
-                              <span className="text-[9px] font-semibold text-neutral-500">
+                              <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
                                 {formatDuration(durMs)}
                               </span>
                             )}
@@ -610,13 +636,16 @@ export const MusicSearchModal: React.FC = () => {
 
                 {/* Bottom Bar */}
                 <div className="shrink-0 pt-3 border-t border-white/[0.08] space-y-2 relative z-10">
-                  {cooldown.active && (
+                  {cooldown.active && !user?.isPremium && (
                     <div className="bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-xl p-2.5 flex items-center justify-between text-xs text-[var(--theme-primary-light)]">
                       <div className="flex items-center gap-2">
                         <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-spin" />
-                        <span className="font-semibold text-xs">Anti-Spam Bekleme Süresi</span>
+                        <div>
+                          <span className="font-semibold text-xs block">Anti-Spam Bekleme Süresi</span>
+                          <span className="text-[9px] text-neutral-400 font-normal">Premium ile bekleme süresi 0 sn ⚡</span>
+                        </div>
                       </div>
-                      <span className="font-mono font-bold text-[var(--theme-primary-light)]">
+                      <span className="font-mono font-bold text-[var(--theme-primary-light)] text-sm">
                         {Math.floor(cooldown.remainingSeconds / 60)}:{(cooldown.remainingSeconds % 60).toString().padStart(2, '0')}
                       </span>
                     </div>
@@ -624,18 +653,18 @@ export const MusicSearchModal: React.FC = () => {
 
                   <button
                     onClick={() => handleConfirmRequest()}
-                    disabled={!selectedTrack || cooldown.active}
+                    disabled={!selectedTrack || (cooldown.active && !user?.isPremium)}
                     className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs flex items-center justify-between transition-all ${
-                      cooldown.active || !selectedTrack
+                      (cooldown.active && !user?.isPremium) || !selectedTrack
                         ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                        : 'bg-[var(--theme-primary)] hover:brightness-110 text-black active:scale-95 shadow-md'
+                        : 'bg-[var(--theme-primary)] hover:brightness-110 text-black active:scale-95 shadow-md cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <Music className="w-4 h-4" />
                       <span>{selectedTrack ? 'Seçili Şarkıyı İste' : 'Listeden Şarkı Seçin'}</span>
                     </div>
-                    {!cooldown.active && selectedTrack && user && (
+                    {(!cooldown.active || user?.isPremium) && selectedTrack && user && (
                       <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-black/20 text-black">
                         {remainingSongs}/{maxDailySongs} Hak
                       </span>

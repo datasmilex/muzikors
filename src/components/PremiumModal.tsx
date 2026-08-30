@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { X, Check, Crown, Ghost, ThumbsUp, Music, ArrowUpCircle, ShieldOff, Loader2, RefreshCw } from 'lucide-react';
+import { X, Check, Crown, Ghost, ThumbsUp, Music, ArrowUpCircle, ShieldOff, Loader2, RefreshCw, Zap, Clock } from 'lucide-react';
 import { iapService } from '../services/iapService';
 
 export const PremiumModal: React.FC = () => {
@@ -76,7 +76,17 @@ export const PremiumModal: React.FC = () => {
 
   const benefits = [
     {
-      icon: <Music className="w-5 h-5 text-[#D4AF37]" />,
+      icon: <Zap className="w-5 h-5 text-amber-400" />,
+      title: "Bekleme Süresi Yok (0 sn Cooldown)",
+      description: "Standart 4 dakikalık bekleme süresi olmadan arka arkaya dilediğiniz gibi şarkı ekleyin."
+    },
+    {
+      icon: <Clock className="w-5 h-5 text-sky-400" />,
+      title: "7 Dakikaya Kadar Şarkı Açabilme",
+      description: "Standart 4 dakika sınırı yerine 7 dakikaya kadar epik parçaları ve konser kayıtlarını çalın."
+    },
+    {
+      icon: <Music className="w-5 h-5 text-[var(--theme-primary)]" />,
       title: "Günlük 5 Şarkı İsteme Hakkı",
       description: "Standart 2 şarkı yerine her gün 5 farklı şarkı ekleme özgürlüğü."
     },
@@ -101,7 +111,7 @@ export const PremiumModal: React.FC = () => {
       description: "İsminiz görünmeden tamamen 'Anonim' olarak şarkı ekleyin."
     },
     {
-      icon: <Check className="w-5 h-5 text-amber-400" />,
+      icon: <Crown className="w-5 h-5 text-amber-400" />,
       title: "VIP Rozeti & Özel Profil",
       description: "Profilde, akışta ve liderlik tablosunda özel VIP statüsü."
     }
