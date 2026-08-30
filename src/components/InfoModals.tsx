@@ -46,305 +46,279 @@ export const InfoModals: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {isInfoModal && (<>
+      {isInfoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeModal}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          />
 
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        {/* Cinematic Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ duration: 0.4 }}
-          onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
-        />
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-sm bg-[#0d0c11] rounded-3xl p-5 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[85vh] flex flex-col justify-between border border-white/[0.1]"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4 relative z-10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400 shadow-inner">
+                  {activeModal === 'campaigns' && <Gift className="w-4 h-4" />}
+                  {activeModal === 'about' && <Info className="w-4 h-4" />}
+                  {activeModal === 'partners' && <Handshake className="w-4 h-4" />}
+                  {activeModal === 'contact' && <MessageCircle className="w-4 h-4" />}
+                  {activeModal === 'howitworks' && <HelpCircle className="w-4 h-4" />}
+                  {activeModal === 'terms' && <Info className="w-4 h-4" />}
+                </div>
 
-        {/* Modal Container */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, y: "100%" }}
-          className="relative w-full max-w-sm bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] overflow-hidden max-h-[85vh] flex flex-col justify-between glass-panel-gold border border-[#D4AF37]/30"
-        >
-          {/* Decorative Glow */}
-
-          {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20 mb-5 relative z-10">
-            <div className="flex items-center gap-3 text-[#D4AF37]">
-              <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-inner">
-                {activeModal === 'campaigns' && <Gift className="w-5 h-5 drop-shadow-md" />}
-                {activeModal === 'about' && <Info className="w-5 h-5 drop-shadow-md" />}
-                {activeModal === 'partners' && <Handshake className="w-5 h-5 drop-shadow-md" />}
-                {activeModal === 'contact' && <MessageCircle className="w-5 h-5 drop-shadow-md" />}
-                {activeModal === 'howitworks' && <HelpCircle className="w-5 h-5 drop-shadow-md" />}
-                {activeModal === 'terms' && <Info className="w-5 h-5 drop-shadow-md" />}
+                <h2 className="text-sm font-black text-white tracking-tight capitalize">
+                  {activeModal === 'campaigns' && 'Kampanyalar'}
+                  {activeModal === 'terms' && 'Kullanım & KVKK'}
+                  {activeModal === 'about' && 'Hakkında'}
+                  {activeModal === 'partners' && 'Mekan Ortaklığı'}
+                  {activeModal === 'contact' && 'İletişim & Destek'}
+                  {activeModal === 'howitworks' && 'Nasıl Çalışır?'}
+                </h2>
               </div>
 
-              <h2 className="text-lg font-black text-white tracking-tight drop-shadow-lg capitalize">
-                {activeModal === 'campaigns' && 'Mevcut Kampanyalar'}
-                {activeModal === 'terms' && 'Kullanım Koşulları & KVKK'}
-                {activeModal === 'about' && 'Muzikors Hakkında'}
-                {activeModal === 'partners' && 'Mekan Ortaklığı'}
-                {activeModal === 'contact' && 'İletişim & Destek'}
-                {activeModal === 'howitworks' && 'Nasıl Çalışır?'}
-              </h2>
+              <button
+                onClick={closeModal}
+                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+                aria-label="Kapat"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <button
-              onClick={closeModal}
-              className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
-              aria-label="Kapat"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Modal Content Switch */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar text-[13px] text-amber-200/80 leading-relaxed relative z-10">
-            {activeModal === 'campaigns' && (
-              <div className="space-y-4">
-                <div className="bg-[#1A1A1A]/80 rounded-2xl p-4 border border-[#D4AF37]/20 shadow-inner group active:-translate-y-1 transition-transform text-center py-8">
-                  <Gift className="w-10 h-10 text-zinc-500 mx-auto mb-3 opacity-50" />
-                  <h4 className="font-black text-white mb-2 text-base">Çok Yakında</h4>
-                  <p className="font-medium text-amber-200/60 leading-relaxed">Yeni sürprizler ve fırsatlarla çok yakında buradayız. Takipte kalın!</p>
-                </div>
-              </div>
-            )}
-
-            {activeModal === 'about' && (
-              <div className="space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
-                <p className="leading-relaxed">
-                  <strong className="text-[#D4AF37] text-lg font-black block mb-2">Muzikors</strong> Mekanlarda müzik seçimini tamamen müşterilere sunan yeni nesil dijital interaktif jukebox platformudur.
-                </p>
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent my-4" />
-                <p className="leading-relaxed font-medium">
-                  Masadaki QR kodu tarayarak mekana bağlanın, favori Spotify şarkılarınızı arayın, tamamen ücretsiz olarak sıraya ekleyin ve mekanın atmosferine yön verin!
-                </p>
-              </div>
-            )}
-
-            {activeModal === 'partners' && (
-              <div>
-                {partnerSubmitted ? (
-                  <div className="text-center py-6 space-y-4 bg-[#1A1A1A]/60 rounded-2xl p-4 border border-emerald-500/20 shadow-inner">
-                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-                    </div>
-                    <h3 className="text-lg font-black text-white tracking-tight">Başvurunuz Alındı</h3>
-                    <p className="text-sm font-medium text-amber-200/70 leading-relaxed">
-                      Mekan ortaklığı başvurunuz ekibimize iletildi. En kısa sürede sizinle iletişime geçeceğiz.
-                    </p>
+            {/* Modal Content Switch */}
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar text-xs text-neutral-300 leading-relaxed relative z-10">
+              {activeModal === 'campaigns' && (
+                <div className="space-y-3">
+                  <div className="bg-[#141318] rounded-2xl p-5 border border-white/[0.08] text-center py-8">
+                    <Gift className="w-8 h-8 text-amber-400 mx-auto mb-2 opacity-60" />
+                    <h4 className="font-bold text-white mb-1 text-sm">Çok Yakında</h4>
+                    <p className="text-xs text-neutral-400 leading-relaxed">Özel fırsatlar ve kampanyalarla çok yakında buradayız.</p>
                   </div>
-                ) : (
-                  <form onSubmit={handlePartnerSubmit} className="space-y-4">
-                    <p className="text-[13px] font-medium text-amber-200/70 mb-4 px-2 leading-relaxed">
-                      Kafeniz veya mekanınız için Muzikors Jukebox platformunu kurmak için formu doldurun.
-                    </p>
+                </div>
+              )}
 
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Mekan Adı *</label>
-                        <input
-                          type="text"
-                          required
-                          value={partnerForm.venueName}
-                          onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
-                          placeholder="Örn: Velvet Lounge"
-                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
-                        />
-                      </div>
+              {activeModal === 'about' && (
+                <div className="space-y-3 bg-[#141318] rounded-2xl p-4 border border-white/[0.08]">
+                  <p className="leading-relaxed">
+                    <strong className="text-amber-400 text-base font-black block mb-1">Muzikors</strong> Mekanlarda müzik seçimini müşterilere sunan yeni nesil dijital jukebox platformudur.
+                  </p>
+                  <div className="h-px w-full bg-white/[0.08] my-3" />
+                  <p className="leading-relaxed text-neutral-400">
+                    Masadaki QR kodu okutun, favori parçanızı arayın ve mekanın müzik akışına katılın!
+                  </p>
+                </div>
+              )}
 
-                      <div>
-                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Yetkili Adı Soyadı *</label>
-                        <input
-                          type="text"
-                          required
-                          value={partnerForm.contactPerson}
-                          onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
-                          placeholder="Örn: Ahmet Yılmaz"
-                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">Telefon Numarası *</label>
-                        <input
-                          type="tel"
-                          required
-                          value={partnerForm.phone}
-                          onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
-                          placeholder="Örn: 0555 123 4567"
-                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-amber-200/80 mb-1.5 uppercase tracking-wider pl-1">E-posta Adresi</label>
-                        <input
-                          type="email"
-                          value={partnerForm.email}
-                          onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
-                          placeholder="Örn: mekan@example.com"
-                          className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:ring-2 focus:ring-[#D4AF37]/20 transition-all shadow-inner"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-4 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(212,175,55,0.2)] active:scale-95 transition-all mt-6 group"
-                    >
-                      <Send className="w-5 h-5 group-active:translate-x-1 group-active:-translate-y-1 transition-transform" />
-                      <span className="tracking-wide">Ortaklık Başvurusu Gönder</span>
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {activeModal === 'contact' && (
-              <div className="space-y-6 text-center py-6 bg-[#1A1A1A]/60 rounded-2xl border border-white/5 shadow-inner">
+              {activeModal === 'partners' && (
                 <div>
-                  <p className="font-black text-white text-base mb-1 tracking-tight">Destek &amp; Müşteri Hizmetleri</p>
-                  <p className="text-[#D4AF37] font-mono text-sm font-bold bg-[#D4AF37]/10 py-1.5 px-4 rounded-lg inline-block border border-[#D4AF37]/20">destek@muzikors.com</p>
-                </div>
-                <div className="pt-6 border-t border-[#D4AF37]/20 space-y-3 px-6">
-                  <a
-                    href="https://wa.me/905068638306"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-sm active:bg-emerald-500/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(16,185,129,0.1)] group"
-                  >
-                    <MessageCircle className="w-5 h-5 group-active:scale-95 transition-transform" />
-                    <span className="tracking-wide">WhatsApp Destek Hattı</span>
-                  </a>
-                  <a
-                    href="tel:+905068638306"
-                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] font-black text-sm active:bg-[#D4AF37]/20 active:scale-95 transition-all shadow-[0_5px_15px_rgba(212,175,55,0.1)] group"
-                  >
-                    <span className="group-active:scale-95 transition-transform">📞</span>
-                    <span className="tracking-wide">+90 506 863 83 06</span>
-                  </a>
-                  <p className="text-xs font-bold text-amber-200/50 uppercase tracking-widest mt-4">Haftanın 7 günü 10:00 - 02:00</p>
-                </div>
-              </div>
-            )}
-
-            {activeModal === 'howitworks' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">1</div>
-                  <div>
-                    <h4 className="font-black text-white text-sm mb-1">Masa QR Okut</h4>
-                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine otomatik bağlan.</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">2</div>
-                  <div>
-                    <h4 className="font-black text-white text-sm mb-1">Şarkı Ara</h4>
-                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Binlerce Spotify şarkısı arasından dilediğini seç.</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 bg-[#1A1A1A]/80 p-4 rounded-2xl border border-white/5 active:-translate-y-1 transition-transform group">
-                  <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 font-black text-lg flex items-center justify-center shrink-0 shadow-md group-active:scale-95 transition-transform">3</div>
-                  <div>
-                    <h4 className="font-black text-white text-sm mb-1">Şarkını Çaldır</h4>
-                    <p className="text-amber-200/60 text-xs font-medium leading-relaxed">Sıraya gir, tamamen ücretsiz olarak mekanın atmosferine sen de katıl!</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeModal === 'terms' && (
-              <div className="space-y-5">
-                {/* 4-Tab Switcher */}
-                <div className="flex bg-black/40 p-1.5 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth snap-x">
-                  <button 
-                    onClick={() => setActiveLegalTab('kvkk')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'kvkk' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
-                  >
-                    KVKK
-                  </button>
-                  <button 
-                    onClick={() => setActiveLegalTab('consent')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'consent' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
-                  >
-                    Açık Rıza
-                  </button>
-                  <button 
-                    onClick={() => setActiveLegalTab('cookie')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'cookie' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
-                  >
-                    Çerez
-                  </button>
-                  <button 
-                    onClick={() => setActiveLegalTab('terms')} 
-                    className={`flex-1 min-w-[max-content] px-4 py-2.5 text-xs font-black rounded-lg transition-all snap-start ${activeLegalTab === 'terms' ? 'gold-gradient-bg text-black shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
-                  >
-                    Koşullar
-                  </button>
-                </div>
-
-                {/* Tab Content */}
-                <div className="bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 space-y-4 min-h-[250px] shadow-inner">
-                  {activeLegalTab === 'kvkk' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">KVKK Aydınlatma Metni</h4>
-                      <div className="space-y-3 text-xs text-amber-200/70 font-medium leading-relaxed">
-                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.</p>
-                        <div className="w-8 h-px bg-white/10" />
-                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, Spotify hesabı kamuya açık kullanıcı kimliği, mekân içi şarkı istek geçmişi.</p>
-                        <div className="w-8 h-px bg-white/10" />
-                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Veri İşleme Amacı:</strong> İnteraktif müzik kuyruğu yönetimi, güvenli oturum doğrulama ve mekân içi sıralama hizmeti sunulması.</p>
-                        <div className="w-8 h-px bg-white/10" />
-                        <p><strong className="text-white font-bold uppercase tracking-wider block mb-0.5">Haklar (KVKK Madde 11):</strong> Kullanıcı profili ayarlarından "Hesabı Sil" özelliğini kullanarak tüm verilerini dilediği an silme hakkına sahiptir.</p>
+                  {partnerSubmitted ? (
+                    <div className="text-center py-6 space-y-3 bg-[#141318] rounded-2xl p-4 border border-emerald-500/20">
+                      <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-sm">
+                        <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                       </div>
-                    </motion.div>
-                  )}
-
-                  {activeLegalTab === 'consent' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Açık Rıza Metni</h4>
-                      <p className="text-amber-200/70 text-xs font-medium leading-relaxed">
-                        Kullanıcı, Muzikors platformunda hesabını oluştururken ve hizmeti kullanırken; kişisel verilerinin ve oturum bilgilerinin yüksek güvenlik standartlarına sahip bulut veritabanı altyapısında (Supabase) saklanmasına, işlenmesine ve yurt dışı sunucu aktarımlarına özgür iradesiyle açık rıza göstermektedir.
+                      <h3 className="text-sm font-bold text-white tracking-tight">Başvurunuz Alındı</h3>
+                      <p className="text-xs text-neutral-400 leading-relaxed">
+                        Mekan ortaklığı başvurunuz ekibimize iletildi. En kısa sürede sizinle iletişime geçeceğiz.
                       </p>
-                    </motion.div>
-                  )}
+                    </div>
+                  ) : (
+                    <form onSubmit={handlePartnerSubmit} className="space-y-3">
+                      <p className="text-xs text-neutral-400 px-1">
+                        Mekanınızda Muzikors Jukebox kullanmak için bilgilerinizi bırakın.
+                      </p>
 
-                  {activeLegalTab === 'cookie' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Çerez Politikası</h4>
-                      <div className="space-y-3 text-amber-200/70 text-xs font-medium leading-relaxed">
-                        <p>
-                          Muzikors, oturum durumunun korunması, Spotify API erişim jetonlarının (tokens) güvenliği ve kullanıcı tercihlerinin hatırlanması amacıyla zorunlu teknik çerezler ve localStorage (yerel depolama) teknolojileri kullanmaktadır.
-                        </p>
-                        <div className="w-8 h-px bg-white/10" />
-                        <p>
-                          Bu çerezler reklam/pazarlama amacıyla <strong className="text-white">kullanılmaz</strong> ve üçüncü şahıslara <strong className="text-white">satılmaz</strong>.
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
+                      <div className="space-y-2.5">
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider pl-0.5">Mekan Adı *</label>
+                          <input
+                            type="text"
+                            required
+                            value={partnerForm.venueName}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
+                            placeholder="Örn: Velvet Lounge"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                          />
+                        </div>
 
-                  {activeLegalTab === 'terms' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                      <h4 className="font-black text-[#D4AF37] text-base tracking-tight">Hizmet Koşulları & İade Politikası</h4>
-                      <div className="space-y-3 text-amber-200/70 text-xs font-medium leading-relaxed">
-                        <p>
-                          Muzikors uygulamasının son kullanıcı tarafı <strong className="text-white">tamamen ücretsizdir</strong>. Müzik arama, istek gönderme ve diğer etkileşimler için hiçbir ücret talep edilmez.
-                        </p>
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider pl-0.5">Yetkili Kişi *</label>
+                          <input
+                            type="text"
+                            required
+                            value={partnerForm.contactPerson}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
+                            placeholder="Örn: Ahmet Yılmaz"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider pl-0.5">Telefon *</label>
+                          <input
+                            type="tel"
+                            required
+                            value={partnerForm.phone}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
+                            placeholder="Örn: 0555 123 4567"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider pl-0.5">E-posta</label>
+                          <input
+                            type="email"
+                            value={partnerForm.email}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
+                            placeholder="Örn: mekan@example.com"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                          />
+                        </div>
                       </div>
-                    </motion.div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all mt-4"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Başvuru Gönder</span>
+                      </button>
+                    </form>
                   )}
                 </div>
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    
-      </>)}
+              )}
+
+              {activeModal === 'contact' && (
+                <div className="space-y-4 text-center py-4 bg-[#141318] rounded-2xl border border-white/[0.08]">
+                  <div>
+                    <p className="font-bold text-white text-sm mb-1">Destek &amp; İletişim</p>
+                    <p className="text-amber-400 font-mono text-xs font-bold bg-black/40 py-1.5 px-3 rounded-lg inline-block border border-white/5">destek@muzikors.com</p>
+                  </div>
+                  <div className="pt-3 border-t border-white/[0.06] space-y-2 px-4">
+                    <a
+                      href="https://wa.me/905068638306"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-bold text-xs active:scale-95 transition-all"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>WhatsApp Destek</span>
+                    </a>
+                    <a
+                      href="tel:+905068638306"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-bold text-xs active:scale-95 transition-all"
+                    >
+                      <span>📞 +90 506 863 83 06</span>
+                    </a>
+                    <p className="text-[10px] text-neutral-500 font-bold uppercase mt-2">Haftanın 7 günü 10:00 - 02:00</p>
+                  </div>
+                </div>
+              )}
+
+              {activeModal === 'howitworks' && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">1</div>
+                    <div>
+                      <h4 className="font-bold text-white text-xs mb-0.5">Masa QR Okut</h4>
+                      <p className="text-neutral-400 text-[11px] leading-snug">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine bağlan.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">2</div>
+                    <div>
+                      <h4 className="font-bold text-white text-xs mb-0.5">Şarkı Ara</h4>
+                      <p className="text-neutral-400 text-[11px] leading-snug">Binlerce Spotify şarkısı arasından dilediğini seç.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
+                    <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0">3</div>
+                    <div>
+                      <h4 className="font-bold text-white text-xs mb-0.5">Şarkını Çaldır</h4>
+                      <p className="text-neutral-400 text-[11px] leading-snug">Sıraya ekle ve mekanın atmosferini şekillendir!</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeModal === 'terms' && (
+                <div className="space-y-3">
+                  <div className="flex bg-[#141318] p-1 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar no-scrollbar">
+                    <button 
+                      onClick={() => setActiveLegalTab('kvkk')} 
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'kvkk' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                    >
+                      KVKK
+                    </button>
+                    <button 
+                      onClick={() => setActiveLegalTab('consent')} 
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'consent' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                    >
+                      Açık Rıza
+                    </button>
+                    <button 
+                      onClick={() => setActiveLegalTab('cookie')} 
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'cookie' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                    >
+                      Çerez
+                    </button>
+                    <button 
+                      onClick={() => setActiveLegalTab('terms')} 
+                      className={`flex-1 min-w-[max-content] px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeLegalTab === 'terms' ? 'bg-amber-400 text-black' : 'text-white/60'}`}
+                    >
+                      Koşullar
+                    </button>
+                  </div>
+
+                  <div className="bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08] space-y-3 min-h-[220px]">
+                    {activeLegalTab === 'kvkk' && (
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
+                        <h4 className="font-bold text-amber-400 text-xs">KVKK Aydınlatma Metni</h4>
+                        <p><strong className="text-white block">Veri Sorumlusu:</strong> Muzikors B2B SaaS Platformu.</p>
+                        <p><strong className="text-white block">İşlenen Veriler:</strong> IP adresi, cihaz bilgisi, istek geçmişi.</p>
+                        <p><strong className="text-white block">Haklar:</strong> Kullanıcı dilediği an hesabını ve verilerini silebilir.</p>
+                      </motion.div>
+                    )}
+
+                    {activeLegalTab === 'consent' && (
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
+                        <h4 className="font-bold text-amber-400 text-xs">Açık Rıza Metni</h4>
+                        <p>Kullanıcı, kişisel verilerinin ve oturum bilgilerinin güvenli veritabanı altyapısında işlenmesine rıza göstermektedir.</p>
+                      </motion.div>
+                    )}
+
+                    {activeLegalTab === 'cookie' && (
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
+                        <h4 className="font-bold text-amber-400 text-xs">Çerez Politikası</h4>
+                        <p>Muzikors, oturum durumunun korunması ve güvenlik amacıyla teknik çerezler kullanır. Reklam amacıyla satılmaz.</p>
+                      </motion.div>
+                    )}
+
+                    {activeLegalTab === 'terms' && (
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
+                        <h4 className="font-bold text-amber-400 text-xs">Hizmet Koşulları</h4>
+                        <p>Muzikors uygulamasının son kullanıcı tarafı tamamen ücretsizdir.</p>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };

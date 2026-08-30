@@ -408,53 +408,52 @@ export const ProfileView: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {activeModal === 'profile' && (<>
+      {activeModal === 'profile' && (
+        <>
+          <AnimatePresence>
+            {cropImageSrc && (
+              <CropModal
+                imageSrc={cropImageSrc}
+                onConfirm={handleCropConfirm}
+                onCancel={() => setCropImageSrc(null)}
+              />
+            )}
+          </AnimatePresence>
 
-      <AnimatePresence>
-        {cropImageSrc && (
-          <CropModal
-            imageSrc={cropImageSrc}
-            onConfirm={handleCropConfirm}
-            onCancel={() => setCropImageSrc(null)}
-          />
-        )}
-      </AnimatePresence>
+          <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeModal}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto"
+            />
 
-      <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center pointer-events-none">
-        <motion.div
-          key="profile-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          onClick={closeModal}
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm pointer-events-auto"
-        />
-
-        <motion.div
-          key="profile-sheet"
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-md bg-[#120C08] rounded-t-[2.5rem] overflow-y-auto max-h-[92vh] border-t border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] pointer-events-auto custom-scrollbar"
-        >
-          {/* Handle */}
-          <div className="flex justify-center pt-3">
-            <div className="w-12 h-1.5 bg-white/15 rounded-full" />
-          </div>
+            <motion.div
+              key="profile-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+              className="relative w-full max-w-md bg-[#0d0c11] rounded-t-[2.5rem] overflow-y-auto max-h-[92vh] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.9)] pointer-events-auto custom-scrollbar"
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-12 h-1 bg-white/20 rounded-full" />
+              </div>
 
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 border border-white/10 active:bg-white/15 text-zinc-400 active:text-white transition-all z-10"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-all z-10"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
 
           <div className="px-5 pt-2 pb-10">
             {isLoadingProfile && !isOwnProfile && !profileData ? (
                <div className="flex flex-col items-center justify-center py-20">
-                 <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37]" />
+                 <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
                </div>
             ) : (
               <>
@@ -462,7 +461,7 @@ export const ProfileView: React.FC = () => {
                 <div className="flex flex-col items-center">
                   <div className="relative mb-3 mt-2">
                     <AvatarFrame frameId={isEditing ? selectedFrame : (currentProfile?.avatar_frame || 'none')} size="2xl">
-                      <div className="w-full h-full bg-[#1C130D] flex items-center justify-center">
+                      <div className="w-full h-full bg-[#141318] border border-white/10 flex items-center justify-center rounded-full overflow-hidden shadow-inner">
                         {(() => {
                           const av = isEditing ? editAvatar : currentProfile?.avatar || currentProfile?.avatar_url;
                           const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
@@ -470,7 +469,7 @@ export const ProfileView: React.FC = () => {
                             <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <User className="w-10 h-10 text-[#D4AF37]/40" />
+                              <User className="w-10 h-10 text-amber-400/40" />
                             </div>
                           );
                         })()}
@@ -478,7 +477,7 @@ export const ProfileView: React.FC = () => {
                     </AvatarFrame>
                     {uploadingAvatar && (
                       <div className="absolute inset-0 rounded-full bg-black/70 flex items-center justify-center z-20">
-                        <Loader2 className="w-6 h-6 text-[#D4AF37] animate-spin" />
+                        <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
                       </div>
                     )}
                   </div>
@@ -487,13 +486,13 @@ export const ProfileView: React.FC = () => {
                     {isEditing ? (
                       <div className="space-y-4">
                         <div>
-                          <p className="text-[10px] text-amber-200/40 font-bold uppercase tracking-widest mb-3">Fotoğraf Seç</p>
+                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-3">Fotoğraf Seç</p>
                           <div className="flex gap-3 overflow-x-auto pb-2 px-1 scrollbar-hide justify-start">
                             <div className="flex flex-col items-center gap-1.5 shrink-0">
                               <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploadingAvatar}
-                                className="w-14 h-14 rounded-full border-2 border-dashed border-[#D4AF37]/50 flex items-center justify-center bg-white/5 active:bg-white/10 transition-colors text-[#D4AF37]"
+                                className="w-14 h-14 rounded-full border-2 border-dashed border-amber-400/50 flex items-center justify-center bg-white/5 active:bg-white/10 transition-colors text-amber-400"
                               >
                                 {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
                               </button>
@@ -511,8 +510,8 @@ export const ProfileView: React.FC = () => {
                                   onClick={() => setEditAvatar(url)}
                                   className={`w-14 h-14 rounded-full border-2 overflow-hidden transition-all ${
                                     editAvatar === url
-                                      ? 'border-[#D4AF37] scale-110 shadow-[0_0_14px_rgba(212,175,55,0.6)]'
-                                      : 'border-white/10 opacity-55 active:opacity-100'
+                                      ? 'border-amber-400 scale-105 shadow-[0_0_12px_rgba(245,158,11,0.5)]'
+                                      : 'border-white/10 opacity-60 active:opacity-100'
                                   }`}
                                 >
                                   <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-contain p-1.5 bg-black" />
@@ -525,8 +524,8 @@ export const ProfileView: React.FC = () => {
                         {/* Profil Çerçeveleri (Avatar Frames) */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] text-amber-200/40 font-bold uppercase tracking-widest">Profil Çerçevesi Seç</p>
-                            <span className="text-[10px] text-zinc-500 font-semibold">Başarımlarla Açılır</span>
+                            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">Profil Çerçevesi Seç</p>
+                            <span className="text-[10px] text-neutral-500 font-semibold">Başarımlarla Açılır</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar text-left">
                             {AVATAR_FRAMES.map((frame) => {
@@ -544,10 +543,10 @@ export const ProfileView: React.FC = () => {
                                   }}
                                   className={`p-2.5 rounded-2xl border transition-all flex items-center gap-2.5 cursor-pointer relative overflow-hidden ${
                                     isSelected
-                                      ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-[0_0_12px_rgba(212,175,55,0.3)]'
+                                      ? 'bg-amber-400/15 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
                                       : isUnlocked
-                                      ? 'bg-white/5 border-white/10 hover:border-white/20'
-                                      : 'bg-white/5 border-white/5 opacity-40'
+                                      ? 'bg-white/[0.03] border-white/10 hover:border-white/20'
+                                      : 'bg-white/[0.02] border-white/5 opacity-40'
                                   }`}
                                 >
                                   <div className="shrink-0">
@@ -559,19 +558,19 @@ export const ProfileView: React.FC = () => {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1">
-                                      <span className={`text-[11px] font-bold truncate ${isSelected ? 'text-amber-200' : 'text-white'}`}>
+                                      <span className={`text-[11px] font-bold truncate ${isSelected ? 'text-amber-300' : 'text-white'}`}>
                                         {frame.name}
                                       </span>
                                     </div>
-                                    <span className="text-[9px] text-zinc-400 block truncate">
+                                    <span className="text-[9px] text-neutral-400 block truncate">
                                       {isUnlocked ? (isSelected ? 'Kuşanıldı' : 'Açık') : 'Kilitli'}
                                     </span>
                                   </div>
                                   {!isUnlocked && (
-                                    <Lock className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                                    <Lock className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
                                   )}
                                   {isSelected && (
-                                    <div className="w-4 h-4 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shrink-0">
+                                    <div className="w-4 h-4 rounded-full bg-amber-400 text-black flex items-center justify-center shrink-0">
                                       <Check className="w-2.5 h-2.5 stroke-[3]" />
                                     </div>
                                   )}
@@ -582,31 +581,31 @@ export const ProfileView: React.FC = () => {
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 block">Kullanıcı ID</label>
+                          <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Kullanıcı ID</label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37] font-bold">@</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-bold">@</span>
                             <input
                               type="text"
                               value={editUsername}
                               onChange={(e) => setEditUsername(e.target.value)}
-                              className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+                              className="w-full bg-[#141318] border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-amber-400/50 transition-colors"
                               placeholder="kullanici_adi"
                             />
                           </div>
-                          <p className="text-[9px] text-amber-200/50 mt-1">Haftada sadece 1 kez değiştirebilirsiniz.</p>
+                          <p className="text-[9px] text-neutral-500 mt-1">Haftada sadece 1 kez değiştirebilirsiniz.</p>
                         </div>
 
                         <div className="flex gap-2 pt-1">
                           <button
                             onClick={() => setIsEditing(false)}
-                            className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
+                            className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-neutral-300 font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
                           >
                             İptal
                           </button>
                           <button
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#E5A93B] text-black font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.3)] disabled:opacity-50"
+                            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform shadow-md disabled:opacity-50"
                           >
                             {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                           </button>
@@ -615,7 +614,7 @@ export const ProfileView: React.FC = () => {
                     ) : (
                       <>
                         <div className="flex items-center justify-center gap-2">
-                          <h2 className={`text-xl font-black tracking-tight leading-none drop-shadow-md ${currentProfile?.is_premium || currentProfile?.isPremium ? 'text-amber-100' : 'text-white'}`}>
+                          <h2 className="text-xl font-black tracking-tight leading-none text-white">
                             {currentProfile?.name || currentProfile?.full_name || 'Misafir Kullanıcı'}
                           </h2>
                           {(currentProfile?.is_premium || currentProfile?.isPremium) && (
@@ -625,18 +624,18 @@ export const ProfileView: React.FC = () => {
                             <BetaTesterBadge className="w-4 h-4 ml-1" />
                           )}
                         </div>
-                        <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                          <span className="text-[9px] text-gray-300 font-medium tracking-wider">ID:</span>
-                          <span className={`text-[10px] font-black tracking-widest ${(currentProfile?.is_premium || currentProfile?.isPremium) ? 'text-amber-400' : 'text-[#D4AF37]'}`}>
+                        <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
+                          <span className="text-[9px] text-neutral-400 font-medium tracking-wider">ID:</span>
+                          <span className="text-[10px] font-black tracking-widest text-amber-400">
                             {currentProfile?.username || '@misafir'}
                           </span>
                         </div>
 
-                        <div className="mt-5 flex items-center gap-2 w-full justify-center">
+                        <div className="mt-4 flex items-center gap-2 w-full justify-center">
                           {isOwnProfile ? (
                             <button
                               onClick={handleEditClick}
-                              className="w-full py-2.5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs active:bg-white/10 active:scale-95 transition-all shadow-sm"
+                              className="w-full py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs active:scale-95 transition-all shadow-sm"
                             >
                               Profili Düzenle
                             </button>
@@ -644,10 +643,10 @@ export const ProfileView: React.FC = () => {
                             <button
                               onClick={handleFollowToggle}
                               disabled={isFollowLoading}
-                              className={`w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg
+                              className={`w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md
                                 ${isFollowingState 
                                   ? 'bg-white/5 border border-white/10 text-white' 
-                                  : 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]'}`}
+                                  : 'bg-amber-400 text-black font-black'}`}
                             >
                               {isFollowLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                                 isFollowingState ? <><Check className="w-4 h-4" /> Takip Ediliyor</> : 'Takip Et'
@@ -671,10 +670,10 @@ export const ProfileView: React.FC = () => {
                               {pinned.map(ach => (
                                 <div 
                                   key={ach.id}
-                                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-[#D4AF37]/30 backdrop-blur-md shadow-sm group-hover:border-[#D4AF37]/60 group-active:scale-95 transition-all"
+                                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/25 backdrop-blur-md shadow-sm group-hover:border-amber-400/50 group-active:scale-95 transition-all"
                                 >
                                   <span className="text-xs">{ach.emoji}</span>
-                                  <span className="text-[10px] font-bold text-amber-200">{ach.title}</span>
+                                  <span className="text-[10px] font-bold text-amber-300">{ach.title}</span>
                                 </div>
                               ))}
                             </div>
@@ -686,22 +685,22 @@ export const ProfileView: React.FC = () => {
                 </div>
 
                 {/* ─── Profile Stats ─── */}
-                <div className="flex justify-around items-center bg-[#1C130D] rounded-2xl border border-white/5 py-3 mt-6 mb-3 shadow-inner">
+                <div className="flex justify-around items-center bg-[#141318] rounded-2xl border border-white/[0.08] py-3 mt-5 mb-3 shadow-inner">
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">
                       {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
                     </span>
-                    <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Toplam İstek</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Toplam İstek</span>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">{stats.followers_count}</span>
-                    <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Takipçi</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takipçi</span>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">{stats.following_count}</span>
-                    <span className="text-[9px] text-amber-200/50 uppercase tracking-widest font-bold">Takip Edilen</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takip Edilen</span>
                   </div>
                 </div>
 
@@ -718,13 +717,13 @@ export const ProfileView: React.FC = () => {
                   return (
                     <button
                       onClick={() => setShowAchievements(true)}
-                      className="w-full py-2.5 px-4 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#2A1D13] via-[#1C130D] to-[#2A1D13] text-[#D4AF37] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
+                      className="w-full py-2.5 px-4 rounded-2xl border border-amber-400/25 bg-[#141318] text-amber-300 font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
                     >
                       <span className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-black text-amber-100">Başarımlar & Rozetler</span>
+                        <Trophy className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-black text-white">Başarımlar & Rozetler</span>
                       </span>
-                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
                         {completedCount} / {ACHIEVEMENTS.length} Kazanıldı
                       </span>
                     </button>
@@ -733,25 +732,25 @@ export const ProfileView: React.FC = () => {
 
                 {/* ─── Social Feed ─── */}
                 <div className="mt-2 relative">
-                  <h3 className="text-sm font-black text-white mb-4 border-b border-white/5 pb-2">Gönderiler</h3>
+                  <h3 className="text-sm font-black text-white mb-4 border-b border-white/[0.08] pb-2">Gönderiler</h3>
                   
                   {isOwnProfile && (
-                    <div className="bg-[#1C130D] rounded-2xl p-4 border border-white/10 mb-4 shadow-inner">
+                    <div className="bg-[#141318] rounded-2xl p-4 border border-white/[0.08] mb-4 shadow-inner">
                       <textarea
                         placeholder="Yeni gönderi paylaş..."
                         value={newPostContent}
                         onChange={e => setNewPostContent(e.target.value)}
                         maxLength={280}
-                        className="w-full bg-transparent text-sm text-white placeholder-zinc-500 resize-none focus:outline-none min-h-[50px]"
+                        className="w-full bg-transparent text-sm text-white placeholder-neutral-500 resize-none focus:outline-none min-h-[50px]"
                       />
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                        <span className={`text-[10px] font-bold ${newPostContent.length >= 280 ? 'text-red-400' : 'text-zinc-500'}`}>
+                        <span className={`text-[10px] font-bold ${newPostContent.length >= 280 ? 'text-red-400' : 'text-neutral-500'}`}>
                           {newPostContent.length}/280
                         </span>
                         <button
                           onClick={handleCreatePost}
                           disabled={isPosting || !newPostContent.trim()}
-                          className="bg-[#D4AF37] text-black px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
+                          className="bg-amber-400 text-black px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
                         >
                           {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Paylaş'}
                         </button>
@@ -761,7 +760,7 @@ export const ProfileView: React.FC = () => {
 
                   {posts.length === 0 ? (
                     <div className="text-center py-10 opacity-70">
-                      <p className="text-sm text-zinc-500 font-medium">Henüz gönderi yok.</p>
+                      <p className="text-sm text-neutral-500 font-medium">Henüz gönderi yok.</p>
                     </div>
                   ) : (
                     posts.map(post => (
@@ -772,11 +771,11 @@ export const ProfileView: React.FC = () => {
 
                 {/* Settings / Auth Actions for Own Profile */}
                 {isOwnProfile && (
-                  <div className="mt-8 border-t border-white/5 pt-6 space-y-2">
+                  <div className="mt-8 border-t border-white/[0.08] pt-5 space-y-2">
                     {!user ? (
                       <button
                         onClick={() => { closeModal(); loginWithProvider('google'); }}
-                        className="w-full py-3 px-4 rounded-2xl bg-white text-stone-950 font-black text-sm flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-lg"
+                        className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-sm flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-lg"
                       >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -790,14 +789,14 @@ export const ProfileView: React.FC = () => {
                       <>
                         <button
                           onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
-                          className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm flex items-center gap-3 active:bg-white/10 active:scale-95 transition-all"
+                          className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center gap-2.5 active:scale-95 transition-all"
                         >
-                          <LogOut className="w-4 h-4 text-zinc-400" />
+                          <LogOut className="w-4 h-4 text-neutral-400" />
                           Çıkış Yap
                         </button>
                         <button
                           onClick={() => setShowConfirmDelete(true)}
-                          className="w-full py-3 px-4 rounded-2xl bg-red-950/30 border border-red-900/30 text-red-400 font-bold text-sm flex items-center gap-3 active:bg-red-950/50 active:scale-95 transition-all"
+                          className="w-full py-3 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center gap-2.5 active:scale-95 transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                           Hesabı Sil
@@ -805,7 +804,7 @@ export const ProfileView: React.FC = () => {
 
                         {showConfirmDelete && (
                           <div className="p-4 rounded-2xl bg-red-950/40 border border-red-700/40 space-y-3 mt-2">
-                            <p className="text-sm text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
+                            <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => setShowConfirmDelete(false)}

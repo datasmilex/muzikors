@@ -31,14 +31,14 @@ export const VenueInfoModal: React.FC = () => {
     <AnimatePresence>
       {activeModal === 'venue_info' && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
-          {/* Cinematic Backdrop */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
           />
 
           {/* Modal Container */}
@@ -46,99 +46,101 @@ export const VenueInfoModal: React.FC = () => {
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="relative w-full max-w-md h-[85vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl flex flex-col overflow-hidden glass-panel-gold border border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] bg-[#120C08] z-10"
+            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+            className="relative w-full max-w-md h-[85vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[#0d0c11] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] z-10"
           >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1 shrink-0">
+              <div className="w-12 h-1 bg-white/20 rounded-full" />
+            </div>
+
             {/* Header */}
-            <div className="flex-none p-4 flex items-center justify-between border-b border-[#D4AF37]/20 bg-black/20">
-              <div className="flex items-center gap-3 text-[#D4AF37]">
-                <Store className="w-6 h-6 drop-shadow-md" />
-                <h2 className="text-xl font-black tracking-tight text-white">Mekân Bilgileri</h2>
+            <div className="flex-none px-5 py-3 flex items-center justify-between border-b border-white/[0.08]">
+              <div className="flex items-center gap-2">
+                <Store className="w-4 h-4 text-amber-400" />
+                <h2 className="text-base font-black tracking-tight text-white">Mekân Bilgileri</h2>
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
+                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center space-y-6 pb-20 custom-scrollbar">
-              
+            <div className="flex-1 overflow-y-auto p-5 flex flex-col items-center space-y-6 pb-20 custom-scrollbar">
               {/* Logo Section */}
-              <div className="flex flex-col items-center space-y-5">
-                <div className="w-[140px] h-[140px] rounded-full border border-[#D4AF37]/40 p-1.5 flex items-center justify-center bg-gradient-to-br from-[#1C130D] to-[#120C08] shadow-[0_0_40px_rgba(212,175,55,0.25)] overflow-hidden relative group">
-                  <div className="absolute inset-0 bg-[#D4AF37]/5 animate-pulse rounded-full pointer-events-none" />
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-24 h-24 rounded-full border border-amber-400/30 p-1 flex items-center justify-center bg-[#141318] shadow-lg overflow-hidden relative">
                   {(activeVenue as any).logo_url?.trim() ? (
                     <img 
                       src={(activeVenue as any).logo_url} 
                       alt={(activeVenue as any).venue_name || (activeVenue as any).name} 
-                      className="w-full h-full object-cover rounded-full z-10"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <Store className="w-14 h-14 text-[#D4AF37]/50 z-10" />
+                    <Store className="w-10 h-10 text-amber-400" />
                   )}
                 </div>
-                <div className="text-center space-y-2">
-                  <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">
+                <div className="text-center space-y-1">
+                  <h1 className="text-xl font-black text-white tracking-tight">
                     {(activeVenue as any).venue_name || (activeVenue as any).name}
                   </h1>
                   {hasWorkingHours && (
-                    <div className="inline-flex items-center justify-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300 text-xs font-semibold shadow-sm">
-                      <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span className="tracking-wide">Çalışma Saatleri: {openingTime} - {closingTime}</span>
+                    <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-white/[0.04] border border-white/10 rounded-full text-neutral-300 text-xs font-semibold">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{openingTime} - {closingTime}</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Action Buttons & Info */}
-              <div className="w-full max-w-sm space-y-6">
-                
+              <div className="w-full space-y-4">
                 {hasMenu && (
                   isNativeMenu ? (
                     <button
                       type="button"
                       onClick={() => openModal('menu')}
-                      className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group cursor-pointer"
+                      className="w-full py-3.5 rounded-2xl bg-[#141318] hover:bg-[#1a1820] border border-amber-400/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm cursor-pointer"
                     >
-                      <BookOpen className="w-6 h-6 text-[#D4AF37] group-active:scale-95 transition-transform" />
-                      <span>Dijital Menü</span>
+                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <span>Dijital Menüyü İncele</span>
                     </button>
                   ) : (
                     <a
                       href={menuUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 text-amber-100 font-black text-lg flex items-center justify-center gap-3 active:bg-[#222] active:border-[#D4AF37]/60 active:shadow-[0_0_25px_rgba(212,175,55,0.2)] active:scale-95 transition-all shadow-xl group"
+                      className="w-full py-3.5 rounded-2xl bg-[#141318] hover:bg-[#1a1820] border border-amber-400/30 text-white font-bold text-sm flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-sm"
                     >
-                      <BookOpen className="w-6 h-6 text-[#D4AF37] group-active:scale-95 transition-transform" />
-                      <span>Dijital Menü</span>
+                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <span>Dijital Menüyü İncele</span>
                     </a>
                   )
                 )}
 
                 {hasWifi && (
-                  <div className="w-full bg-[#1A1A1A]/50 border border-[#D4AF37]/20 rounded-2xl p-4 shadow-2xl backdrop-blur-md">
-                    <div className="flex items-center justify-center gap-2 mb-5 border-b border-[#D4AF37]/10 pb-4">
-                      <Wifi className="w-5 h-5 text-[#D4AF37] animate-pulse" />
-                      <h3 className="text-sm font-black text-white tracking-widest uppercase">Wi-Fi Bilgileri</h3>
+                  <div className="w-full bg-[#141318] border border-white/[0.08] rounded-2xl p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3.5 border-b border-white/[0.06] pb-2.5">
+                      <Wifi className="w-4 h-4 text-amber-400" />
+                      <h3 className="text-xs font-black text-white uppercase tracking-wider">Wi-Fi Bilgileri</h3>
                     </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-2.5">
                       {wifiName?.trim() && (
-                        <div className="flex items-center justify-between bg-black/60 rounded-2xl p-4 border border-white/5 shadow-inner">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ağ Adı</span>
-                          <span className="text-sm text-white font-black">{wifiName}</span>
+                        <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
+                          <span className="text-[10px] text-neutral-400 font-bold uppercase">Ağ Adı</span>
+                          <span className="text-xs text-white font-bold">{wifiName}</span>
                         </div>
                       )}
                       
                       {wifiPass?.trim() && (
-                        <div className="flex items-center justify-between bg-black/60 rounded-2xl p-4 border border-white/5 shadow-inner group">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Şifre</span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-base text-[#D4AF37] font-mono font-black tracking-widest drop-shadow-md">{wifiPass}</span>
+                        <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
+                          <span className="text-[10px] text-neutral-400 font-bold uppercase">Şifre</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-amber-400 font-mono font-bold">{wifiPass}</span>
                             <button 
                               onClick={() => {
                                 navigator.clipboard.writeText(wifiPass);
@@ -146,10 +148,10 @@ export const VenueInfoModal: React.FC = () => {
                                 showToast('Wi-Fi Şifresi Kopyalandı!');
                                 setTimeout(() => setCopied(false), 2000);
                               }}
-                              className="p-2 rounded-xl bg-white/5 active:bg-white/10 text-gray-300 transition-all active:scale-95 shadow-sm"
+                              className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 transition-colors"
                               title="Şifreyi Kopyala"
                             >
-                              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
                           </div>
                         </div>
@@ -159,11 +161,10 @@ export const VenueInfoModal: React.FC = () => {
                 )}
                 
                 {!hasMenu && !hasWifi && (
-                  <div className="text-center p-8 bg-[#1A1A1A]/50 rounded-[1.5rem] border border-white/5 backdrop-blur-md">
-                    <p className="text-gray-400 text-sm font-medium">Bu mekân için detaylı bilgi eklenmemiştir.</p>
+                  <div className="text-center p-6 bg-[#141318] rounded-2xl border border-white/[0.08]">
+                    <p className="text-neutral-400 text-xs font-medium">Bu mekân için henüz ek bilgi girilmemiş.</p>
                   </div>
                 )}
-
               </div>
             </div>
           </motion.div>

@@ -116,32 +116,30 @@ export const MenuModal: React.FC = () => {
           className="fixed inset-0 bg-black/80 backdrop-blur-md"
         />
 
-        {/* Modal Sheet Container */}
+        {/* Modal Container */}
         <motion.div
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'tween', duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-lg h-[90vh] sm:h-[720px] rounded-t-[2.5rem] sm:rounded-[2.5rem] flex flex-col overflow-hidden bg-[#120C08] border border-[#D4AF37]/30 shadow-[0_-20px_50px_rgba(212,175,55,0.2)] glass-panel-gold z-10"
+          transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+          className="relative w-full max-w-md h-[90vh] sm:h-[680px] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
         >
-          {/* Top Grabber for Mobile */}
-          <div className="w-full pt-3 pb-1 flex justify-center sm:hidden">
-            <div className="w-12 h-1.5 rounded-full bg-white/20" />
+          {/* Handle */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-12 h-1 bg-white/20 rounded-full" />
           </div>
 
           {/* Header */}
-          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-[#D4AF37]/20 bg-black/40 backdrop-blur-xl">
+          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.08] bg-[#141318]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#8C6D23] p-0.5 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                <div className="w-full h-full bg-[#120C08] rounded-[14px] flex items-center justify-center text-[#D4AF37]">
-                  <UtensilsCrossed className="w-5 h-5 stroke-[2.5]" />
-                </div>
+              <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                <UtensilsCrossed className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-white tracking-tight leading-tight">
+                <h2 className="text-base font-black text-white tracking-tight leading-tight">
                   {activeVenue?.venue_name || activeVenue?.name || 'Mekân Menüsü'}
                 </h2>
-                <span className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
+                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
                   <BookOpen className="w-3 h-3" /> Dijital Menü
                 </span>
               </div>
@@ -149,27 +147,27 @@ export const MenuModal: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="p-2.5 rounded-full bg-white/5 active:bg-white/15 text-zinc-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Search Bar */}
-          <div className="p-4 pb-2 bg-[#120C08]">
+          <div className="p-4 pb-2 bg-[#0d0c11]">
             <div className="relative">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Menüde ürün veya lezzet ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/60 border border-[#D4AF37]/30 rounded-2xl py-3 pl-11 pr-4 text-sm font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/40 transition-all shadow-inner"
+                className="w-full bg-[#141318] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/50 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -179,13 +177,13 @@ export const MenuModal: React.FC = () => {
 
           {/* Category Navigation Pills */}
           {categories.length > 0 && (
-            <div className="px-4 py-2 border-b border-white/5 overflow-x-auto scrollbar-hide flex items-center gap-2">
+            <div className="px-4 py-2 border-b border-white/[0.06] overflow-x-auto scrollbar-hide flex items-center gap-1.5">
               <button
                 onClick={() => setSelectedCategoryId('all')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
                   selectedCategoryId === 'all'
-                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#AA820A] text-black shadow-[0_0_12px_rgba(212,175,55,0.4)]'
-                    : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-amber-400 text-black shadow-sm'
+                    : 'bg-white/[0.04] text-neutral-400 hover:text-white'
                 }`}
               >
                 <Layers className="w-3 h-3" />
@@ -199,14 +197,14 @@ export const MenuModal: React.FC = () => {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategoryId(cat.id)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-[#D4AF37] to-[#AA820A] text-black shadow-[0_0_12px_rgba(212,175,55,0.4)]'
-                        : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-white'
+                        ? 'bg-amber-400 text-black shadow-sm'
+                        : 'bg-white/[0.04] text-neutral-400 hover:text-white'
                     }`}
                   >
                     <span>{cat.name}</span>
-                    <span className={`text-[10px] px-1 rounded-full ${isSelected ? 'bg-black/30 text-black font-extrabold' : 'text-zinc-500'}`}>
+                    <span className={`text-[9px] px-1 rounded-full ${isSelected ? 'bg-black/20 text-black font-extrabold' : 'text-neutral-500'}`}>
                       {count}
                     </span>
                   </button>
@@ -216,27 +214,27 @@ export const MenuModal: React.FC = () => {
           )}
 
           {/* Menu Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar pb-10">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar pb-10">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-24 text-zinc-500 gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37]" />
-                <p className="text-xs font-bold tracking-wide">Lezzetler yükleniyor...</p>
+              <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                <p className="text-xs font-bold tracking-wider uppercase">Menü yükleniyor...</p>
               </div>
             ) : items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center px-4 space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-600">
-                  <UtensilsCrossed className="w-8 h-8" />
+              <div className="flex flex-col items-center justify-center py-24 text-center px-4 space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-neutral-500">
+                  <UtensilsCrossed className="w-6 h-6" />
                 </div>
-                <h4 className="text-base font-bold text-white">Menü Henüz Hazırlanıyor</h4>
-                <p className="text-xs text-zinc-400 max-w-xs leading-relaxed">
-                  Bu mekân henüz dijital menü ürünlerini sisteme eklememiş.
+                <h4 className="text-sm font-bold text-white">Menü Henüz Eklenmemiş</h4>
+                <p className="text-xs text-neutral-400 max-w-xs leading-relaxed">
+                  Bu mekân henüz dijital menü ürünlerini sisteme kaydetmedi.
                 </p>
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center space-y-2 text-zinc-500">
-                <Search className="w-8 h-8 opacity-40" />
-                <p className="text-sm font-bold text-zinc-300">Aradığınız kriterde ürün bulunamadı</p>
-                <p className="text-xs">Farklı bir arama kelimesi deneyebilir veya kategoriyi değiştirebilirsiniz.</p>
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-1 text-neutral-500">
+                <Search className="w-6 h-6 opacity-40 mb-1" />
+                <p className="text-xs font-bold text-neutral-300">Aradığınız kriterde ürün bulunamadı</p>
+                <p className="text-[11px]">Farklı bir arama yapmayı deneyin.</p>
               </div>
             ) : (
               filteredItems.map((item) => {
@@ -246,30 +244,30 @@ export const MenuModal: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className={`relative rounded-2xl border p-3.5 transition-all flex gap-3.5 overflow-hidden backdrop-blur-md ${
+                    className={`relative rounded-2xl border p-3 transition-all flex gap-3 overflow-hidden ${
                       isAvailable
-                        ? 'bg-[#1A120B]/80 border-[#D4AF37]/25 shadow-lg shadow-black/40'
-                        : 'bg-black/50 border-white/5 opacity-55'
+                        ? 'bg-[#141318] border-white/[0.08] shadow-sm'
+                        : 'bg-black/40 border-white/5 opacity-50'
                     }`}
                   >
                     {/* Item Image */}
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-black/60 border border-white/10 shrink-0 relative flex items-center justify-center">
+                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black/60 border border-white/10 shrink-0 relative flex items-center justify-center">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
                           alt={item.name}
-                          className={`w-full h-full object-cover transition-transform duration-300 ${
+                          className={`w-full h-full object-cover ${
                             !isAvailable ? 'grayscale' : ''
                           }`}
                         />
                       ) : (
-                        <Coffee className="w-8 h-8 text-[#D4AF37]/50" />
+                        <Coffee className="w-6 h-6 text-amber-400" />
                       )}
 
                       {/* Tükendi Rozeti */}
                       {!isAvailable && (
                         <div className="absolute inset-0 bg-black/75 flex items-center justify-center p-1">
-                          <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">
+                          <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest text-center">
                             Tükendi
                           </span>
                         </div>
@@ -280,10 +278,10 @@ export const MenuModal: React.FC = () => {
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-extrabold text-white text-sm sm:text-base leading-snug line-clamp-1">
+                          <h4 className="font-bold text-white text-xs sm:text-sm leading-snug line-clamp-1">
                             {item.name}
                           </h4>
-                          <span className="font-black text-[#D4AF37] text-sm sm:text-base shrink-0 drop-shadow-md">
+                          <span className="font-black text-amber-400 text-xs sm:text-sm shrink-0">
                             {Number(item.price).toLocaleString('tr-TR', {
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 2,
@@ -293,13 +291,13 @@ export const MenuModal: React.FC = () => {
                         </div>
 
                         {catName && selectedCategoryId === 'all' && (
-                          <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-wider block mt-0.5">
+                          <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider block mt-0.5">
                             {catName}
                           </span>
                         )}
 
                         {item.description && (
-                          <p className="text-xs text-zinc-400 line-clamp-2 mt-1 leading-relaxed">
+                          <p className="text-[11px] text-neutral-400 line-clamp-2 mt-1 leading-snug">
                             {item.description}
                           </p>
                         )}
@@ -307,9 +305,9 @@ export const MenuModal: React.FC = () => {
 
                       {/* Status row if out of stock */}
                       {!isAvailable && (
-                        <div className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-rose-400">
+                        <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-rose-400">
                           <AlertCircle className="w-3 h-3" />
-                          <span>Şu an stokta yok</span>
+                          <span>Stokta yok</span>
                         </div>
                       )}
                     </div>

@@ -114,89 +114,89 @@ export const PremiumModal: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/90 backdrop-blur-md"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
           onClick={closeModal}
         />
 
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 10 }}
-          className="relative w-full max-w-md bg-[#120C08] rounded-3xl overflow-hidden shadow-2xl border border-[#D4AF37]/30 flex flex-col max-h-[90vh]"
+          exit={{ scale: 0.95, opacity: 0, y: 15 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md bg-[#0d0c11] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/[0.1] flex flex-col max-h-[90vh]"
         >
           {/* Header Graphic */}
-          <div className="relative h-48 bg-gradient-to-br from-amber-900 via-[#1C130D] to-[#120C08] p-6 flex flex-col items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37] via-[#120C08] to-[#120C08]" />
-            <Crown className="w-14 h-14 text-[#D4AF37] mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.8)]" />
-            <h2 className="text-2xl sm:text-3xl font-black text-white drop-shadow-sm text-center tracking-tight">
+          <div className="relative p-6 pb-4 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[#141318]">
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mb-3 shadow-inner">
+              <Crown className="w-7 h-7" />
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tight">
               Muzikors Premium
             </h2>
             
             {/* Free Trial Highlight Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/50 shadow-inner">
-              <span className="text-[11px] font-black text-amber-200 uppercase tracking-wide">
-                🎁 İlk 3 Gün Tamamen Ücretsiz!
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-amber-400/15 border border-amber-400/30">
+              <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">
+                İlk 3 Gün Ücretsiz Deneme!
               </span>
             </div>
-            
+
             <button 
               onClick={closeModal}
-              className="absolute top-4 right-4 p-2 bg-black/40 rounded-full text-white/50 hover:text-white hover:bg-black/60 transition-colors"
+              className="absolute top-4 right-4 p-1.5 bg-white/[0.05] hover:bg-white/[0.1] rounded-full text-neutral-400 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Benefits list */}
-          <div className="p-5 overflow-y-auto custom-scrollbar">
-            <div className="space-y-3">
-              {benefits.map((benefit, idx) => (
-                <div key={idx} className="flex gap-4 items-start bg-white/5 p-3 rounded-2xl border border-white/5">
-                  <div className="p-2 rounded-xl bg-black/40 shadow-inner mt-0.5">
-                    {benefit.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-white mb-0.5">{benefit.title}</h3>
-                    <p className="text-xs text-zinc-400 leading-snug">{benefit.description}</p>
-                  </div>
+          <div className="p-5 overflow-y-auto custom-scrollbar space-y-2.5">
+            {benefits.map((benefit, idx) => (
+              <div key={idx} className="flex gap-3.5 items-start bg-[#141318] p-3 rounded-2xl border border-white/[0.06]">
+                <div className="p-2 rounded-xl bg-black/40 border border-white/5 shrink-0 mt-0.5">
+                  {benefit.icon}
                 </div>
-              ))}
-            </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white mb-0.5">{benefit.title}</h3>
+                  <p className="text-[10px] text-neutral-400 leading-snug">{benefit.description}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Footer & Subscribe CTA */}
-          <div className="p-5 bg-gradient-to-t from-black to-transparent pt-4">
+          <div className="p-5 border-t border-white/[0.08] bg-[#0d0c11]">
             <button
               onClick={handleSubscribe}
               disabled={isProcessing}
-              className="w-full py-4 rounded-2xl font-black text-base sm:text-lg bg-gradient-to-r from-yellow-500 via-[#D4AF37] to-amber-600 text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl font-black text-xs bg-amber-400 hover:bg-amber-300 text-black shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>İşleniyor...</span>
                 </>
               ) : (
                 <>
-                  <Crown className="w-5 h-5 fill-black" />
-                  <span>3 Gün Ücretsiz Dene</span>
+                  <Crown className="w-4 h-4" />
+                  <span>3 Gün Ücretsiz Başlat</span>
                 </>
               )}
             </button>
 
-            <div className="flex items-center justify-between mt-3 px-2 text-[10px] text-zinc-400">
+            <div className="flex items-center justify-between mt-3 px-1 text-[10px] text-neutral-400">
               <span>Deneme sonrası 60 TL / Ay</span>
               <button
                 onClick={handleRestore}
-                className="text-[#D4AF37] hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-amber-400 hover:underline flex items-center gap-1 cursor-pointer font-bold"
               >
                 <RefreshCw className="w-2.5 h-2.5" />
-                Geri Yükle
+                Satın Alımı Geri Yükle
               </button>
             </div>
 
-            <p className="text-[9px] text-center text-zinc-500 mt-2">
-              Aboneliğinizi Google Play üzerinden dilediğiniz zaman tek tıkla iptal edebilirsiniz.
+            <p className="text-[9px] text-center text-neutral-500 mt-2">
+              Aboneliğinizi Google Play üzerinden dilediğiniz an iptal edebilirsiniz.
             </p>
           </div>
         </motion.div>

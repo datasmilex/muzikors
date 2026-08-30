@@ -269,475 +269,384 @@ export const MusicSearchModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {activeModal === 'search' && (<>
+      {activeModal === 'search' && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeModal}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          />
 
-      <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
-        {/* Cinematic Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ duration: 0.4 }}
-          onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
-        />
-
-        {/* Bottom Sheet / Modal Container */}
-        <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-md h-[92vh] bg-[#120C08] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30"
-        >
-          {/* Decorative Glow */}
-
-          {confirmingTrack ? (
-            <div className="flex-1 flex flex-col pt-4 overflow-y-auto custom-scrollbar h-full relative z-10 px-2 pb-24">
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => setConfirmingTrack(null)}
-                  className="p-2 rounded-full bg-white/5 border border-transparent active:border-[#D4AF37]/30 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
-                  aria-label="Geri"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="space-y-6 pt-2">
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/20 mx-auto flex items-center justify-center shadow-inner">
-                    <AlertTriangle className="w-8 h-8 text-[#E5A93C] drop-shadow-md" />
+          {/* Bottom Sheet Container */}
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+            className="relative w-full max-w-md h-[92vh] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col justify-between overflow-hidden border-t sm:border border-white/[0.1]"
+          >
+            {confirmingTrack ? (
+              <div className="flex-1 flex flex-col pt-2 overflow-y-auto custom-scrollbar h-full relative z-10 pb-20">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+                  <div className="flex items-center gap-2">
+                    <Music className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-black text-white uppercase tracking-wider">İsteği Onayla</span>
                   </div>
-                  <h2 className="text-xl font-black text-white tracking-tight">Şarkı İsteğini Onayla</h2>
-                  <p className="text-xs text-amber-200/60 px-4 font-medium leading-relaxed">
-                    Şarkı isteğinizi onaylamadan önce lütfen aşağıdaki KVKK aydınlatmasını okuyun.
-                  </p>
-                </div>
-
-                {/* Track Info Box */}
-                <div className="flex items-center gap-4 bg-gradient-to-r from-[#241911] to-[#1C130D] rounded-[1.5rem] p-4 border border-[#D4AF37]/40 shadow-xl">
-                  <div className="w-14 h-14 rounded-[1rem] overflow-hidden border border-[#D4AF37]/30 shadow-md shrink-0">
-                    <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="truncate">
-                    <p className="text-base font-black text-white truncate drop-shadow-md">{confirmingTrack.title}</p>
-                    <p className="text-xs font-semibold text-[#D4AF37] truncate mt-0.5">{confirmingTrack.artist}</p>
-                  </div>
-                </div>
-
-                {/* Anonymous Toggle (VIP Feature) */}
-                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-white tracking-wide">Hayalet Modu</p>
-                      {!user?.isPremium && (
-                        <span className="text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">
-                      {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      if (!user?.isPremium) {
-                        showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
-                        return;
-                      }
-                      setIsAnonymous(!isAnonymous);
-                    }}
-                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${
-                      !user?.isPremium ? 'bg-gray-800 opacity-50 cursor-not-allowed' :
-                      isAnonymous ? 'bg-[#D4AF37]' : 'bg-gray-600'
-                    }`}
+                  <button
+                    onClick={() => setConfirmingTrack(null)}
+                    className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+                    aria-label="Geri"
                   >
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Priority / Boost Toggle (VIP Feature) */}
-                <div className="flex items-center justify-between bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
-                      {!user?.isPremium && (
-                        <span className="text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                      )}
+                <div className="space-y-4 pt-4">
+                  {/* Track Info Box */}
+                  <div className="flex items-center gap-3.5 bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08] shadow-md">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
+                      <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
                     </div>
-                    <p className="text-[10px] text-amber-200/50 mt-1 font-semibold uppercase tracking-wider">
-                      {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın en başına geçer)` : 'Sadece Premium üyeler için'}
-                    </p>
+                    <div className="truncate flex-1 min-w-0">
+                      <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
+                      <p className="text-xs font-semibold text-amber-400 truncate mt-0.5">{confirmingTrack.artist}</p>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => {
-                      if (!user?.isPremium) {
-                        showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
-                        return;
-                      }
-                      if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
-                        showToast('Günlük üste taşıma limitinize ulaştınız.');
-                        return;
-                      }
-                      setIsBoosted(!isBoosted);
-                    }}
-                    className={`w-12 h-6 rounded-full p-1 transition-all flex items-center shadow-inner ${
-                      !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-gray-800 opacity-50 cursor-not-allowed' :
-                      isBoosted ? 'bg-[#D4AF37]' : 'bg-gray-600'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-6' : 'translate-x-0'}`} />
-                  </button>
-                </div>
 
-                {/* Message Input */}
-                <div className="bg-[#1A1A1A]/60 rounded-2xl p-4 border border-white/5 shadow-inner space-y-2">
-                  <p className="text-sm font-bold text-white tracking-wide">Not Ekle <span className="text-xs font-normal text-zinc-500">(İsteğe bağlı)</span></p>
-                  <input 
-                    type="text" 
-                    placeholder="Örn: Ayşe'nin doğum günü için..." 
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    maxLength={60}
-                    className="w-full bg-[#120C08] border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-zinc-600 focus:border-[#D4AF37]/50 focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Estimated Time */}
-                {estimatedWaitMs > 0 && (
-                  <div className="flex items-center gap-2 justify-center text-xs text-zinc-400 mt-2">
-                    <Clock className="w-4 h-4 text-[#D4AF37]" />
-                    <span>Sıranın tahmini bekleme süresi: <strong className="text-white">{Math.round(estimatedWaitMs / 60000)} dakika</strong></span>
-                  </div>
-                )}
-
-                {/* Consent Text */}
-                <div className="bg-amber-900/10 rounded-2xl p-4 border border-amber-500/20 text-xs leading-relaxed text-amber-100/80 font-medium">
-                  {isAnonymous ? (
-                    <p>"Şarkı isteğin uygulamada ve sıra listesinde <b className="text-white">Anonim Müşteri</b> olarak görünecektir. Onaylıyor musun?"</p>
-                  ) : (
-                    <p>"Şarkı isteğinle birlikte ismin <b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b> olarak uygulamada yayınlanacaktır. KVKK kapsamında isminin görünmesini onaylıyor musun?"</p>
-                  )}
-                </div>
-
-                {/* Vibe Guard Friendly Request */}
-                {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                  <div className="bg-[#D4AF37]/10 rounded-2xl p-4 border border-[#D4AF37]/25 text-[11px] leading-relaxed text-amber-200/90 mt-4">
-                    <p>
-                      <b className="text-[#D4AF37]">🎵 Küçük Bir Rica:</b> Mekânın müzik konsepti ve ambiyansı ağırlıklı olarak <span className="font-black text-white">{activeVenue.allowed_genres.join(', ')}</span> tarzındadır. Mekandaki herkesin keyif alması için bu tarza yakın parçalar seçmenizi rica ederiz. Keyifli dinlemeler!
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-4 mt-6">
-                <button
-                  onClick={handleFinalRequest}
-                  disabled={submittingTrackId === confirmingTrack.id}
-                  className="w-full py-4 px-5 rounded-[1.5rem] gold-gradient-bg text-stone-950 font-black text-base flex items-center justify-between shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:brightness-110 active:scale-95 transition-all group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5 stroke-[3] group-active:scale-95 transition-transform" />}
-                    <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
-                  </div>
-                  {user && (
-                    <span className="text-xs font-black px-2.5 py-1 rounded-full bg-stone-950/20 text-stone-950 border border-stone-950/15">
-                      {remainingSongs}/{maxDailySongs} Hak
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-          {/* Top Header & Mode Tab Switcher */}
-          <div className="shrink-0 space-y-4 relative z-10">
-            <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto sm:hidden" />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Music className="w-5 h-5 text-[#D4AF37]" />
-                <h2 className="text-xl font-black text-white tracking-tight">Müzik Arama</h2>
-                {user && (
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-black border flex items-center gap-1 shadow-sm ${
-                    user.isPremium
-                      ? 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40 shadow-[0_0_10px_rgba(212,175,55,0.25)]'
-                      : 'bg-white/10 text-zinc-300 border-white/15'
-                  }`}>
-                    {user.isPremium && <Crown className="w-3 h-3 text-[#D4AF37]" />}
-                    {remainingSongs}/{maxDailySongs} Hak
-                  </span>
-                )}
-              </div>
-
-              <button
-                onClick={closeModal}
-                className="p-2 rounded-full bg-white/5 border border-transparent active:border-[#D4AF37]/30 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
-                aria-label="Kapat"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Main Search Controls */}
-            <div className="space-y-3 mt-2">
-              {/* Vibe Guard Info Text */}
-              {activeVenue?.allowed_genres && activeVenue.allowed_genres.length > 0 && (
-                <p className="text-[11px] font-bold text-amber-200/60 pl-1 uppercase tracking-widest">
-                  Kafenin Tercihi: <span className="text-[#D4AF37] drop-shadow-sm">{activeVenue.allowed_genres.join(', ')}</span>
-                </p>
-              )}
-              
-
-              <div className="relative group">
-                  <Search className="w-5 h-5 text-[#D4AF37] absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:scale-110 transition-transform" />
-                  <input
-                    id="tour-search-input"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (e.target.value.trim() !== '') {
-                        setActiveTab(null);
-                      } else if (activeTab === null) {
-                        setActiveTab('all');
-                      }
-                    }}
-                    placeholder="Sanatçı veya şarkı adı yazın (örn: Sezen Aksu)..."
-                    className="w-full bg-[#1A1A1A]/80 border border-[#D4AF37]/30 rounded-[1.5rem] py-4 pl-12 pr-12 text-sm font-semibold text-white placeholder-amber-200/30 focus:outline-none focus:border-[#D4AF37]/60 focus:bg-[#1C130D] focus:ring-4 focus:ring-[#D4AF37]/10 transition-all shadow-inner"
-                  />
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 text-[#D4AF37] animate-spin absolute right-4 top-1/2 -translate-y-1/2" />
-                  ) : searchQuery ? (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-200/50 active:text-white transition-colors"
+                  {/* Anonymous Toggle (VIP Feature) */}
+                  <div className="flex items-center justify-between bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-white tracking-wide">Hayalet Modu</p>
+                        {!user?.isPremium && (
+                          <span className="text-[8px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-neutral-400 mt-0.5">
+                        {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (!user?.isPremium) {
+                          showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
+                          return;
+                        }
+                        setIsAnonymous(!isAnonymous);
+                      }}
+                      className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
+                        !user?.isPremium ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
+                        isAnonymous ? 'bg-amber-400' : 'bg-neutral-700'
+                      }`}
                     >
-                      <X className="w-5 h-5" />
+                      <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
                     </button>
-                  ) : null}
+                  </div>
+
+                  {/* Priority / Boost Toggle (VIP Feature) */}
+                  <div className="flex items-center justify-between bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
+                        {!user?.isPremium && (
+                          <span className="text-[8px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-neutral-400 mt-0.5">
+                        {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın en başına geçer)` : 'Sadece Premium üyeler için'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (!user?.isPremium) {
+                          showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
+                          return;
+                        }
+                        if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
+                          showToast('Günlük üste taşıma limitinize ulaştınız.');
+                          return;
+                        }
+                        setIsBoosted(!isBoosted);
+                      }}
+                      className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
+                        !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
+                        isBoosted ? 'bg-amber-400' : 'bg-neutral-700'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Message Input */}
+                  <div className="bg-[#141318] rounded-2xl p-3.5 border border-white/[0.08] space-y-2">
+                    <p className="text-xs font-bold text-white">Not Ekle <span className="text-[10px] text-neutral-400">(İsteğe bağlı)</span></p>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: Masamıza gelsin..." 
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      maxLength={60}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-neutral-500 focus:border-amber-400/50 focus:outline-none transition-colors"
+                    />
+                  </div>
+
+                  {/* Estimated Time */}
+                  {estimatedWaitMs > 0 && (
+                    <div className="flex items-center gap-2 justify-center text-xs text-neutral-400 mt-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Tahmini çalma süresi: <strong className="text-white">~{Math.round(estimatedWaitMs / 60000)} dk sonra</strong></span>
+                    </div>
+                  )}
+
+                  {/* Consent Text */}
+                  <div className="bg-amber-400/5 rounded-2xl p-3 border border-amber-400/20 text-[11px] leading-relaxed text-amber-200/90 font-medium">
+                    {isAnonymous ? (
+                      <p>Şarkı isteğin uygulamada <b className="text-white">Anonim</b> olarak yayınlanacaktır.</p>
+                    ) : (
+                      <p>Şarkı isteğin isminle (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) birlikte yayınlanacaktır.</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x">
+                {/* Action Buttons */}
+                <div className="mt-5">
                   <button
-                    onClick={() => {
-                      setActiveTab('all');
-                      setSearchQuery('');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
-                      activeTab === 'all'
-                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
-                    }`}
+                    onClick={handleFinalRequest}
+                    disabled={submittingTrackId === confirmingTrack.id}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs flex items-center justify-between shadow-md active:scale-95 transition-all"
                   >
-                    Trendler
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('top10');
-                      setSearchQuery('');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start ${
-                      activeTab === 'top10'
-                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
-                    }`}
-                  >
-                    Mekanın Tercihi
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab('history');
-                      setSearchQuery('');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all snap-start flex items-center gap-1.5 ${
-                      activeTab === 'history'
-                        ? 'gold-gradient-bg text-stone-950 shadow-[0_5px_15px_rgba(212,175,55,0.3)] scale-105'
-                        : 'bg-white/5 text-gray-400 border border-white/5 active:border-[#D4AF37]/30 active:text-white'
-                    }`}
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Son İstediklerim</span>
+                    <div className="flex items-center gap-2">
+                      {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
+                      <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
+                    </div>
+                    {user && (
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-black/20 text-black">
+                        {remainingSongs}/{maxDailySongs} Hak
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Header & Search Bar */}
+                <div className="shrink-0 space-y-3 relative z-10">
+                  <div className="w-10 h-1 rounded-full bg-white/20 mx-auto sm:hidden" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Music className="w-4 h-4 text-amber-400" />
+                      <h2 className="text-base font-black text-white tracking-tight">Müzik Arama</h2>
+                      {user && (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${
+                          user.isPremium
+                            ? 'bg-amber-400/15 text-amber-300 border-amber-400/30'
+                            : 'bg-white/[0.04] text-neutral-300 border-white/10'
+                        }`}>
+                          {user.isPremium && <Crown className="w-2.5 h-2.5 text-amber-400" />}
+                          {remainingSongs}/{maxDailySongs} Hak
+                        </span>
+                      )}
+                    </div>
 
-          {/* Search Track Results List */}
-          <div className="flex-1 overflow-y-auto my-2 space-y-0 flex flex-col pt-2 pr-1 custom-scrollbar relative z-10">
-              {isLoading ? (
-                <div className="text-center py-16 text-amber-200/60 flex flex-col items-center justify-center space-y-4">
-                  <Loader2 className="w-10 h-10 text-[#D4AF37] animate-spin" />
-                  <p className="text-xs font-bold uppercase tracking-widest">
-                    {activeTab === 'history' ? 'Geçmiş İstekleriniz Yükleniyor...' : 'Spotify Müzikleri Aranıyor...'}
-                  </p>
-                </div>
-              ) : searchResults.length === 0 ? (
-                activeTab === 'history' ? (
-                  <div className="text-center py-16 text-amber-200/40">
-                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
-                    <p className="text-sm font-bold text-white">Henüz geçmiş istek kaydınız yok</p>
-                    <p className="text-xs text-zinc-400 mt-1 max-w-xs mx-auto">
-                      Beğendiğiniz şarkıları aratarak ilk isteğinizi yapın, sık çaldırdıklarınız burada biriksin!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center py-16 text-amber-200/40">
-                    <Music className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#D4AF37]" />
-                    <p className="text-sm font-semibold">Aramanıza uygun Spotify şarkısı bulunamadı</p>
-                  </div>
-                )
-              ) : (
-                searchResults.map((track, idx) => {
-                  const zIndex = searchResults.length - idx;
-                  const isSelected = selectedTrack?.id === track.id;
-                  const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                  const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
-                  const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
-                  const isExplicitBlocked = isExplicitFilterActive && isExplicitTrack;
-                  
-                  const isBlocked = isExplicitBlocked;
-                                    return (
-                    <div 
-                      key={track.id}
-                      className={`relative group transition-all duration-300 active:-translate-y-1 ${idx !== 0 ? 'mt-1.5' : ''}`}
-                      style={{ zIndex }}
+                    <button
+                      onClick={closeModal}
+                      className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+                      aria-label="Kapat"
                     >
-                      <div
-                        onClick={() => {
-                          if (isBlocked || cooldown.active || submittingTrackId === track.id) return;
-                          setSelectedTrack(track);
-                        }}
-                        className={`rounded-[1.2rem] p-2 flex items-center justify-between border transition-all duration-300 ${
-                          isBlocked
-                            ? 'bg-black/40 opacity-50 border-red-500/10'
-                            : 'bg-white/5 border-white/5 active:border-[#D4AF37]/30 active:bg-[#1C130D]/60 active:shadow-[0_4px_15px_rgba(212,175,55,0.1)] cursor-pointer'
-                        }`}
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="relative group">
+                    <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      id="tour-search-input"
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (e.target.value.trim() !== '') {
+                          setActiveTab(null);
+                        } else if (activeTab === null) {
+                          setActiveTab('all');
+                        }
+                      }}
+                      placeholder="Sanatçı veya şarkı adı..."
+                      className="w-full bg-[#141318] border border-white/10 rounded-2xl py-3 pl-10 pr-10 text-xs font-semibold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/50 transition-colors shadow-inner"
+                    />
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 text-amber-400 animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
+                    ) : searchQuery ? (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
-                          {/* Compact Album Cover */}
-                          <div className="relative w-11 h-11 rounded-[0.7rem] overflow-hidden shrink-0 shadow-md border border-white/10 group-active:border-[#D4AF37]/40 transition-colors">
-                            <img
-                              src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                              alt={track.title}
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = '/logo.png';
-                              }}
-                              className="w-full h-full object-cover"
-                            />
-                            {isSelected && (
-                              <div className="absolute inset-0 bg-[#D4AF37]/30 flex items-center justify-center backdrop-blur-sm">
-                                <Check className="w-5 h-5 text-white drop-shadow-md stroke-[3]" />
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Title & Artist - Single Column */}
-                          <div className="min-w-0 flex-1 flex flex-col justify-center py-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <h4 className={`text-[13px] font-black truncate leading-tight ${isSelected ? 'text-white' : 'text-gray-100'}`}>
+                        <X className="w-4 h-4" />
+                      </button>
+                    ) : null}
+                  </div>
+
+                  {/* Filter Tabs */}
+                  <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
+                    <button
+                      onClick={() => {
+                        setActiveTab('all');
+                        setSearchQuery('');
+                      }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                        activeTab === 'all'
+                          ? 'bg-amber-400 text-black font-black shadow-sm'
+                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Trendler
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('top10');
+                        setSearchQuery('');
+                      }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                        activeTab === 'top10'
+                          ? 'bg-amber-400 text-black font-black shadow-sm'
+                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Mekanın Tercihi
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('history');
+                        setSearchQuery('');
+                      }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                        activeTab === 'history'
+                          ? 'bg-amber-400 text-black font-black shadow-sm'
+                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <Clock className="w-3 h-3" />
+                      <span>Son İstediklerim</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Results List */}
+                <div className="flex-1 overflow-y-auto my-2 space-y-1.5 pr-1 custom-scrollbar relative z-10">
+                  {isLoading ? (
+                    <div className="text-center py-16 flex flex-col items-center justify-center space-y-3">
+                      <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+                      <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                        {activeTab === 'history' ? 'Geçmiş İstekler Yükleniyor...' : 'Şarkılar Aranıyor...'}
+                      </p>
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="text-center py-16 text-neutral-500">
+                      <Music className="w-10 h-10 mx-auto mb-2 opacity-30 text-amber-400" />
+                      <p className="text-xs font-semibold">Sonuç bulunamadı</p>
+                    </div>
+                  ) : (
+                    searchResults.map((track) => {
+                      const isSelected = selectedTrack?.id === track.id;
+                      const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
+                      const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
+                      const isExplicitTrack = track.explicit === true || (track as any).is_explicit === true;
+                      const isBlocked = isExplicitFilterActive && isExplicitTrack;
+
+                      return (
+                        <div
+                          key={track.id}
+                          onClick={() => {
+                            if (isBlocked || cooldown.active || submittingTrackId === track.id) return;
+                            setSelectedTrack(track);
+                          }}
+                          className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#17151e] border-amber-400/40 shadow-sm'
+                              : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                              <img
+                                src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                                alt={track.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {isSelected && (
+                                <div className="absolute inset-0 bg-amber-400/40 flex items-center justify-center backdrop-blur-xs">
+                                  <Check className="w-4 h-4 text-black stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <h4 className="text-xs font-bold truncate text-white">
                                 {track.title}
                               </h4>
-                              {isExplicitBlocked ? (
-                                <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
-                              ) : null}
+                              <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
+                                {track.artist}
+                              </p>
                             </div>
-                            <p className="text-[11px] font-semibold text-gray-400 truncate mt-0.5 leading-tight">
-                              {track.artist}
-                            </p>
+                          </div>
+
+                          <div className="shrink-0 pl-2">
+                            {durMs > 0 && (
+                              <span className="text-[9px] font-semibold text-neutral-500">
+                                {formatDuration(durMs)}
+                              </span>
+                            )}
                           </div>
                         </div>
+                      );
+                    })
+                  )}
+                </div>
 
-                        {/* Right side: Cost Info */}
-                        <div className="flex flex-col items-end justify-center shrink-0 pr-2">
-                          {isExplicitBlocked ? (
-                            <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-400/10 px-2 py-1 rounded-md">Engelli</span>
-                          ) : (
-                            <div className="flex flex-col items-end gap-0.5">
-                              
-                              {durMs > 0 && (
-                                <span className="text-[9px] font-semibold text-gray-500 tracking-wider">
-                                  {formatDuration(durMs)}
-                                </span>
-                              )}
-                              
-                              {submittingTrackId === track.id && (
-                                <Loader2 className="w-3 h-3 text-[#D4AF37] animate-spin mt-1" />
-                              )}
-                            </div>
-                          )}
-                        </div>
+                {/* Bottom Bar */}
+                <div className="shrink-0 pt-3 border-t border-white/[0.08] space-y-2 relative z-10">
+                  {cooldown.active && (
+                    <div className="bg-amber-400/10 border border-amber-400/25 rounded-xl p-2.5 flex items-center justify-between text-xs text-amber-200">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                        <span className="font-semibold text-xs">Anti-Spam Bekleme Süresi</span>
                       </div>
+                      <span className="font-mono font-bold text-amber-300">
+                        {Math.floor(cooldown.remainingSeconds / 60)}:{(cooldown.remainingSeconds % 60).toString().padStart(2, '0')}
+                      </span>
                     </div>
-                  );
-                })
-              )}
-            </div>
+                  )}
 
-          {/* Bottom Action Bar */}
-          <div className="shrink-0 pt-3 border-t border-[#D4AF37]/20 space-y-3 relative z-10 bg-transparent">
-            {cooldown.active && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-[1rem] p-3 flex items-center justify-between text-xs text-amber-200 shadow-inner">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
-                  <span className="font-bold">Anti-Spam Bekleme Süresi</span>
+                  <button
+                    onClick={() => handleConfirmRequest()}
+                    disabled={!selectedTrack || cooldown.active}
+                    className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs flex items-center justify-between transition-all ${
+                      cooldown.active || !selectedTrack
+                        ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                        : 'bg-amber-400 hover:bg-amber-300 text-black active:scale-95 shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Music className="w-4 h-4" />
+                      <span>{selectedTrack ? 'Seçili Şarkıyı İste' : 'Listeden Şarkı Seçin'}</span>
+                    </div>
+                    {!cooldown.active && selectedTrack && user && (
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-black/20 text-black">
+                        {remainingSongs}/{maxDailySongs} Hak
+                      </span>
+                    )}
+                  </button>
                 </div>
-                <span className="font-mono font-black text-amber-400 text-sm">
-                  {formatCooldown(cooldown.remainingSeconds)}
-                </span>
-              </div>
+              </>
             )}
-
-            {selectedTrack && (
-              <div className="flex items-center justify-between bg-black/35 rounded-[1.5rem] p-3.5 border border-[#D4AF37]/30 shadow-lg backdrop-blur-sm">
-                <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={selectedTrack.albumCover || selectedTrack.coverUrl || selectedTrack.album_art || '/logo.png'}
-                    alt={selectedTrack.title}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/logo.png';
-                    }}
-                    className="w-10 h-10 rounded-[0.8rem] object-cover border border-[#D4AF37]/20 shadow-sm"
-                  />
-                  <div className="truncate">
-                    <p className="text-sm font-black text-white truncate drop-shadow-sm">{selectedTrack.title}</p>
-                    <p className="text-[11px] font-semibold text-[#D4AF37] truncate">{selectedTrack.artist}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => handleConfirmRequest()}
-              disabled={!selectedTrack || cooldown.active}
-              className={`w-full py-4 px-5 rounded-[1.5rem] font-black text-base flex items-center justify-between shadow-[0_10px_30px_rgba(212,175,55,0.2)] transition-all duration-300 group ${
-                cooldown.active || !selectedTrack
-                  ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 shadow-none'
-                  : 'gold-gradient-bg text-stone-950 active:brightness-110 active:scale-95'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Music className={`w-5 h-5 ${cooldown.active || !selectedTrack ? 'text-zinc-600' : 'text-stone-950 group-active:scale-95 transition-transform'}`} />
-                {cooldown.active ? (
-                  <span>Bekleme Süresi ({formatCooldown(cooldown.remainingSeconds)})</span>
-                ) : (
-                  <span>Seçili Şarkıyı İste</span>
-                )}
-              </div>
-              {!cooldown.active && selectedTrack && user && (
-                <span className="text-xs font-black px-2.5 py-1 rounded-full bg-stone-950/20 text-stone-950 border border-stone-950/15">
-                  {remainingSongs}/{maxDailySongs} Hak
-                </span>
-              )}
-            </button>
-          </div>
-            </>
-          )}
-        </motion.div>
-      </div>
-    
-      </>)}
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };

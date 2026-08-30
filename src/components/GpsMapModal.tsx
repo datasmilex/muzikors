@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, X, Navigation, Store, List, Map as MapIcon, QrCode, Search } from 'lucide-react';
+import { MapPin, X, Navigation, Store, List, Map as MapIcon, QrCode, Search, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Capacitor } from '@capacitor/core';
@@ -147,95 +147,95 @@ export const GpsMapModal: React.FC = () => {
       {activeModal === 'map' && (<>
 
       <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-4">
-        {/* Cinematic Backdrop */}
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ duration: 0.4 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md"
         />
 
         {/* Modal Container */}
         <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'tween', duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-md h-[88vh] sm:h-[650px] sm:rounded-3xl rounded-t-3xl p-4 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 bg-[#120C08]"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+          className="relative w-full max-w-md h-[88vh] sm:h-[680px] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
         >
-          {/* Decorative Glow */}
+          {/* Handle */}
+          <div className="flex justify-center pt-0 pb-2 shrink-0">
+            <div className="w-12 h-1 bg-white/20 rounded-full" />
+          </div>
 
           {/* Header */}
-          <div className="shrink-0 pb-4 border-b border-[#D4AF37]/20 relative z-10">
-            <div className="w-12 h-1.5 rounded-full bg-[#D4AF37]/30 mx-auto mb-4" />
+          <div className="shrink-0 pb-3 border-b border-white/[0.08] relative z-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shadow-inner">
-                  <MapPin className="w-5 h-5 drop-shadow-md" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                  <MapPin className="w-4 h-4" />
                 </div>
-                <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md">Yakın Mekanlar</h2>
+                <h2 className="text-base font-black text-white tracking-tight">Yakın Mekanlar</h2>
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
+                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
                 aria-label="Kapat"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
-            {locError && <p className="text-[11px] text-red-400 font-medium mt-2 px-1">{locError}</p>}
+            {locError && <p className="text-[10px] text-amber-400/80 font-medium mt-1.5 px-0.5">{locError}</p>}
           </div>
 
           {/* Search Input */}
-          <div className="mt-4 shrink-0 relative z-10">
+          <div className="mt-3 shrink-0 relative z-10">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <Search className="w-4 h-4" />
-              </span>
+              <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Mekan adı, ilçe veya adres ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white font-medium focus:outline-none focus:border-[#D4AF37]/50 transition-colors shadow-inner"
+                className="w-full bg-[#141318] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs text-white font-medium focus:outline-none focus:border-amber-400/50 transition-colors"
               />
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
           </div>
 
           {/* Toggle Map/List */}
-          <div className="flex bg-black/40 p-1.5 rounded-xl mt-4 mb-3 shrink-0 border border-white/5 relative z-10 shadow-inner">
+          <div className="flex bg-[#141318] p-1 rounded-xl mt-3 mb-2 shrink-0 border border-white/10 relative z-10">
             <button
               onClick={() => setViewMode('list')}
-              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'list' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
+              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'list' ? 'bg-amber-400 text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
-              <List className="w-4 h-4" /> Liste
+              <List className="w-3.5 h-3.5" /> Liste
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`flex-1 py-2 text-xs font-black rounded-lg flex items-center justify-center gap-2 transition-all ${viewMode === 'map' ? 'bg-[#D4AF37] text-stone-950 shadow-md scale-105' : 'text-gray-400 active:text-white'}`}
+              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'map' ? 'bg-amber-400 text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
-              <MapIcon className="w-4 h-4" /> Harita
+              <MapIcon className="w-3.5 h-3.5" /> Harita
             </button>
           </div>
 
           {/* Filters */}
           {viewMode === 'list' && (
-            <div className="shrink-0 mb-4 flex gap-2 overflow-x-auto no-scrollbar py-1 relative z-10 px-1">
+            <div className="shrink-0 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar py-0.5 relative z-10">
               {[0, 1, 5, 10].map((r) => (
                 <button
                   key={r}
                   onClick={() => setRadiusFilter(r)}
-                  className={`px-4 py-1.5 rounded-full text-[11px] font-black border transition-all whitespace-nowrap shadow-sm ${radiusFilter === r ? 'border-[#D4AF37] bg-[#D4AF37]/20 text-[#D4AF37]' : 'border-white/10 text-gray-400 bg-white/5 active:bg-white/10'}`}
+                  className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition-all whitespace-nowrap ${radiusFilter === r ? 'border-amber-400 bg-amber-400/15 text-amber-300' : 'border-white/[0.06] text-white/60 bg-white/[0.02]'}`}
                 >
                   {r === 0 ? 'Tümü' : `${r} km`}
                 </button>
@@ -244,39 +244,39 @@ export const GpsMapModal: React.FC = () => {
           )}
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative rounded-xl z-10">
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative rounded-2xl z-10">
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center text-[#D4AF37]/50 animate-pulse space-y-3">
-                <MapPin className="w-8 h-8" />
-                <span className="text-sm font-bold tracking-widest uppercase">Yükleniyor...</span>
+              <div className="h-full flex flex-col items-center justify-center text-amber-400/70 space-y-2 py-16">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+                <span className="text-xs font-bold uppercase tracking-wider">Yükleniyor...</span>
               </div>
             ) : viewMode === 'map' ? (
-              <div className="w-full h-full bg-[#1A1A1A] rounded-[1.5rem] overflow-hidden border border-[#D4AF37]/20 relative shadow-inner">
+              <div className="w-full h-full bg-[#141318] rounded-2xl overflow-hidden border border-white/[0.08] relative">
                 {userLoc && (
                   <Map 
                     defaultCenter={[userLoc.lat, userLoc.lng]} 
                     defaultZoom={12}
-                    provider={(x, y, z, dpr) => `https://a.tile.openstreetmap.org/${z}/${x}/${y}.png`}
+                    provider={(x, y, z) => `https://a.tile.openstreetmap.org/${z}/${x}/${y}.png`}
                   >
                     <ZoomControl />
                     {userLoc !== ISTANBUL_CENTER && (
-                      <Marker width={50} anchor={[userLoc.lat, userLoc.lng]}>
+                      <Marker width={40} anchor={[userLoc.lat, userLoc.lng]}>
                         <div className="relative flex items-center justify-center">
-                          <div className="absolute w-8 h-8 bg-blue-500/30 rounded-full animate-ping" />
-                          <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg relative z-10" />
+                          <div className="absolute w-6 h-6 bg-blue-500/30 rounded-full animate-ping" />
+                          <div className="w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white shadow-md relative z-10" />
                         </div>
                       </Marker>
                     )}
                     {processedVenues.filter(v => v.latitude && v.longitude).map((v) => (
-                      <Marker key={v.id} width={40} anchor={[v.latitude!, v.longitude!]}>
+                      <Marker key={v.id} width={36} anchor={[v.latitude!, v.longitude!]}>
                         <div 
                           className="flex flex-col items-center group cursor-pointer"
                           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
                         >
-                          <div className="w-10 h-10 rounded-full gold-gradient-bg text-stone-950 flex items-center justify-center font-bold shadow-[0_5px_15px_rgba(212,175,55,0.4)] border-2 border-[#120C08] group-active:scale-95 transition-transform">
-                            <Store className="w-5 h-5" />
+                          <div className="w-8 h-8 rounded-full bg-amber-400 text-black flex items-center justify-center font-bold shadow-md border-2 border-[#0d0c11]">
+                            <Store className="w-4 h-4" />
                           </div>
-                          <div className="bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[11px] font-bold text-white mt-2 opacity-0 group-active:opacity-100 transition-opacity absolute top-full whitespace-nowrap border border-[#D4AF37]/30 shadow-lg pointer-events-none">
+                          <div className="bg-black/90 px-2 py-1 rounded-md text-[10px] font-bold text-white mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-full whitespace-nowrap border border-white/10 shadow-lg pointer-events-none">
                             {v.name}
                           </div>
                         </div>
@@ -286,7 +286,7 @@ export const GpsMapModal: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="space-y-4 pb-4 px-1">
+              <div className="space-y-2.5 pb-2">
                 {processedVenues.length > 0 ? processedVenues.map((v) => {
                   const distFormatted = v.computedDistance && v.computedDistance < 999999 
                     ? v.computedDistance < 1 
@@ -295,77 +295,75 @@ export const GpsMapModal: React.FC = () => {
                     : '';
 
                   return (
-                    <div key={v.id} className="bg-[#1A1A1A]/80 border border-[#D4AF37]/20 p-4 rounded-2xl flex items-center gap-4 relative shadow-inner active:-translate-y-1 transition-transform group">
-                      <div className="w-14 h-14 rounded-xl bg-black/60 border border-[#D4AF37]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-md group-active:border-[#D4AF37]/60 transition-colors">
+                    <div key={v.id} className="bg-[#141318] border border-white/[0.08] p-3 rounded-2xl flex items-center gap-3 relative shadow-sm">
+                      <div className="w-11 h-11 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
                         {v.logo ? (
                           <img src={v.logo} alt={v.name} className="w-full h-full object-cover" />
                         ) : (
-                          <Store className="w-6 h-6 text-[#D4AF37]/50" />
+                          <Store className="w-5 h-5 text-amber-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-black text-white text-sm truncate drop-shadow-sm">{v.name}</h4>
-                        <p className="text-[11px] font-medium text-gray-400 truncate mt-0.5">{v.address || `${v.district}, ${v.city}`}</p>
+                        <h4 className="font-bold text-white text-xs truncate">{v.name}</h4>
+                        <p className="text-[10px] font-medium text-neutral-400 truncate mt-0.5">{v.address || `${v.district}, ${v.city}`}</p>
                         {distFormatted && (
-                          <span className="inline-flex items-center gap-1 mt-2 bg-black/40 text-[#D4AF37] px-2.5 py-1 rounded-md text-[10px] font-black tracking-widest uppercase border border-[#D4AF37]/20">
-                            <Navigation className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1 mt-1 bg-black/40 text-amber-400 px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase border border-white/5">
+                            <Navigation className="w-2.5 h-2.5" />
                             {distFormatted}
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-2 shrink-0">
+                      <div className="flex gap-1.5 shrink-0">
                         <button
                           onClick={() => {
                             bindVenueById(v.id.toString());
                             closeModal();
-                            showToast('Mekana başarıyla bağlandınız!');
+                            showToast('Mekana bağlanıldı!');
                           }}
-                          className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#E5A93B] flex items-center justify-center text-black active:scale-95 transition-all shadow-[0_4px_15px_rgba(212,175,55,0.3)]"
+                          className="w-9 h-9 rounded-xl bg-amber-400 text-black flex items-center justify-center active:scale-95 transition-all shadow-sm"
                           title="Mekana Git"
                         >
-                          <Store className="w-5 h-5 stroke-[2.5]" />
+                          <Store className="w-4 h-4" />
                         </button>
                         {v.latitude && v.longitude && (
                           <button
                             onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
-                            className="w-12 h-12 rounded-xl bg-white/5 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] active:bg-[#D4AF37]/10 active:scale-95 transition-all shadow-sm"
+                            className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-amber-400 active:scale-95 transition-all"
                             title="Yol Tarifi"
                           >
-                            <Navigation className="w-5 h-5" />
+                            <Navigation className="w-4 h-4" />
                           </button>
                         )}
                       </div>
                     </div>
                   );
                 }) : (
-                  <div className="bg-[#1A1A1A]/60 rounded-2xl p-8 text-center border border-white/5 flex flex-col items-center justify-center space-y-4 shadow-inner">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                      <Store className="w-8 h-8 text-gray-500" />
-                    </div>
+                  <div className="bg-[#141318] rounded-2xl p-6 text-center border border-white/[0.08] flex flex-col items-center justify-center space-y-2">
+                    <Store className="w-6 h-6 text-neutral-500 mb-1" />
                     <div>
-                      <h4 className="text-base font-black text-white mb-1">Mekan Bulunamadı</h4>
-                      <p className="text-[13px] text-gray-400 font-medium">Bu mesafede herhangi bir Muzikors mekanı bulunmuyor.</p>
+                      <h4 className="text-xs font-bold text-white mb-0.5">Mekan Bulunamadı</h4>
+                      <p className="text-[11px] text-neutral-400">Bu mesafede açık bir mekan bulunmuyor.</p>
                     </div>
                   </div>
                 )}
 
                 {/* QR Shortcut */}
                 {!activeVenue && (
-                   <button
-                   onClick={() => {
-                     closeModal();
-                     openModal('qr');
-                   }}
-                   className="w-full mt-6 p-5 rounded-[1.5rem] border-2 border-dashed border-[#D4AF37]/40 flex items-center justify-center gap-4 active:bg-[#D4AF37]/5 active:border-[#D4AF37] active:scale-95 transition-all text-amber-200/80 group bg-black/20"
-                 >
-                   <div className="w-12 h-12 rounded-xl gold-gradient-bg flex items-center justify-center shadow-md group-active:scale-95 transition-transform shrink-0">
-                     <QrCode className="w-6 h-6 text-stone-950" />
-                   </div>
-                   <div className="text-left">
-                     <span className="block font-black text-sm text-white tracking-wide">Masadayım!</span>
-                     <span className="block text-[11px] font-medium mt-0.5">Mekanın QR kodunu okutarak hemen bağlan.</span>
-                   </div>
-                 </button>
+                  <button
+                    onClick={() => {
+                      closeModal();
+                      openModal('qr');
+                    }}
+                    className="w-full mt-3 p-3.5 rounded-2xl border border-dashed border-amber-400/40 flex items-center gap-3 active:scale-95 transition-all text-white/80 bg-amber-400/[0.03]"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center text-black shrink-0 shadow-sm">
+                      <QrCode className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <span className="block font-bold text-xs text-white">Masadayım!</span>
+                      <span className="block text-[10px] text-neutral-400">Masadaki QR kodu okutarak hemen bağlanın.</span>
+                    </div>
+                  </button>
                 )}
               </div>
             )}

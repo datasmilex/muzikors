@@ -140,9 +140,9 @@ export const LyricsModal: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.2 }}
           onClick={closeModal}
-          className="absolute inset-0 bg-black/85 backdrop-blur-md"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
         />
 
         {/* Modal Sheet */}
@@ -150,23 +150,25 @@ export const LyricsModal: React.FC = () => {
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'tween', duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-md h-[88vh] bg-[#120C08] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_50px_rgba(212,175,55,0.2)] flex flex-col border border-[#D4AF37]/40 glass-panel-gold overflow-hidden"
+          transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+          className="relative w-full max-w-md h-[86vh] bg-[#0d0c11] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
         >
-          {/* Top Grab Bar */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/20 rounded-b-xl" />
+          {/* Handle */}
+          <div className="flex justify-center pt-0 pb-2 shrink-0">
+            <div className="w-12 h-1 bg-white/20 rounded-full" />
+          </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 pt-2 border-b border-[#D4AF37]/20 shrink-0">
+          <div className="flex items-center justify-between pb-3 pt-1 border-b border-white/[0.08] shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+              <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
                 <Mic2 className="w-4 h-4" />
               </div>
-              <div>
-                <h2 className="text-base font-black text-white tracking-tight flex items-center gap-1.5">
-                  <span>Şarkı Sözleri</span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-black text-white tracking-tight">
+                  Şarkı Sözleri
                 </h2>
-                <p className="text-[11px] text-amber-200/60 font-medium line-clamp-1">
+                <p className="text-[10px] text-neutral-400 font-medium truncate">
                   {nowPlaying?.title} • {nowPlaying?.artist}
                 </p>
               </div>
@@ -174,77 +176,77 @@ export const LyricsModal: React.FC = () => {
             
             <button
               onClick={closeModal}
-              className="p-2 rounded-full bg-white/5 border border-transparent active:border-[#D4AF37]/30 text-zinc-400 active:text-white transition-all"
+              className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto py-5 px-2 custom-scrollbar space-y-4">
+          <div className="flex-1 overflow-y-auto py-4 px-1 custom-scrollbar space-y-3">
             {isLoading ? (
               <div className="h-full flex flex-col items-center justify-center space-y-3 py-20">
-                <Loader2 className="w-10 h-10 animate-spin text-[#D4AF37]" />
-                <span className="text-xs font-bold text-amber-200/60 uppercase tracking-widest">Sözler aranıyor...</span>
+                <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Sözler aranıyor...</span>
               </div>
             ) : isInstrumental ? (
-              <div className="text-center py-16 space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-[#D4AF37]">
-                  <Music className="w-7 h-7" />
+              <div className="text-center py-16 space-y-2.5">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center mx-auto text-amber-400">
+                  <Music className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white">Enstrümantal Eser</h3>
-                <p className="text-xs text-zinc-400 max-w-xs mx-auto">
-                  Bu parça enstrümantal olarak işaretlenmiş, söz bulunmamaktadır.
+                <h3 className="text-sm font-bold text-white">Enstrümantal Eser</h3>
+                <p className="text-xs text-neutral-400 max-w-xs mx-auto">
+                  Bu parça enstrümantal olarak işaretlenmiş, söz bulunmuyor.
                 </p>
               </div>
             ) : lyrics ? (
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-sm">
-                  <pre className="text-sm font-medium text-amber-50/90 leading-loose whitespace-pre-wrap font-sans text-center tracking-wide">
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-[#141318] border border-white/[0.06]">
+                  <pre className="text-xs font-medium text-neutral-200 leading-relaxed whitespace-pre-wrap font-sans text-center tracking-wide">
                     {lyrics}
                   </pre>
                 </div>
-                <p className="text-[10px] text-center text-zinc-500">
+                <p className="text-[9px] text-center text-neutral-500">
                   Şarkı sözleri LRCLIB açık veri tabanından sağlanmaktadır.
                 </p>
               </div>
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-zinc-500">
-                  <Search className="w-7 h-7 text-amber-200/50" />
+              <div className="text-center py-12 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-neutral-400">
+                  <Search className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Sözler Bulunamadı</h3>
-                  <p className="text-xs text-zinc-400 max-w-xs mx-auto">
-                    Bu şarkının sözleri otomatik veritabanında yer almıyor. Google'da tek tıkla arayabilirsiniz.
+                  <h3 className="text-sm font-bold text-white mb-0.5">Sözler Bulunamadı</h3>
+                  <p className="text-xs text-neutral-400 max-w-xs mx-auto">
+                    Bu şarkının sözleri otomatik veritabanında bulunamadı.
                   </p>
                 </div>
                 <button
                   onClick={handleSearchGoogle}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-[#D4AF37]/50 text-amber-200 font-bold text-xs active:scale-95 transition-all shadow-md"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-amber-300 font-bold text-xs active:scale-95 transition-all shadow-sm"
                 >
-                  <Search className="w-4 h-4 text-[#D4AF37]" />
-                  Google'da Şarkı Sözü Ara
+                  <Search className="w-3.5 h-3.5" />
+                  Google&apos;da Ara
                 </button>
               </div>
             )}
           </div>
 
           {/* Footer Quick Actions */}
-          <div className="pt-3 border-t border-[#D4AF37]/20 flex items-center gap-2.5 shrink-0">
+          <div className="pt-3 border-t border-white/[0.08] flex items-center gap-2 shrink-0">
             <button
               onClick={handleOpenSpotify}
-              className="flex-1 py-3 px-4 rounded-2xl bg-[#1DB954]/15 hover:bg-[#1DB954]/25 border border-[#1DB954]/40 text-[#1DB954] font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+              className="flex-1 py-3 px-4 rounded-xl bg-[#1DB954]/15 hover:bg-[#1DB954]/25 border border-[#1DB954]/30 text-[#1DB954] font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
             >
-              <ExternalLink className="w-4 h-4" />
-              <span>Spotify'da Aç / Favorile</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Spotify&apos;da Aç</span>
             </button>
             <button
               onClick={handleSearchGoogle}
-              className="py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+              className="py-3 px-4 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-neutral-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all"
               title="Google'da Ara"
             >
-              <Search className="w-4 h-4 text-amber-200/70" />
+              <Search className="w-3.5 h-3.5" />
             </button>
           </div>
         </motion.div>

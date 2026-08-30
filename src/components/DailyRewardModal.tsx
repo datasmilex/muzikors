@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Clock } from 'lucide-react';
+import { Gift, X, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const DailyRewardModal: React.FC = () => {
@@ -10,62 +10,68 @@ export const DailyRewardModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {activeModal === 'daily_reward' && (<>
-
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        {/* Cinematic Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ duration: 0.4 }}
-          onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
-        />
-
-        {/* Modal Container */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-full max-w-xs bg-[#120C08] rounded-3xl p-5 z-10 shadow-[0_-10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-between overflow-hidden glass-panel-gold border border-[#D4AF37]/30 text-center"
-        >
-          {/* Decorative Glow */}
-
-          <button
+      {activeModal === 'daily_reward' && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={closeModal}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300 z-20"
-            aria-label="Kapat"
-          >
-            <X className="w-5 h-5" />
-          </button>
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          />
 
-          <div className="flex justify-center mb-6 mt-4 relative z-10">
-            <div className="w-20 h-20 rounded-full border-[3px] border-zinc-600 bg-gradient-to-br from-zinc-800 to-[#120C08] flex items-center justify-center relative shadow-[0_0_30px_rgba(100,100,100,0.3)]">
-              <Gift className="w-10 h-10 text-zinc-500 drop-shadow-md" />
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-xs bg-[#0d0c11] border border-white/[0.1] rounded-3xl p-6 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col items-center text-center"
+          >
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+              aria-label="Kapat"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-16 h-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mb-4 mt-2">
+              <Gift className="w-8 h-8 text-amber-400" />
             </div>
-          </div>
 
-          <h2 className="text-xl font-black text-white tracking-tight drop-shadow-md mb-2 relative z-10">
-            Günlük Sürprizler
-          </h2>
+            <h2 className="text-lg font-black text-white tracking-tight mb-1">
+              Günlük Ödüller & Sürprizler
+            </h2>
 
-          <p className="text-[13px] text-zinc-400 font-medium mb-8 leading-relaxed relative z-10 px-2">
-            Çok yakında yeni sürprizler ve hediyelerle burada olacağız. Takipte kal!
-          </p>
+            <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
+              Her gün giriş yaparak ekstra şarkı istek hakları ve VIP rozetler kazan!
+            </p>
 
-          <button
-            disabled={true}
-            className="w-full py-4 px-4 rounded-[1.5rem] font-black text-base flex items-center justify-center gap-3 transition-all duration-300 relative z-10 shadow-none bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-not-allowed group"
-          >
-            <Clock className="w-5 h-5" />
-            <span className="tracking-wide text-sm uppercase">Çok Yakında</span>
-          </button>
-        </motion.div>
-      </div>
-    
-      </>)}
+            <div className="w-full p-3.5 rounded-2xl bg-[#141318] border border-white/[0.08] mb-4 flex items-center justify-between text-left">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <div>
+                  <span className="text-xs font-bold text-white block">Günün Hediyesi</span>
+                  <span className="text-[10px] text-neutral-400">+1 Ücretsiz Şarkı Hakkı</span>
+                </div>
+              </div>
+              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-black uppercase">
+                Aktif
+              </span>
+            </div>
+
+            <button
+              onClick={closeModal}
+              className="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs active:scale-95 transition-all shadow-md"
+            >
+              Anladım
+            </button>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };

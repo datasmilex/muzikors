@@ -11,7 +11,6 @@ import {
   MessageCircle,
   HelpCircle,
   ChevronRight,
-  Coins,
   LogOut,
   Tag,
   Music,
@@ -20,7 +19,8 @@ import {
   Crown,
   Palette,
   Store,
-  Check
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
@@ -45,314 +45,287 @@ export const DrawerMenu: React.FC = () => {
     }
   }, [activeModal, user?.id, activeVenue?.id]);
 
-  
-
-  // Calculate daily reward dot
   const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
   const showRewardDot = !!user && !hasClaimedToday;
 
   const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean; isPremiumBtn?: boolean }[] = [
-    { label: 'Profil', icon: <User className="w-5 h-5 text-[#D4AF37]" />, modal: 'profile', isProtected: true },
-    { label: 'Muzikors Premium', icon: <Crown className="w-5 h-5 text-[#D4AF37]" />, modal: 'premium', isPremiumBtn: true },
-    { label: 'İşletmem & Kafe Paneli', icon: <Store className="w-5 h-5 text-[#D4AF37]" />, modal: 'venue_owner', isProtected: true },
-    { label: 'Günlük Ödül 🎁', icon: <Gift className="w-5 h-5 text-[#D4AF37]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
-    { label: 'Kampanyalar', icon: <Tag className="w-5 h-5 text-[#D4AF37]" />, modal: 'campaigns' },
+    { label: 'Profilim', icon: <User className="w-4 h-4 text-amber-400" />, modal: 'profile', isProtected: true },
+    { label: 'Muzikors Premium', icon: <Crown className="w-4 h-4 text-amber-400" />, modal: 'premium', isPremiumBtn: true },
+    { label: 'İşletmem & Kafe Paneli', icon: <Store className="w-4 h-4 text-amber-400" />, modal: 'venue_owner', isProtected: true },
+    { label: 'Günlük Ödül', icon: <Gift className="w-4 h-4 text-amber-400" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
+    { label: 'Kampanyalar', icon: <Tag className="w-4 h-4 text-amber-400" />, modal: 'campaigns' },
   ];
 
   const secondaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
-    { label: 'Hakkımızda', icon: <Info className="w-5 h-5 text-[#D4AF37]" />, modal: 'about' },
-    { label: 'Ortaklık', icon: <Handshake className="w-5 h-5 text-[#D4AF37]" />, modal: 'partners' },
-    { label: 'İletişim', icon: <MessageCircle className="w-5 h-5 text-[#D4AF37]" />, modal: 'contact' },
-    { label: 'Nasıl Çalışır', icon: <HelpCircle className="w-5 h-5 text-[#D4AF37]" />, modal: 'howitworks' },
+    { label: 'Hakkımızda', icon: <Info className="w-4 h-4 text-neutral-400" />, modal: 'about' },
+    { label: 'Ortaklık', icon: <Handshake className="w-4 h-4 text-neutral-400" />, modal: 'partners' },
+    { label: 'İletişim & Destek', icon: <MessageCircle className="w-4 h-4 text-neutral-400" />, modal: 'contact' },
+    { label: 'Nasıl Çalışır?', icon: <HelpCircle className="w-4 h-4 text-neutral-400" />, modal: 'howitworks' },
   ];
 
   return (
     <AnimatePresence>
-      {activeModal === 'drawer' && (<>
+      {activeModal === 'drawer' && (
+        <div className="fixed inset-0 z-[100] flex">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeModal}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+          />
 
-      <div className="fixed inset-0 z-[100] flex">
-        {/* Cinematic Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          onClick={closeModal}
-          className="fixed inset-0 bg-black/70 backdrop-blur-md"
-        />
-
-        {/* Drawer Container */}
-        <motion.div
-          initial={{ x: '-100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '-100%' }}
-          transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative w-[80%] max-w-[280px] h-full bg-[#120C08] border-r border-[#D4AF37]/30 flex flex-col justify-between p-4 z-10 shadow-[20px_0_40px_rgba(212,175,55,0.15)] overflow-y-auto custom-scrollbar glass-panel-gold"
-        >
-          {/* Decorative Glow */}
-
-          <div className="relative z-10">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20 mb-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-[1.25rem] gold-gradient-bg flex items-center justify-center text-stone-950 font-black shadow-[0_5px_15px_rgba(212,175,55,0.3)]">
-                  <Music className="w-6 h-6 stroke-[2.5]" />
+          {/* Drawer Sheet */}
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+            className="relative w-[82%] max-w-[300px] h-full bg-[#0d0c11] border-r border-white/[0.08] flex flex-col justify-between p-5 z-10 shadow-[20px_0_50px_rgba(0,0,0,0.9)] overflow-y-auto custom-scrollbar"
+          >
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400 shadow-inner">
+                    <img src="/logo.png" alt="Muzikors" className="w-6 h-6 object-contain" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-black text-white tracking-tight">Muzikors</h2>
+                    <span className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">Mobile Jukebox</span>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-black text-white tracking-tight drop-shadow-md">Muzikors</h2>
-                  <span className="text-[10px] text-[#D4AF37] font-bold uppercase tracking-widest">Mobile Jukebox</span>
-                </div>
+
+                <button
+                  onClick={closeModal}
+                  className="p-2 rounded-full bg-white/[0.05] text-neutral-400 hover:text-white transition-colors"
+                  aria-label="Kapat"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              <button
-                onClick={closeModal}
-                className="p-2.5 rounded-full bg-white/5 active:bg-white/10 active:rotate-90 text-zinc-400 active:text-white transition-all duration-300"
-                aria-label="Kapat"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+              {/* User Card / Login Banner */}
+              {!user ? (
+                <div className="my-3 p-4 rounded-2xl bg-[#141318] border border-white/[0.08] text-center space-y-3 shadow-sm">
+                  <div className="flex flex-col items-center gap-1">
+                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <span className="text-xs font-bold text-white">Giriş Yap ve Şarkı İste!</span>
+                    <span className="text-[10px] text-neutral-400">Favori parçalarını sıraya ekle</span>
+                  </div>
 
-            {!user ? (
-              <div className="my-4 p-4 rounded-2xl bg-gradient-to-br from-[#241911] to-[#1C130D] border border-[#D4AF37]/40 space-y-3 text-center shadow-[0_10px_30px_rgba(212,175,55,0.1)] relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/5 blur-2xl rounded-full pointer-events-none" />
-                <div className="flex flex-col items-center justify-center gap-2 relative z-10">
-                  <Music className="w-6 h-6 text-[#D4AF37]" />
-                  <span className="text-sm font-black text-white tracking-wide">Giriş Yap ve Müziği Yönet!</span>
-                  <span className="text-[11px] text-amber-200/60 font-medium">Favori şarkılarını öne çıkar</span>
-                </div>
-
-                <div className="space-y-2 relative z-10">
                   <button
                     onClick={() => {
                       closeModal();
                       loginWithProvider('google');
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white text-stone-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-[0_5px_15px_rgba(255,255,255,0.1)] active:scale-95"
+                    className="w-full py-2.5 px-3 rounded-xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
                   >
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                     </svg>
-                    <span>Google ile Devam Et</span>
+                    <span>Google ile Giriş</span>
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="my-4 bg-[#1A1A1A]/80 rounded-2xl p-3 flex flex-col gap-3 border border-[#D4AF37]/20 shadow-inner group">
-                <div className="flex items-center gap-3">
-                  <div className="relative shrink-0">
-                    <img
-                      src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
-                      alt={user.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = '/logo.png';
-                      }}
-                      className="w-12 h-12 rounded-full border-2 border-[#D4AF37] object-cover shadow-[0_0_15px_rgba(212,175,55,0.3)] group-active:scale-95 transition-transform"
-                    />
-                    {isDj && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-[#1A1A1A] flex items-center justify-center text-[8px]" title="Mekanın DJ'i">
-                        👑
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-black text-white truncate drop-shadow-sm">{user.name}</h3>
-                    <span className="text-[10px] font-bold text-amber-200/50 uppercase tracking-widest block mt-0.5 truncate">{user.username || '@misafir'}</span>
-                  </div>
-                </div>
-                
-
-              </div>
-            )}
-
-
-            <nav className="space-y-1.5 mt-2">
-              {primaryNavItems.map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => {
-                    closeModal();
-                    if (item.modal === 'premium_buy' as ModalType) {
-                      showToast('Premium üyelik sistemi şu anda güncellenmektedir.');
-                      return;
-                    }
-                    if (item.isProtected && !user) {
-                      openProtectedModal(item.modal, 'Bu bölümü görüntülemek için giriş yapmalısınız.');
-                    } else {
-                      openModal(item.modal);
-                    }
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-[#1A1A1A] border border-transparent active:border-[#D4AF37]/20 font-bold text-sm transition-all group relative active:scale-[0.98] ${
-                    item.isPremiumBtn 
-                      ? 'bg-gradient-to-r from-yellow-500/10 via-[#D4AF37]/20 to-amber-600/10 text-[#D4AF37] border-[#D4AF37]/30 shadow-inner' 
-                      : 'text-gray-300'
-                  }`}
+              ) : (
+                <div 
+                  onClick={() => { closeModal(); openModal('profile'); }}
+                  className="my-3 p-3.5 rounded-2xl bg-[#141318] border border-white/[0.08] hover:border-amber-400/30 flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-sm group"
                 >
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className={`w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/20 flex items-center justify-center group-active:border-[#D4AF37]/50 group-active:bg-[#D4AF37]/5 transition-colors relative shadow-inner ${item.isPremiumBtn ? 'border-[#D4AF37]/50' : ''}`}>
-                      {item.icon}
-                      {item.showBadge && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#120C08] shadow-sm animate-pulse" />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-black border border-white/15 overflow-hidden shrink-0">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-5 h-5 text-amber-400 m-auto" />
                       )}
                     </div>
-                    <span className="group-active:text-white transition-colors tracking-wide">{item.label}</span>
-                  </div>
-                  <ChevronRight className={`w-5 h-5 transition-all ${item.isPremiumBtn ? 'text-[#D4AF37]' : 'text-gray-600 group-active:text-[#D4AF37]'} group-active:translate-x-1`} />
-                </button>
-              ))}
-
-              <button
-                onClick={() => setIsMoreOpen(!isMoreOpen)}
-                className="w-full flex items-center justify-between px-3 py-2.5 mt-1 rounded-xl active:bg-[#1A1A1A] border border-transparent text-gray-400 font-bold text-sm transition-all group relative"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="tracking-wide text-xs uppercase opacity-60">Daha Fazla / Kurumsal</span>
-                </div>
-                <ChevronRight className={`w-4 h-4 text-gray-600 transition-transform ${isMoreOpen ? 'rotate-90' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {isMoreOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden space-y-1.5 pl-2 border-l border-white/5 ml-3"
-                  >
-                    {secondaryNavItems.map((item) => (
-                      <button
-                        key={item.label}
-                        onClick={() => {
-                          closeModal();
-                          if (item.modal === 'manage_subscription' as ModalType) {
-                            showToast('Abonelik yönetimi şu anda güncellenmektedir.');
-                            return;
-                          }
-                          if (item.isProtected && !user) {
-                            openProtectedModal(item.modal, 'Bu bölümü görüntülemek için giriş yapmalısınız.');
-                          } else {
-                            openModal(item.modal);
-                          }
-                        }}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl active:bg-[#1A1A1A] border border-transparent text-gray-400 font-bold text-xs transition-all group relative active:scale-[0.98]"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md bg-[#1A1A1A] border border-white/5 flex items-center justify-center group-active:border-[#D4AF37]/50 transition-colors">
-                            {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-3.5 h-3.5 text-gray-400 group-active:text-[#D4AF37]' })}
-                          </div>
-                          <span className="group-active:text-white transition-colors">{item.label}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Watch Ads & Earn Button */}
-              <button
-                onClick={() => {
-                  closeModal();
-                  openRewardedAdModal();
-                }}
-                className="w-full flex items-center justify-between px-3 py-2.5 mt-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#D4AF37]/10 to-transparent border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 active:scale-95 transition-all group relative cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] group-active:scale-105 transition-transform shadow-inner">
-                    <PlaySquare className="w-4 h-4" />
-                  </div>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-bold text-white group-active:text-[#D4AF37] transition-colors">Reklam İzle & Kazan</span>
-                    <span className="text-[10px] font-medium text-amber-200/60 mt-0.5">+1 Şarkı İstek Hakkı Al</span>
-                  </div>
-                </div>
-                <div className="text-[9px] font-black bg-[#D4AF37] text-stone-950 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wider shadow-sm flex items-center gap-1">
-                  <span>+1 Hak</span>
-                </div>
-              </button>
-            </nav>
-
-            {/* Theme Selector Widget */}
-            <div className="mt-4 p-3 rounded-2xl bg-[#1A1A1A]/80 border border-[#D4AF37]/25 shadow-inner relative overflow-hidden">
-              <div className="flex items-center justify-between mb-2.5 px-0.5">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="text-xs font-black text-white tracking-wide">Tema & Görünüm</span>
-                </div>
-                <span className="text-[10px] font-bold text-amber-200/60 truncate max-w-[90px] text-right">
-                  {THEMES.find((t) => t.id === theme)?.name}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-5 gap-1.5">
-                {THEMES.map((t) => {
-                  const isSelected = theme === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => setTheme(t.id)}
-                      title={`${t.name} - ${t.subtitle}`}
-                      className={`group relative flex flex-col items-center gap-1 p-1 rounded-xl transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? 'bg-white/10 border border-[#D4AF37]/60 shadow-[0_0_10px_rgba(212,175,55,0.25)] scale-105'
-                          : 'hover:bg-white/5 border border-transparent opacity-60 hover:opacity-100 active:scale-95'
-                      }`}
-                    >
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-md relative overflow-hidden transition-transform group-hover:scale-110"
-                        style={{
-                          background: `linear-gradient(135deg, ${t.accentColor} 50%, ${t.bgColor} 50%)`,
-                        }}
-                      >
-                        {isSelected && (
-                          <Check className="w-3.5 h-3.5 text-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] stroke-[3]" />
-                        )}
-                      </div>
-                      <span className="text-[8px] font-bold text-gray-300 truncate w-full text-center leading-none">
-                        {t.name.split(' ')[0]}
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-black text-white truncate group-hover:text-amber-300 transition-colors">
+                        {user.name}
+                      </h3>
+                      <span className="text-[10px] text-amber-400/80 font-semibold block truncate">
+                        {user.isPremium ? '👑 Premium Üye' : '⭐ Üye'}
                       </span>
-                    </button>
-                  );
-                })}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              )}
+
+              {/* Navigation Items */}
+              <nav className="space-y-1 my-3">
+                {primaryNavItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      closeModal();
+                      if (item.isProtected && !user) {
+                        openProtectedModal(item.modal, 'Bu bölümü görüntülemek için lütfen giriş yapın.');
+                      } else {
+                        openModal(item.modal);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                      item.isPremiumBtn
+                        ? 'bg-amber-400/10 border border-amber-400/25 text-amber-300 hover:bg-amber-400/15'
+                        : 'bg-transparent hover:bg-white/[0.04] text-neutral-300 hover:text-white'
+                    } active:scale-95`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
+                        {item.icon}
+                      </div>
+                      <span>{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {item.showBadge && (
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#f59e0b]" />
+                      )}
+                      <ChevronRight className="w-4 h-4 text-neutral-600" />
+                    </div>
+                  </button>
+                ))}
+
+                {/* More toggle */}
+                <button
+                  onClick={() => setIsMoreOpen(!isMoreOpen)}
+                  className="w-full flex items-center justify-between px-3.5 py-2 mt-1 rounded-xl text-neutral-400 font-semibold text-[11px] hover:text-neutral-200 transition-colors"
+                >
+                  <span className="uppercase tracking-wider">Kurumsal & Destek</span>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isMoreOpen ? 'rotate-90' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isMoreOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden space-y-1 pl-3 border-l border-white/[0.08] ml-3"
+                    >
+                      {secondaryNavItems.map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => {
+                            closeModal();
+                            openModal(item.modal);
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-colors text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            {item.icon}
+                            <span>{item.label}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Rewarded Ad */}
+                <button
+                  onClick={() => {
+                    closeModal();
+                    openRewardedAdModal();
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 mt-2 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 active:scale-95 transition-all text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-amber-400">
+                      <PlaySquare className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">Reklam İzle & Kazan</span>
+                      <span className="text-[9px] text-neutral-400">+1 Şarkı İstek Hakkı</span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[9px] font-black uppercase">
+                    +1 Hak
+                  </span>
+                </button>
+              </nav>
+
+              {/* Theme Switcher Widget */}
+              <div className="mt-3 p-3 rounded-2xl bg-[#141318] border border-white/[0.08] shadow-inner">
+                <div className="flex items-center justify-between mb-2.5 px-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[11px] font-bold text-white">Renk Teması</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-300">
+                    {THEMES.find((t) => t.id === theme)?.name}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-5 gap-1.5">
+                  {THEMES.map((t) => {
+                    const isSelected = theme === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setTheme(t.id)}
+                        title={`${t.name} - ${t.subtitle}`}
+                        className={`flex flex-col items-center gap-1 p-1 rounded-xl transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-white/10 border border-amber-400/60 scale-105 shadow-sm'
+                            : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
+                        }`}
+                      >
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
+                          style={{ backgroundColor: t.accentColor }}
+                        >
+                          {isSelected && (
+                            <Check className="w-3 h-3 text-black stroke-[3]" />
+                          )}
+                        </div>
+                        <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none">
+                          {t.name.split(' ')[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-4 border-t border-[#D4AF37]/20 text-center space-y-3 relative z-10 mt-4">
-            {user ? (
-              <button
-                onClick={logout}
-                className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-sm flex items-center justify-center gap-2 active:bg-red-500/20 active:scale-95 transition-all group shadow-inner"
-              >
-                <LogOut className="w-4 h-4 group-active:-translate-x-1 transition-transform" />
-                <span className="tracking-wide">Çıkış Yap</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  closeModal();
-                  openModal('login');
-                }}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-black text-sm flex items-center justify-center gap-2 active:bg-white/10 active:scale-95 transition-all shadow-inner group"
-              >
-                <LogIn className="w-4 h-4 text-[#D4AF37] group-active:scale-95 transition-transform" />
-                <span className="tracking-wide">Giriş Yap / Kaydol</span>
-              </button>
-            )}
+            {/* Bottom Footer */}
+            <div className="pt-3 border-t border-white/[0.08] space-y-2.5 text-center">
+              {user ? (
+                <button
+                  onClick={logout}
+                  className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Çıkış Yap</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    closeModal();
+                    openModal('login');
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Giriş Yap / Kaydol</span>
+                </button>
+              )}
 
-            <div className="flex flex-col items-center gap-1">
-              <span className="gold-gradient-text font-black text-xs tracking-wider">Müzik Senin, Gece Senin</span>
-              <span className="text-[10px] font-bold text-amber-200/30 uppercase tracking-widest">© 2026 Muzikors Mobile Inc.</span>
+              <span className="text-[9px] font-semibold text-neutral-500 block uppercase tracking-wider">
+                Muzikors Mobile © 2026
+              </span>
             </div>
-          </div>
-        </motion.div>
-      </div>
-    
-      </>)}
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };
