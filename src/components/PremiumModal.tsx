@@ -128,7 +128,7 @@ export const PremiumModal: React.FC = () => {
           <div className="relative h-48 bg-gradient-to-br from-amber-900 via-[#1C130D] to-[#120C08] p-6 flex flex-col items-center justify-center overflow-hidden">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37] via-[#120C08] to-[#120C08]" />
             <Crown className="w-14 h-14 text-[#D4AF37] mb-2 drop-shadow-[0_0_15px_rgba(212,175,55,0.8)]" />
-            <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 drop-shadow-sm text-center tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-white drop-shadow-sm text-center tracking-tight">
               Muzikors Premium
             </h2>
             

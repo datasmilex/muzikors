@@ -116,9 +116,9 @@
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #FFFFFF 0%, var(--theme-primary-light) 40%, var(--theme-primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--theme-primary-light, #fbbf24);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .gold-gradient-bg {
@@ -180,7 +180,7 @@
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Performance: promote animated elements to GPU layer */
-.animate-bounce, .animate-ping, .animate-spin, .animate-pulse {
+.animate-ping, .animate-spin, .animate-pulse {
   will-change: transform, opacity;
 }
 

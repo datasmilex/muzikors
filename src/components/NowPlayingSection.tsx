@@ -174,7 +174,7 @@ export const NowPlayingSection: React.FC = () => {
                   <Store className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span className="tracking-wider flex items-center gap-1.5 font-bold uppercase">
                     <span className="text-amber-200/70 text-[9px]">Seçim:</span>
-                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 font-extrabold tracking-widest text-[10px]">
+                    <strong className="text-amber-300 font-bold tracking-wider text-[10px]">
                       {isBgMusic ? '☕ Mekan Fon Müziği' : '👑 Mekan Sahibi'}
                     </strong>
                   </span>

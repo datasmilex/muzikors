@@ -210,11 +210,11 @@ export const QrScannerModal: React.FC = () => {
               className="w-full h-full object-cover scale-105"
             />
 
-            {/* Corner guides - Minimal Apple Style */}
-            <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-white/50 rounded-tl-xl pointer-events-none z-10" />
-            <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-white/50 rounded-tr-xl pointer-events-none z-10" />
-            <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-white/50 rounded-bl-xl pointer-events-none z-10" />
-            <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-white/50 rounded-br-xl pointer-events-none z-10" />
+            {/* Corner guides - Sharp Minimal Lens Reticle */}
+            <div className="absolute top-4 left-4 w-5 h-5 border-t border-l border-white/70 rounded-none pointer-events-none z-10" />
+            <div className="absolute top-4 right-4 w-5 h-5 border-t border-r border-white/70 rounded-none pointer-events-none z-10" />
+            <div className="absolute bottom-4 left-4 w-5 h-5 border-b border-l border-white/70 rounded-none pointer-events-none z-10" />
+            <div className="absolute bottom-4 right-4 w-5 h-5 border-b border-r border-white/70 rounded-none pointer-events-none z-10" />
 
             {/* Scanning Line overlay */}
             <div className="absolute left-0 right-0 h-[1px] bg-[#D4AF37] shadow-[0_0_8px_#D4AF37] animate-[scan_2s_ease-in-out_infinite] top-0 pointer-events-none z-10" />

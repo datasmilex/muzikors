@@ -174,13 +174,13 @@ export const AVATAR_FRAMES: AvatarFrameConfig[] = [
   },
   {
     id: 'beta_tester',
-    name: 'Kuantum Siber Mor',
+    name: 'Kuantum Siber Altın',
     requiredAchievementId: 'beta_tester',
-    glowClass: 'shadow-[0_0_20px_rgba(168,85,247,0.9)] ring-2 ring-purple-500',
-    borderClass: 'border-2 border-purple-400',
+    glowClass: 'shadow-[0_0_20px_rgba(245,158,11,0.8)] ring-2 ring-amber-500',
+    borderClass: 'border-2 border-amber-400',
     ornamentEmoji: '🧪',
-    previewGradient: 'from-purple-600 via-pink-500 to-indigo-600',
-    description: 'Muzikors Beta Tester takımına özel kuantum siber mor çerçeve.',
+    previewGradient: 'from-amber-500 via-yellow-400 to-amber-600',
+    description: 'Muzikors Beta Tester takımına özel kuantum siber altın çerçeve.',
   },
 ];
 
@@ -235,11 +235,11 @@ export const TIER_STYLES: Record<AchievementTier, {
     progressFill: 'bg-gradient-to-r from-[#D4AF37] to-[#E5A93B]',
   },
   diamond: {
-    border: 'border-purple-400/50',
-    bg: 'bg-purple-950/30',
-    glow: 'shadow-[0_0_20px_rgba(167,139,250,0.2)]',
-    badge: 'bg-purple-900/30 text-purple-300 border-purple-700/40',
-    text: 'text-purple-300',
-    progressFill: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    border: 'border-cyan-400/50',
+    bg: 'bg-cyan-950/30',
+    glow: 'shadow-[0_0_20px_rgba(34,211,238,0.2)]',
+    badge: 'bg-cyan-900/30 text-cyan-300 border-cyan-700/40',
+    text: 'text-cyan-300',
+    progressFill: 'bg-gradient-to-r from-cyan-500 to-emerald-500',
   },
 };

@@ -83,7 +83,7 @@ export const BetaTesterWelcomeModal = () => {
         onClick={() => setIsVisible(false)}
       />
       
-      <div className="relative w-full max-w-sm bg-[#120C08] border border-purple-500/30 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(168,85,247,0.15)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-sm bg-[#120C08] border border-amber-500/30 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
         
         <button 
           onClick={() => setIsVisible(false)}
@@ -92,29 +92,29 @@ export const BetaTesterWelcomeModal = () => {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="w-16 h-16 bg-gradient-to-tr from-purple-600 to-fuchsia-500 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-          <Award className="w-8 h-8 text-white" />
+        <div className="w-16 h-16 bg-gradient-to-tr from-amber-600 to-yellow-500 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(245,158,11,0.35)]">
+          <Award className="w-8 h-8 text-black" />
         </div>
 
-        <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 mb-2">
+        <h3 className="text-2xl font-black text-white mb-2">
           Beta Tester Rozetiniz Hazır!
         </h3>
         
         <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
           Muzikors'un gelişimine ve erken aşama test sürecine katkıda bulunduğunuz için teşekkür ederiz. 
-          Özel mor onaylı <strong className="text-purple-400 font-bold">Beta Tester</strong> rozetiniz profilinize tanımlandı!
+          Özel onaylı <strong className="text-amber-400 font-bold">Beta Tester</strong> rozetiniz profilinize tanımlandı!
         </p>
 
         <button 
           onClick={handleClaim}
           disabled={isLoading}
-          className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold rounded-xl active:scale-95 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold rounded-xl active:scale-95 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.45)] disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
             'Tanımlanıyor...'
           ) : (
             <>
-              <Crown className="w-5 h-5" />
+              <Crown className="w-5 h-5 text-black" />
               Rozetimi Al
             </>
           )}

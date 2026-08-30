@@ -61,7 +61,7 @@ export const WelcomeScreen: React.FC = () => {
         >
           <h1 className="text-3xl font-black text-white tracking-tight leading-tight drop-shadow-lg">
             Mekanın Ritmini <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F3D573]">
+            <span className="text-[#F3D573] font-black">
               Sen Belirle
             </span>
           </h1>

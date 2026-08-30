@@ -291,7 +291,7 @@ export const UpNextQueueSection: React.FC = () => {
                             {isVenueOrBackgroundRequester(track.requestedBy, track.requestedByUserId) ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/20 border border-[#D4AF37]/60 text-[9px] font-extrabold text-amber-100 shadow-[0_0_10px_rgba(212,175,55,0.25)] uppercase tracking-wide">
                                 <Store className="w-2.5 h-2.5 text-[#D4AF37] shrink-0" />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 font-extrabold">
+                                <span className="text-amber-300 font-bold">
                                   {getRequestedByLabel(track)}
                                 </span>
                               </span>
