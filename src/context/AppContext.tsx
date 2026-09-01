@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 import { ThemeType, getStoredTheme, applyTheme } from '../lib/theme';
 import { formatUserDisplayName } from '../utils/formatters';
 import { containsProfanity } from '../utils/profanityFilter';
+import { isTrackAllowedByVibeGuard } from '../utils/genreMatcher';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -1083,6 +1084,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isExplicit = track.explicit === true || (track as any).is_explicit === true || containsProfanity(track.title) || containsProfanity(track.artist);
     if (activeVenue.explicit_filter_enabled === true && isExplicit) {
       showToast('Bu mekanda küfürlü / sansürsüz şarkı talebi engellenmiştir.');
+      return false;
+    }
+
+    // Vibe Guard check
+    const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue.allowed_genres);
+    if (!vibeCheck.isAllowed) {
+      showToast(`Bu mekanda ${vibeCheck.blockedReason || 'bu müzik tarzı'} kısıtlanmıştır.`);
       return false;
     }
 

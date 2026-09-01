@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, BookOpen, Wifi, Copy, Check, Clock, X } from 'lucide-react';
+import { Store, BookOpen, Wifi, Copy, Check, Clock, X, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const VenueInfoModal: React.FC = () => {
@@ -17,6 +17,8 @@ export const VenueInfoModal: React.FC = () => {
   const isNativeMenu = (activeVenue as any).menu_type === 'native';
   const hasWifi = Boolean(wifiName?.trim()) || Boolean(wifiPass?.trim());
   const hasMenu = isNativeMenu || Boolean(menuUrl?.trim());
+  const allowedGenres = activeVenue.allowed_genres || [];
+  const hasVibeGuard = Array.isArray(allowedGenres) && allowedGenres.length > 0;
 
   const formatTime = (t?: string) => {
     if (!t) return null;
@@ -160,7 +162,29 @@ export const VenueInfoModal: React.FC = () => {
                   </div>
                 )}
                 
-                {!hasMenu && !hasWifi && (
+                {hasVibeGuard && (
+                  <div className="w-full bg-[var(--theme-card-alt)] border border-amber-500/20 rounded-2xl p-4 shadow-sm space-y-3">
+                    <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2.5">
+                      <ShieldAlert className="w-4 h-4 text-amber-400" />
+                      <h3 className="text-xs font-black text-white uppercase tracking-wider">Mekân Müzik Tarzı (Vibe Guard)</h3>
+                    </div>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed">
+                      Bu mekanda atmosferi korumak amacıyla sadece aşağıdaki müzik türlerinden şarkı istekleri kabul edilir:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {allowedGenres.map((genre: string) => (
+                        <span
+                          key={genre}
+                          className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold"
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!hasMenu && !hasWifi && !hasVibeGuard && (
                   <div className="text-center p-6 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
                     <p className="text-xs text-neutral-400">Bu mekân için henüz ek bilgi eklenmemiş.</p>
                   </div>

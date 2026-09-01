@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
 import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration, formatUserDisplayName } from '../utils/formatters';
+import { isTrackAllowedByVibeGuard, classifyTrackGenres } from '../utils/genreMatcher';
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -43,6 +44,7 @@ export const MusicSearchModal: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
+  const isVibeGuardActive = Array.isArray(activeVenue?.allowed_genres) && activeVenue.allowed_genres.length > 0;
 
   const isTrackExplicit = (track: Track) => {
     return (
@@ -53,12 +55,25 @@ export const MusicSearchModal: React.FC = () => {
     );
   };
 
+  const getTrackBlockStatus = (track: Track): { isBlocked: boolean; reason?: string; type?: 'explicit' | 'vibe' } => {
+    if (isExplicitFilterActive && isTrackExplicit(track)) {
+      return { isBlocked: true, reason: 'Sansürsüz Şarkı (Küfürlü)', type: 'explicit' };
+    }
+    if (isVibeGuardActive) {
+      const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue?.allowed_genres);
+      if (!vibeCheck.isAllowed) {
+        return { isBlocked: true, reason: vibeCheck.blockedReason || 'Mekân Tarzı Dışı', type: 'vibe' };
+      }
+    }
+    return { isBlocked: false };
+  };
+
   const allowedTracks = searchResults.filter(
-    (track) => !isExplicitFilterActive || !isTrackExplicit(track)
+    (track) => !getTrackBlockStatus(track).isBlocked
   );
 
   const blockedTracks = searchResults.filter(
-    (track) => isExplicitFilterActive && isTrackExplicit(track)
+    (track) => getTrackBlockStatus(track).isBlocked
   );
 
   useEffect(() => {
@@ -69,7 +84,7 @@ export const MusicSearchModal: React.FC = () => {
     } else {
       setSelectedTrack(null);
     }
-  }, [searchResults, activeVenue?.explicit_filter_enabled]);
+  }, [searchResults, activeVenue?.explicit_filter_enabled, activeVenue?.allowed_genres]);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
@@ -252,6 +267,12 @@ export const MusicSearchModal: React.FC = () => {
   const handleConfirmRequest = async (trackToRequest?: Track) => {
     const target = trackToRequest || selectedTrack;
     if (target) {
+      const blockStatus = getTrackBlockStatus(target);
+      if (blockStatus.isBlocked) {
+        showToast(`⚠️ ${blockStatus.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.'}`);
+        return;
+      }
+
       const durMs = (target as any).duration_ms || target.durationMs || (target.duration ? target.duration * 1000 : 0);
       const formatted = formatDuration(durMs);
 
@@ -534,6 +555,16 @@ export const MusicSearchModal: React.FC = () => {
                     ) : null}
                   </div>
 
+                  {/* Vibe Guard Active Notice */}
+                  {isVibeGuardActive && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                      <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+                      <p className="text-[11px] leading-tight font-medium">
+                        <strong className="font-bold">Mekân Tarzı (Vibe Guard):</strong> Bu mekanda yalnızca <span className="underline decoration-amber-500/40 font-bold text-white">{activeVenue.allowed_genres?.join(', ')}</span> şarkıları kabul edilmektedir.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Filter Tabs */}
                   <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
                     <button
@@ -597,13 +628,13 @@ export const MusicSearchModal: React.FC = () => {
                     <>
                       {/* Empty Allowed notice if only blocked tracks exist */}
                       {allowedTracks.length === 0 && blockedTracks.length > 0 && (
-                        <div className="text-center py-6 px-4 text-neutral-400 space-y-2 bg-rose-500/[0.03] border border-rose-500/10 rounded-2xl my-2">
-                          <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
-                            <Ban className="w-4 h-4" />
+                        <div className="text-center py-6 px-4 text-neutral-400 space-y-2 bg-amber-500/[0.03] border border-amber-500/15 rounded-2xl my-2">
+                          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                            <ShieldAlert className="w-4 h-4" />
                           </div>
-                          <p className="text-xs font-bold text-neutral-200">Uygun Şarkı Bulunamadı</p>
+                          <p className="text-xs font-bold text-neutral-200">Mekana Uygun Şarkı Bulunamadı</p>
                           <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
-                            Aramanızla eşleşen {blockedTracks.length} şarkı mekanın aile ve sansür filtresine takıldı.
+                            Aramanızla eşleşen {blockedTracks.length} şarkı mekanın müzik tarzı (Vibe Guard) veya sansür kurallarına takıldı.
                           </p>
                         </div>
                       )}
@@ -689,9 +720,9 @@ export const MusicSearchModal: React.FC = () => {
                             className="w-full py-2 px-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] flex items-center justify-between text-xs text-neutral-400 hover:text-neutral-200 transition-all active:scale-[0.99] cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                               <span className="font-bold text-[11px] text-neutral-300">
-                                Filtrelenen Şarkılar ({blockedTracks.length})
+                                Mekan Kısıtlamasına Takılanlar ({blockedTracks.length})
                               </span>
                             </div>
                             <div className="flex items-center gap-1 text-[10px] text-neutral-500 font-medium">
@@ -709,17 +740,18 @@ export const MusicSearchModal: React.FC = () => {
                                 transition={{ duration: 0.2 }}
                                 className="space-y-1.5 overflow-hidden"
                               >
-                                <div className="px-2.5 py-1 text-[10px] text-neutral-400 flex items-center gap-1.5 bg-rose-500/[0.04] border border-rose-500/10 rounded-xl">
-                                  <Ban className="w-3 h-3 text-rose-400 shrink-0" />
-                                  <span>Mekanın sansür filtresi aktif olduğu için bu şarkılar çalınamaz.</span>
+                                <div className="px-2.5 py-1 text-[10px] text-neutral-400 flex items-center gap-1.5 bg-amber-500/[0.04] border border-amber-500/10 rounded-xl">
+                                  <ShieldAlert className="w-3 h-3 text-amber-400 shrink-0" />
+                                  <span>Bu şarkılar mekanın müzik tarzı (Vibe Guard) veya sansür kuralları gereği çalınamaz.</span>
                                 </div>
                                 {blockedTracks.map((track) => {
                                   const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
+                                  const blockInfo = getTrackBlockStatus(track);
                                   return (
                                     <div
                                       key={track.id}
-                                      onClick={() => showToast('Bu şarkı mekanın sansür filtresi nedeniyle çalınamaz.')}
-                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-rose-500/15 bg-rose-500/[0.02] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
+                                      onClick={() => showToast(`⚠️ ${blockInfo.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.'}`)}
+                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-amber-500/15 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
                                     >
                                       <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10 grayscale">
@@ -729,7 +761,11 @@ export const MusicSearchModal: React.FC = () => {
                                             className="w-full h-full object-cover"
                                           />
                                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                            <Ban className="w-3.5 h-3.5 text-rose-400" />
+                                            {blockInfo.type === 'vibe' ? (
+                                              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                                            ) : (
+                                              <Ban className="w-3.5 h-3.5 text-rose-400" />
+                                            )}
                                           </div>
                                         </div>
 
@@ -738,9 +774,15 @@ export const MusicSearchModal: React.FC = () => {
                                             <h4 className="text-xs font-bold truncate text-neutral-300">
                                               {track.title}
                                             </h4>
-                                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase flex items-center gap-0.5">
-                                              <Ban className="w-2.5 h-2.5" /> Mekanda Çalınamaz
-                                            </span>
+                                            {blockInfo.type === 'vibe' ? (
+                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase flex items-center gap-0.5">
+                                                <ShieldAlert className="w-2.5 h-2.5" /> {blockInfo.reason}
+                                              </span>
+                                            ) : (
+                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase flex items-center gap-0.5">
+                                                <Ban className="w-2.5 h-2.5" /> Sansürsüz Şarkı
+                                              </span>
+                                            )}
                                           </div>
                                           <p className="text-[10px] text-neutral-500 font-medium truncate mt-0.5">
                                             {track.artist}
@@ -749,11 +791,9 @@ export const MusicSearchModal: React.FC = () => {
                                       </div>
 
                                       <div className="shrink-0 pl-2 text-right">
-                                        {durMs > 0 && (
-                                          <span className="text-[10px] font-mono font-bold text-neutral-500">
-                                            {formatDuration(durMs)}
-                                          </span>
-                                        )}
+                                        <span className="text-[9px] font-bold text-neutral-500 uppercase">
+                                          Kısıtlı
+                                        </span>
                                       </div>
                                     </div>
                                   );
