@@ -188,23 +188,38 @@ export const NowPlayingSection: React.FC = () => {
               );
             }
 
+            const isAnon = 
+              nowPlaying.isAnonymous === true || 
+              nowPlaying.is_anonymous === true || 
+              nowPlaying.requestedBy === 'Anonim' || 
+              nowPlaying.requestedBy?.trim().toLowerCase() === 'anonim' ||
+              nowPlaying.requestedBy?.startsWith('Anonim');
+
             return (
               <div 
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-neutral-300 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
                 onClick={() => {
-                  if (nowPlaying.requestedByUserId) openProfile(nowPlaying.requestedByUserId);
+                  if (isAnon) {
+                    showToast('Bu profil gizlidir 🔒');
+                    return;
+                  }
+                  if (nowPlaying.requestedByUserId) {
+                    openProfile(nowPlaying.requestedByUserId);
+                  }
                 }}
               >
                 <User className="w-3 h-3 text-[var(--theme-primary)]" />
                 <span className="truncate flex items-center gap-1">
                   İsteyen: <strong className="text-white font-bold">
-                    {(user && nowPlaying.requestedByUserId === user.id) 
+                    {(user && nowPlaying.requestedByUserId === user.id && !isAnon) 
                       ? 'Sen' 
-                      : (nowPlaying.requestedBy.startsWith('@') || nowPlaying.requestedBy.includes('.***') || nowPlaying.requestedBy === 'Anonim')
-                        ? nowPlaying.requestedBy.replace(' VIP', '')
-                        : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
+                      : isAnon
+                        ? 'Anonim'
+                        : (nowPlaying.requestedBy.startsWith('@') || nowPlaying.requestedBy.includes('.***'))
+                          ? nowPlaying.requestedBy.replace(' VIP', '')
+                          : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
                   </strong>
-                  {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium)) && (
+                  {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium && !isAnon)) && (
                     <span className="text-[8px] font-black bg-[var(--theme-primary)] text-black px-1.5 py-0.5 rounded uppercase ml-1 font-bold">VIP</span>
                   )}
                 </span>

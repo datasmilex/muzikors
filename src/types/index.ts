@@ -19,8 +19,9 @@ export interface Track {
   spotifyUrl?: string;
   explicit?: boolean;
   is_explicit?: boolean;
-  genres?: string[];
   isBoosted?: boolean;
+  isAnonymous?: boolean;
+  is_anonymous?: boolean;
   message?: string;
 }
 

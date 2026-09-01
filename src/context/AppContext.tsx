@@ -733,6 +733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         const toTrack = (r: any): Track => {
           const cover = r.album_cover || '';
+          const isAnon = r.is_anonymous === true || r.requested_by_name === 'Anonim';
           return {
             id: r.id,
             title: r.song_name || r.song_title || '',
@@ -747,6 +748,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             votes: r.votes ?? 0,
             requestedBy: r.requested_by_name || 'Misafir',
             requestedByUserId: r.requested_by_user_id,
+            isAnonymous: isAnon,
+            is_anonymous: isAnon,
             requestedAt: 'Sirada',
             startedAt: r.started_at,
             isPlaying: r.status === 'playing',
@@ -761,6 +764,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const trackDurationMs = trackInfo.duration_ms || (trackInfo.duration ? trackInfo.duration * 1000 : (playingRow?.duration_ms || 210000));
           const trackDurationSec = Math.round(trackDurationMs / 1000);
           const trackStartedAt = trackInfo.started_at || (trackInfo.progress_ms ? new Date(Date.now() - trackInfo.progress_ms).toISOString() : (trackInfo.updated_at || playingRow?.started_at || null));
+          const isNowPlayingAnon = playingRow?.is_anonymous === true || trackInfo.requested_by_name === 'Anonim';
 
           if (trackInfo.progress_ms) {
             setAudioProgress(Math.min(trackDurationSec, Math.floor(trackInfo.progress_ms / 1000)));
@@ -784,6 +788,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               votes: playingRow?.votes ?? prev?.votes ?? 0,
               requestedBy: (isSameTrack && prev?.requestedByUserId) ? prev.requestedBy : (trackInfo.requested_by_name || 'Mekan Fon Müziği'),
               requestedByUserId: (isSameTrack && prev?.requestedByUserId) ? prev.requestedByUserId : (trackInfo.requested_by_user_id || undefined),
+              isAnonymous: isNowPlayingAnon,
+              is_anonymous: isNowPlayingAnon,
               requestedAt: 'Canli',
               startedAt: trackStartedAt,
               isPlaying: trackInfo.is_playing !== false,

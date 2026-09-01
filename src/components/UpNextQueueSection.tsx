@@ -43,16 +43,26 @@ export const UpNextQueueSection: React.FC = () => {
     }, 2000);
   };
 
+  const isAnonymousTrack = (track: any) => {
+    return (
+      track.isAnonymous === true ||
+      track.is_anonymous === true ||
+      track.requestedBy === 'Anonim' ||
+      track.requestedBy === 'Anonim Müşteri' ||
+      track.requestedBy?.trim().toLowerCase() === 'anonim' ||
+      track.requestedBy?.startsWith('Anonim')
+    );
+  };
+
   const getRequestedByLabel = (track: any) => {
-    if (user && track.requestedByUserId === user.id) return 'Sen';
+    const isAnon = isAnonymousTrack(track);
+    if (user && track.requestedByUserId === user.id && !isAnon) return 'Sen';
+    if (isAnon) return 'Anonim';
     if (isVenueOrBackgroundRequester(track.requestedBy, track.requestedByUserId)) {
       return isBackgroundMusicRequester(track.requestedBy) ? '☕ Fon Müziği' : '👑 Mekan Sahibi';
     }
     if (!track.requestedBy) return 'Misafir';
-    if (track.requestedBy.startsWith('@') || track.requestedBy === 'Anonim' || track.requestedBy === 'Anonim Müşteri') {
-      return track.requestedBy;
-    }
-    if (track.requestedBy.includes('.***')) {
+    if (track.requestedBy.startsWith('@') || track.requestedBy.includes('.***')) {
       return track.requestedBy;
     }
     return formatUserDisplayName(null, track.requestedBy);
@@ -303,6 +313,10 @@ export const UpNextQueueSection: React.FC = () => {
                                   className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    if (isAnonymousTrack(track)) {
+                                      showToast('Bu profil gizlidir 🔒');
+                                      return;
+                                    }
                                     if (track.requestedByUserId) openProfile(track.requestedByUserId);
                                   }}
                                 >
@@ -310,7 +324,7 @@ export const UpNextQueueSection: React.FC = () => {
                                   <span className="truncate max-w-[90px]">{getRequestedByLabel(track)}</span>
                                 </span>
                               )}
-                              {user && track.requestedByUserId === user.id && (
+                              {user && track.requestedByUserId === user.id && !isAnonymousTrack(track) && (
                                 <span className="px-1.5 py-0.5 rounded bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] text-[8px] font-black border border-[var(--theme-primary)]/30">
                                   Senin
                                 </span>
