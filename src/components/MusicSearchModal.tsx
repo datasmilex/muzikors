@@ -60,7 +60,7 @@ export const MusicSearchModal: React.FC = () => {
       return { isBlocked: true, reason: 'Sansürsüz Şarkı (Küfürlü)', type: 'explicit' };
     }
     if (isVibeGuardActive) {
-      const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue?.allowed_genres);
+      const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue?.allowed_genres, searchQuery);
       if (!vibeCheck.isAllowed) {
         return { isBlocked: true, reason: vibeCheck.blockedReason || 'Mekân Tarzı Dışı', type: 'vibe' };
       }
@@ -84,7 +84,7 @@ export const MusicSearchModal: React.FC = () => {
     } else {
       setSelectedTrack(null);
     }
-  }, [searchResults, activeVenue?.explicit_filter_enabled, activeVenue?.allowed_genres]);
+  }, [searchResults, searchQuery, activeVenue?.explicit_filter_enabled, activeVenue?.allowed_genres]);
 
   // Auto-search real Spotify tracks on mount or query change
   useEffect(() => {
