@@ -98,16 +98,9 @@ export const NowPlayingSection: React.FC = () => {
     );
   }
 
+  const isMusicPlaying = isPlayingAudio && nowPlaying.isPlaying !== false && !isPaused;
   const durationSec = nowPlaying.duration || (nowPlaying.durationMs ? Math.round(nowPlaying.durationMs / 1000) : 180);
-  let currentElapsed = audioProgress;
-
-  if (nowPlaying.startedAt && (!audioProgress || audioProgress === 0)) {
-    const elapsedMs = Math.max(0, Date.now() - new Date(nowPlaying.startedAt).getTime());
-    currentElapsed = Math.min(durationSec, Math.floor(elapsedMs / 1000));
-  } else {
-    currentElapsed = Math.min(durationSec, Math.max(0, audioProgress));
-  }
-
+  const currentElapsed = Math.min(durationSec, Math.max(0, audioProgress));
   const progressPercent = durationSec > 0 ? Math.min(100, (currentElapsed / durationSec) * 100) : 0;
   const albumSrc = nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || '';
 
@@ -124,7 +117,14 @@ export const NowPlayingSection: React.FC = () => {
         
         {/* Top Status Header */}
         <div className="w-full flex items-center justify-between mb-4">
-          {user && nowPlaying.requestedByUserId === user.id ? (
+          {!isMusicPlaying ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="text-[10px] font-extrabold tracking-wider text-amber-300 uppercase">
+                Duraklatıldı
+              </span>
+            </div>
+          ) : user && nowPlaying.requestedByUserId === user.id ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)] animate-pulse" />
               <span className="text-[10px] font-extrabold tracking-wider text-[var(--theme-primary-light)] uppercase">
@@ -142,10 +142,10 @@ export const NowPlayingSection: React.FC = () => {
 
           {/* Equalizer Waveform Indicator */}
           <div className="flex items-center gap-0.5 h-4 px-2 py-1 rounded-full bg-black/40 border border-white/5">
-            <span className="w-1 bg-[var(--theme-primary)] rounded-full animate-bar-1" />
-            <span className="w-1 bg-[var(--theme-primary)] rounded-full animate-bar-2" />
-            <span className="w-1 bg-[var(--theme-primary)] rounded-full animate-bar-3" />
-            <span className="w-1 bg-[var(--theme-primary)] rounded-full animate-bar-4" />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-1' : 'h-1.5 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-2' : 'h-2.5 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-3' : 'h-1.5 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-4' : 'h-2 opacity-40'}`} />
           </div>
         </div>
 
