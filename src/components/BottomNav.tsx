@@ -3,13 +3,13 @@
 import React from 'react';
 import { Store, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { getUserDailySongRights } from '../lib/timeHelpers';
 
 export const BottomNav: React.FC = () => {
   const { openModal, isVenueBound, activeModal, user } = useApp();
-
-  const maxDailySongs = user?.isPremium ? 5 : 2;
-  const usedSongs = user?.daily_songs_count || 0;
-  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
+  const songRights = getUserDailySongRights(user);
+  const remainingSongs = songRights.remainingSongs;
+  const maxDailySongs = songRights.baseMaxDailySongs;
 
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 pointer-events-none">

@@ -4,6 +4,7 @@ import React from 'react';
 import { Play, Disc, User, Volume2, Music, Store, ExternalLink, Mic2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
+import { getUserDailySongRights } from '../lib/timeHelpers';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 
@@ -64,9 +65,7 @@ export const NowPlayingSection: React.FC = () => {
     );
   }
 
-  const maxDailySongs = user?.isPremium ? 5 : 2;
-  const usedSongs = user?.daily_songs_count || 0;
-  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
+  const songRights = getUserDailySongRights(user);
 
   // If no user track is currently playing or if it is Spotify background music
   if (!nowPlaying || (nowPlaying as any).isBackgroundMusic === true || nowPlaying.id === 'spotify-bg') {
@@ -89,7 +88,7 @@ export const NowPlayingSection: React.FC = () => {
             <span>+ Sıraya İlk Şarkıyı Ekle</span>
             {user && (
               <span className="px-2 py-0.5 rounded-full bg-black/20 text-black text-[10px] font-black">
-                {remainingSongs}/{maxDailySongs} Hak
+                {songRights.display}
               </span>
             )}
           </button>

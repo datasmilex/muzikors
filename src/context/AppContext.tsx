@@ -1659,13 +1659,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     await addXp(earnedXp, `${currentStreak}. Gün Giriş Bonusu`);
 
-    const newDailySongsCount = Math.max(0, (user.daily_songs_count || 0) - 1);
-
     setUser((prev) => prev ? {
       ...prev,
       lastDailyClaim: todayTR,
       daily_streak: currentStreak,
-      daily_songs_count: newDailySongsCount
     } : null);
 
     if (supabase) {
@@ -1675,7 +1672,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .update({
             last_daily_claim: todayTR,
             daily_streak: currentStreak,
-            daily_songs_count: newDailySongsCount
           })
           .eq('id', user.id);
       } catch (err) {

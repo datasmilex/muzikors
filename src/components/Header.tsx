@@ -4,9 +4,11 @@ import React from 'react';
 import { Menu, User, QrCode, Coins, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarFrame } from './AvatarFrame';
+import { getUserDailySongRights } from '../lib/timeHelpers';
 
 export const Header: React.FC = () => {
   const { openModal, activeVenue, user, isVenueBound, isVenueActive } = useApp();
+  const songRights = getUserDailySongRights(user);
 
   return (
     <header className="sticky top-0 z-30 w-full bg-[var(--theme-bg)]/90 backdrop-blur-2xl border-b border-white/[0.08] px-4 py-2.5 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.8)] transition-colors duration-300">
@@ -70,9 +72,13 @@ export const Header: React.FC = () => {
         {user && (
           <button
             onClick={() => openModal('profile')}
-            className="hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] text-[11px] font-black active:scale-95 transition-transform"
+            className={`hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-black active:scale-95 transition-all ${
+              songRights.isBonusActive 
+                ? 'bg-amber-400/20 border-amber-400/50 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+                : 'bg-[var(--theme-primary)]/15 border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)]'
+            }`}
           >
-            <span>{Math.max(0, (user.isPremium ? 5 : 2) - (user.daily_songs_count || 0))}/{user.isPremium ? 5 : 2} Hak</span>
+            <span>{songRights.display}</span>
           </button>
         )}
 

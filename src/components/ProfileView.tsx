@@ -513,7 +513,7 @@ export const ProfileView: React.FC = () => {
                           const av = isEditing ? editAvatar : currentProfile?.avatar || currentProfile?.avatar_url;
                           const isGoogle = av?.includes('googleusercontent.com') || av?.includes('google.com');
                           return av && !isGoogle ? (
-                            <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo_') ? 'object-contain p-3 bg-black' : 'object-cover'}`} />
+                            <img src={av} alt={currentProfile?.name || currentProfile?.full_name} className={`w-full h-full ${av.startsWith('/logo') ? 'object-contain p-3 bg-black/60' : 'object-cover'}`} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <User className="w-10 h-10 text-[var(--theme-primary)]/40" />
@@ -552,24 +552,27 @@ export const ProfileView: React.FC = () => {
                               className="hidden"
                             />
                             {[
-                              { id: 'custom', url: user?.avatar },
-                              { id: 'logo1', url: '/logo_1.png' },
-                              { id: 'logo2', url: '/logo_2.png' },
-                              { id: 'logo3', url: '/logo_3.png' },
-                              { id: 'logo4', url: '/logo_4.png' },
-                              { id: 'logo5', url: '/logo_5.png' },
-                            ].filter(a => a.url).map((av, idx) => (
+                              ...(user?.avatar && !['/logo_gold.png', '/logo_cyan.png', '/logo_purple.png', '/logo_green.png', '/logo_blue.png', '/logo_red.png', '/logo.png'].includes(user.avatar) ? [{ id: 'custom', url: user.avatar }] : []),
+                              { id: 'gold', url: '/logo_gold.png' },
+                              { id: 'cyan', url: '/logo_cyan.png' },
+                              { id: 'purple', url: '/logo_purple.png' },
+                              { id: 'green', url: '/logo_green.png' },
+                              { id: 'blue', url: '/logo_blue.png' },
+                              { id: 'red', url: '/logo_red.png' },
+                              { id: 'classic', url: '/logo.png' },
+                            ].map((av) => (
                               <button
-                                key={idx}
-                                onClick={() => setEditAvatar(av.url!)}
-                                className={`w-14 h-14 rounded-full border-2 overflow-hidden shrink-0 relative transition-transform active:scale-95 ${
-                                  editAvatar === av.url ? 'border-amber-400 scale-105 shadow-md shadow-amber-500/20' : 'border-white/10 opacity-70'
+                                key={av.id}
+                                type="button"
+                                onClick={() => setEditAvatar(av.url)}
+                                className={`w-14 h-14 rounded-full border-2 overflow-hidden shrink-0 relative transition-transform active:scale-95 cursor-pointer ${
+                                  editAvatar === av.url ? 'border-amber-400 scale-105 shadow-md shadow-amber-500/20' : 'border-white/10 opacity-70 hover:opacity-100'
                                 }`}
                               >
-                                <img src={av.url!} alt="avatar" className={`w-full h-full ${av.url!.startsWith('/logo_') ? 'object-contain p-2 bg-black' : 'object-cover'}`} />
+                                <img src={av.url} alt="avatar" className={`w-full h-full ${av.url.startsWith('/logo') ? 'object-contain p-2 bg-black/60' : 'object-cover'}`} />
                                 {editAvatar === av.url && (
                                   <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
-                                    <Check className="w-5 h-5 text-amber-400" />
+                                    <Check className="w-5 h-5 text-amber-400 stroke-[3]" />
                                   </div>
                                 )}
                               </button>

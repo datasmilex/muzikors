@@ -9,6 +9,7 @@ import { Track } from '../types';
 import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration, formatUserDisplayName } from '../utils/formatters';
 import { isTrackAllowedByVibeGuard, classifyTrackGenres } from '../utils/genreMatcher';
+import { getUserDailySongRights } from '../lib/timeHelpers';
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -21,9 +22,9 @@ export const MusicSearchModal: React.FC = () => {
     showToast,
   } = useApp();
 
-  const maxDailySongs = user?.isPremium ? 5 : 2;
-  const usedSongs = user?.daily_songs_count || 0;
-  const remainingSongs = Math.max(0, maxDailySongs - usedSongs);
+  const songRights = getUserDailySongRights(user);
+  const remainingSongs = songRights.remainingSongs;
+  const maxDailySongs = songRights.baseMaxDailySongs;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
