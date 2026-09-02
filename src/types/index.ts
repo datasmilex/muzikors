@@ -107,6 +107,7 @@ export interface UserProfile {
   xp?: number;
   level?: number;
   daily_liked_songs_xp?: number;
+  daily_streak?: number;
   avatar_frame?: string;
   is_beta_tester?: boolean;
   beta_tester_reward_claimed?: boolean;

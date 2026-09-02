@@ -56,6 +56,7 @@ interface AppContextType {
   pendingRewardTrack: Track | null;
   openRewardedAdModal: (track?: Track | null, options?: { isAnonymous?: boolean; isBoosted?: boolean; message?: string }) => void;
   claimRewardAndQueueTrack: () => Promise<boolean>;
+  claimDailyReward: () => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -451,7 +452,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp')
+          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp, last_daily_claim, daily_streak')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -541,6 +542,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         xp: totalXp,
         level: computedLevel,
         daily_liked_songs_xp: Number(dbProfile.daily_liked_songs_xp ?? 0),
+        lastDailyClaim: dbProfile.last_daily_claim || prev?.lastDailyClaim || null,
+        daily_streak: Number(dbProfile.daily_streak ?? prev?.daily_streak ?? 0),
         avatar_frame: dbProfile.avatar_frame || prev?.avatar_frame || 'none',
         premium_until: dbProfile.premium_until || null,
         premium_activated_at: dbProfile.premium_activated_at || null,
@@ -638,6 +641,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             xp: updatedXp,
             level: computedLvl,
             daily_liked_songs_xp: isNewDay ? 0 : (typeof row?.daily_liked_songs_xp === 'number' ? row.daily_liked_songs_xp : (prev.daily_liked_songs_xp ?? 0)),
+            daily_streak: typeof row?.daily_streak === 'number' ? row.daily_streak : (prev.daily_streak ?? 0),
             avatar_frame: row?.avatar_frame ?? prev.avatar_frame,
             is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
             beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
@@ -1620,6 +1624,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [user, showToast, supabase]);
 
+  // ── CLAIM DAILY REWARD ──────────────────────────────────────────────────
+  const claimDailyReward = useCallback(async (): Promise<boolean> => {
+    if (!user || !user.id) {
+      openProtectedModal('daily_reward', 'Günlük ödülü toplamak için giriş yapmalısınız.');
+      return false;
+    }
+
+    const todayTR = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Istanbul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterdayTR = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Istanbul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(d);
+
+    if (user.lastDailyClaim === todayTR) {
+      showToast('Günün ödülünü zaten aldınız! Yarın tekrar bekleriz.');
+      return false;
+    }
+
+    // Determine streak: consecutive day check
+    const currentStreak = user.lastDailyClaim === yesterdayTR ? ((user.daily_streak || 0) + 1) : 1;
+    // Base +5 XP, +2 XP for each consecutive day
+    const earnedXp = 5 + (currentStreak - 1) * 2;
+
+    await addXp(earnedXp, `${currentStreak}. Gün Giriş Bonusu`);
+
+    const newDailySongsCount = Math.max(0, (user.daily_songs_count || 0) - 1);
+
+    setUser((prev) => prev ? {
+      ...prev,
+      lastDailyClaim: todayTR,
+      daily_streak: currentStreak,
+      daily_songs_count: newDailySongsCount
+    } : null);
+
+    if (supabase) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            last_daily_claim: todayTR,
+            daily_streak: currentStreak,
+            daily_songs_count: newDailySongsCount
+          })
+          .eq('id', user.id);
+      } catch (err) {
+        console.warn('[claimDailyReward DB update]', err);
+      }
+    }
+
+    confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
+    showToast(`🎉 Günlük Ödül: +${earnedXp} XP (${currentStreak}. Gün Serisi) ve +1 Şarkı Hakkı!`);
+    return true;
+  }, [user, addXp, openProtectedModal, showToast, supabase]);
+
   const toggleAudioPlay = useCallback(() => setIsPlayingAudio((p) => !p), []);
 
   return (
@@ -1631,7 +1699,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, addXp, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway,
-      pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack
+      pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack, claimDailyReward
     }}>
       {children}
     </AppContext.Provider>
