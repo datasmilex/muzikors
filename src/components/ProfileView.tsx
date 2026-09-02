@@ -7,12 +7,11 @@ import { useApp } from '../context/AppContext';
 import { THEMES } from '../lib/theme';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
-import { AchievementsModal } from './AchievementsModal';
-import { ACHIEVEMENTS, TIER_STYLES, isAchievementUnlocked, isAchievementClaimed, AVATAR_FRAMES, isFrameUnlocked } from '../data/achievements';
 import { AvatarFrame } from './AvatarFrame';
 import { supabase } from '../lib/supabaseClient';
 import { SocialPost as SocialPostType, ProfileStats } from '../types';
 import { SocialPost } from './SocialPost';
+import { getLevelDetails, AVATAR_FRAMES, isFrameUnlocked } from '../utils/levelSystem';
 
 // ─── Crop helpers ─────────────────────────────────────────────────────────────
 interface Area { x: number; y: number; width: number; height: number; }
@@ -61,340 +60,383 @@ const CropModal: React.FC<CropModalProps> = ({ imageSrc, onConfirm, onCancel }) 
     try {
       const blob = await getCroppedBlob(imageSrc, croppedAreaPixels);
       onConfirm(blob);
-    } catch {
+    } catch (err) {
+      console.error('[Crop Error]', err);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-end"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-    >
-      <div className="absolute inset-0 bg-black/95" onClick={onCancel} />
-      <motion.div
-        className="relative w-full max-w-md bg-[#120C08] rounded-t-[2rem] flex flex-col overflow-hidden border-t border-[#D4AF37]/30 shadow-[0_-20px_60px_rgba(0,0,0,0.8)]"
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#D4AF37]/15">
-          <div className="flex items-center gap-2">
-            <CropIcon className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-sm font-black text-white tracking-tight">Fotoğrafı Kırp</span>
-          </div>
-          <button onClick={onCancel} className="p-1.5 rounded-full bg-white/5 active:bg-white/15 text-zinc-400">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="relative w-full" style={{ height: '320px' }}>
-          <Cropper
-            image={imageSrc}
-            crop={crop}
-            zoom={zoom}
-            aspect={1}
-            cropShape="round"
-            showGrid={false}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
-            style={{
-              containerStyle: { background: '#0A0A0A' },
-              cropAreaStyle: {
-                border: '3px solid #D4AF37',
-                boxShadow: '0 0 0 9999px rgba(10, 10, 10, 0.75)',
-              },
-            }}
-          />
-        </div>
-        <div className="px-6 pt-3 pb-2 flex items-center gap-3">
-          <span className="text-[10px] text-amber-200/40 font-bold w-4">—</span>
-          <input
-            type="range"
-            min={1} max={3} step={0.01}
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 h-1 accent-[#D4AF37] cursor-pointer"
-          />
-          <span className="text-[10px] text-amber-200/40 font-bold w-4">+</span>
-        </div>
-        <div className="flex gap-3 px-5 pb-6 pt-2">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm active:scale-95 transition-transform"
-          >
-            İptal
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={loading}
-            className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#E5A93B] text-black font-black text-sm active:scale-95 transition-transform disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,55,0.4)]"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Uygula</>}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+    <div className="fixed inset-0 z-[150] flex flex-col items-center justify-center bg-black/90 p-4">
+      <div className="relative w-full max-w-sm aspect-square bg-neutral-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+        <Cropper
+          image={imageSrc}
+          crop={crop}
+          zoom={zoom}
+          aspect={1}
+          cropShape="round"
+          showGrid={false}
+          onCropChange={setCrop}
+          onZoomChange={setZoom}
+          onCropComplete={onCropComplete}
+        />
+      </div>
+
+      <div className="w-full max-w-sm mt-4 px-4 flex items-center gap-3">
+        <span className="text-xs text-neutral-400 font-bold">Yakınlaştır</span>
+        <input
+          type="range"
+          min={1}
+          max={3}
+          step={0.05}
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          className="flex-1 accent-[var(--theme-primary)] h-1.5 bg-neutral-700 rounded-lg cursor-pointer"
+        />
+      </div>
+
+      <div className="flex gap-3 mt-6 w-full max-w-sm px-4">
+        <button
+          onClick={onCancel}
+          disabled={loading}
+          className="flex-1 py-3 rounded-2xl bg-white/10 text-white font-bold text-xs active:scale-95 transition-all"
+        >
+          İptal
+        </button>
+        <button
+          onClick={handleConfirm}
+          disabled={loading}
+          className="flex-1 py-3 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CropIcon className="w-4 h-4" /> Kırp ve Seç</>}
+        </button>
+      </div>
+    </div>
   );
 };
 
-// ─── Main ProfileView ──────────────────────────────────────────────────────────
 export const ProfileView: React.FC = () => {
-  const { activeModal, closeModal, user, setUser, deleteAccount, logout, loginWithProvider, showToast, viewingProfileId, openProtectedModal, theme, setTheme } = useApp();
-  
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const {
+    user,
+    setUser,
+    activeModal,
+    closeModal,
+    logout,
+    deleteAccount,
+    showToast,
+    loginWithProvider,
+    theme,
+    setTheme,
+    viewingProfileId,
+    openProfile
+  } = useApp();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editAvatar, setEditAvatar] = useState('');
-  const [selectedFrame, setSelectedFrame] = useState<string>('none');
+  const [selectedFrame, setSelectedFrame] = useState('none');
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [showAchievements, setShowAchievements] = useState(false);
-  const [showTechnicalStats, setShowTechnicalStats] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  // Social State
+  // Social & Stats state
   const [profileData, setProfileData] = useState<any>(null);
-  const [stats, setStats] = useState<ProfileStats>({ posts_count: 0, followers_count: 0, following_count: 0, is_following: false });
-  const [posts, setPosts] = useState<SocialPostType[]>([]);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [isFollowingState, setIsFollowingState] = useState(false);
-  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [stats, setStats] = useState<ProfileStats>({ followers_count: 0, following_count: 0, posts_count: 0, is_following: false });
+  const [posts, setPosts] = useState<SocialPostType[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
-  // Crop state
-  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
-
-  const presetAvatars = [
-    '/logo_gold.png',
-    '/logo_red.png',
-    '/logo_green.png',
-    '/logo_cyan.png',
-    '/logo_blue.png',
-    '/logo_purple.png',
-  ];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = !viewingProfileId || viewingProfileId === user?.id;
   const currentProfile = isOwnProfile ? user : profileData;
-  const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
-  const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
-
-  const currentUserId = user?.id;
 
   const fetchProfileData = useCallback(async () => {
-    if (activeModal !== 'profile') return;
-    const targetId = viewingProfileId || currentUserId;
+    if (!supabase) return;
+    const targetId = viewingProfileId || user?.id;
     if (!targetId) return;
-    
+
     setIsLoadingProfile(true);
     try {
-      // 1. Fetch user info from profiles
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', targetId).single();
-      if (!error && data) {
-        setProfileData(data);
+      // 1. Fetch Profile
+      const { data: pData, error: pErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', targetId)
+        .single();
+      
+      if (!pErr && pData) {
+        setProfileData(pData);
       }
 
-      // 2. Fetch Stats via RPC
-      const { data: statsData, error: statsError } = await supabase.rpc('get_profile_stats', { p_user_id: targetId });
-      if (!statsError && statsData) {
-        setStats(statsData as any);
+      // 2. Fetch Stats
+      const { count: followersCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', targetId);
+
+      const { count: followingCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', targetId);
+
+      let isFollowing = false;
+      if (user?.id && user.id !== targetId) {
+        const { data: followRel } = await supabase
+          .from('follows')
+          .select('id')
+          .eq('follower_id', user.id)
+          .eq('following_id', targetId)
+          .maybeSingle();
+        isFollowing = !!followRel;
       }
 
-      // 3. Fetch Follow state if logged in and looking at someone else
-      if (!isOwnProfile && currentUserId) {
-        const { data: followData } = await supabase.from('follows').select('*').eq('follower_id', currentUserId).eq('following_id', targetId).single();
-        setIsFollowingState(!!followData);
-      }
+      setStats({
+        followers_count: followersCount || 0,
+        following_count: followingCount || 0,
+        posts_count: 0,
+        is_following: isFollowing,
+      });
 
-      // 4. Fetch Posts
-      const { data: postsData, error: postsError } = await supabase
+      // 3. Fetch Posts
+      const { data: postsData, error: postsErr } = await supabase
         .from('posts')
         .select(`
-          id, content, created_at, likes_count, comments_count, user_id,
-          profiles:user_id ( full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester ),
-          post_likes ( user_id )
+          id, user_id, content, likes_count, comments_count, created_at,
+          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level)
         `)
         .eq('user_id', targetId)
         .order('created_at', { ascending: false });
-        
-      if (!postsError && postsData) {
-        setPosts(postsData.map((row: any) => ({
-          id: row.id,
-          user_id: row.user_id,
-          content: row.content,
-          likes_count: row.likes_count,
-          comments_count: row.comments_count,
-          created_at: row.created_at,
-          user_full_name: row.profiles?.full_name,
-          user_username: row.profiles?.username,
-          user_avatar_url: row.profiles?.avatar_url,
-          user_avatar_frame: row.profiles?.avatar_frame || 'none',
-          user_is_beta_tester: row.profiles?.is_beta_tester,
-          user_is_premium: row.profiles?.is_premium,
-          has_liked: currentUserId ? row.post_likes.some((like: any) => like.user_id === currentUserId) : false,
-        })));
+
+      if (!postsErr && postsData) {
+        setPosts(postsData as any);
       }
     } catch (err) {
-      console.error(err);
-      if (!isOwnProfile) showToast('Kullanıcı bulunamadı.');
+      console.error('[fetchProfileData error]', err);
     } finally {
       setIsLoadingProfile(false);
     }
-  }, [viewingProfileId, currentUserId, isOwnProfile, activeModal, showToast]);
+  }, [viewingProfileId, user?.id]);
 
   useEffect(() => {
     if (activeModal === 'profile') {
       fetchProfileData();
+    } else {
+      setIsEditing(false);
+      setShowConfirmDelete(false);
     }
-  }, [activeModal, viewingProfileId, currentUserId]);
-
-  const handleFollowToggle = async () => {
-    if (!user) {
-      openProtectedModal('none', 'Takip etmek için giriş yapmalısınız.');
-      return;
-    }
-    if (isOwnProfile || !viewingProfileId) return;
-
-    setIsFollowLoading(true);
-    const prevFollowing = isFollowingState;
-    const prevFollowers = stats.followers_count;
-    
-    // Optimistic UI update
-    setIsFollowingState(!prevFollowing);
-    setStats(prev => ({ ...prev, followers_count: prevFollowing ? prevFollowers - 1 : prevFollowers + 1 }));
-
-    try {
-      if (prevFollowing) {
-        await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', viewingProfileId);
-      } else {
-        await supabase.from('follows').insert({ follower_id: user.id, following_id: viewingProfileId });
-      }
-    } catch (err) {
-      console.error(err);
-      showToast('İşlem başarısız.');
-      // Revert
-      setIsFollowingState(prevFollowing);
-      setStats(prev => ({ ...prev, followers_count: prevFollowers }));
-    } finally {
-      setIsFollowLoading(false);
-    }
-  };
-
-  const handleCreatePost = async () => {
-    if (!user) return;
-    const content = newPostContent.trim();
-    if (!content) return;
-    if (content.length > 280) {
-      showToast('Gönderi 280 karakterden uzun olamaz.');
-      return;
-    }
-
-    setIsPosting(true);
-    try {
-      const { error } = await supabase.from('posts').insert({
-        user_id: user.id,
-        content
-      });
-      if (error) throw error;
-      setNewPostContent('');
-      showToast('Gönderi paylaşıldı!');
-      fetchProfileData(); // Refresh posts and stats
-    } catch (err: any) {
-      console.error(err);
-      showToast('Paylaşırken hata oluştu.');
-    } finally {
-      setIsPosting(false);
-    }
-  };
+  }, [activeModal, viewingProfileId, fetchProfileData]);
 
   const handleEditClick = () => {
-    setEditUsername(user?.username?.replace('@', '') || '');
-    const currentAvatar = user?.avatar || '';
-    const isGoogleAvatar = currentAvatar.includes('googleusercontent.com') || currentAvatar.includes('google.com');
-    setEditAvatar(isGoogleAvatar ? '' : currentAvatar);
-    setSelectedFrame(user?.avatar_frame || 'none');
+    if (!user) return;
+    setEditName(user.name || '');
+    setEditUsername((user.username || '').replace(/^@/, ''));
+    setEditAvatar(user.avatar || '');
+    setSelectedFrame(user.avatar_frame || 'none');
     setIsEditing(true);
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     if (!file.type.startsWith('image/')) {
-      showToast('Lütfen sadece resim dosyası yükleyin.');
+      showToast('Lütfen geçerli bir görsel dosyası seçin.');
       return;
     }
+
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('Görsel boyutu 8MB\'dan küçük olmalıdır.');
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = () => {
-      setCropImageSrc(reader.result as string);
-    };
+    reader.onload = () => setCropImageSrc(reader.result as string);
     reader.readAsDataURL(file);
-    event.target.value = '';
+    e.target.value = '';
   };
 
-  const handleCropConfirm = async (blob: Blob) => {
+  const handleCropConfirm = async (croppedBlob: Blob) => {
     setCropImageSrc(null);
-    if (!user) return;
+    if (!user || !supabase) return;
+
     setUploadingAvatar(true);
     try {
-      if (user.avatar && user.avatar.includes('/storage/v1/object/public/avatars/')) {
-        const oldFileName = user.avatar.split('/').pop();
-        if (oldFileName) await supabase.storage.from('avatars').remove([oldFileName]);
-      }
-      const fileName = `${user.id}-${Date.now()}.jpg`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, blob, {
-        contentType: 'image/jpeg',
-        upsert: false,
-      });
+      const fileExt = 'jpg';
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, croppedBlob, { contentType: 'image/jpeg', upsert: true });
+
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = urlData.publicUrl;
+
       setEditAvatar(publicUrl);
-      showToast('Fotoğraf yüklendi!');
+      showToast('Fotoğraf kırpıldı ve yüklendi!');
     } catch (err: any) {
-      console.error(err);
+      console.error('[Avatar Upload Error]', err);
       showToast('Fotoğraf yüklenirken bir hata oluştu.');
     } finally {
       setUploadingAvatar(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!user) return;
-    setIsSaving(true);
+  const handleCreatePost = async () => {
+    if (!newPostContent.trim() || !user || !supabase) return;
+    setIsPosting(true);
     try {
-      const newUsername = '@' + editUsername.trim();
-      if (newUsername !== user.username) {
+      const { data, error } = await supabase
+        .from('posts')
+        .insert({
+          user_id: user.id,
+          content: newPostContent.trim(),
+        })
+        .select(`
+          id, user_id, content, likes_count, comments_count, created_at,
+          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level)
+        `)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setPosts(prev => [data as any, ...prev]);
+        setNewPostContent('');
+        showToast('Gönderi paylaşıldı!');
+      }
+    } catch (err) {
+      console.error('[Create Post Error]', err);
+      showToast('Gönderi paylaşılamadı.');
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
+  const [isFollowingState, setIsFollowingState] = useState(false);
+
+  useEffect(() => {
+    setIsFollowingState(Boolean(stats.is_following));
+  }, [stats.is_following]);
+
+  const handleFollowToggle = async () => {
+    if (!user) {
+      showToast('Takip etmek için giriş yapmalısınız.');
+      return;
+    }
+    const targetId = viewingProfileId;
+    if (!targetId || targetId === user.id || !supabase) return;
+
+    setIsFollowLoading(true);
+    const nextState = !isFollowingState;
+    setIsFollowingState(nextState);
+    setStats(prev => ({
+      ...prev,
+      followers_count: prev.followers_count + (nextState ? 1 : -1),
+    }));
+
+    try {
+      if (!nextState) {
+        await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', user.id)
+          .eq('following_id', targetId);
+        showToast('Takipten çıkıldı.');
+      } else {
+        await supabase
+          .from('follows')
+          .insert({ follower_id: user.id, following_id: targetId });
+        showToast('Takip edildi!');
+      }
+    } catch (err) {
+      console.error('[Follow Error]', err);
+      setIsFollowingState(!nextState);
+      setStats(prev => ({
+        ...prev,
+        followers_count: prev.followers_count + (!nextState ? 1 : -1),
+      }));
+      showToast('İşlem başarısız.');
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user || !supabase) return;
+    setIsSaving(true);
+
+    try {
+      const cleanUsername = editUsername.trim().toLowerCase().replace(/^@/, '');
+      
+      if (cleanUsername && cleanUsername !== (user.username || '').replace(/^@/, '')) {
+        const usernameRegex = /^[a-z0-9_]{3,20}$/;
+        if (!usernameRegex.test(cleanUsername)) {
+          showToast('Kullanıcı adı 3-20 karakter olmalı ve sadece harf, rakam, alt çizgi içermelidir.');
+          setIsSaving(false);
+          return;
+        }
+
         if (user.last_username_update) {
-          const daysSince = (new Date().getTime() - new Date(user.last_username_update).getTime()) / (1000 * 3600 * 24);
-          if (daysSince < 7) {
-            showToast('ID (Kullanıcı Adı) haftada sadece 1 kez değiştirilebilir.');
+          const lastUpdate = new Date(user.last_username_update).getTime();
+          const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+          if (Date.now() - lastUpdate < oneWeekMs) {
+            const daysLeft = Math.ceil((oneWeekMs - (Date.now() - lastUpdate)) / (24 * 60 * 60 * 1000));
+            showToast(`Kullanıcı adınızı 7 günde bir değiştirebilirsiniz. (${daysLeft} gün kaldı)`);
             setIsSaving(false);
             return;
           }
         }
+
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', '@' + cleanUsername)
+          .neq('id', user.id)
+          .maybeSingle();
+
+        if (existingUser) {
+          showToast('Bu kullanıcı adı zaten kullanılıyor.');
+          setIsSaving(false);
+          return;
+        }
       }
-      const updates: any = { avatar_url: editAvatar, avatar_frame: selectedFrame };
-      if (newUsername !== user.username) {
-        updates.username = newUsername;
-        updates.last_username_update = new Date().toISOString();
+
+      const updates: any = {
+        full_name: editName.trim() || user.name,
+        avatar_url: editAvatar || user.avatar,
+        avatar_frame: selectedFrame,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (cleanUsername) {
+        updates.username = '@' + cleanUsername;
+        if (cleanUsername !== (user.username || '').replace(/^@/, '')) {
+          updates.last_username_update = new Date().toISOString();
+        }
       }
-      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
       if (error) throw error;
-      
+
       setUser(prev => prev ? {
         ...prev,
-        avatar: editAvatar,
-        avatar_frame: selectedFrame,
-        username: newUsername !== user.username ? newUsername : prev.username,
-        last_username_update: newUsername !== user.username ? updates.last_username_update : prev.last_username_update,
+        name: updates.full_name,
+        avatar: updates.avatar_url,
+        username: updates.username || prev.username,
+        avatar_frame: updates.avatar_frame,
+        last_username_update: updates.last_username_update || prev.last_username_update,
       } : null);
 
       showToast('Profiliniz başarıyla güncellendi!');
@@ -406,6 +448,10 @@ export const ProfileView: React.FC = () => {
       setIsSaving(false);
     }
   };
+
+  const profileTotalXp = Number(currentProfile?.xp ?? 0);
+  const levelInfo = getLevelDetails(profileTotalXp);
+  const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
 
   return (
     <AnimatePresence>
@@ -501,36 +547,57 @@ export const ProfileView: React.FC = () => {
                             <input
                               type="file"
                               ref={fileInputRef}
-                              className="hidden"
-                              accept="image/*"
                               onChange={handleFileSelect}
+                              accept="image/*"
+                              className="hidden"
                             />
-                            {presetAvatars.map((url, idx) => (
-                              <div key={idx} className="shrink-0">
-                                <button
-                                  onClick={() => setEditAvatar(url)}
-                                  className={`w-14 h-14 rounded-full border-2 overflow-hidden transition-all ${
-                                    editAvatar === url
-                                      ? 'border-amber-400 scale-105 shadow-[0_0_12px_rgba(245,158,11,0.5)]'
-                                      : 'border-white/10 opacity-60 active:opacity-100'
-                                  }`}
-                                >
-                                  <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-contain p-1.5 bg-black" />
-                                </button>
-                              </div>
+                            {[
+                              { id: 'custom', url: user?.avatar },
+                              { id: 'logo1', url: '/logo_1.png' },
+                              { id: 'logo2', url: '/logo_2.png' },
+                              { id: 'logo3', url: '/logo_3.png' },
+                              { id: 'logo4', url: '/logo_4.png' },
+                              { id: 'logo5', url: '/logo_5.png' },
+                            ].filter(a => a.url).map((av, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => setEditAvatar(av.url!)}
+                                className={`w-14 h-14 rounded-full border-2 overflow-hidden shrink-0 relative transition-transform active:scale-95 ${
+                                  editAvatar === av.url ? 'border-amber-400 scale-105 shadow-md shadow-amber-500/20' : 'border-white/10 opacity-70'
+                                }`}
+                              >
+                                <img src={av.url!} alt="avatar" className={`w-full h-full ${av.url!.startsWith('/logo_') ? 'object-contain p-2 bg-black' : 'object-cover'}`} />
+                                {editAvatar === av.url && (
+                                  <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                                    <Check className="w-5 h-5 text-amber-400" />
+                                  </div>
+                                )}
+                              </button>
                             ))}
                           </div>
                         </div>
 
-                        {/* Profil Çerçeveleri (Avatar Frames) */}
+                        <div>
+                          <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Görünen Ad</label>
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 px-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors"
+                            placeholder="Ad Soyad"
+                          />
+                        </div>
+
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">Profil Çerçevesi Seç</p>
-                            <span className="text-[10px] text-neutral-500 font-semibold">Başarımlarla Açılır</span>
+                            <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest block">Avatar Çerçevesi</label>
+                            <span className="text-[9px] text-[var(--theme-primary-light)] font-bold">
+                              Seviye: {levelInfo.level} ({levelInfo.title})
+                            </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar text-left">
                             {AVATAR_FRAMES.map((frame) => {
-                              const isUnlocked = isFrameUnlocked(frame.id, totalSongsCount, isProfileBetaTester);
+                              const isUnlocked = isFrameUnlocked(frame.id, levelInfo.level, isProfileBetaTester);
                               const isSelected = selectedFrame === frame.id;
                               return (
                                 <div
@@ -599,35 +666,31 @@ export const ProfileView: React.FC = () => {
                         <div className="flex gap-2 pt-1">
                           <button
                             onClick={() => setIsEditing(false)}
-                            className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-neutral-300 font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
+                            className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95 transition-all"
                           >
                             İptal
                           </button>
                           <button
-                            onClick={handleSave}
+                            onClick={handleSaveProfile}
                             disabled={isSaving}
-                            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform shadow-md disabled:opacity-50"
+                            className="flex-1 py-2.5 rounded-xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md"
                           >
-                            {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Kaydet'}
                           </button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <div className="flex items-center justify-center gap-2">
-                          <h2 className="text-xl font-black tracking-tight leading-none text-white">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <h2 className="text-base font-black text-white tracking-tight">
                             {currentProfile?.name || currentProfile?.full_name || 'Misafir Kullanıcı'}
                           </h2>
-                          {(currentProfile?.is_premium || currentProfile?.isPremium) && (
-                            <PremiumBadge className="w-4 h-4 ml-1" />
-                          )}
-                          {(currentProfile?.is_beta_tester || currentProfile?.isBetaTester) && (
-                            <BetaTesterBadge className="w-4 h-4 ml-1" />
-                          )}
+                          {currentProfile?.isPremium || currentProfile?.is_premium ? <PremiumBadge /> : null}
+                          {isProfileBetaTester ? <BetaTesterBadge /> : null}
                         </div>
-                        <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
-                          <span className="text-[9px] text-neutral-400 font-medium tracking-wider">ID:</span>
-                          <span className="text-[10px] font-black tracking-widest text-amber-400">
+
+                        <div className="flex items-center justify-center gap-2 mt-1">
+                          <span className="text-[11px] font-black tracking-wider text-amber-400">
                             {currentProfile?.username || '@misafir'}
                           </span>
                         </div>
@@ -655,38 +718,46 @@ export const ProfileView: React.FC = () => {
                             </button>
                           )}
                         </div>
-
-                        {/* ─── Pinned Achievements Badges ─── */}
-                        {(() => {
-                          const pinnedIds: string[] = (currentProfile as any)?.pinned_achievements ?? [];
-                          const pinned = ACHIEVEMENTS.filter(a => pinnedIds.includes(a.id));
-                          if (pinned.length === 0) return null;
-
-                          return (
-                            <div 
-                              onClick={() => setShowAchievements(true)}
-                              className="flex items-center justify-center gap-1.5 mt-3 flex-wrap cursor-pointer group"
-                              title="Tüm başarımları görüntüle"
-                            >
-                              {pinned.map(ach => (
-                                <div 
-                                  key={ach.id}
-                                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/25 backdrop-blur-md shadow-sm group-hover:border-amber-400/50 group-active:scale-95 transition-all"
-                                >
-                                  <span className="text-xs">{ach.emoji}</span>
-                                  <span className="text-[10px] font-bold text-amber-300">{ach.title}</span>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })()}
                       </>
                     )}
                   </div>
                 </div>
 
+                {/* ─── Level & XP Progress Card (Anti-Slop Minimalist) ─── */}
+                <div className="w-full bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] p-3.5 mt-4 mb-2 shadow-sm space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border ${levelInfo.tier.badgeBg} ${levelInfo.tier.badgeText} ${levelInfo.tier.badgeBorder}`}>
+                        Lv. {levelInfo.level}
+                      </span>
+                      <span className="text-xs font-black text-white flex items-center gap-1">
+                        <span>{levelInfo.icon}</span>
+                        <span>{levelInfo.title}</span>
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold text-amber-400">
+                      {levelInfo.currentLevelXp} / {levelInfo.xpForNextLevel} XP
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${levelInfo.progressPercentage}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9px] text-neutral-400 font-semibold px-0.5">
+                    <span>%{levelInfo.progressPercentage} tamamlandı</span>
+                    <span>Sonraki seviyeye {levelInfo.remainingXpForNext} XP</span>
+                  </div>
+                </div>
+
                 {/* ─── Profile Stats ─── */}
-                <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 mt-5 mb-3 shadow-inner">
+                <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 my-3 shadow-inner">
                   <div className="flex flex-col items-center flex-1">
                     <span className="text-sm font-black text-white">
                       {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
@@ -704,32 +775,6 @@ export const ProfileView: React.FC = () => {
                     <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takip Edilen</span>
                   </div>
                 </div>
-
-                {/* ─── Achievements Action Button ─── */}
-                {(() => {
-                  const totalSongsCount = currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0;
-                  const isProfileBetaTester = currentProfile?.is_beta_tester ?? currentProfile?.isBetaTester ?? false;
-                  const isProfileBetaTesterRewardClaimed = currentProfile?.beta_tester_reward_claimed ?? false;
-                  const userClaimedList: string[] = (currentProfile as any)?.claimed_achievements ?? [];
-                  const completedCount = ACHIEVEMENTS.filter(
-                    a => isAchievementUnlocked(a, totalSongsCount, isProfileBetaTester) || isAchievementClaimed(a, userClaimedList, isProfileBetaTesterRewardClaimed)
-                  ).length;
-
-                  return (
-                    <button
-                      onClick={() => setShowAchievements(true)}
-                      className="w-full py-2.5 px-4 rounded-2xl border border-[var(--theme-primary)]/25 bg-[var(--theme-card-alt)] text-[var(--theme-primary-light)] font-bold text-xs flex items-center justify-between shadow-sm active:scale-95 transition-all mb-4 group"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-[var(--theme-primary)] group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-black text-white">Başarımlar & Rozetler</span>
-                      </span>
-                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30">
-                        {completedCount} / {ACHIEVEMENTS.length} Kazanıldı
-                      </span>
-                    </button>
-                  );
-                })()}
 
                 {/* ─── Social Feed ─── */}
                 <div className="mt-2 relative">
@@ -874,13 +919,6 @@ export const ProfileView: React.FC = () => {
           </div>
         </motion.div>
       </div>
-
-      <AchievementsModal 
-        isOpen={showAchievements} 
-        onClose={() => setShowAchievements(false)} 
-        targetProfile={currentProfile}
-        isOwnProfile={isOwnProfile}
-      />
       </>)}
     </AnimatePresence>
   );

@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { formatUserDisplayName } from '../utils/formatters';
 import { AvatarFrame } from './AvatarFrame';
+import { getLevelDetails } from '../utils/levelSystem';
 
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
@@ -29,21 +30,31 @@ export const LeaderboardModal: React.FC = () => {
       if (activeTab === 'users') {
         const { data: profiles, error } = await supabase
           .from('profiles')
-          .select('id, full_name, username, avatar_url, avatar_frame, total_songs_requested, is_premium, is_beta_tester')
-          .order('total_songs_requested', { ascending: false })
+          .select('id, full_name, username, avatar_url, avatar_frame, total_songs_requested, is_premium, is_beta_tester, xp, level')
+          .order('level', { ascending: false })
+          .order('xp', { ascending: false })
           .limit(50);
         
         if (profiles && !error) {
-          const list = profiles.map((p: any) => ({
-            id: p.id,
-            name: p.full_name || 'Kullanıcı',
-            username: p.username || null,
-            avatar: p.avatar_url,
-            avatar_frame: p.avatar_frame || 'none',
-            is_premium: p.is_premium || false,
-            is_beta_tester: p.is_beta_tester || false,
-            total_songs_requested: p.total_songs_requested || 0
-          }));
+          const list = profiles.map((p: any) => {
+            const totalXp = Number(p.xp || 0);
+            const lvlInfo = getLevelDetails(totalXp);
+            return {
+              id: p.id,
+              name: p.full_name || 'Kullanıcı',
+              username: p.username || null,
+              avatar: p.avatar_url,
+              avatar_frame: p.avatar_frame || 'none',
+              is_premium: p.is_premium || false,
+              is_beta_tester: p.is_beta_tester || false,
+              total_songs_requested: p.total_songs_requested || 0,
+              xp: totalXp,
+              level: lvlInfo.level,
+              title: lvlInfo.title,
+              fullTitle: lvlInfo.fullTitle,
+              tier: lvlInfo.tier
+            };
+          });
           setUsers(list);
         } else {
           setUsers([]);
@@ -249,11 +260,14 @@ export const LeaderboardModal: React.FC = () => {
                             {isUserVip && <PremiumBadge className="w-3.5 h-3.5 shrink-0" />}
                             {isUserBeta && <BetaTesterBadge className="w-3.5 h-3.5 shrink-0" />}
                           </p>
+                          <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5 flex items-center gap-1">
+                            <span>{user.title}</span>
+                          </p>
                         </div>
 
-                        <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
-                          <span className="text-xs font-black text-[var(--theme-primary)]">{user.total_songs_requested || 0}</span>
-                          <span className="text-[8px] font-bold text-neutral-500 uppercase">İstek</span>
+                        <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center min-w-[54px]">
+                          <span className="text-xs font-black text-[var(--theme-primary)]">Lv. {user.level}</span>
+                          <span className="text-[8px] font-bold text-neutral-500 uppercase">{user.xp} XP</span>
                         </div>
                       </div>
                     );

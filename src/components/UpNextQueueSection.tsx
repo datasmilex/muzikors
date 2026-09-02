@@ -357,17 +357,26 @@ export const UpNextQueueSection: React.FC = () => {
                               <span className="text-xs font-black text-[var(--theme-primary)] min-w-[20px] text-right">
                                 {track.votes > 900000 ? 0 : track.votes}
                               </span>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleVoteTrack(track.id); }}
-                                disabled={votingCooldowns[track.id]}
-                                className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-200 ${
-                                  votingCooldowns[track.id] 
-                                    ? 'bg-white/[0.02] border-white/10 text-neutral-600 cursor-not-allowed'
-                                    : 'bg-[var(--theme-primary)]/10 active:bg-[var(--theme-primary)]/20 border-[var(--theme-primary)]/30 text-[var(--theme-primary)] active:scale-90'
-                                }`}
-                              >
-                                <ThumbsUp className="w-3.5 h-3.5" />
-                              </button>
+                              {user && track.requestedByUserId === user.id ? (
+                                <div
+                                  title="Kendi şarkınıza oy veremezsiniz"
+                                  className="p-2 rounded-xl border border-white/5 bg-white/[0.02] text-neutral-600 cursor-not-allowed"
+                                >
+                                  <ThumbsUp className="w-3.5 h-3.5 opacity-40" />
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleVoteTrack(track.id); }}
+                                  disabled={votingCooldowns[track.id]}
+                                  className={`p-2 rounded-xl border flex items-center justify-center transition-all duration-200 ${
+                                    votingCooldowns[track.id] 
+                                      ? 'bg-white/[0.02] border-white/10 text-neutral-600 cursor-not-allowed'
+                                      : 'bg-[var(--theme-primary)]/10 active:bg-[var(--theme-primary)]/20 border-[var(--theme-primary)]/30 text-[var(--theme-primary)] active:scale-90'
+                                  }`}
+                                >
+                                  <ThumbsUp className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>

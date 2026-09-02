@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AVATAR_FRAMES } from '../data/achievements';
+import { AVATAR_FRAMES } from '../utils/levelSystem';
 
 interface AvatarFrameProps {
   frameId?: string | null;

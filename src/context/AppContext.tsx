@@ -8,6 +8,7 @@ import { ThemeType, getStoredTheme, applyTheme } from '../lib/theme';
 import { formatUserDisplayName } from '../utils/formatters';
 import { containsProfanity } from '../utils/profanityFilter';
 import { isTrackAllowedByVibeGuard } from '../utils/genreMatcher';
+import { getLevelDetails, XP_REWARDS } from '../utils/levelSystem';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -46,6 +47,7 @@ interface AppContextType {
   requestTrack: (track: Track, isAnonymous?: boolean, isBoosted?: boolean, message?: string) => Promise<boolean>;
   vetoTrack: (trackId: string, isAnonymous?: boolean) => Promise<boolean>;
   voteTrack: (trackId: string) => void;
+  addXp: (amount: number, reason?: string) => Promise<void>;
   bindVenueById: (kafeId: string) => void;
   deleteAccount: () => void;
   showToast: (msg: string) => void;
@@ -449,7 +451,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, claimed_achievements, pinned_achievements, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at')
+          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -466,6 +468,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             existingProfile.daily_votes_count = 0;
             existingProfile.daily_boosts_count = 0;
             existingProfile.daily_vetoes_count = 0;
+            existingProfile.daily_liked_songs_xp = 0;
             existingProfile.last_reset_date = todayInTurkey;
 
             // Trigger DB reset in background
@@ -519,6 +522,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveModal((prev) => (prev === 'login' ? 'none' : prev));
       }
 
+      const totalXp = Number(dbProfile.xp ?? 0);
+      const computedLevel = getLevelDetails(totalXp).level;
+
       setUser((prev) => ({
         ...(prev || ({} as any)),
         id: authUser.id,
@@ -532,8 +538,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isPremium: dbProfile.is_premium || false,
         is_beta_tester: dbProfile.is_beta_tester ?? prev?.is_beta_tester ?? false,
         beta_tester_reward_claimed: dbProfile.beta_tester_reward_claimed ?? prev?.beta_tester_reward_claimed ?? false,
-        claimed_achievements: dbProfile.claimed_achievements || prev?.claimed_achievements || [],
-        pinned_achievements: dbProfile.pinned_achievements || prev?.pinned_achievements || [],
+        xp: totalXp,
+        level: computedLevel,
+        daily_liked_songs_xp: Number(dbProfile.daily_liked_songs_xp ?? 0),
         avatar_frame: dbProfile.avatar_frame || prev?.avatar_frame || 'none',
         premium_until: dbProfile.premium_until || null,
         premium_activated_at: dbProfile.premium_activated_at || null,
@@ -617,32 +624,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }).format(new Date());
         const isNewDay = !row?.last_reset_date || row?.last_reset_date !== todayInTurkey;
 
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
-                lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
-                username: row?.username ? row.username : prev.username,
-                last_username_update: row?.last_username_update ?? prev.last_username_update,
-                avatar: row?.avatar_url ?? prev.avatar,
-                claimed_achievements: Array.isArray(row?.claimed_achievements) ? row.claimed_achievements : prev.claimed_achievements,
-                pinned_achievements: Array.isArray(row?.pinned_achievements) ? row.pinned_achievements : prev.pinned_achievements,
-                is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
-                beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
-                isPremium: (row?.is_premium !== undefined)
-                  ? (!!row.is_premium && (!row?.premium_until || new Date(row.premium_until).getTime() > Date.now()))
-                  : prev.isPremium,
-                premium_until: row?.premium_until !== undefined ? row.premium_until : prev.premium_until,
-                premium_activated_at: row?.premium_activated_at !== undefined ? row.premium_activated_at : prev.premium_activated_at,
-                daily_songs_count: isNewDay ? 0 : (typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count),
-                daily_votes_count: isNewDay ? 0 : (typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count),
-                daily_boosts_count: isNewDay ? 0 : (typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count),
-                daily_vetoes_count: isNewDay ? 0 : (typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count),
-                last_reset_date: isNewDay ? todayInTurkey : (row?.last_reset_date ?? prev.last_reset_date),
-              }
-            : null
-        );
+        setUser((prev) => {
+          if (!prev) return null;
+          const updatedXp = typeof row?.xp === 'number' ? row.xp : (prev.xp ?? 0);
+          const computedLvl = getLevelDetails(updatedXp).level;
+          return {
+            ...prev,
+            totalSongsRequested: typeof row?.total_songs_requested === 'number' ? row.total_songs_requested : prev.totalSongsRequested,
+            lastDailyClaim: row?.last_daily_claim ?? prev.lastDailyClaim,
+            username: row?.username ? row.username : prev.username,
+            last_username_update: row?.last_username_update ?? prev.last_username_update,
+            avatar: row?.avatar_url ?? prev.avatar,
+            xp: updatedXp,
+            level: computedLvl,
+            daily_liked_songs_xp: isNewDay ? 0 : (typeof row?.daily_liked_songs_xp === 'number' ? row.daily_liked_songs_xp : (prev.daily_liked_songs_xp ?? 0)),
+            avatar_frame: row?.avatar_frame ?? prev.avatar_frame,
+            is_beta_tester: row?.is_beta_tester ?? prev.is_beta_tester,
+            beta_tester_reward_claimed: row?.beta_tester_reward_claimed ?? prev.beta_tester_reward_claimed,
+            isPremium: (row?.is_premium !== undefined)
+              ? (!!row.is_premium && (!row?.premium_until || new Date(row.premium_until).getTime() > Date.now()))
+              : prev.isPremium,
+            premium_until: row?.premium_until !== undefined ? row.premium_until : prev.premium_until,
+            premium_activated_at: row?.premium_activated_at !== undefined ? row.premium_activated_at : prev.premium_activated_at,
+            daily_songs_count: isNewDay ? 0 : (typeof row?.daily_songs_count === 'number' ? row.daily_songs_count : prev.daily_songs_count),
+            daily_votes_count: isNewDay ? 0 : (typeof row?.daily_votes_count === 'number' ? row.daily_votes_count : prev.daily_votes_count),
+            daily_boosts_count: isNewDay ? 0 : (typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count),
+            daily_vetoes_count: isNewDay ? 0 : (typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count),
+            last_reset_date: isNewDay ? todayInTurkey : (row?.last_reset_date ?? prev.last_reset_date),
+          };
+        });
 
       })
       .subscribe();
@@ -1063,6 +1073,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Ödeme sistemi devre dışı bırakılmıştır.');
   }, [showToast]);
 
+  // ── ADD XP FUNCTION ──────────────────────────────────────────────────────
+  const addXp = useCallback(async (amount: number, reason?: string) => {
+    if (!user || !user.id || amount <= 0) return;
+
+    const currentXp = Number(user.xp || 0);
+    const newTotalXp = currentXp + amount;
+    const oldLevelInfo = getLevelDetails(currentXp);
+    const newLevelInfo = getLevelDetails(newTotalXp);
+
+    setUser((prev) => prev ? {
+      ...prev,
+      xp: newTotalXp,
+      level: newLevelInfo.level
+    } : null);
+
+    if (newLevelInfo.level > oldLevelInfo.level) {
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8'] });
+      showToast(`🎉 Tebrikler! Seviye Atladın: ${newLevelInfo.fullTitle} (Lv. ${newLevelInfo.level})`);
+    } else if (reason) {
+      showToast(`✨ +${amount} XP (${reason})`);
+    }
+
+    if (supabase) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            xp: newTotalXp,
+            level: newLevelInfo.level
+          })
+          .eq('id', user.id);
+      } catch (err) {
+        console.warn('[addXp sync error]', err);
+      }
+    }
+  }, [user, showToast, supabase]);
+
   // ── REQUEST TRACK: with venue isolation + financial split ─────────────────
   const requestTrack = useCallback(async (track: Track, isAnonymous?: boolean, isBoosted?: boolean, message?: string): Promise<boolean> => {
     // Venue guard
@@ -1314,6 +1361,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0)
     } : null);
 
+    // Award XP for requesting a song
+    const xpEarned = isBoosted ? (XP_REWARDS.REQUEST_SONG + XP_REWARDS.BOOST_SONG) : XP_REWARDS.REQUEST_SONG;
+    addXp(xpEarned, isBoosted ? 'Şarkı İsteği & VIP Boost' : 'Şarkı İsteği');
+
     // Cooldown logic: 0s for Premium, 4 minutes (240s) for Free users
     if (user?.isPremium) {
       setCooldown({ active: false, remainingSeconds: 0, lastRequestedAt: Date.now() });
@@ -1325,7 +1376,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(`"${track.title}" sıraya eklendi!`);
     closeModal();
     return true;
-  }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase]);
+  }, [user, cooldown, nowPlaying, activeVenue, openProtectedModal, openModal, showToast, closeModal, supabase, addXp]);
 
   // ── CLAIM REWARD & QUEUE TRACK (AdMob Callback) ─────────────────────────
   const claimRewardAndQueueTrack = useCallback(async (): Promise<boolean> => {
@@ -1372,6 +1423,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       setQueue((prev) => [...prev, newTrack]);
+      addXp(XP_REWARDS.REQUEST_SONG, 'Şarkı İsteği');
       setPendingRewardTrack(null);
       setPendingRewardOptions(null);
       closeModal();
@@ -1387,7 +1439,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     closeModal();
     showToast('Tebrikler! +1 ek şarkı istek hakkı kazandınız. 🎵');
     return true;
-  }, [pendingRewardTrack, pendingRewardOptions, activeVenue, user, supabase, closeModal, showToast]);
+  }, [pendingRewardTrack, pendingRewardOptions, activeVenue, user, supabase, closeModal, showToast, addXp]);
 
   // ── VETO TRACK ────────────────────────────────────────────────────────
   const vetoTrack = useCallback(async (trackId: string, isAnonymous?: boolean): Promise<boolean> => {
@@ -1441,6 +1493,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
+    // 1. Self-vote check (User cannot upvote their own requested track)
+    const targetTrack = queue.find((t) => t.id === trackId);
+    if (targetTrack && targetTrack.requestedByUserId === user.id) {
+      showToast('Kendi açtığınız şarkıya oy veremezsiniz!');
+      return;
+    }
+
     const maxDailyVotes = user.isPremium ? 15 : 5;
     const currentDailyVotes = user.daily_votes_count || 0;
 
@@ -1484,7 +1543,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch (vErr) {
           console.warn('[song_user_votes log]', vErr);
         }
+
+        // 4. Award XP to the song requester (if they exist and haven't exceeded daily cap of 100 XP)
+        if (targetTrack?.requestedByUserId) {
+          try {
+            const requesterId = targetTrack.requestedByUserId;
+            const { data: reqProfile } = await supabase
+              .from('profiles')
+              .select('xp, level, daily_liked_songs_xp')
+              .eq('id', requesterId)
+              .maybeSingle();
+
+            if (reqProfile) {
+              const currentDailyLikedXp = Number(reqProfile.daily_liked_songs_xp || 0);
+              if (currentDailyLikedXp < XP_REWARDS.MAX_DAILY_RECEIVED_LIKE_XP) {
+                const xpToAdd = Math.min(XP_REWARDS.RECEIVE_LIKE, XP_REWARDS.MAX_DAILY_RECEIVED_LIKE_XP - currentDailyLikedXp);
+                const newReqTotalXp = Number(reqProfile.xp || 0) + xpToAdd;
+                const newReqLevel = getLevelDetails(newReqTotalXp).level;
+
+                await supabase
+                  .from('profiles')
+                  .update({
+                    xp: newReqTotalXp,
+                    level: newReqLevel,
+                    daily_liked_songs_xp: currentDailyLikedXp + xpToAdd
+                  })
+                  .eq('id', requesterId);
+              }
+            }
+          } catch (xpErr) {
+            console.warn('[voteTrack requester XP error]', xpErr);
+          }
+        }
       }
+
+      // 5. Award +2 XP to the voter
+      addXp(XP_REWARDS.GIVE_LIKE, 'Şarkı Beğenme');
 
       // Update local context states
       setUser((prev) => prev ? { ...prev, daily_votes_count: newDailyVotes } : null);
@@ -1495,7 +1589,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('[voteTrack exception]', err);
       showToast('Oylama sırasında bir hata oluştu.');
     }
-  }, [user, openProtectedModal, openModal, showToast]);
+  }, [user, queue, openProtectedModal, openModal, showToast, addXp, supabase]);
 
   const deleteAccount = useCallback(async () => {
     if (!supabase || !user) return;
@@ -1535,7 +1629,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nowPlaying, queue,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
-      handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
+      handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, addXp, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway,
       pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack
     }}>

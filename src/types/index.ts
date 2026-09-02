@@ -104,8 +104,9 @@ export interface UserProfile {
   isPremium?: boolean;
   daily_free_votes?: number;
   last_username_update?: string;
-  claimed_achievements?: string[];
-  pinned_achievements?: string[];
+  xp?: number;
+  level?: number;
+  daily_liked_songs_xp?: number;
   avatar_frame?: string;
   is_beta_tester?: boolean;
   beta_tester_reward_claimed?: boolean;
