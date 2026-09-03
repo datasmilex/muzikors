@@ -13,6 +13,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useRouter } from 'next/navigation';
+import { initPushNotifications } from '../utils/pushNotifications';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -419,6 +420,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     }
+
+    // Initialize Push Notifications on mobile devices
+    initPushNotifications();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── AUTH SESSION HANDLER ──────────────────────────────────────────────────

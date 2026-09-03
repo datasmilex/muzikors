@@ -14,6 +14,12 @@ export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
   const [activeTab, setActiveTab] = useState<'users' | 'venues'>('users');
   const [showRewards, setShowRewards] = useState(false);
+  const [rewardSettings, setRewardSettings] = useState<{
+    is_active: boolean;
+    user_rewards: { rank: string; title: string; description: string }[];
+    venue_rewards: { rank: string; title: string; description: string }[];
+    rules_text?: string;
+  } | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [venues, setVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,6 +83,17 @@ export const LeaderboardModal: React.FC = () => {
         } else {
           setVenues([]);
         }
+      }
+
+      // Fetch dynamic leaderboard rewards settings from Supabase
+      const { data: settingsRow } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'leaderboard_rewards')
+        .maybeSingle();
+
+      if (settingsRow?.value) {
+        setRewardSettings(settingsRow.value);
       }
     } catch (err) {
       console.error('[Leaderboard fetch error]', err);
@@ -149,63 +166,86 @@ export const LeaderboardModal: React.FC = () => {
 
             {/* Content List */}
             <div className="flex-1 overflow-y-auto px-5 pb-6 pt-4 space-y-2 flex flex-col custom-scrollbar">
-              {/* Rewards Accordion */}
-              <div className="mb-2">
-                <button
-                  onClick={() => setShowRewards(!showRewards)}
-                  className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
-                      <Gift className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="text-left">
-                      <h4 className="text-xs font-bold text-white">
-                        {activeTab === 'users' ? 'Ayın Kullanıcı Ödülleri' : 'Ayın Mekan Ödülleri'}
-                      </h4>
-                      <p className="text-[10px] text-neutral-400">İlk 3&apos;e girenlerin kazanacağı ödüller</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-[var(--theme-primary)]">
-                      {showRewards ? 'Gizle' : 'Gör'}
-                    </span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-[var(--theme-primary)] transition-transform ${showRewards ? 'rotate-180' : ''}`} />
-                  </div>
-                </button>
-
-                <AnimatePresence>
-                  {showRewards && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-2 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] space-y-2">
-                        {activeTab === 'users' ? (
-                          <div className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                            <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">1-3</div>
-                            <div>
-                              <p className="text-xs font-bold text-white mb-0.5">1 Aylık Muzikors Premium</p>
-                              <p className="text-[10px] text-neutral-400 leading-snug">Liderlik tablosunda ilk 3&apos;e giren kullanıcılara ücretsiz Premium hediye!</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                            <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center font-black text-black text-[10px] shrink-0">1</div>
-                            <div>
-                              <p className="text-xs font-bold text-white mb-0.5">Özel Plaket & Sponsorluk</p>
-                              <p className="text-[10px] text-neutral-400 leading-snug">Özel Muzikors Plaketi ve sosyal medya tanıtım desteği.</p>
-                            </div>
-                          </div>
-                        )}
+              {/* Rewards Accordion - Controlled via Admin Panel app_settings */}
+              {rewardSettings?.is_active && (
+                <div className="mb-2">
+                  <button
+                    onClick={() => setShowRewards(!showRewards)}
+                    className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
+                        <Gift className="w-3.5 h-3.5" />
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      <div className="text-left">
+                        <h4 className="text-xs font-bold text-white">
+                          {activeTab === 'users' ? 'Ayın Kullanıcı Ödülleri' : 'Ayın Mekan Ödülleri'}
+                        </h4>
+                        <p className="text-[10px] text-neutral-400">İlk 3&apos;e girenlerin kazanacağı ödüller</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-[var(--theme-primary)]">
+                        {showRewards ? 'Gizle' : 'Gör'}
+                      </span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-[var(--theme-primary)] transition-transform ${showRewards ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {showRewards && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] space-y-2">
+                          {activeTab === 'users' ? (
+                            rewardSettings.user_rewards && rewardSettings.user_rewards.length > 0 ? (
+                              rewardSettings.user_rewards.map((rw, idx) => (
+                                <div key={idx} className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                                  <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">
+                                    {rw.rank || idx + 1}
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-bold text-white mb-0.5">{rw.title}</p>
+                                    <p className="text-[10px] text-neutral-400 leading-snug">{rw.description}</p>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-xs text-neutral-400 p-2">Bu ay için henüz kullanıcı ödülü belirlenmedi.</p>
+                            )
+                          ) : (
+                            rewardSettings.venue_rewards && rewardSettings.venue_rewards.length > 0 ? (
+                              rewardSettings.venue_rewards.map((rw, idx) => (
+                                <div key={idx} className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                                  <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center font-black text-black text-[10px] shrink-0">
+                                    {rw.rank || idx + 1}
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-bold text-white mb-0.5">{rw.title}</p>
+                                    <p className="text-[10px] text-neutral-400 leading-snug">{rw.description}</p>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-xs text-neutral-400 p-2">Bu ay için henüz mekan ödülü belirlenmedi.</p>
+                            )
+                          )}
+                          {rewardSettings.rules_text && (
+                            <p className="text-[9px] text-neutral-500 pt-1 text-center italic border-t border-white/5">
+                              {rewardSettings.rules_text}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {loading ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-3 py-12">

@@ -1,0 +1,29 @@
+﻿{
+  "project_info": {
+    "project_number": "265677370954",
+    "project_id": "muzikors-1313",
+    "storage_bucket": "muzikors-1313.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265677370954:android:64b0f2b6d83d8c0bbd98b3",
+        "android_client_info": {
+          "package_name": "com.muzikors.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYd2s9-ixZBFWEJH0uiOkcQmaC0-j1-tg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
