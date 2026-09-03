@@ -232,7 +232,7 @@ export const InfoModals: React.FC = () => {
                   <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
                     <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">1</div>
                     <div>
-                      <h4 className="font-bold text-white text-xs mb-0.5">Masa QR Okut</h4>
+                      <h4 className="font-bold text-white text-xs mb-0.5">Bir Mekana Bağlan</h4>
                       <p className="text-neutral-400 text-[11px] leading-snug">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine bağlan.</p>
                     </div>
                   </div>

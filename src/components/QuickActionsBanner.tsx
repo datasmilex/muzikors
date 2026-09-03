@@ -18,7 +18,7 @@ export const QuickActionsBanner: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <QrCode className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-            <span className="text-white text-xs font-bold">{isVenueBound ? 'Masa / QR Değiştir' : 'Bir Mekana Bağlan'}</span>
+            <span className="text-white text-xs font-bold">Bir Mekana Bağlan</span>
           </div>
           <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] uppercase tracking-wider">
             Tara
