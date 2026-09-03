@@ -704,11 +704,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const fetchQueue = async () => {
       try {
-        const { data: venueData, error: venueError } = await supabase
-          .from('venues')
-          .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_paused')
-          .eq('id', targetVenueId)
-          .single();
+        let venueData: any = null;
+        try {
+          const { data: vData, error: venueError } = await supabase
+            .from('venues')
+            .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_paused')
+            .eq('id', targetVenueId)
+            .maybeSingle();
+
+          if (vData) {
+            venueData = vData;
+          } else if (venueError) {
+            console.warn('[Venue fetch fallback]', venueError.message);
+            const { data: fallbackData } = await supabase
+              .from('venues')
+              .select('id, venue_name, current_track_info')
+              .eq('id', targetVenueId)
+              .maybeSingle();
+            venueData = fallbackData;
+          }
+        } catch (vErr) {
+          console.error('[Venue fetch exception]', vErr);
+        }
 
         if (venueData) {
           setActiveVenue(prev => prev ? {
@@ -898,6 +915,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
       )
+      .on('broadcast', { event: 'track_changed' }, ({ payload }) => {
+        if (payload) {
+          fetchQueue();
+        }
+      })
       .on('broadcast', { event: 'playback_state' }, ({ payload }) => {
         if (payload) {
           setLivePlaybackState(payload);
