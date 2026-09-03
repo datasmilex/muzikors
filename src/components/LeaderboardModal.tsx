@@ -2,13 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown } from 'lucide-react';
+import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown, Check, Sparkles, Crown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import { formatUserDisplayName } from '../utils/formatters';
 import { AvatarFrame } from './AvatarFrame';
 import { getLevelDetails } from '../utils/levelSystem';
+
+interface GiveawayWinner {
+  rank: number;
+  user_id: string;
+  full_name: string;
+  username: string | null;
+  avatar_url: string | null;
+  reward_title: string;
+  drawn_at: string;
+}
 
 export const LeaderboardModal: React.FC = () => {
   const { activeModal, closeModal, user: currentUser } = useApp();
@@ -19,7 +29,16 @@ export const LeaderboardModal: React.FC = () => {
     user_rewards: { rank: string; title: string; description: string }[];
     venue_rewards: { rank: string; title: string; description: string }[];
     rules_text?: string;
+    giveaway_winners?: GiveawayWinner[];
+    giveaway_drawn_at?: string | null;
   } | null>(null);
+
+  const [giveawayStatus, setGiveawayStatus] = useState<{ participant_count: number; is_joined: boolean }>({
+    participant_count: 0,
+    is_joined: false
+  });
+  const [joiningGiveaway, setJoiningGiveaway] = useState(false);
+
   const [users, setUsers] = useState<any[]>([]);
   const [venues, setVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,8 +46,60 @@ export const LeaderboardModal: React.FC = () => {
   useEffect(() => {
     if (activeModal === 'leaderboard') {
       fetchData();
+      fetchGiveawayStatus();
     }
-  }, [activeModal, activeTab]);
+  }, [activeModal, activeTab, currentUser?.id]);
+
+  const fetchGiveawayStatus = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_giveaway_status', {
+        p_user_id: currentUser?.id || null
+      });
+      if (!error && data) {
+        setGiveawayStatus({
+          participant_count: Number(data.participant_count || 0),
+          is_joined: !!data.is_joined
+        });
+      }
+    } catch (e) {
+      console.error('[Giveaway status error]', e);
+    }
+  };
+
+  const handleJoinGiveaway = async () => {
+    if (!currentUser) {
+      alert('Çekilişe katılabilmek için lütfen önce giriş yapın!');
+      return;
+    }
+
+    setJoiningGiveaway(true);
+    try {
+      const { data, error } = await supabase.rpc('join_giveaway', {
+        p_user_id: currentUser.id
+      });
+      if (error) throw error;
+      if (data?.success) {
+        setGiveawayStatus({
+          participant_count: Number(data.participant_count || giveawayStatus.participant_count + 1),
+          is_joined: true
+        });
+
+        // Trigger celebratory confetti
+        try {
+          const confetti = (await import('canvas-confetti')).default;
+          confetti({
+            particleCount: 65,
+            spread: 60,
+            origin: { y: 0.65 }
+          });
+        } catch (_) {}
+      }
+    } catch (err: any) {
+      alert('Çekilişe katılırken bir hata oluştu: ' + (err.message || 'Lütfen tekrar deneyin.'));
+    } finally {
+      setJoiningGiveaway(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -132,36 +203,45 @@ export const LeaderboardModal: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-base font-black text-white tracking-tight">Liderlik Tablosu</h2>
-                  <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider">En Çok Şarkı Çaldıranlar</span>
+                  <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider">
+                    {activeTab === 'users' ? 'En Yüksek Seviyeli Müzikseverler' : 'En Çok Şarkı Çalınan Mekanlar'}
+                  </span>
                 </div>
               </div>
               <button
                 onClick={closeModal}
-                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
-                aria-label="Kapat"
+                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex-none flex items-center p-1.5 mx-5 mt-4 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'users' ? 'bg-[var(--theme-primary)] text-black shadow-md' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" /> Kullanıcılar
-              </button>
-              <button
-                onClick={() => setActiveTab('venues')}
-                className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
-                  activeTab === 'venues' ? 'bg-[var(--theme-primary)] text-black shadow-md' : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <Store className="w-3.5 h-3.5" /> Mekanlar
-              </button>
+            <div className="flex-none px-5 pt-4">
+              <div className="flex p-1 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.06]">
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'users'
+                      ? 'bg-[var(--theme-primary)] text-black shadow-md'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Kullanıcılar</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('venues')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'venues'
+                      ? 'bg-[var(--theme-primary)] text-black shadow-md'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <Store className="w-3.5 h-3.5" />
+                  <span>Mekanlar</span>
+                </button>
+              </div>
             </div>
 
             {/* Content List */}
@@ -171,17 +251,26 @@ export const LeaderboardModal: React.FC = () => {
                 <div className="mb-2">
                   <button
                     onClick={() => setShowRewards(!showRewards)}
-                    className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all"
+                    className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
                         <Gift className="w-3.5 h-3.5" />
                       </div>
                       <div className="text-left">
-                        <h4 className="text-xs font-bold text-white">
-                          {activeTab === 'users' ? 'Ayın Kullanıcı Ödülleri' : 'Ayın Mekan Ödülleri'}
+                        <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{activeTab === 'users' ? '🎁 Kullanıcı VIP Çekilişi' : '🏆 Ayın Mekan Ödülü'}</span>
+                          {activeTab === 'users' && giveawayStatus.is_joined && (
+                            <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-bold">
+                              Katıldın
+                            </span>
+                          )}
                         </h4>
-                        <p className="text-[10px] text-neutral-400">İlk 3&apos;e girenlerin kazanacağı ödüller</p>
+                        <p className="text-[10px] text-neutral-400">
+                          {activeTab === 'users' 
+                            ? 'Çekilişe katılan şanslı müzikseverlere hediyeler' 
+                            : '1. sıradaki popüler mekana özel ödül'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -201,23 +290,98 @@ export const LeaderboardModal: React.FC = () => {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-2 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] space-y-2">
+                        <div className="mt-2 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] space-y-2.5">
                           {activeTab === 'users' ? (
-                            rewardSettings.user_rewards && rewardSettings.user_rewards.length > 0 ? (
-                              rewardSettings.user_rewards.map((rw, idx) => (
-                                <div key={idx} className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                                  <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">
-                                    {rw.rank || idx + 1}
+                            <>
+                              {/* 1. ÇEKİLİŞE KATIL BUTONU & DURUM KARTI */}
+                              <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-[var(--theme-card)] to-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                                <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
+                                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-center shrink-0">
+                                    <Sparkles className="w-4 h-4" />
                                   </div>
-                                  <div>
-                                    <p className="text-xs font-bold text-white mb-0.5">{rw.title}</p>
-                                    <p className="text-[10px] text-neutral-400 leading-snug">{rw.description}</p>
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                                      <span>Aylık VIP Çekilişi</span>
+                                      <span className="text-[10px] font-normal text-neutral-400">({giveawayStatus.participant_count} Katılımcı)</span>
+                                    </p>
+                                    <p className="text-[10px] text-neutral-400">
+                                      {giveawayStatus.is_joined 
+                                        ? 'Tebrikler, çekiliş havuzundasın!' 
+                                        : 'Tek tıkla ücretsiz katıl, VIP kazan'}
+                                    </p>
                                   </div>
                                 </div>
-                              ))
-                            ) : (
-                              <p className="text-xs text-neutral-400 p-2">Bu ay için henüz kullanıcı ödülü belirlenmedi.</p>
-                            )
+
+                                {giveawayStatus.is_joined ? (
+                                  <div className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 shrink-0">
+                                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    <span>Çekilişe Katıldın</span>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={handleJoinGiveaway}
+                                    disabled={joiningGiveaway}
+                                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[var(--theme-primary)] hover:brightness-110 text-black font-black text-xs shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                                  >
+                                    {joiningGiveaway ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
+                                    <span>Çekilişe Katıl</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* 2. KAZANANLAR VARSA GÖSTER */}
+                              {rewardSettings.giveaway_winners && rewardSettings.giveaway_winners.length > 0 && (
+                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                                  <p className="text-[11px] font-black text-amber-300 flex items-center gap-1">
+                                    <Crown className="w-3.5 h-3.5 fill-current" />
+                                    <span>Son Çekilişin Kazananları:</span>
+                                  </p>
+                                  <div className="grid grid-cols-1 gap-1.5">
+                                    {rewardSettings.giveaway_winners.map((winner, idx) => (
+                                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-white/5">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <div className="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-black font-black text-[10px] flex items-center justify-center shrink-0">
+                                            {winner.rank || idx + 1}
+                                          </div>
+                                          <img
+                                            src={winner.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(winner.full_name || 'K')}&background=0d1322&color=F59E0B`}
+                                            alt=""
+                                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; }}
+                                            className="w-6 h-6 rounded-lg object-cover border border-white/10 shrink-0"
+                                          />
+                                          <span className="text-xs font-bold text-white truncate">{winner.full_name}</span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-amber-400 shrink-0 pl-2">
+                                          {winner.reward_title}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 3. ÇEKİLİŞ ÖDÜLLERİ LİSTESİ */}
+                              <div className="space-y-1.5">
+                                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-1">
+                                  Verilecek Çekiliş Hediyeleri
+                                </p>
+                                {rewardSettings.user_rewards && rewardSettings.user_rewards.length > 0 ? (
+                                  rewardSettings.user_rewards.map((rw, idx) => (
+                                    <div key={idx} className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
+                                      <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">
+                                        {rw.rank || idx + 1}
+                                      </div>
+                                      <div>
+                                        <p className="text-xs font-bold text-white mb-0.5">{rw.title}</p>
+                                        <p className="text-[10px] text-neutral-400 leading-snug">{rw.description}</p>
+                                      </div>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p className="text-xs text-neutral-400 p-2">Bu ay için henüz çekiliş ödülü belirlenmedi.</p>
+                                )}
+                              </div>
+                            </>
                           ) : (
                             rewardSettings.venue_rewards && rewardSettings.venue_rewards.length > 0 ? (
                               rewardSettings.venue_rewards.map((rw, idx) => (
