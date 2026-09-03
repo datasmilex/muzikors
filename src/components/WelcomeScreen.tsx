@@ -105,11 +105,8 @@ export const WelcomeScreen: React.FC = () => {
             </div>
             
             <div className="flex flex-col items-center -mt-1">
-              <span className="text-sm font-black tracking-widest uppercase text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
-                Masa QR Okut
-              </span>
-              <span className="text-[10px] font-semibold text-neutral-400 tracking-normal mt-0.5">
-                Kamerayı Açmak İçin Dokun
+              <span className="text-sm font-black tracking-wider uppercase text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
+                Bir Mekana Bağlan
               </span>
             </div>
 

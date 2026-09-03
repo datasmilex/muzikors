@@ -19,10 +19,7 @@ export const TopRowCards: React.FC = () => {
           <QrCode className="w-6 h-6" />
         </div>
         <span className="text-sm font-bold text-amber-100 group-active:text-[#D4AF37] transition-colors">
-          QR Okut
-        </span>
-        <span className="text-[10px] text-amber-200/60 mt-0.5">
-          Masa QR&apos;ı Tara
+          Bir Mekana Bağlan
         </span>
       </button>
       </div>
