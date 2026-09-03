@@ -129,7 +129,7 @@ export const DailyRewardModal: React.FC = () => {
               Günlük Giriş Ödülü
             </h2>
             <p className="text-[11px] text-neutral-400 leading-snug">
-              Her gün giriş yaparak seriyi koru, katlanan XP ve ekstra şarkı istek hakkı kazan!
+              Her gün giriş yaparak seriyi koru, katlanan XP kazan ve seviye atlayarak ekstra şarkı hakları aç!
             </p>
           </div>
 
@@ -189,11 +189,11 @@ export const DailyRewardModal: React.FC = () => {
 
             <div className="p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] flex items-center gap-2.5 text-left">
               <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/20 flex items-center justify-center shrink-0">
-                <Music className="w-4 h-4 text-[var(--theme-primary)]" />
+                <Flame className="w-4 h-4 text-[var(--theme-primary)] fill-current" />
               </div>
               <div className="min-w-0">
-                <span className="text-[9px] text-neutral-400 font-bold uppercase block">Şarkı Hakkı</span>
-                <span className="text-xs font-black text-white">+1 Ek Hak</span>
+                <span className="text-[9px] text-neutral-400 font-bold uppercase block">Seri Durumu</span>
+                <span className="text-xs font-black text-white">{targetStreak}. Gün Aktif</span>
               </div>
             </div>
           </div>

@@ -44,23 +44,28 @@ export const getUserDailySongRights = (user: UserProfile | null) => {
       baseMaxDailySongs: 2,
       effectiveMaxSongs: 2,
       usedSongs: 0,
+      extraCredits: 0,
       isBonusActive: false,
       display: '0/2 Hak'
     };
   }
 
   const baseMaxDailySongs = user.isPremium ? 5 : 2;
-  const isBonusActive = isClaimedTodayTR(user.lastDailyClaim || null);
-  const bonusSongs = isBonusActive ? 1 : 0;
-  const effectiveMaxSongs = baseMaxDailySongs + bonusSongs;
   const usedSongs = user.daily_songs_count || 0;
-  const remainingSongs = Math.max(0, effectiveMaxSongs - usedSongs);
+  const extraCredits = Math.max(0, user.extra_song_credits || 0);
+
+  // Remaining free daily songs
+  const remainingDaily = Math.max(0, baseMaxDailySongs - usedSongs);
+  // Total remaining songs = remaining daily songs + permanent extra credits
+  const remainingSongs = remainingDaily + extraCredits;
+  const isBonusActive = extraCredits > 0;
 
   return {
     remainingSongs,
     baseMaxDailySongs,
-    effectiveMaxSongs,
+    effectiveMaxSongs: baseMaxDailySongs + extraCredits,
     usedSongs,
+    extraCredits,
     isBonusActive,
     display: `${remainingSongs}/${baseMaxDailySongs} Hak`
   };

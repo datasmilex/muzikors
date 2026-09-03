@@ -456,7 +456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp, last_daily_claim, daily_streak')
+          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp, last_daily_claim, daily_streak, extra_song_credits')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -556,6 +556,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         daily_boosts_count: dbProfile.daily_boosts_count || 0,
         daily_vetoes_count: dbProfile.daily_vetoes_count || 0,
         last_reset_date: dbProfile.last_reset_date || null,
+        extra_song_credits: Number(dbProfile.extra_song_credits ?? prev?.extra_song_credits ?? 0),
         loginMethod: 'google',
       }));
     };
@@ -659,6 +660,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             daily_boosts_count: isNewDay ? 0 : (typeof row?.daily_boosts_count === 'number' ? row.daily_boosts_count : prev.daily_boosts_count),
             daily_vetoes_count: isNewDay ? 0 : (typeof row?.daily_vetoes_count === 'number' ? row.daily_vetoes_count : prev.daily_vetoes_count),
             last_reset_date: isNewDay ? todayInTurkey : (row?.last_reset_date ?? prev.last_reset_date),
+            extra_song_credits: typeof row?.extra_song_credits === 'number' ? row.extra_song_credits : (prev.extra_song_credits ?? 0),
           };
         });
 
@@ -1146,28 +1148,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newTotalXp = currentXp + amount;
     const oldLevelInfo = getLevelDetails(currentXp);
     const newLevelInfo = getLevelDetails(newTotalXp);
+    const levelsGained = Math.max(0, newLevelInfo.level - oldLevelInfo.level);
+    const newExtraCredits = (user.extra_song_credits || 0) + levelsGained;
 
     setUser((prev) => prev ? {
       ...prev,
       xp: newTotalXp,
-      level: newLevelInfo.level
+      level: newLevelInfo.level,
+      extra_song_credits: (prev.extra_song_credits || 0) + levelsGained
     } : null);
 
-    if (newLevelInfo.level > oldLevelInfo.level) {
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8'] });
-      showToast(`🎉 Tebrikler! Seviye Atladın: ${newLevelInfo.fullTitle} (Lv. ${newLevelInfo.level})`);
+    if (levelsGained > 0) {
+      confetti({ particleCount: 90, spread: 70, origin: { y: 0.65 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
+      showToast(`🎉 Tebrikler! Seviye Atladın: ${newLevelInfo.fullTitle} (Lv. ${newLevelInfo.level}) — Süre sınırlaması olmayan +${levelsGained} Şarkı Hakkı Kazandın! 🎵`);
     } else if (reason) {
       showToast(`✨ +${amount} XP (${reason})`);
     }
 
     if (supabase) {
       try {
+        const updatePayload: any = {
+          xp: newTotalXp,
+          level: newLevelInfo.level
+        };
+        if (levelsGained > 0) {
+          updatePayload.extra_song_credits = newExtraCredits;
+        }
+
         await supabase
           .from('profiles')
-          .update({
-            xp: newTotalXp,
-            level: newLevelInfo.level
-          })
+          .update(updatePayload)
           .eq('id', user.id);
       } catch (err) {
         console.warn('[addXp sync error]', err);
@@ -1419,12 +1429,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setQueue((prev) => [...prev, newTrack]);
-    setUser((prev) => prev ? {
-      ...prev,
-      totalSongsRequested: (prev.totalSongsRequested || 0) + 1,
-      daily_songs_count: (prev.daily_songs_count || 0) + 1,
-      daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0)
-    } : null);
+    setUser((prev) => {
+      if (!prev) return null;
+      const baseDailyLimit = prev.isPremium ? 5 : 2;
+      const willUseDaily = (prev.daily_songs_count || 0) < baseDailyLimit;
+      return {
+        ...prev,
+        totalSongsRequested: (prev.totalSongsRequested || 0) + 1,
+        daily_songs_count: willUseDaily ? (prev.daily_songs_count || 0) + 1 : prev.daily_songs_count,
+        extra_song_credits: !willUseDaily ? Math.max(0, (prev.extra_song_credits || 1) - 1) : (prev.extra_song_credits || 0),
+        daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0)
+      };
+    });
 
     // Award XP for requesting a song
     const xpEarned = isBoosted ? (XP_REWARDS.REQUEST_SONG + XP_REWARDS.BOOST_SONG) : XP_REWARDS.REQUEST_SONG;
@@ -1740,8 +1756,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
-    showToast(`🎉 Günlük Ödül: +${earnedXp} XP (${currentStreak}. Gün Serisi) ve +1 Şarkı Hakkı!`);
+    confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
+    showToast(`🎉 Günlük Ödül: +${earnedXp} XP (${currentStreak}. Gün Serisi) kazandınız!`);
     return true;
   }, [user, addXp, openProtectedModal, showToast, supabase]);
 

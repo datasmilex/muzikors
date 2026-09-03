@@ -118,6 +118,7 @@ export interface UserProfile {
   last_reset_date?: string;
   premium_until?: string | null;
   premium_activated_at?: string | null;
+  extra_song_credits?: number;
 }
 
 export type ModalType = 
