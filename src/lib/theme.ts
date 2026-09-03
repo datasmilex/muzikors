@@ -19,8 +19,8 @@ export interface ThemeConfig {
 export const THEMES: ThemeConfig[] = [
   {
     id: 'velvet',
-    name: 'Lacivert',
-    subtitle: 'Muzikors Klasik (Gece Laciverti)',
+    name: 'Midnight Navy',
+    subtitle: 'Gece Laciverti & Altın',
     previewColor: '#1E3A8A',
     accentColor: '#F59E0B',
     accentLight: '#FBBF24',
