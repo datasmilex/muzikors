@@ -4,6 +4,7 @@ export interface ThemeConfig {
   id: ThemeType;
   name: string;
   subtitle: string;
+  previewColor?: string;
   accentColor: string;
   accentLight: string;
   accentDark: string;
@@ -18,8 +19,9 @@ export interface ThemeConfig {
 export const THEMES: ThemeConfig[] = [
   {
     id: 'velvet',
-    name: 'Velvet Gold',
-    subtitle: 'Gece Laciverti & Altın',
+    name: 'Lacivert',
+    subtitle: 'Muzikors Klasik (Gece Laciverti)',
+    previewColor: '#1E3A8A',
     accentColor: '#F59E0B',
     accentLight: '#FBBF24',
     accentDark: '#D97706',

@@ -280,10 +280,10 @@ export const DrawerMenu: React.FC = () => {
                       >
                         <div
                           className="w-6 h-6 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
-                          style={{ backgroundColor: t.accentColor }}
+                          style={{ backgroundColor: t.previewColor || t.accentColor }}
                         >
                           {isSelected && (
-                            <Check className="w-3 h-3 text-black stroke-[3]" />
+                            <Check className={`w-3 h-3 stroke-[3] ${t.id === 'crema' ? 'text-black' : 'text-white'}`} />
                           )}
                         </div>
                         <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
