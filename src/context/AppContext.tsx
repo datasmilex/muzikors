@@ -836,14 +836,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
 
           setNowPlaying(prev => {
-            const isSameTrack = prev?.title === trackInfo.song_title || prev?.id === trackInfo.spotify_track_id;
+            const trackTitle = trackInfo.song_title || trackInfo.title;
+            const trackArtist = trackInfo.artist || 'Bilinmeyen Sanatçı';
+            const trackCover = trackInfo.album_cover || trackInfo.album_art || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80';
+            const isSameTrack = prev?.title === trackTitle || prev?.id === trackInfo.spotify_track_id;
             return {
               id: trackInfo.spotify_track_id || playingRow?.id || 'live-track',
-              title: trackInfo.song_title || 'Bilinmeyen Şarkı',
-              artist: trackInfo.artist || 'Bilinmeyen Sanatçı',
-              albumCover: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-              coverUrl: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
-              album_art: trackInfo.album_cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+              title: trackTitle || prev?.title || 'Bilinmeyen Şarkı',
+              artist: trackArtist,
+              albumCover: trackCover,
+              coverUrl: trackCover,
+              album_art: trackCover,
               spotifyUri: trackInfo.spotify_track_id ? `spotify:track:${trackInfo.spotify_track_id}` : '',
               durationMs: trackDurationMs,
               duration: trackDurationSec,
@@ -925,6 +928,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setLivePlaybackState(payload);
           const isPlaying = payload.is_playing === true;
           setIsPlayingAudio(isPlaying);
+
+          const trackTitle = payload.song_title || payload.title;
+          const trackArtist = payload.artist;
+          const trackCover = payload.album_cover || payload.album_art;
+
+          if (trackTitle && trackTitle.trim().length > 0) {
+            setNowPlaying(prev => {
+              if (prev && prev.title === trackTitle && prev.artist === trackArtist) {
+                return { ...prev, isPlaying };
+              }
+              const durMs = payload.duration_ms || 210000;
+              return {
+                id: payload.spotify_track_id || prev?.id || 'live-track',
+                title: trackTitle,
+                artist: trackArtist || 'Bilinmeyen Sanatçı',
+                albumCover: trackCover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+                coverUrl: trackCover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+                album_art: trackCover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+                spotifyUri: payload.spotify_track_id ? `spotify:track:${payload.spotify_track_id}` : '',
+                durationMs: durMs,
+                duration: Math.round(durMs / 1000),
+                votes: payload.votes ?? prev?.votes ?? 0,
+                requestedBy: payload.requested_by_name || prev?.requestedBy || 'Mekan Fon Müziği',
+                requestedByUserId: payload.requested_by_user_id || prev?.requestedByUserId,
+                isAnonymous: prev?.isAnonymous ?? false,
+                is_anonymous: prev?.is_anonymous ?? false,
+                requestedAt: 'Canli',
+                startedAt: prev?.startedAt || undefined,
+                isPlaying: isPlaying,
+              };
+            });
+          }
 
           if (payload.progress_ms !== undefined) {
             const durSec = Math.round((payload.duration_ms || 210000) / 1000);
