@@ -236,8 +236,9 @@ export const DrawerMenu: React.FC = () => {
                   className="w-full flex items-center justify-between px-3.5 py-2.5 mt-2 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-[var(--theme-primary)]/40 active:scale-95 transition-all text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
+                    <div className="w-7 h-7 rounded-lg bg-neutral-900/90 border-t border-l border-[var(--theme-primary)]/60 border-b border-r border-[var(--theme-primary)]/15 flex items-center justify-center text-[var(--theme-primary)] shadow-inner relative">
                       <PlaySquare className="w-3.5 h-3.5" />
+                      <div className="absolute inset-0.5 rounded-md border border-white/5 pointer-events-none" />
                     </div>
                     <div>
                       <span className="text-xs font-bold text-white block">Reklam İzle & Kazan</span>
