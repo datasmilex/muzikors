@@ -208,13 +208,39 @@ export const ProfileView: React.FC = () => {
         .from('posts')
         .select(`
           id, user_id, content, likes_count, comments_count, created_at,
-          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level)
+          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level),
+          post_likes ( user_id )
         `)
         .eq('user_id', targetId)
         .order('created_at', { ascending: false });
 
       if (!postsErr && postsData) {
-        setPosts(postsData as any);
+        const formattedPosts: SocialPostType[] = postsData.map((row: any) => {
+          const prof = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+          const authorFullName = prof?.full_name || (targetId === user?.id ? user?.name : pData?.full_name) || 'Muzikors Dinleyicisi';
+          const authorUsername = prof?.username || (targetId === user?.id ? user?.username : pData?.username) || '@dinleyici';
+          const authorAvatar = prof?.avatar_url || (targetId === user?.id ? user?.avatar : pData?.avatar_url);
+          const authorFrame = prof?.avatar_frame || (targetId === user?.id ? user?.avatar_frame : pData?.avatar_frame) || 'none';
+          const authorPremium = prof?.is_premium ?? (targetId === user?.id ? user?.isPremium : pData?.is_premium) ?? false;
+          const authorBeta = prof?.is_beta_tester ?? (targetId === user?.id ? user?.is_beta_tester : pData?.is_beta_tester) ?? false;
+
+          return {
+            id: row.id,
+            user_id: row.user_id,
+            content: row.content,
+            likes_count: row.likes_count || 0,
+            comments_count: row.comments_count || 0,
+            created_at: row.created_at,
+            user_full_name: authorFullName,
+            user_username: authorUsername,
+            user_avatar_url: authorAvatar,
+            user_avatar_frame: authorFrame,
+            user_is_beta_tester: authorBeta,
+            user_is_premium: authorPremium,
+            has_liked: user && row.post_likes ? row.post_likes.some((like: any) => like.user_id === user.id) : false,
+          };
+        });
+        setPosts(formattedPosts);
       }
     } catch (err) {
       console.error('[fetchProfileData error]', err);
@@ -308,7 +334,23 @@ export const ProfileView: React.FC = () => {
 
       if (error) throw error;
       if (data) {
-        setPosts(prev => [data as any, ...prev]);
+        const prof = Array.isArray((data as any).profiles) ? (data as any).profiles[0] : (data as any).profiles;
+        const newFormattedPost: SocialPostType = {
+          id: data.id,
+          user_id: data.user_id,
+          content: data.content,
+          likes_count: data.likes_count || 0,
+          comments_count: data.comments_count || 0,
+          created_at: data.created_at,
+          user_full_name: prof?.full_name || user.name || 'Muzikors Dinleyicisi',
+          user_username: prof?.username || user.username || '@dinleyici',
+          user_avatar_url: prof?.avatar_url || user.avatar,
+          user_avatar_frame: prof?.avatar_frame || user.avatar_frame || 'none',
+          user_is_beta_tester: prof?.is_beta_tester ?? user.is_beta_tester ?? false,
+          user_is_premium: prof?.is_premium ?? user.isPremium ?? false,
+          has_liked: false,
+        };
+        setPosts(prev => [newFormattedPost, ...prev]);
         setNewPostContent('');
         showToast('Gönderi paylaşıldı!');
       }
@@ -441,6 +483,7 @@ export const ProfileView: React.FC = () => {
 
       showToast('Profiliniz başarıyla güncellendi!');
       setIsEditing(false);
+      fetchProfileData();
     } catch (err: any) {
       console.error(err);
       showToast('Profil güncellenirken bir hata oluştu.');

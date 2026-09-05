@@ -456,7 +456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (supabase) {
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp, last_daily_claim, daily_streak, extra_song_credits')
+          .select('full_name, avatar_url, username, last_username_update, is_premium, is_beta_tester, beta_tester_reward_claimed, avatar_frame, total_songs_requested, daily_songs_count, daily_votes_count, daily_boosts_count, daily_vetoes_count, last_reset_date, premium_until, premium_activated_at, xp, level, daily_liked_songs_xp, last_daily_claim, daily_streak, extra_song_credits')
           .eq('id', authUser.id)
           .single();
         if (existingProfile) {
@@ -505,7 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Never store the Google photo — only upsert non-avatar profile fields
         const profileData: any = {
           id: authUser.id,
-          full_name: fullName,
+          full_name: dbProfile.full_name || fullName,
           email: emailStr,
           updated_at: new Date().toISOString(),
           // Clear any previously stored Google photo
@@ -533,7 +533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser((prev) => ({
         ...(prev || ({} as any)),
         id: authUser.id,
-        name: fullName,
+        name: dbProfile.full_name || fullName,
         username: dbUsername || prev?.username || ('@' + (emailStr.split('@')[0] || 'kullanici')),
         // Use only custom (non-Google) avatar; empty string = show default icon
         avatar: customAvatarUrl,

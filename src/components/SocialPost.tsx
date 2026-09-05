@@ -166,6 +166,43 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
     }
   };
 
+  const postProfile = Array.isArray((post as any).profiles) ? (post as any).profiles[0] : (post as any).profiles;
+  const isPostOwner = user?.id === post.user_id;
+
+  const authorName = 
+    post.user_full_name || 
+    postProfile?.full_name || 
+    (isPostOwner ? user?.name : null) || 
+    'Muzikors Dinleyicisi';
+
+  const authorUsername = 
+    post.user_username || 
+    postProfile?.username || 
+    (isPostOwner ? user?.username : null) || 
+    '@dinleyici';
+
+  const authorAvatar = 
+    post.user_avatar_url || 
+    postProfile?.avatar_url || 
+    (isPostOwner ? user?.avatar : null) || 
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=141318&color=fff`;
+
+  const authorFrame = 
+    post.user_avatar_frame || 
+    postProfile?.avatar_frame || 
+    (isPostOwner ? user?.avatar_frame : null) || 
+    'none';
+
+  const authorIsPremium = 
+    post.user_is_premium ?? 
+    postProfile?.is_premium ?? 
+    (isPostOwner ? user?.isPremium : false);
+
+  const authorIsBetaTester = 
+    post.user_is_beta_tester ?? 
+    postProfile?.is_beta_tester ?? 
+    (isPostOwner ? user?.is_beta_tester : false);
+
   return (
     <div className="bg-[var(--theme-card-alt)] border border-white/[0.08] p-4 mb-3 rounded-2xl shadow-sm">
       {/* Header: User Info */}
@@ -174,24 +211,24 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
           className="flex items-center gap-3 cursor-pointer group"
           onClick={() => onClickUser?.(post.user_id)}
         >
-          <AvatarFrame frameId={post.user_avatar_frame} size="md">
+          <AvatarFrame frameId={authorFrame} size="md">
             <img 
-              src={post.user_avatar_url || "https://ui-avatars.com/api/?name=" + (post.user_full_name || 'U') + "&background=141318&color=fff"} 
-              alt={post.user_full_name} 
+              src={authorAvatar} 
+              alt={authorName} 
               className="w-full h-full object-cover group-active:scale-95 transition-transform"
             />
           </AvatarFrame>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-bold text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
-                {post.user_full_name || 'Bilinmeyen Kullanıcı'}
+                {authorName}
               </span>
-              {post.user_is_premium && <PremiumBadge className="w-3.5 h-3.5 ml-0.5" />}
-              {post.user_is_beta_tester && <BetaTesterBadge className="w-3.5 h-3.5 ml-0.5" />}
+              {authorIsPremium && <PremiumBadge className="w-3.5 h-3.5 ml-0.5" />}
+              {authorIsBetaTester && <BetaTesterBadge className="w-3.5 h-3.5 ml-0.5" />}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-medium text-neutral-400">
-                {post.user_username || '@misafir'}
+                {authorUsername}
               </span>
               <span className="text-[10px] text-neutral-600 font-medium">•</span>
               <span className="text-[10px] text-neutral-500 font-medium">
@@ -253,34 +290,44 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
             <div className="text-center py-2"><Loader2 className="w-4 h-4 animate-spin mx-auto text-neutral-400" /></div>
           ) : comments.length > 0 ? (
             <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-              {comments.map((comment: any) => (
-                <div key={comment.id} className="flex gap-2 items-start">
-                  <div className="cursor-pointer shrink-0" onClick={() => onClickUser?.(comment.user_id)}>
-                    <AvatarFrame frameId={comment.profiles?.avatar_frame} size="xs">
-                      <img 
-                        src={comment.profiles?.avatar_url || "https://ui-avatars.com/api/?name=" + (comment.profiles?.full_name || 'U') + "&background=141318&color=fff"}
-                        alt={comment.profiles?.full_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </AvatarFrame>
-                  </div>
-                  <div className="flex flex-col bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-tl-sm px-3 py-2 text-xs flex-1 group/comment relative">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
-                        <span className="font-bold text-white text-xs cursor-pointer hover:text-[var(--theme-primary-light)]">{comment.profiles?.full_name || 'Bilinmeyen'}</span>
-                        {comment.profiles?.is_premium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
-                        {comment.profiles?.is_beta_tester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
-                      </div>
-                      {(user?.id === comment.user_id || user?.id === post.user_id) && (
-                        <button onClick={() => handleDeleteComment(comment.id)} className="text-neutral-500 hover:text-rose-400 transition-colors p-0.5">
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      )}
+              {comments.map((comment: any) => {
+                const commentProf = Array.isArray(comment.profiles) ? comment.profiles[0] : comment.profiles;
+                const isCommentOwner = user?.id === comment.user_id;
+                const cName = commentProf?.full_name || (isCommentOwner ? user?.name : null) || 'Muzikors Dinleyicisi';
+                const cAvatar = commentProf?.avatar_url || (isCommentOwner ? user?.avatar : null) || `https://ui-avatars.com/api/?name=${encodeURIComponent(cName)}&background=141318&color=fff`;
+                const cFrame = commentProf?.avatar_frame || (isCommentOwner ? user?.avatar_frame : null) || 'none';
+                const cIsPremium = commentProf?.is_premium ?? (isCommentOwner ? user?.isPremium : false);
+                const cIsBetaTester = commentProf?.is_beta_tester ?? (isCommentOwner ? user?.is_beta_tester : false);
+
+                return (
+                  <div key={comment.id} className="flex gap-2 items-start">
+                    <div className="cursor-pointer shrink-0" onClick={() => onClickUser?.(comment.user_id)}>
+                      <AvatarFrame frameId={cFrame} size="xs">
+                        <img 
+                          src={cAvatar}
+                          alt={cName}
+                          className="w-full h-full object-cover"
+                        />
+                      </AvatarFrame>
                     </div>
-                    <span className="text-neutral-300 font-normal whitespace-pre-wrap break-words text-xs">{comment.content}</span>
+                    <div className="flex flex-col bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-tl-sm px-3 py-2 text-xs flex-1 group/comment relative">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5" onClick={() => onClickUser?.(comment.user_id)}>
+                          <span className="font-bold text-white text-xs cursor-pointer hover:text-[var(--theme-primary-light)]">{cName}</span>
+                          {cIsPremium && <PremiumBadge className="w-3 h-3 ml-0.5" />}
+                          {cIsBetaTester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
+                        </div>
+                        {(user?.id === comment.user_id || user?.id === post.user_id) && (
+                          <button onClick={() => handleDeleteComment(comment.id)} className="text-neutral-500 hover:text-rose-400 transition-colors p-0.5">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-neutral-300 font-normal whitespace-pre-wrap break-words text-xs">{comment.content}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center text-[11px] text-neutral-500 py-1">Henüz yorum yok. İlk yorumu sen yap!</div>
