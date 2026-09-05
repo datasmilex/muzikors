@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, User, QrCode, Coins, Sparkles } from 'lucide-react';
+import { Menu, User, QrCode, Coins } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarFrame } from './AvatarFrame';
 import { getUserDailySongRights } from '../lib/timeHelpers';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, MapPin, User, Sparkles, Compass, Radio } from 'lucide-react';
+import { QrCode, MapPin, User, Compass, Radio } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const WelcomeScreen: React.FC = () => {
@@ -142,7 +142,7 @@ export const WelcomeScreen: React.FC = () => {
         className="w-full pb-7 pt-3 flex flex-col items-center gap-1.5 relative z-20 text-center"
       >
         <div className="flex items-center gap-1.5 text-neutral-500 text-[10px] font-semibold tracking-wider uppercase">
-          <Sparkles className="w-3 h-3 text-[var(--theme-primary)]/80" />
+          <Radio className="w-3 h-3 text-[var(--theme-primary)]/80" />
           <span>Spotify Canlı Ses Sistemi Entegrasyonu</span>
         </div>
       </motion.footer>

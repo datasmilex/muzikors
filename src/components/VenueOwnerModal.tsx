@@ -19,7 +19,6 @@ import {
   Check,
   CreditCard,
   Lock,
-  Sparkles,
   Info,
   Radio,
   ArrowRight,
@@ -365,7 +364,7 @@ export const VenueOwnerModal: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <Sparkles
+                            <Store
                               style={{ color: 'var(--theme-primary)' }}
                               className="w-3.5 h-3.5"
                             />

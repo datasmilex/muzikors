@@ -19,8 +19,7 @@ import {
   Crown,
   Palette,
   Store,
-  Check,
-  Sparkles
+  Check
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';

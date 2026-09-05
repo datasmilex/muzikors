@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown, Check, Sparkles, Crown } from 'lucide-react';
+import { Trophy, X, Users, Store, Loader2, Gift, ChevronDown, Check, Crown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
@@ -292,7 +292,7 @@ export const LeaderboardModal: React.FC = () => {
                               {/* 1. ÇEKİLİŞE KATIL BUTONU & DURUM KARTI */}
                               <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
-                                  <Sparkles className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
+                                  <Gift className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
                                   <div className="min-w-0">
                                     <p className="text-xs font-bold text-white flex items-center gap-1.5">
                                       <span>Aylık VIP Çekilişi</span>

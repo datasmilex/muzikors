@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, Clock, X, QrCode, Music, Store, Sparkles } from 'lucide-react';
+import { ListMusic, ThumbsUp, Flame, User, Clock, X, QrCode, Music, Store } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';

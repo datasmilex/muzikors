@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, Flame, Check, Clock, Loader2, Music, Crown } from 'lucide-react';
+import { Gift, X, Flame, Check, Clock, Loader2, Music, Crown, Zap } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getSecondsUntilTRMidnight } from '../lib/timeHelpers';
 
@@ -165,7 +165,7 @@ export const DailyRewardModal: React.FC = () => {
                       ) : s.isGrand ? (
                         <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
                       ) : (
-                        <Sparkles className="w-3 h-3 text-neutral-400" />
+                        <span className="w-1 h-1 rounded-full bg-neutral-600" />
                       )}
                     </div>
                   </div>
@@ -177,7 +177,7 @@ export const DailyRewardModal: React.FC = () => {
           {/* Reward Perks Summary */}
           <div className="w-full grid grid-cols-2 gap-2 mb-4">
             <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-2.5 text-left">
-              <Sparkles className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
+              <Zap className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
               <div className="min-w-0">
                 <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider block">Kazanılan XP</span>
                 <span className="text-xs font-bold text-white">+{todayRewardXp} XP</span>
