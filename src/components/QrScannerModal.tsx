@@ -201,8 +201,8 @@ export const QrScannerModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Direct Camera Video Stream Container */}
-          <div className="relative w-64 h-64 mx-auto rounded-3xl overflow-hidden bg-black flex items-center justify-center shadow-inner mb-6 relative z-10 border border-white/10">
+          {/* Direct Camera Video Stream Container (Adapted Compact Optical Reticle) */}
+          <div className="relative w-full max-w-[240px] aspect-square mx-auto rounded-2xl overflow-hidden bg-neutral-950 flex flex-col items-center justify-center shadow-inner mb-6 z-10 border border-amber-500/20">
             <video
               ref={videoRef}
               playsInline
@@ -210,14 +210,16 @@ export const QrScannerModal: React.FC = () => {
               className="w-full h-full object-cover scale-105"
             />
 
-            {/* Corner guides - Sharp Minimal Lens Reticle */}
-            <div className="absolute top-4 left-4 w-5 h-5 border-t border-l border-white/70 rounded-none pointer-events-none z-10" />
-            <div className="absolute top-4 right-4 w-5 h-5 border-t border-r border-white/70 rounded-none pointer-events-none z-10" />
-            <div className="absolute bottom-4 left-4 w-5 h-5 border-b border-l border-white/70 rounded-none pointer-events-none z-10" />
-            <div className="absolute bottom-4 right-4 w-5 h-5 border-b border-r border-white/70 rounded-none pointer-events-none z-10" />
+            {/* Precision Minimal Reticle */}
+            <div className="absolute inset-3 rounded-xl border border-white/10 flex items-center justify-center pointer-events-none z-10">
+              <div className="w-6 h-6 border-t border-l border-amber-400/80 absolute top-1 left-1" />
+              <div className="w-6 h-6 border-t border-r border-amber-400/80 absolute top-1 right-1" />
+              <div className="w-6 h-6 border-b border-l border-amber-400/80 absolute bottom-1 left-1" />
+              <div className="w-6 h-6 border-b border-r border-amber-400/80 absolute bottom-1 right-1" />
+            </div>
 
-            {/* Scanning Line overlay */}
-            <div className="absolute left-0 right-0 h-[1px] bg-[#D4AF37] shadow-[0_0_8px_#D4AF37] animate-[scan_2s_ease-in-out_infinite] top-0 pointer-events-none z-10" />
+            {/* Laser scan line overlay */}
+            <div className="absolute left-4 right-4 h-[1px] bg-amber-400 shadow-[0_0_6px_#f59e0b] animate-[scan_1.8s_ease-in-out_infinite] top-0 pointer-events-none z-20" />
             <style dangerouslySetInnerHTML={{__html: `
               @keyframes scan {
                 0% { top: 0%; opacity: 0; }
