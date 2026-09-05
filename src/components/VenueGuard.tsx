@@ -13,8 +13,8 @@ export const VenueGuard: React.FC<{ children: React.ReactNode }> = ({ children }
           <Ban className="w-12 h-12 text-red-500" />
         </div>
         <div className="relative z-10 space-y-3">
-          <h2 className="text-2xl font-black text-red-400">
-            🚫 Bu Mekân Şu An Müzik İsteklerine Kapalıdır.
+          <h2 className="text-2xl font-bold text-red-400">
+            Bu Mekân Şu An Müzik İsteklerine Kapalıdır.
           </h2>
           <p className="text-sm font-semibold text-gray-400 max-w-xs mx-auto">
             {activeVenue?.name || 'Mekân yetkilisi'} sistemi geçici olarak pasife almıştır.

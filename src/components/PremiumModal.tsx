@@ -32,7 +32,7 @@ export const PremiumModal: React.FC = () => {
     if (activeModal === 'premium') {
       iapService.initialize(
         async () => {
-          showToast('Tebrikler! Muzikors Premium başarıyla aktif edildi! 👑');
+          showToast('Tebrikler! Muzikors Premium başarıyla aktif edildi.');
           await refreshUser();
           closeModal();
         },
@@ -137,33 +137,33 @@ export const PremiumModal: React.FC = () => {
         >
           {/* Header Graphic */}
           <div className="relative p-6 pb-4 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[var(--theme-card)]">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center text-[var(--theme-primary)] mb-3 shadow-inner">
-              <Crown className="w-7 h-7" />
+            <div className="my-2">
+              <Crown className="w-10 h-10 text-[var(--theme-primary)]" strokeWidth={1.75} />
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight">
+            <h2 className="text-2xl font-bold text-white tracking-tight">
               Muzikors Premium
             </h2>
             
             {/* Free Trial Highlight Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30">
-              <span className="text-[10px] font-black text-[var(--theme-primary-light)] uppercase tracking-wider">
-                İlk 3 Gün Ücretsiz Deneme!
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10">
+              <span className="text-[10px] font-bold text-[var(--theme-primary-light)] uppercase tracking-wider">
+                İlk 3 Gün Ücretsiz Deneme
               </span>
             </div>
 
             <button 
               onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-white/[0.05] hover:bg-white/[0.1] rounded-full text-neutral-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-1.5 bg-white/[0.05] hover:bg-white/[0.1] rounded-full text-neutral-400 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Benefits list */}
-          <div className="p-5 overflow-y-auto custom-scrollbar space-y-2.5">
+          <div className="p-5 overflow-y-auto custom-scrollbar space-y-2">
             {benefits.map((benefit, idx) => (
-              <div key={idx} className="flex gap-3.5 items-start bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
-                <div className="p-2 rounded-xl bg-black/40 border border-white/5 shrink-0 mt-0.5">
+              <div key={idx} className="flex gap-3 items-start bg-white/[0.02] p-3 rounded-2xl border border-white/[0.05]">
+                <div className="shrink-0 mt-0.5">
                   {benefit.icon}
                 </div>
                 <div>

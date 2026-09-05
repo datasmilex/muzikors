@@ -40,14 +40,10 @@ export const LoginModal: React.FC = () => {
             className="relative w-full max-w-sm bg-[var(--theme-card)] border border-white/[0.1] rounded-3xl p-6 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[10px] font-bold text-[var(--theme-primary-light)] uppercase tracking-wider">
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                <span>Güvenli Giriş</span>
-              </div>
+            <div className="flex items-center justify-end mb-2">
               <button
                 onClick={closeModal}
-                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 aria-label="Kapat"
               >
                 <X className="w-4 h-4" />
@@ -56,7 +52,7 @@ export const LoginModal: React.FC = () => {
 
             {/* Alert Banner */}
             {loginPromptReason && (
-              <div className="mb-4 bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-2xl p-3 flex items-start gap-2.5 text-[var(--theme-primary-light)] text-xs font-medium leading-relaxed">
+              <div className="mb-4 bg-white/[0.03] border border-white/10 rounded-2xl p-3 flex items-start gap-2.5 text-neutral-300 text-xs font-medium leading-relaxed">
                 <AlertCircle className="w-4 h-4 text-[var(--theme-primary)] shrink-0 mt-0.5" />
                 <span>{loginPromptReason}</span>
               </div>
@@ -64,14 +60,14 @@ export const LoginModal: React.FC = () => {
 
             {/* Hero Icon & Title */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center shadow-inner mb-3 p-2.5">
+              <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center mb-3 p-2.5">
                 <img src="/logo.png" alt="Muzikors Logo" className="w-full h-full object-contain" />
               </div>
 
-              <h2 className="text-xl font-black text-white tracking-tight">
+              <h2 className="text-xl font-bold text-white tracking-tight">
                 Muzikors&apos;a Giriş Yap
               </h2>
-              <p className="text-xs text-neutral-400 mt-1 max-w-[220px]">
+              <p className="text-xs text-neutral-400 mt-1 max-w-[240px]">
                 Mekanın çalma listesine şarkı ekle, oyla ve ritmi yönet.
               </p>
             </div>

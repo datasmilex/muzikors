@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { Crown, Award, X } from 'lucide-react';
+import { Crown, Award, X, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const BetaTesterWelcomeModal = () => {
@@ -52,7 +52,7 @@ export const BetaTesterWelcomeModal = () => {
         beta_tester_reward_claimed: true,
       } : null);
       
-      showToast('Tebrikler! Özel Beta Tester rozetiniz profilinize tanımlandı. 🎉');
+      showToast('Tebrikler! Özel Beta Tester rozetiniz profilinize tanımlandı.');
       confetti({
         particleCount: 150,
         spread: 80,
@@ -67,7 +67,7 @@ export const BetaTesterWelcomeModal = () => {
         ...prev,
         beta_tester_reward_claimed: true,
       } : null);
-      showToast('Özel Beta Tester rozetiniz tanımlandı. 🎉');
+      showToast('Özel Beta Tester rozetiniz tanımlandı.');
       setIsVisible(false);
     } finally {
       setIsLoading(false);
@@ -87,17 +87,17 @@ export const BetaTesterWelcomeModal = () => {
         
         <button 
           onClick={() => setIsVisible(false)}
-          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="w-14 h-14 bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-2xl flex items-center justify-center mb-4 text-[var(--theme-primary)] shadow-inner">
-          <Award className="w-7 h-7" />
+        <div className="my-2 flex items-center justify-center text-[var(--theme-primary)]">
+          <Award className="w-10 h-10 stroke-[1.75]" />
         </div>
 
-        <h3 className="text-lg font-black text-white mb-2 tracking-tight">
-          Beta Tester Rozetiniz Hazır!
+        <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
+          Beta Tester Rozetiniz Hazır
         </h3>
         
         <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
@@ -107,10 +107,10 @@ export const BetaTesterWelcomeModal = () => {
         <button 
           onClick={handleClaim}
           disabled={isLoading}
-          className="w-full py-3.5 px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3.5 px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
         >
           {isLoading ? (
-            <span className="inline-block animate-spin mr-2">⏳</span>
+            <Loader2 className="w-4 h-4 animate-spin text-black" />
           ) : (
             <Crown className="w-4 h-4" />
           )}

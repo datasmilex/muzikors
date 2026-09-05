@@ -136,12 +136,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // Celebratory Toast
-      showToast(`🎉 İstediğin Şarkı Başladı! "${nowPlaying.title}" şu an mekanda çalıyor! Arkana yaslan ve keyfini çıkar`);
+      showToast(`İstediğin şarkı başladı: "${nowPlaying.title}" şu an mekânda çalıyor.`);
 
       // Browser Notification if permitted
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         try {
-          new Notification('🎶 İstediğin Şarkı Mekanda Çalıyor!', {
+          new Notification('İstediğin Şarkı Mekânda Çalıyor', {
             body: `"${nowPlaying.title} - ${nowPlaying.artist}" şu an başladı!`,
             icon: nowPlaying.albumCover || '/logo.png'
           });
@@ -1160,9 +1160,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (levelsGained > 0) {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.65 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
-      showToast(`🎉 Tebrikler! Seviye Atladın: ${newLevelInfo.fullTitle} (Lv. ${newLevelInfo.level}) — Süre sınırlaması olmayan +${levelsGained} Şarkı Hakkı Kazandın! 🎵`);
+      showToast(`Tebrikler! Seviye atladın: ${newLevelInfo.fullTitle} (Lv. ${newLevelInfo.level}) — +${levelsGained} kalıcı şarkı hakkı tanımlandı.`);
     } else if (reason) {
-      showToast(`✨ +${amount} XP (${reason})`);
+      showToast(`+${amount} XP (${reason})`);
     }
 
     if (supabase) {
@@ -1220,7 +1220,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (cooldown.active && !user?.isPremium && cooldown.remainingSeconds > 0) {
       const m = Math.floor(cooldown.remainingSeconds / 60);
       const s = cooldown.remainingSeconds % 60;
-      showToast(`Anti-Spam aktif! Tekrar şarkı eklemek için ${m > 0 ? `${m} dk ` : ''}${s} sn bekleyin. (Premium ile bekleme süresi 0 sn ⚡)`);
+      showToast(`Anti-Spam aktif! Tekrar şarkı eklemek için ${m > 0 ? `${m} dk ` : ''}${s} sn bekleyin. (Premium ile bekleme süresi 0 sn)`);
       return false;
     }
 
@@ -1268,7 +1268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } else {
       if (songDurationMs > 240000) {
-        showToast(`Bu şarkı 4 dakikadan uzun (${durFormatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz 👑`);
+        showToast(`Bu şarkı 4 dakikadan uzun (${durFormatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz.`);
         return false;
       }
     }
@@ -1304,7 +1304,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (recentLog?.created_at) {
         const diffMs = (new Date(recentLog.created_at).getTime() + 60 * 60 * 1000) - Date.now();
         const remainingMins = Math.max(1, Math.ceil(diffMs / (60 * 1000)));
-        showToast(`"${track.title}" bu mekanda kısa süre önce çalındı/istendi. Müzik çeşitliliğini korumak için ${remainingMins} dakika sonra tekrar isteyebilirsiniz 🎵`);
+        showToast(`"${track.title}" bu mekanda kısa süre önce çalındı/istendi. Müzik çeşitliliğini korumak için ${remainingMins} dakika sonra tekrar isteyebilirsiniz.`);
         return false;
       }
     }
@@ -1509,7 +1509,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setPendingRewardOptions(null);
       closeModal();
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.8 }, colors: ['#D4AF37', '#FFFFFF', '#38BDF8'] });
-      showToast(`"${trackToQueue.title}" reklam izlenerek sıraya eklendi! 🎉`);
+      showToast(`"${trackToQueue.title}" sıraya eklendi.`);
       return true;
     }
 
@@ -1518,7 +1518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser((prev) => prev ? { ...prev, daily_songs_count: Math.max(0, (prev.daily_songs_count || 1) - 1) } : null);
     }
     closeModal();
-    showToast('Tebrikler! +1 ek şarkı istek hakkı kazandınız. 🎵');
+    showToast('Tebrikler! +1 ek şarkı istek hakkı kazandınız.');
     return true;
   }, [pendingRewardTrack, pendingRewardOptions, activeVenue, user, supabase, closeModal, showToast, addXp]);
 
@@ -1757,7 +1757,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#D4AF37', '#10B981', '#38BDF8', '#F59E0B'] });
-    showToast(`🎉 Günlük Ödül: +${earnedXp} XP (${currentStreak}. Gün Serisi) kazandınız!`);
+    showToast(`Günlük Ödül: +${earnedXp} XP (${currentStreak}. Gün Serisi) kazandınız!`);
     return true;
   }, [user, addXp, openProtectedModal, showToast, supabase]);
 

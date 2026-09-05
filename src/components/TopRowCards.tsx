@@ -13,12 +13,10 @@ export const TopRowCards: React.FC = () => {
 
       <button
         onClick={() => openModal('qr')}
-        className="glass-panel rounded-2xl p-3.5 flex flex-col items-center justify-center text-center relative overflow-hidden border border-[#D4AF37]/30 active:border-[#D4AF37] transition-all group active:scale-95 cursor-pointer bg-gradient-to-br from-[#26190F]/90 to-[#120C08]/90"
+        className="rounded-2xl p-4 flex flex-col items-center justify-center text-center relative overflow-hidden border border-white/[0.08] bg-[var(--theme-card)] hover:border-white/20 transition-all group active:scale-95 cursor-pointer"
       >
-        <div className="w-11 h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center mb-2 group-active:scale-95 group-active:bg-[#D4AF37]/25 transition-all text-[#D4AF37]">
-          <QrCode className="w-6 h-6" />
-        </div>
-        <span className="text-sm font-bold text-amber-100 group-active:text-[#D4AF37] transition-colors">
+        <QrCode className="w-8 h-8 text-[var(--theme-primary)] mb-2" strokeWidth={1.75} />
+        <span className="text-sm font-bold text-white transition-colors">
           Bir Mekana Bağlan
         </span>
       </button>

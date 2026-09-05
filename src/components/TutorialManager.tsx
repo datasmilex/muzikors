@@ -34,7 +34,7 @@ export const TutorialManager: React.FC = () => {
         {
           element: '#tour-qr-button',
           popover: {
-            title: 'Mekanlara Bağlan 🎧',
+            title: 'Mekanlara Bağlan',
             description: 'Kafeye bağlanmak için masandaki QR kodu okutabilir veya "Keşfet" menüsünden bulunduğun kafeyi bulabilirsin.',
             side: 'top',
             align: 'center'
@@ -43,7 +43,7 @@ export const TutorialManager: React.FC = () => {
         {
           element: '#tour-wallet-button',
           popover: {
-            title: 'Kullanım Hakları 🎵',
+            title: 'Kullanım Hakları',
             description: '<div class="space-y-3"><p>Muzikors tamamen ücretsizdir!</p><p>Buradan kalan günlük şarkı açma, beğenme ve diğer etkileşim haklarını anlık olarak takip edebilirsin.</p><p class="text-[10px] text-amber-200/50">Hakların her gece 00:00\'da sıfırlanır.</p></div>',
             side: 'left',
             align: 'start'
@@ -52,7 +52,7 @@ export const TutorialManager: React.FC = () => {
         {
           element: '#tour-add-song',
           popover: {
-            title: 'Şarkı Ekle 🎵',
+            title: 'Şarkı Ekle',
             description: 'Mekana bağlandıktan sonra bu butona tıklayarak şarkı arama ekranını açabilirsin.',
             side: 'top',
             align: 'center',
@@ -68,7 +68,7 @@ export const TutorialManager: React.FC = () => {
         {
           element: '#tour-search-input',
           popover: {
-            title: 'Şarkı Arama 🔍',
+            title: 'Şarkı Arama',
             description: 'Dilediğin şarkıyı seç, sıraya ekle ve herkes dinlesin! (Şarkı seçmek zorunlu değil, tanıtımı burada bitirebilirsin)',
             side: 'bottom',
             align: 'center'

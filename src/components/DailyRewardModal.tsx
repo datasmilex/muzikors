@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, Flame, Check, Clock, Loader2, Music } from 'lucide-react';
+import { Gift, X, Sparkles, Flame, Check, Clock, Loader2, Music, Crown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getSecondsUntilTRMidnight } from '../lib/timeHelpers';
 
@@ -113,19 +113,16 @@ export const DailyRewardModal: React.FC = () => {
           </button>
 
           {/* Icon Header */}
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-3 mt-1 shadow-inner relative">
-            <Gift className="w-8 h-8 text-amber-400" />
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-black flex items-center justify-center font-black text-[10px] shadow-sm">
-              <Sparkles className="w-3 h-3" />
-            </div>
+          <div className="my-2 flex items-center justify-center">
+            <Gift className="w-10 h-10 text-[var(--theme-primary)]" strokeWidth={1.75} />
           </div>
 
           <div className="space-y-1 mb-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-black">
-              <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />
+            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--theme-primary)]">
+              <Flame className="w-3.5 h-3.5 fill-current" />
               <span>{targetStreak}. Gün Giriş Serisi</span>
             </div>
-            <h2 className="text-base font-black text-white tracking-tight">
+            <h2 className="text-base font-bold text-white tracking-tight">
               Günlük Giriş Ödülü
             </h2>
             <p className="text-[11px] text-neutral-400 leading-snug">
@@ -162,11 +159,13 @@ export const DailyRewardModal: React.FC = () => {
                     <span className="text-[10px] font-black">
                       +{s.xp}
                     </span>
-                    <div className="mt-1">
+                    <div className="mt-1 flex items-center justify-center h-3">
                       {isPast ? (
                         <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                      ) : s.isGrand ? (
+                        <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
                       ) : (
-                        <span className="text-[8px]">{s.isGrand ? '👑' : '✨'}</span>
+                        <Sparkles className="w-3 h-3 text-neutral-400" />
                       )}
                     </div>
                   </div>
@@ -177,23 +176,19 @@ export const DailyRewardModal: React.FC = () => {
 
           {/* Reward Perks Summary */}
           <div className="w-full grid grid-cols-2 gap-2 mb-4">
-            <div className="p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] flex items-center gap-2.5 text-left">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-              </div>
+            <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-2.5 text-left">
+              <Sparkles className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
               <div className="min-w-0">
-                <span className="text-[9px] text-neutral-400 font-bold uppercase block">Kazanılan XP</span>
-                <span className="text-xs font-black text-amber-300">+{todayRewardXp} XP</span>
+                <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider block">Kazanılan XP</span>
+                <span className="text-xs font-bold text-white">+{todayRewardXp} XP</span>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] flex items-center gap-2.5 text-left">
-              <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/20 flex items-center justify-center shrink-0">
-                <Flame className="w-4 h-4 text-[var(--theme-primary)] fill-current" />
-              </div>
+            <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-2.5 text-left">
+              <Flame className="w-4 h-4 text-[var(--theme-primary)] fill-current shrink-0" />
               <div className="min-w-0">
-                <span className="text-[9px] text-neutral-400 font-bold uppercase block">Seri Durumu</span>
-                <span className="text-xs font-black text-white">{targetStreak}. Gün Aktif</span>
+                <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider block">Seri Durumu</span>
+                <span className="text-xs font-bold text-white">{targetStreak}. Gün Aktif</span>
               </div>
             </div>
           </div>

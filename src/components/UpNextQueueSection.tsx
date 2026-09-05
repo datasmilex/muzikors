@@ -59,7 +59,7 @@ export const UpNextQueueSection: React.FC = () => {
     if (user && track.requestedByUserId === user.id && !isAnon) return 'Sen';
     if (isAnon) return 'Anonim';
     if (isVenueOrBackgroundRequester(track.requestedBy, track.requestedByUserId)) {
-      return isBackgroundMusicRequester(track.requestedBy) ? '☕ Fon Müziği' : '👑 Mekan Sahibi';
+      return isBackgroundMusicRequester(track.requestedBy) ? 'Mekan Fon Listesi' : 'Mekan Sahibi';
     }
     if (!track.requestedBy) return 'Misafir';
     if (track.requestedBy.startsWith('@') || track.requestedBy.includes('.***')) {
@@ -132,18 +132,18 @@ export const UpNextQueueSection: React.FC = () => {
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
             <ListMusic className="w-4 h-4 text-[var(--theme-primary)]" />
-            <h3 className="text-sm font-black text-white tracking-wide">
+            <h3 className="text-sm font-bold text-white tracking-tight">
               Sıradaki Şarkılar
             </h3>
-            <span className="bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] text-[10px] font-black px-2 py-0.5 rounded-full">
-              {filteredQueue.length}
+            <span className="text-xs font-mono font-medium text-neutral-500">
+              ({filteredQueue.length})
             </span>
           </div>
 
           {filteredQueue.length > 0 && (
             <button
               onClick={() => setIsExpanded(true)}
-              className="text-xs font-bold text-[var(--theme-primary)] hover:text-[var(--theme-primary-light)] flex items-center gap-1 active:scale-95 transition-transform"
+              className="text-xs font-semibold text-[var(--theme-primary)] hover:text-white flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
             >
               <span>Tümünü Gör</span>
             </button>
@@ -152,13 +152,11 @@ export const UpNextQueueSection: React.FC = () => {
 
         {/* Queue Stack / List */}
         {filteredQueue.length === 0 ? (
-          <div className="rounded-2xl p-5 border border-white/[0.08] bg-[var(--theme-card)] backdrop-blur-xl flex items-center gap-4 my-1 shadow-md transition-colors duration-300">
-            <div className="w-11 h-11 shrink-0 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)] shadow-inner">
-              <QrCode className="w-5 h-5" />
-            </div>
+          <div className="rounded-2xl p-4 sm:p-5 border border-white/[0.06] bg-[var(--theme-card)] flex items-center gap-3.5 my-1 transition-colors duration-300">
+            <QrCode className="w-5 h-5 text-neutral-500 shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold text-white tracking-wide">Sırada Şarkı Yok</h4>
-              <p className="text-[10px] text-neutral-400 leading-snug mt-0.5">
+              <p className="text-[11px] text-neutral-400 leading-snug mt-0.5">
                 Masadaki QR kodu okutarak sıradaki şarkıyı sen seç!
               </p>
             </div>
@@ -314,7 +312,7 @@ export const UpNextQueueSection: React.FC = () => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (isAnonymousTrack(track)) {
-                                      showToast('Bu profil gizlidir 🔒');
+                                      showToast('Bu profil gizlidir.');
                                       return;
                                     }
                                     if (track.requestedByUserId) openProfile(track.requestedByUserId);

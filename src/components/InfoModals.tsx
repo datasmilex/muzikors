@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Gift, Info, Handshake, MessageCircle, HelpCircle, Send, CheckCircle2 } from 'lucide-react';
+import { X, Gift, Info, Handshake, MessageCircle, HelpCircle, Send, CheckCircle2, Phone } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const InfoModals: React.FC = () => {
@@ -68,17 +68,15 @@ export const InfoModals: React.FC = () => {
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4 relative z-10 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)] shadow-inner">
-                  {activeModal === 'campaigns' && <Gift className="w-4 h-4" />}
-                  {activeModal === 'about' && <Info className="w-4 h-4" />}
-                  {activeModal === 'partners' && <Handshake className="w-4 h-4" />}
-                  {activeModal === 'contact' && <MessageCircle className="w-4 h-4" />}
-                  {activeModal === 'howitworks' && <HelpCircle className="w-4 h-4" />}
-                  {activeModal === 'terms' && <Info className="w-4 h-4" />}
-                </div>
+              <div className="flex items-center gap-2.5 text-[var(--theme-primary)]">
+                {activeModal === 'campaigns' && <Gift className="w-4 h-4 shrink-0" />}
+                {activeModal === 'about' && <Info className="w-4 h-4 shrink-0" />}
+                {activeModal === 'partners' && <Handshake className="w-4 h-4 shrink-0" />}
+                {activeModal === 'contact' && <MessageCircle className="w-4 h-4 shrink-0" />}
+                {activeModal === 'howitworks' && <HelpCircle className="w-4 h-4 shrink-0" />}
+                {activeModal === 'terms' && <Info className="w-4 h-4 shrink-0" />}
 
-                <h2 className="text-sm font-black text-white tracking-tight capitalize">
+                <h2 className="text-sm font-bold text-white tracking-tight capitalize">
                   {activeModal === 'campaigns' && 'Kampanyalar'}
                   {activeModal === 'terms' && 'Kullanım & KVKK'}
                   {activeModal === 'about' && 'Hakkında'}
@@ -220,7 +218,8 @@ export const InfoModals: React.FC = () => {
                       href="tel:+905068638306"
                       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-bold text-xs active:scale-95 transition-all"
                     >
-                      <span>📞 +90 506 863 83 06</span>
+                      <Phone className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>+90 506 863 83 06</span>
                     </a>
                     <p className="text-[10px] text-neutral-500 font-bold uppercase mt-2">Haftanın 7 günü 10:00 - 02:00</p>
                   </div>

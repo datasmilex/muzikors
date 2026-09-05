@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
       {/* Left: Menu Drawer Trigger */}
       <button
         onClick={() => openModal('drawer')}
-        className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/[0.04] border border-white/10 text-neutral-300 hover:text-[var(--theme-primary)] active:bg-white/10 transition-all active:scale-95 shadow-inner"
+        className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/10 text-neutral-300 hover:text-[var(--theme-primary)] active:bg-white/10 transition-all active:scale-95"
         aria-label="Menü Aç"
       >
         <Menu className="w-4 h-4" />
@@ -24,19 +24,19 @@ export const Header: React.FC = () => {
       {/* Center: Interactive Venue Pill / Branding */}
       <div 
         onClick={() => isVenueBound && openModal('venue_info')}
-        className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-[var(--theme-primary)]/40 transition-all cursor-pointer ${
+        className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-all cursor-pointer ${
           isVenueBound ? 'active:scale-95' : ''
         }`}
       >
-        <div className="w-6 h-6 rounded-lg bg-[var(--theme-card)] border border-[var(--theme-primary)]/30 flex items-center justify-center p-0.5 shrink-0 shadow-sm">
+        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-white/15 bg-black/40 flex items-center justify-center">
           <img
-            src="/logo.png"
-            alt="Muzikors Logo"
+            src={(isVenueBound && activeVenue && (activeVenue as any).logo_url) ? (activeVenue as any).logo_url : '/logo.png'}
+            alt={isVenueBound && activeVenue ? activeVenue.name : 'Muzikors'}
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/logo.png';
             }}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </div>
 

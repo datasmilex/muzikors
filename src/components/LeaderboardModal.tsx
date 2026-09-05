@@ -197,13 +197,11 @@ export const LeaderboardModal: React.FC = () => {
           >
             {/* Header */}
             <div className="flex-none p-5 flex items-center justify-between border-b border-white/[0.08] relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)] shadow-inner">
-                  <Trophy className="w-5 h-5" />
-                </div>
+              <div className="flex items-center gap-2.5">
+                <Trophy className="w-5 h-5 text-[var(--theme-primary)] shrink-0" />
                 <div>
-                  <h2 className="text-base font-black text-white tracking-tight">Liderlik Tablosu</h2>
-                  <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider">
+                  <h2 className="text-base font-bold text-white tracking-tight">Liderlik Tablosu</h2>
+                  <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider">
                     {activeTab === 'users' ? 'En Yüksek Seviyeli Müzikseverler' : 'En Çok Şarkı Çalınan Mekanlar'}
                   </span>
                 </div>
@@ -254,12 +252,10 @@ export const LeaderboardModal: React.FC = () => {
                     className="w-full p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-[var(--theme-primary)]/30 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
-                        <Gift className="w-3.5 h-3.5" />
-                      </div>
+                      <Gift className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
                       <div className="text-left">
                         <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>{activeTab === 'users' ? '🎁 Kullanıcı VIP Çekilişi' : '🏆 Ayın Mekan Ödülü'}</span>
+                          <span>{activeTab === 'users' ? 'Kullanıcı VIP Çekilişi' : 'Ayın Mekan Ödülü'}</span>
                           {activeTab === 'users' && giveawayStatus.is_joined && (
                             <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-bold">
                               Katıldın
@@ -294,17 +290,15 @@ export const LeaderboardModal: React.FC = () => {
                           {activeTab === 'users' ? (
                             <>
                               {/* 1. ÇEKİLİŞE KATIL BUTONU & DURUM KARTI */}
-                              <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-[var(--theme-card)] to-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                                <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
-                                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-4 h-4" />
-                                  </div>
+                              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
+                                  <Sparkles className="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
                                   <div className="min-w-0">
                                     <p className="text-xs font-bold text-white flex items-center gap-1.5">
                                       <span>Aylık VIP Çekilişi</span>
                                       <span className="text-[10px] font-normal text-neutral-400">({giveawayStatus.participant_count} Katılımcı)</span>
                                     </p>
-                                    <p className="text-[10px] text-neutral-400">
+                                    <p className="text-[10px] text-neutral-400 mt-0.5">
                                       {giveawayStatus.is_joined 
                                         ? 'Tebrikler, çekiliş havuzundasın!' 
                                         : 'Tek tıkla ücretsiz katıl, VIP kazan'}

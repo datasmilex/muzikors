@@ -117,34 +117,28 @@ export const NowPlayingSection: React.FC = () => {
         {/* Top Status Header */}
         <div className="w-full flex items-center justify-between mb-4">
           {!isMusicPlaying ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="text-[10px] font-extrabold tracking-wider text-amber-300 uppercase">
-                Duraklatıldı
-              </span>
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <span>Duraklatıldı</span>
             </div>
           ) : user && nowPlaying.requestedByUserId === user.id ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)] animate-pulse" />
-              <span className="text-[10px] font-extrabold tracking-wider text-[var(--theme-primary-light)] uppercase">
-                Senin Şarkın Çalıyor!
-              </span>
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--theme-primary)] tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-primary)] animate-pulse" />
+              <span>Senin Şarkın</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#10b981]" />
-              <span className="text-[10px] font-bold tracking-wider text-neutral-300 uppercase">
-                Şu An Çalıyor
-              </span>
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Şu An Çalıyor</span>
             </div>
           )}
 
           {/* Equalizer Waveform Indicator */}
-          <div className="flex items-center gap-0.5 h-4 px-2 py-1 rounded-full bg-black/40 border border-white/5">
+          <div className="flex items-center gap-1 h-4 px-1" aria-hidden="true">
             <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-1' : 'h-1.5 opacity-40'}`} />
-            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-2' : 'h-2.5 opacity-40'}`} />
-            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-3' : 'h-1.5 opacity-40'}`} />
-            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-4' : 'h-2 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-2' : 'h-3.5 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-3' : 'h-2 opacity-40'}`} />
+            <span className={`w-1 bg-[var(--theme-primary)] rounded-full transition-all ${isMusicPlaying ? 'animate-bar-4' : 'h-3 opacity-40'}`} />
           </div>
         </div>
 
@@ -178,11 +172,18 @@ export const NowPlayingSection: React.FC = () => {
 
             if (isVenue || isBgMusic) {
               return (
-                <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 text-[10px] text-[var(--theme-primary-light)]">
-                  <Store className="w-3 h-3 text-[var(--theme-primary)]" />
-                  <span className="font-bold uppercase tracking-wider">
-                    {isBgMusic ? '☕ Mekan Fon Müziği' : '👑 Mekan Sahibi'}
-                  </span>
+                <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-neutral-300">
+                  {isBgMusic ? (
+                    <>
+                      <Disc className="w-3.5 h-3.5 text-neutral-400" />
+                      <span className="font-medium tracking-wide">Mekan Fon Listesi</span>
+                    </>
+                  ) : (
+                    <>
+                      <Store className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                      <span className="font-semibold text-white tracking-wide">Mekan Sahibi</span>
+                    </>
+                  )}
                 </div>
               );
             }
@@ -196,10 +197,10 @@ export const NowPlayingSection: React.FC = () => {
 
             return (
               <div 
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-neutral-300 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-neutral-300 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
                 onClick={() => {
                   if (isAnon) {
-                    showToast('Bu profil gizlidir 🔒');
+                    showToast('Bu profil gizlidir.');
                     return;
                   }
                   if (nowPlaying.requestedByUserId) {
@@ -209,7 +210,7 @@ export const NowPlayingSection: React.FC = () => {
               >
                 <User className="w-3 h-3 text-[var(--theme-primary)]" />
                 <span className="truncate flex items-center gap-1">
-                  İsteyen: <strong className="text-white font-bold">
+                  İsteyen: <strong className="text-white font-semibold">
                     {(user && nowPlaying.requestedByUserId === user.id && !isAnon) 
                       ? 'Sen' 
                       : isAnon
@@ -218,8 +219,8 @@ export const NowPlayingSection: React.FC = () => {
                           ? nowPlaying.requestedBy.replace(' VIP', '')
                           : formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}
                   </strong>
-                  {(nowPlaying.requestedBy.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium && !isAnon)) && (
-                    <span className="text-[8px] font-black bg-[var(--theme-primary)] text-black px-1.5 py-0.5 rounded uppercase ml-1 font-bold">VIP</span>
+                  {(nowPlaying.requestedBy?.includes('VIP') || (user && nowPlaying.requestedByUserId === user.id && user.isPremium && !isAnon)) && (
+                    <span className="text-[8px] font-black bg-[var(--theme-primary)] text-black px-1.5 py-0.5 rounded uppercase ml-1">VIP</span>
                   )}
                 </span>
               </div>

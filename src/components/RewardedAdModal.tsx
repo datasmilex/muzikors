@@ -123,28 +123,28 @@ export const RewardedAdModal: React.FC = () => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-                className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 shadow-sm"
+                className="my-2 flex items-center justify-center mx-auto text-emerald-400"
               >
-                <CheckCircle2 className="w-8 h-8" />
+                <CheckCircle2 className="w-10 h-10" />
               </motion.div>
-              <h3 className="text-base font-black text-white tracking-tight">Ödülün Tanımlandı! 🎉</h3>
+              <h3 className="text-base font-bold text-white tracking-tight">Ödülün Tanımlandı</h3>
               <p className="text-xs text-neutral-300">
                 {pendingRewardTrack
                   ? `"${pendingRewardTrack.title}" sıraya ekleniyor...`
-                  : '+1 ek şarkı hakkı hesabına eklendi!'}
+                  : '+1 ek şarkı hakkı hesabına eklendi.'}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Header Icon */}
-              <div className="w-12 h-12 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center mx-auto text-[var(--theme-primary)] shadow-inner">
-                {isNative ? <Gift className="w-6 h-6" /> : <Smartphone className="w-6 h-6" />}
+              <div className="my-2 flex items-center justify-center mx-auto text-[var(--theme-primary)]">
+                {isNative ? <Gift className="w-8 h-8" /> : <Smartphone className="w-8 h-8" />}
               </div>
 
               {/* Title & Description */}
               <div>
-                <h3 className="text-base font-black text-white tracking-tight">
-                  Günlük Şarkı Hakkın Doldu! 🎵
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Günlük Şarkı Hakkın Doldu
                 </h3>
                 <p className="text-xs text-neutral-400 mt-1.5 leading-relaxed">
                   {isNative ? (

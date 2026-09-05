@@ -23,6 +23,7 @@ import {
   Info,
   Radio,
   ArrowRight,
+  MapPin,
   Shield
 } from 'lucide-react';
 import { iapService } from '../services/iapService';
@@ -76,7 +77,7 @@ export const VenueOwnerModal: React.FC = () => {
       fetchOwnedVenues();
       iapService.initialize(
         async () => {
-          showToast('Tebrikler! Kafe aboneliğiniz başarıyla yenilendi! ☕👑');
+          showToast('Tebrikler! Kafe aboneliğiniz başarıyla yenilendi.');
           await fetchOwnedVenues();
         },
         (err) => {
@@ -106,7 +107,7 @@ export const VenueOwnerModal: React.FC = () => {
     const url = `https://kafe.muzikors.com.tr/admin/${slug}`;
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(url);
-      showToast('Kafe paneli linki kopyalandı! 📋');
+      showToast('Kafe paneli linki kopyalandı.');
     }
   };
 
@@ -134,7 +135,7 @@ export const VenueOwnerModal: React.FC = () => {
       if (error) {
         showToast('Yetkilendirme başarısız: ' + error.message);
       } else {
-        showToast(`"${data?.venue_name || 'Mekan'}" başarıyla hesabınıza bağlandı! 🎉`);
+        showToast(`"${data?.venue_name || 'Mekan'}" başarıyla hesabınıza bağlandı.`);
         setIsLinking(false);
         setLinkUsername('');
         setLinkPassword('');
@@ -261,9 +262,10 @@ export const VenueOwnerModal: React.FC = () => {
                             /{venue.slug}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-400">
-                          📍 {venue.district ? `${venue.district}, ${venue.city}` : 'Konum tanımlandı'}
-                        </p>
+                        <div className="flex items-center gap-1 text-xs text-zinc-400 mt-0.5">
+                          <MapPin className="w-3 h-3 text-neutral-500 shrink-0" />
+                          <span>{venue.district ? `${venue.district}, ${venue.city}` : 'Konum tanımlandı'}</span>
+                        </div>
                       </div>
 
                       {/* Status Badges */}

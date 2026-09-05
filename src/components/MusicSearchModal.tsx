@@ -270,7 +270,7 @@ export const MusicSearchModal: React.FC = () => {
     if (target) {
       const blockStatus = getTrackBlockStatus(target);
       if (blockStatus.isBlocked) {
-        showToast(`⚠️ ${blockStatus.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.'}`);
+        showToast(blockStatus.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.');
         return;
       }
 
@@ -283,7 +283,7 @@ export const MusicSearchModal: React.FC = () => {
       }
 
       if (!user?.isPremium && durMs > 240000) {
-        showToast(`Bu şarkı 4 dakikadan uzun (${formatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz 👑`);
+        showToast(`Bu şarkı 4 dakikadan uzun (${formatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz.`);
         return;
       }
 
@@ -691,7 +691,7 @@ export const MusicSearchModal: React.FC = () => {
                                     </span>
                                   ) : isTooLongForFree ? (
                                     <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
-                                      👑 VIP (4+ dk)
+                                      VIP (4+ dk)
                                     </span>
                                   ) : null}
                                 </div>
@@ -751,7 +751,7 @@ export const MusicSearchModal: React.FC = () => {
                                   return (
                                     <div
                                       key={track.id}
-                                      onClick={() => showToast(`⚠️ ${blockInfo.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.'}`)}
+                                      onClick={() => showToast(blockInfo.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.')}
                                       className="rounded-2xl p-2.5 flex items-center justify-between border border-amber-500/15 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
                                     >
                                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -816,7 +816,7 @@ export const MusicSearchModal: React.FC = () => {
                         <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-spin" />
                         <div>
                           <span className="font-semibold text-xs block">Anti-Spam Bekleme Süresi</span>
-                          <span className="text-[9px] text-neutral-400 font-normal">Premium ile bekleme süresi 0 sn ⚡</span>
+                          <span className="text-[9px] text-neutral-400 font-normal">Premium ile bekleme süresi 0 sn</span>
                         </div>
                       </div>
                       <span className="font-mono font-bold text-[var(--theme-primary-light)] text-sm">

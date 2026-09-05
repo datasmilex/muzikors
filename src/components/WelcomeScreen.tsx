@@ -69,10 +69,6 @@ export const WelcomeScreen: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="text-center max-w-xs mx-auto mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[var(--theme-primary-light)] text-[11px] font-bold tracking-wide uppercase mb-4 shadow-sm">
-            <Radio className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-pulse" />
-            <span>İnteraktif Mekan Müziği</span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-[1.15]">
             Mekanın Ritmini <br />
             <span className="text-[var(--theme-primary)]">Sen Belirle.</span>
@@ -95,17 +91,15 @@ export const WelcomeScreen: React.FC = () => {
           <button
             id="tour-qr-button"
             onClick={() => openModal('qr')}
-            className="group relative w-48 h-48 rounded-[2.5rem] bg-gradient-to-b from-[var(--theme-card-alt)] to-[var(--theme-card)] border border-[var(--theme-primary)]/30 hover:border-[var(--theme-primary)]/60 flex flex-col items-center justify-center gap-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_var(--theme-glow)] active:scale-95 transition-all duration-300 overflow-hidden"
+            className="group relative w-48 h-48 rounded-[2.5rem] bg-gradient-to-b from-[var(--theme-card-alt)] to-[var(--theme-card)] border border-[var(--theme-primary)]/30 hover:border-[var(--theme-primary)]/60 flex flex-col items-center justify-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_var(--theme-glow)] active:scale-95 transition-all duration-300 overflow-hidden cursor-pointer"
           >
             {/* Animated Laser Reticle effect */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent shadow-[0_0_12px_var(--theme-glow)] animate-[scan_2.4s_ease-in-out_infinite]" />
             
-            <div className="w-20 h-20 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center text-[var(--theme-primary)] group-hover:scale-105 group-active:scale-95 transition-transform duration-300 shadow-inner">
-              <QrCode className="w-10 h-10 stroke-[1.75]" />
-            </div>
+            <QrCode className="w-14 h-14 text-[var(--theme-primary)] stroke-[1.75] group-hover:scale-105 transition-transform duration-300" />
             
-            <div className="flex flex-col items-center -mt-1">
-              <span className="text-sm font-black tracking-wider uppercase text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
+            <div className="flex flex-col items-center">
+              <span className="text-sm font-bold tracking-wider uppercase text-white group-hover:text-[var(--theme-primary-light)] transition-colors">
                 Bir Mekana Bağlan
               </span>
             </div>
