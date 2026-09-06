@@ -13,7 +13,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { useRouter } from 'next/navigation';
-import { initPushNotifications } from '../utils/pushNotifications';
+import { initPushNotifications, syncDeviceToken } from '../utils/pushNotifications';
 
 const VENUE_STORAGE_KEY = 'muzikors_active_venue';
 
@@ -526,6 +526,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
         setActiveModal((prev) => (prev === 'login' ? 'none' : prev));
       }
+
+      // Sync device push token with user ID
+      syncDeviceToken(undefined, authUser.id);
 
       const totalXp = Number(dbProfile.xp ?? 0);
       const computedLevel = getLevelDetails(totalXp).level;
