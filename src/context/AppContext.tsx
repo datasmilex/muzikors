@@ -1213,15 +1213,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               return;
             }
           }
-
-          // 5. Root screen -> Double-tap to exit
-          const now = Date.now();
-          if (lastBackPressRef.current && now - lastBackPressRef.current < 2000) {
-            App.exitApp();
-          } else {
-            lastBackPressRef.current = now;
-            showToast('Çıkmak için tekrar dokunun');
-          }
         });
       } catch (e) {
         console.warn('[BackButton] Failed to attach back listener:', e);
