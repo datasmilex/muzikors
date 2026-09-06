@@ -11,11 +11,11 @@ export const Header: React.FC = () => {
   const songRights = getUserDailySongRights(user);
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-[var(--theme-bg)]/90 backdrop-blur-2xl border-b border-white/[0.08] px-4 py-2.5 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.8)] transition-colors duration-300">
+    <header className="sticky top-0 z-30 w-full bg-[var(--theme-bg)]/90 backdrop-blur-2xl border-b border-white/[0.08] px-4 landscape:px-3 py-2.5 landscape:py-1.5 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.8)] transition-colors duration-300">
       {/* Left: Menu Drawer Trigger */}
       <button
         onClick={() => openModal('drawer')}
-        className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/10 text-neutral-300 hover:text-[var(--theme-primary)] active:bg-white/10 transition-all active:scale-95"
+        className="w-10 h-10 landscape:w-8 landscape:h-8 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/10 text-neutral-300 hover:text-[var(--theme-primary)] active:bg-white/10 transition-all active:scale-95"
         aria-label="Menü Aç"
       >
         <Menu className="w-4 h-4" />
@@ -88,7 +88,7 @@ export const Header: React.FC = () => {
           className="relative active:scale-95 transition-all flex items-center justify-center shrink-0"
         >
           <AvatarFrame frameId={user?.avatar_frame} size="md">
-            <div className="w-10 h-10 rounded-full bg-[var(--theme-card)] border border-white/15 flex items-center justify-center overflow-hidden shadow-inner">
+            <div className="w-10 h-10 landscape:w-8 landscape:h-8 rounded-full bg-[var(--theme-card)] border border-white/15 flex items-center justify-center overflow-hidden shadow-inner">
               {user && user.avatar && !user.avatar.includes('googleusercontent') ? (
                 <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
               ) : (

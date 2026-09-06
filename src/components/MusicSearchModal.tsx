@@ -20,6 +20,7 @@ export const MusicSearchModal: React.FC = () => {
     activeVenue,
     cooldown,
     showToast,
+    registerBackHandler,
   } = useApp();
 
   const songRights = getUserDailySongRights(user);
@@ -43,6 +44,15 @@ export const MusicSearchModal: React.FC = () => {
   const [estimatedWaitMs, setEstimatedWaitMs] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (confirmingTrack) {
+      return registerBackHandler(() => {
+        setConfirmingTrack(null);
+        return true;
+      });
+    }
+  }, [confirmingTrack, registerBackHandler]);
 
   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
   const isVibeGuardActive = Array.isArray(activeVenue?.allowed_genres) && activeVenue.allowed_genres.length > 0;

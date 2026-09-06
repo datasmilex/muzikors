@@ -129,7 +129,8 @@ export const ProfileView: React.FC = () => {
     theme,
     setTheme,
     viewingProfileId,
-    openProfile
+    openProfile,
+    registerBackHandler
   } = useApp();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -141,6 +142,27 @@ export const ProfileView: React.FC = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    if (cropImageSrc) {
+      return registerBackHandler(() => {
+        setCropImageSrc(null);
+        return true;
+      });
+    }
+    if (showConfirmDelete) {
+      return registerBackHandler(() => {
+        setShowConfirmDelete(false);
+        return true;
+      });
+    }
+    if (isEditing) {
+      return registerBackHandler(() => {
+        setIsEditing(false);
+        return true;
+      });
+    }
+  }, [cropImageSrc, showConfirmDelete, isEditing, registerBackHandler]);
 
   // Social & Stats state
   const [profileData, setProfileData] = useState<any>(null);

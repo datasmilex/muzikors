@@ -58,6 +58,7 @@ interface AppContextType {
   openRewardedAdModal: (track?: Track | null, options?: { isAnonymous?: boolean; isBoosted?: boolean; message?: string }) => void;
   claimRewardAndQueueTrack: () => Promise<boolean>;
   claimDailyReward: () => Promise<boolean>;
+  registerBackHandler: (handler: () => boolean) => () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -110,6 +111,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const venueChannelRef = useRef<any>(null);
   const lastNotifiedTrackRef = useRef<string | null>(null);
   const prevTrackIdRef = useRef<string | null>(null);
+  const activeModalRef = useRef<ModalType>(activeModal);
+  const viewingProfileIdRef = useRef<string | null>(viewingProfileId);
+  const modalHistoryRef = useRef<ModalType[]>([]);
+  const lastBackPressRef = useRef<number>(0);
+  const backHandlersRef = useRef<(() => boolean)[]>([]);
+
+  useEffect(() => {
+    activeModalRef.current = activeModal;
+  }, [activeModal]);
+
+  useEffect(() => {
+    viewingProfileIdRef.current = viewingProfileId;
+  }, [viewingProfileId]);
+
+  const registerBackHandler = useCallback((handler: () => boolean) => {
+    backHandlersRef.current.push(handler);
+    return () => {
+      backHandlersRef.current = backHandlersRef.current.filter((h) => h !== handler);
+    };
+  }, []);
 
   // Derived venue state
   const isVenueBound = activeVenue !== null;
@@ -1087,23 +1108,134 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(timer);
   }, [cooldown.active, cooldown.remainingSeconds]);
 
-  const openModal = useCallback((modal: ModalType) => { setLoginPromptReason(null); setActiveModal(modal); }, []);
   const closeModal = useCallback(() => {
+    modalHistoryRef.current = [];
     setActiveModal('none');
     setViewingProfileId(null);
     setPendingModal(null);
     setLoginPromptReason(null);
   }, []);
 
+  const openModal = useCallback((modal: ModalType) => {
+    setLoginPromptReason(null);
+    if (modal === 'none') {
+      closeModal();
+      return;
+    }
+    setActiveModal((prev) => {
+      if (prev !== 'none' && prev !== modal && prev !== 'drawer') {
+        if (modalHistoryRef.current[modalHistoryRef.current.length - 1] !== prev) {
+          modalHistoryRef.current.push(prev);
+        }
+      }
+      return modal;
+    });
+  }, [closeModal]);
+
   const openProfile = useCallback((id?: string) => {
-    setViewingProfileId(id || user?.id || null);
-    setActiveModal('profile');
+    const targetId = id || user?.id || null;
+    setViewingProfileId(targetId);
+    setActiveModal((prev) => {
+      if (prev !== 'none' && prev !== 'profile' && prev !== 'drawer') {
+        if (modalHistoryRef.current[modalHistoryRef.current.length - 1] !== prev) {
+          modalHistoryRef.current.push(prev);
+        }
+      }
+      return 'profile';
+    });
   }, [user?.id]);
 
   const openProtectedModal = useCallback((modal: ModalType, reason?: string) => {
-    if (!user) { setPendingModal(modal); setLoginPromptReason(reason || 'Devam etmek icin giris yapin'); setActiveModal('login'); return; }
-    setActiveModal(modal);
-  }, [user]);
+    if (!user) {
+      setPendingModal(modal);
+      setLoginPromptReason(reason || 'Devam etmek için giriş yapın');
+      setActiveModal((prev) => {
+        if (prev !== 'none' && prev !== 'login' && prev !== 'drawer') {
+          if (modalHistoryRef.current[modalHistoryRef.current.length - 1] !== prev) {
+            modalHistoryRef.current.push(prev);
+          }
+        }
+        return 'login';
+      });
+      return;
+    }
+    openModal(modal);
+  }, [user, openModal]);
+
+  // ── ANDROID HARDWARE BACK BUTTON & BACK GESTURE INTERCEPTOR ────────────────
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let backListener: any = null;
+
+    const setupBackListener = async () => {
+      try {
+        backListener = await App.addListener('backButton', () => {
+          // 1. Check custom component-level back handlers (LIFO: newest first)
+          const customHandlers = [...backHandlersRef.current].reverse();
+          for (const handler of customHandlers) {
+            try {
+              if (handler()) {
+                return;
+              }
+            } catch (err) {
+              console.error('[BackButton] Error in custom handler:', err);
+            }
+          }
+
+          // 2. Sub-profile viewing
+          if (viewingProfileIdRef.current) {
+            setViewingProfileId(null);
+            if (modalHistoryRef.current.length > 0) {
+              const prev = modalHistoryRef.current.pop()!;
+              setActiveModal(prev);
+            } else {
+              setActiveModal('none');
+            }
+            return;
+          }
+
+          // 3. Active modal open -> close or pop history
+          if (activeModalRef.current !== 'none') {
+            if (modalHistoryRef.current.length > 0) {
+              const prev = modalHistoryRef.current.pop()!;
+              setActiveModal(prev);
+            } else {
+              closeModal();
+            }
+            return;
+          }
+
+          // 4. In-app sub-routes (e.g. /legal/privacy, /delete-account)
+          if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+            if (window.history.length > 1) {
+              window.history.back();
+              return;
+            }
+          }
+
+          // 5. Root screen -> Double-tap to exit
+          const now = Date.now();
+          if (lastBackPressRef.current && now - lastBackPressRef.current < 2000) {
+            App.exitApp();
+          } else {
+            lastBackPressRef.current = now;
+            showToast('Çıkmak için tekrar dokunun');
+          }
+        });
+      } catch (e) {
+        console.warn('[BackButton] Failed to attach back listener:', e);
+      }
+    };
+
+    setupBackListener();
+
+    return () => {
+      if (backListener) {
+        backListener.remove();
+      }
+    };
+  }, [closeModal, showToast]);
 
   const loginWithProvider = useCallback(async (provider: 'google') => {
     if (!supabase) return;
@@ -1775,7 +1907,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       handleIyzicoPayment, iyzicoHtml, requestTrack, vetoTrack, voteTrack, addXp, bindVenueById, deleteAccount, showToast, toggleAudioPlay,
       hasEnteredGateway, setHasEnteredGateway,
-      pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack, claimDailyReward
+      pendingRewardTrack, openRewardedAdModal, claimRewardAndQueueTrack, claimDailyReward,
+      registerBackHandler
     }}>
       {children}
     </AppContext.Provider>

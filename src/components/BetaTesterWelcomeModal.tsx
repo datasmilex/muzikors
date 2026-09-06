@@ -7,9 +7,18 @@ import { Crown, Award, X, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const BetaTesterWelcomeModal = () => {
-  const { user, setUser, showToast, hasEnteredGateway } = useApp();
+  const { user, setUser, showToast, hasEnteredGateway, registerBackHandler } = useApp();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) {
+      return registerBackHandler(() => {
+        setIsVisible(false);
+        return true;
+      });
+    }
+  }, [isVisible, registerBackHandler]);
 
   useEffect(() => {
     if (!user || !hasEnteredGateway) return;
