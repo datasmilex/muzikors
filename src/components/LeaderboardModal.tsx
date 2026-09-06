@@ -21,7 +21,7 @@ interface GiveawayWinner {
 }
 
 export const LeaderboardModal: React.FC = () => {
-  const { activeModal, closeModal, user: currentUser } = useApp();
+  const { activeModal, closeModal, user: currentUser, showToast } = useApp();
   const [activeTab, setActiveTab] = useState<'users' | 'venues'>('users');
   const [showRewards, setShowRewards] = useState(false);
   const [rewardSettings, setRewardSettings] = useState<{
@@ -68,7 +68,7 @@ export const LeaderboardModal: React.FC = () => {
 
   const handleJoinGiveaway = async () => {
     if (!currentUser) {
-      alert('Çekilişe katılabilmek için lütfen önce giriş yapın!');
+      showToast('Çekilişe katılabilmek için lütfen önce giriş yapın!');
       return;
     }
 
@@ -93,9 +93,10 @@ export const LeaderboardModal: React.FC = () => {
             origin: { y: 0.65 }
           });
         } catch (_) {}
+        showToast('Çekilişe başarıyla katıldınız! Bol şans.');
       }
     } catch (err: any) {
-      alert('Çekilişe katılırken bir hata oluştu: ' + (err.message || 'Lütfen tekrar deneyin.'));
+      showToast('Çekilişe katılırken bir hata oluştu: ' + (err.message || 'Lütfen tekrar deneyin.'));
     } finally {
       setJoiningGiveaway(false);
     }

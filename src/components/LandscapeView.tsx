@@ -18,8 +18,12 @@ import {
   Flame,
   Clock,
   Trash2,
-  Crown
+  Crown,
+  X,
+  ShieldCheck,
+  Loader2
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
 import { getUserDailySongRights } from '../lib/timeHelpers';
@@ -266,6 +270,8 @@ export const LandscapeQueue: React.FC = () => {
   const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast, openProtectedModal } = useApp();
   const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
   const [vetoingTrackId, setVetoingTrackId] = useState<string | null>(null);
+  const [trackToVeto, setTrackToVeto] = useState<Track | null>(null);
+  const [isVetoAnonymous, setIsVetoAnonymous] = useState(false);
 
   const handleVoteTrack = (trackId: string) => {
     if (votingCooldowns[trackId]) return;
@@ -276,7 +282,7 @@ export const LandscapeQueue: React.FC = () => {
     }, 2000);
   };
 
-  const handleVeto = async (track: Track, e: React.MouseEvent) => {
+  const handleVeto = (track: Track, e: React.MouseEvent) => {
     e.stopPropagation();
     if (vetoingTrackId) return;
 
@@ -290,10 +296,23 @@ export const LandscapeQueue: React.FC = () => {
       return;
     }
 
-    const isAnonymous = window.confirm('Şarkıyı silerken isminizi gizlemek ister misiniz? (Anonim Veto)');
-    setVetoingTrackId(track.id);
-    await vetoTrack(track.id, isAnonymous);
-    setVetoingTrackId(null);
+    setTrackToVeto(track);
+    setIsVetoAnonymous(false);
+  };
+
+  const confirmExecuteVeto = async () => {
+    if (!trackToVeto || vetoingTrackId) return;
+    const target = trackToVeto;
+    setVetoingTrackId(target.id);
+    try {
+      await vetoTrack(target.id, isVetoAnonymous);
+      showToast(`"${target.title}" şarkısı sıradan kaldırıldı.`);
+      setTrackToVeto(null);
+    } catch (err: any) {
+      showToast('Şarkı kaldırılamadı: ' + (err?.message || 'Lütfen tekrar deneyin.'));
+    } finally {
+      setVetoingTrackId(null);
+    }
   };
 
   const isAnonymousTrack = (track: any) => {
@@ -449,11 +468,17 @@ export const LandscapeQueue: React.FC = () => {
 
                   {/* Upvote Button */}
                   <button
-                    onClick={() => handleVoteTrack(track.id)}
-                    disabled={votingCooldowns[track.id] || isMySong}
+                    onClick={() => {
+                      if (isMySong) {
+                        showToast('Kendi istediğiniz şarkıya oy veremezsiniz');
+                        return;
+                      }
+                      handleVoteTrack(track.id);
+                    }}
+                    disabled={votingCooldowns[track.id]}
                     className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-xs font-bold transition-all ${
                       isMySong
-                        ? 'bg-white/[0.04] border-white/10 text-neutral-500 cursor-not-allowed opacity-60'
+                        ? 'bg-white/[0.04] border-white/10 text-neutral-500 opacity-60 active:scale-95'
                         : 'bg-[var(--theme-primary)]/10 hover:bg-[var(--theme-primary)]/20 border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] active:scale-95'
                     }`}
                   >
@@ -466,6 +491,93 @@ export const LandscapeQueue: React.FC = () => {
           })
         )}
       </div>
+
+      {/* In-App Veto Confirmation Sheet for Landscape */}
+      <AnimatePresence>
+        {trackToVeto && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-sm rounded-3xl bg-[var(--theme-card)] border border-white/[0.12] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.95)] space-y-4"
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400">
+                    <Trash2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Şarkıyı Sıradan Kaldır</h4>
+                    <p className="text-[10px] text-neutral-400">Premium Veto Yetkisi</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setTrackToVeto(null)}
+                  className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/10 text-neutral-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-black/30 border border-white/[0.06] flex items-center gap-3">
+                <img
+                  src={trackToVeto.albumCover || trackToVeto.coverUrl || trackToVeto.album_art || '/logo.png'}
+                  alt={trackToVeto.title}
+                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/10"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-white truncate">{trackToVeto.title}</p>
+                  <p className="text-[11px] text-neutral-400 truncate">{trackToVeto.artist}</p>
+                </div>
+              </div>
+
+              {/* Anonymous Toggle */}
+              <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.05] transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-[var(--theme-primary)]" />
+                  <div>
+                    <span className="text-xs font-semibold text-white block">Anonim Veto</span>
+                    <span className="text-[10px] text-neutral-400">İsminiz istek sahibine bildirilmez</span>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={isVetoAnonymous}
+                  onChange={(e) => setIsVetoAnonymous(e.target.checked)}
+                  className="w-4 h-4 accent-[var(--theme-primary)] rounded cursor-pointer"
+                />
+              </label>
+
+              {/* Buttons */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <button
+                  onClick={() => setTrackToVeto(null)}
+                  disabled={vetoingTrackId === trackToVeto.id}
+                  className="py-3 px-4 rounded-xl bg-white/[0.06] hover:bg-white/10 text-neutral-300 font-semibold text-xs active:scale-95 transition-all text-center"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  onClick={confirmExecuteVeto}
+                  disabled={vetoingTrackId === trackToVeto.id}
+                  className="py-3 px-4 rounded-xl bg-red-500/90 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-lg shadow-red-500/20"
+                >
+                  {vetoingTrackId === trackToVeto.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Kaldır</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

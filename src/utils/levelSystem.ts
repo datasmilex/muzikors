@@ -55,9 +55,9 @@ export const LEVEL_TIERS: LevelTier[] = [
     maxLevel: 75,
     title: 'Rezident DJ',
     icon: '🎛️',
-    badgeBg: 'bg-indigo-500/15',
-    badgeText: 'text-indigo-300',
-    badgeBorder: 'border-indigo-500/30'
+    badgeBg: 'bg-emerald-500/15',
+    badgeText: 'text-emerald-400',
+    badgeBorder: 'border-emerald-500/30'
   },
   {
     minLevel: 76,
@@ -194,7 +194,7 @@ export const AVATAR_FRAMES: AvatarFrameConfig[] = [
     glowClass: 'shadow-[0_0_14px_rgba(56,189,248,0.6)] ring-2 ring-sky-400',
     borderClass: 'border-2 border-sky-300',
     ornamentEmoji: '🎶',
-    previewGradient: 'from-sky-600 via-sky-400 to-indigo-500',
+    previewGradient: 'from-sky-600 via-sky-400 to-blue-500',
     description: 'Seviye 16 (Part time DJ) ve üzeri kullanıcılara özel neon gökyüzü çerçevesi.',
   },
   {
@@ -211,11 +211,11 @@ export const AVATAR_FRAMES: AvatarFrameConfig[] = [
     id: 'frame_lvl51',
     name: 'Rezident DJ Aurası',
     minLevel: 51,
-    glowClass: 'shadow-[0_0_20px_rgba(99,102,241,0.8)] ring-2 ring-indigo-400',
-    borderClass: 'border-2 border-indigo-300',
+    glowClass: 'shadow-[0_0_20px_rgba(16,185,129,0.8)] ring-2 ring-emerald-400',
+    borderClass: 'border-2 border-emerald-300',
     ornamentEmoji: '🎛️',
-    previewGradient: 'from-indigo-600 via-indigo-400 to-purple-500',
-    description: 'Seviye 51 (Rezident DJ) ve üzeri kullanıcılara özel stüdyo mikseri aurası.',
+    previewGradient: 'from-emerald-600 via-teal-400 to-emerald-300',
+    description: 'Seviye 51 (Rezident DJ) ve üzeri kullanıcılara özel stüdyo mikseri zümrüt aurası.',
   },
   {
     id: 'frame_lvl76',

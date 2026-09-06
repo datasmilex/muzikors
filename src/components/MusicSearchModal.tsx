@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown, Ban, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
@@ -10,6 +10,115 @@ import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration, formatUserDisplayName } from '../utils/formatters';
 import { isTrackAllowedByVibeGuard, classifyTrackGenres } from '../utils/genreMatcher';
 import { getUserDailySongRights } from '../lib/timeHelpers';
+
+interface SwipeToDropCoinProps {
+  onConfirm: () => void;
+  isSubmitting: boolean;
+  remainingDisplay?: string;
+}
+
+const SwipeToDropCoin: React.FC<SwipeToDropCoinProps> = ({
+  onConfirm,
+  isSubmitting,
+  remainingDisplay,
+}) => {
+  const [sliderWidth, setSliderWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setSliderWidth(containerRef.current.offsetWidth);
+      }
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  const handleSize = 52;
+  const maxDrag = Math.max(sliderWidth - handleSize - 8, 120);
+
+  // Background fill width based on drag progress
+  const fillWidth = useTransform(x, [0, maxDrag], [handleSize, sliderWidth]);
+  const textOpacity = useTransform(x, [0, maxDrag * 0.45], [1, 0]);
+
+  const handleDragEnd = () => {
+    if (isSubmitting) return;
+    if (x.get() >= maxDrag * 0.72) {
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate?.([40, 60]); } catch (_) {}
+      }
+      onConfirm();
+    } else {
+      x.set(0);
+    }
+  };
+
+  return (
+    <div className="space-y-2 mt-4 select-none">
+      <div
+        ref={containerRef}
+        className="relative h-15 w-full rounded-2xl bg-black/60 border border-white/10 p-1 flex items-center overflow-hidden shadow-inner touch-none"
+      >
+        {/* Dynamic Theme Fill Track */}
+        <motion.div
+          style={{ width: fillWidth }}
+          className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[var(--theme-primary)]/20 via-[var(--theme-primary)]/35 to-[var(--theme-primary)]/50 rounded-2xl pointer-events-none"
+        />
+
+        {/* Shimmer Hint Text */}
+        <motion.div
+          style={{ opacity: textOpacity }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none pl-12 pr-4"
+        >
+          <span className="text-xs font-bold text-white/80 tracking-wide flex items-center gap-2">
+            <span>Jetonu Sağa Kaydır</span>
+            <span className="text-[var(--theme-primary)] animate-pulse">➔</span>
+          </span>
+        </motion.div>
+
+        {/* Draggable Coin Handle */}
+        <motion.div
+          drag={isSubmitting ? false : "x"}
+          dragConstraints={{ left: 0, right: maxDrag }}
+          dragElastic={0.08}
+          dragMomentum={false}
+          style={{ x }}
+          onDragEnd={handleDragEnd}
+          className="relative z-10 w-13 h-13 rounded-xl bg-[var(--theme-primary)] text-black flex items-center justify-center font-black shadow-[0_4px_15px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing border border-white/20 active:scale-95 transition-transform"
+        >
+          {isSubmitting ? (
+            <Loader2 className="w-5 h-5 animate-spin text-black" />
+          ) : (
+            <div className="flex flex-col items-center justify-center">
+              <Coins className="w-5 h-5 text-black stroke-[2.5]" />
+              <span className="text-[8px] font-black uppercase tracking-tighter -mt-0.5">Jeton</span>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Fallback One-Tap Trigger for Accessibility */}
+      <div className="flex items-center justify-between px-2 text-[11px] text-neutral-400">
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={isSubmitting}
+          className="hover:text-white underline underline-offset-4 decoration-white/20 hover:decoration-white transition-colors"
+        >
+          {isSubmitting ? 'İstek gönderiliyor...' : 'veya tek tıkla onayla'}
+        </button>
+        {remainingDisplay && (
+          <span className="font-semibold text-neutral-300">
+            {remainingDisplay}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const MusicSearchModal: React.FC = () => {
   const {
@@ -495,23 +604,13 @@ export const MusicSearchModal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="mt-5">
-                  <button
-                    onClick={handleFinalRequest}
-                    disabled={submittingTrackId === confirmingTrack.id}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[var(--theme-primary)] hover:brightness-110 text-black font-black text-xs flex items-center justify-between shadow-md active:scale-95 transition-all"
-                  >
-                    <div className="flex items-center gap-2">
-                      {submittingTrackId === confirmingTrack.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
-                      <span>{submittingTrackId === confirmingTrack.id ? 'İstek Gönderiliyor...' : 'Onaylıyorum, İsteği Gönder'}</span>
-                    </div>
-                    {user && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-black/20 text-black">
-                        {remainingSongs}/{maxDailySongs} Hak
-                      </span>
-                    )}
-                  </button>
+                {/* Tactile Swipe To Drop Coin Slider */}
+                <div className="mt-3">
+                  <SwipeToDropCoin
+                    onConfirm={handleFinalRequest}
+                    isSubmitting={submittingTrackId === confirmingTrack.id}
+                    remainingDisplay={user ? `${remainingSongs}/${maxDailySongs} Günlük Hak` : undefined}
+                  />
                 </div>
               </div>
             ) : (
@@ -647,12 +746,12 @@ export const MusicSearchModal: React.FC = () => {
                     <>
                       {/* Empty Allowed notice if only blocked tracks exist */}
                       {allowedTracks.length === 0 && blockedTracks.length > 0 && (
-                        <div className="text-center py-6 px-4 text-neutral-400 space-y-2 bg-amber-500/[0.03] border border-amber-500/15 rounded-2xl my-2">
-                          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                        <div className="text-center py-6 px-4 text-neutral-300 space-y-2 bg-[var(--theme-primary)]/[0.04] border border-[var(--theme-primary)]/20 rounded-2xl my-2">
+                          <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[var(--theme-primary)] flex items-center justify-center mx-auto">
                             <ShieldAlert className="w-4 h-4" />
                           </div>
-                          <p className="text-xs font-bold text-neutral-200">Mekana Uygun Şarkı Bulunamadı</p>
-                          <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
+                          <p className="text-xs font-bold text-white">Mekana Uygun Şarkı Bulunamadı</p>
+                          <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
                             Aramanızla eşleşen {blockedTracks.length} şarkı mekanın müzik tarzı (Vibe Guard) veya sansür kurallarına takıldı.
                           </p>
                         </div>
@@ -761,8 +860,8 @@ export const MusicSearchModal: React.FC = () => {
                                 transition={{ duration: 0.2 }}
                                 className="space-y-1.5 overflow-hidden"
                               >
-                                <div className="px-2.5 py-1 text-[10px] text-neutral-400 flex items-center gap-1.5 bg-amber-500/[0.04] border border-amber-500/10 rounded-xl">
-                                  <ShieldAlert className="w-3 h-3 text-amber-400 shrink-0" />
+                                <div className="px-3 py-2 text-xs text-neutral-300 flex items-center gap-2 bg-[var(--theme-primary)]/[0.05] border border-[var(--theme-primary)]/20 rounded-xl font-medium">
+                                  <ShieldAlert className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
                                   <span>Bu şarkılar mekanın müzik tarzı (Vibe Guard) veya sansür kuralları gereği çalınamaz.</span>
                                 </div>
                                 {blockedTracks.map((track) => {
