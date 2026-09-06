@@ -62,12 +62,15 @@ export interface Venue {
   opening_time?: string | null;
   closing_time?: string | null;
   current_track_info?: {
-    song_title: string;
-    artist: string;
-    album_cover: string;
-    spotify_track_id: string;
-    requested_by_name: string;
-  };
+    song_title?: string;
+    artist?: string;
+    album_cover?: string;
+    spotify_track_id?: string;
+    requested_by_name?: string;
+    is_playing?: boolean;
+    title?: string;
+    [key: string]: any;
+  } | null;
 }
 
 export interface MenuCategory {

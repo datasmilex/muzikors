@@ -261,7 +261,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         menu_type: data.menu_type || 'external',
         logo_url: data.logo_url || data.logo || '',
         spotify_client_id: data.spotify_client_id || null,
-        has_spotify: !!(data.spotify_refresh_token),
+        has_spotify: data.has_spotify === true ||
+                     Boolean(data.spotify_refresh_token) ||
+                     Boolean(data.current_track_info?.spotify_track_id) ||
+                     Boolean(data.current_track_info?.is_playing) ||
+                     Boolean(data.current_track_info?.song_title || data.current_track_info?.title),
         opening_time: data.opening_time || null,
         closing_time: data.closing_time || null,
         current_track_info: data.current_track_info || null
@@ -738,7 +742,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const { data: vData, error: venueError } = await supabase
             .from('venues')
-            .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_paused')
+            .select('id, venue_name, explicit_filter_enabled, allowed_genres, current_track_info, is_paused, has_spotify')
             .eq('id', targetVenueId)
             .maybeSingle();
 
@@ -748,7 +752,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             console.warn('[Venue fetch fallback]', venueError.message);
             const { data: fallbackData } = await supabase
               .from('venues')
-              .select('id, venue_name, current_track_info')
+              .select('id, venue_name, current_track_info, has_spotify')
               .eq('id', targetVenueId)
               .maybeSingle();
             venueData = fallbackData;
@@ -763,7 +767,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             is_paused: venueData.is_paused === true,
             explicit_filter_enabled: venueData.explicit_filter_enabled,
             allowed_genres: venueData.allowed_genres,
-            current_track_info: venueData.current_track_info
+            current_track_info: venueData.current_track_info,
+            has_spotify: venueData.has_spotify === true ||
+                         prev.has_spotify === true ||
+                         Boolean(venueData.current_track_info?.spotify_track_id) ||
+                         Boolean(venueData.current_track_info?.song_title)
           } : null);
         }
 
@@ -1324,7 +1332,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     // Spotify guard: venue must have a connected Spotify account
-    if (activeVenue.has_spotify === false) {
+    const isSpotifyConnected = activeVenue.has_spotify === true ||
+      Boolean(activeVenue.current_track_info?.spotify_track_id) ||
+      Boolean(activeVenue.current_track_info?.song_title) ||
+      Boolean(activeVenue.current_track_info?.is_playing) ||
+      Boolean((activeVenue as any).spotify_refresh_token);
+
+    if (!isSpotifyConnected) {
       showToast('Bu mekan henüz Spotify hesabını bağlamamış. Şarkı eklenemiyor.');
       return false;
     }
