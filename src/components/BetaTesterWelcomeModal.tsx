@@ -86,37 +86,39 @@ export const BetaTesterWelcomeModal = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 landscape:p-2">
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/85"
+        style={{ willChange: 'opacity' }}
         onClick={() => setIsVisible(false)}
       />
       
-      <div className="relative w-full max-w-sm bg-[var(--theme-card)] border border-white/[0.1] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col items-center p-6 text-center animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-sm landscape:max-w-md max-h-[96vh] bg-[var(--theme-card)] border border-white/[0.1] rounded-3xl landscape:rounded-2xl overflow-y-auto custom-scrollbar shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col items-center p-6 landscape:p-4 text-center">
         
         <button 
           onClick={() => setIsVisible(false)}
           className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+          aria-label="Kapat"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="my-2 flex items-center justify-center text-[var(--theme-primary)]">
-          <Award className="w-10 h-10 stroke-[1.75]" />
+        <div className="my-2 landscape:my-1 flex items-center justify-center text-[var(--theme-primary)]">
+          <Award className="w-10 h-10 landscape:w-8 landscape:h-8 stroke-[1.75]" />
         </div>
 
-        <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
+        <h3 className="text-base sm:text-lg font-bold text-white mb-2 landscape:mb-1 tracking-tight">
           Beta Tester Rozetiniz Hazır
         </h3>
         
-        <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
+        <p className="text-xs text-neutral-400 mb-5 landscape:mb-3 leading-relaxed">
           Muzikors'un gelişimine katkıda bulunduğunuz için teşekkür ederiz! Özel <span className="text-[var(--theme-primary-light)] font-bold">Beta Tester</span> rozetini hemen profilinize ekleyin.
         </p>
 
         <button 
           onClick={handleClaim}
           disabled={isLoading}
-          className="w-full py-3.5 px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-3.5 landscape:py-2.5 px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -126,7 +128,7 @@ export const BetaTesterWelcomeModal = () => {
           <span>Rozeti Al ve Başla</span>
         </button>
 
-        <p className="text-[10px] text-zinc-600 mt-4">
+        <p className="text-[10px] text-zinc-500 mt-4 landscape:mt-2">
           Rozetinizi Profilinizde ve Akış gönderilerinde adınızın yanında görebilirsiniz.
         </p>
       </div>

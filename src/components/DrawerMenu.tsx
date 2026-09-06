@@ -72,8 +72,9 @@ export const DrawerMenu: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            style={{ willChange: 'opacity' }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/85"
           />
 
           {/* Drawer Sheet */}
@@ -81,8 +82,9 @@ export const DrawerMenu: React.FC = () => {
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-[82%] max-w-[300px] h-full bg-[var(--theme-card)] border-r border-white/[0.08] flex flex-col justify-between p-5 z-10 shadow-[20px_0_50px_rgba(0,0,0,0.9)] overflow-y-auto custom-scrollbar"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-[82%] max-w-[300px] landscape:max-w-[340px] h-full bg-[var(--theme-card)] border-r border-white/[0.08] flex flex-col justify-between p-5 landscape:p-3.5 z-10 shadow-[20px_0_50px_rgba(0,0,0,0.9)] overflow-y-auto custom-scrollbar"
           >
             <div className="relative z-10">
               {/* Header */}

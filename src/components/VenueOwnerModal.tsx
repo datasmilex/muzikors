@@ -167,19 +167,23 @@ export const VenueOwnerModal: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/85 backdrop-blur-md"
+          transition={{ duration: 0.18 }}
+          className="absolute inset-0 bg-black/85"
+          style={{ willChange: 'opacity' }}
           onClick={closeModal}
         />
 
         <motion.div
-          initial={{ scale: 0.92, opacity: 0, y: 15 }}
+          initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          exit={{ scale: 0.95, opacity: 0, y: 15 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           style={{
             backgroundColor: 'var(--theme-bg)',
-            borderColor: 'rgba(var(--theme-primary-rgb), 0.35)'
+            borderColor: 'rgba(var(--theme-primary-rgb), 0.35)',
+            willChange: 'transform'
           }}
-          className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border flex flex-col max-h-[92vh]"
+          className="relative w-full max-w-lg landscape:max-w-2xl rounded-3xl landscape:rounded-2xl overflow-hidden shadow-2xl border flex flex-col max-h-[92vh] landscape:max-h-[96vh]"
         >
           {/* Header Banner */}
           <div
@@ -187,7 +191,7 @@ export const VenueOwnerModal: React.FC = () => {
               background: 'linear-gradient(135deg, rgba(var(--theme-card-alt-rgb), 0.95) 0%, rgba(var(--theme-bg-rgb), 0.98) 100%)',
               borderBottomColor: 'rgba(var(--theme-primary-rgb), 0.2)'
             }}
-            className="relative px-5 py-4.5 border-b flex items-center justify-between"
+            className="relative px-5 py-4.5 landscape:py-2.5 border-b flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <div
@@ -195,12 +199,12 @@ export const VenueOwnerModal: React.FC = () => {
                   background: 'linear-gradient(135deg, var(--theme-primary-light) 0%, var(--theme-primary) 100%)',
                   boxShadow: '0 4px 15px var(--theme-glow)'
                 }}
-                className="w-11 h-11 rounded-2xl flex items-center justify-center text-stone-950 font-black shadow-lg"
+                className="w-10 h-10 landscape:w-9 landscape:h-9 rounded-2xl flex items-center justify-center text-stone-950 font-black shadow-lg"
               >
-                <Store className="w-5 h-5 text-stone-950 stroke-[2.4]" />
+                <Store className="w-5 h-5 landscape:w-4.5 landscape:h-4.5 text-stone-950 stroke-[2.4]" />
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-black text-white tracking-tight flex items-center gap-2">
                   İşletme & Abonelik Yönetimi
                 </h2>
                 <p
@@ -215,13 +219,14 @@ export const VenueOwnerModal: React.FC = () => {
             <button
               onClick={closeModal}
               className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Kapat"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Body Content */}
-          <div className="p-4 sm:p-5 overflow-y-auto custom-scrollbar space-y-4">
+          <div className="p-4 sm:p-5 landscape:p-3.5 overflow-y-auto custom-scrollbar space-y-4 landscape:space-y-3">
             {loading ? (
               <div className="py-14 flex flex-col items-center justify-center text-zinc-400 gap-3">
                 <Loader2
@@ -243,7 +248,7 @@ export const VenueOwnerModal: React.FC = () => {
                       backgroundColor: 'rgba(var(--theme-card-rgb), 0.85)',
                       borderColor: 'rgba(var(--theme-primary-rgb), 0.28)'
                     }}
-                    className="border rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden backdrop-blur-md"
+                    className="border rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden"
                   >
                     {/* Top Venue Header Info */}
                     <div className="flex items-start justify-between gap-3 pb-3.5 border-b border-white/10">

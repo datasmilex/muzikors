@@ -88,29 +88,32 @@ export const RewardedAdModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 landscape:p-2">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
           onClick={() => !isLoadingAd && closeModal()}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-black/85"
+          style={{ willChange: 'opacity' }}
         />
 
         {/* Modal Content */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-sm rounded-3xl bg-[var(--theme-card)] border border-white/[0.1] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          style={{ willChange: 'transform' }}
+          className="relative w-full max-w-sm landscape:max-w-xl max-h-[96vh] rounded-3xl landscape:rounded-2xl bg-[var(--theme-card)] border border-white/[0.1] p-6 landscape:p-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-y-auto custom-scrollbar"
         >
           {/* Close button */}
           {!isLoadingAd && (
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer z-10"
               aria-label="Kapat"
             >
               <X className="w-4 h-4" />
@@ -118,11 +121,11 @@ export const RewardedAdModal: React.FC = () => {
           )}
 
           {isCompleted ? (
-            <div className="py-6 space-y-3">
+            <div className="py-6 landscape:py-4 space-y-3">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', damping: 15, stiffness: 200 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                 className="my-2 flex items-center justify-center mx-auto text-emerald-400"
               >
                 <CheckCircle2 className="w-10 h-10" />
@@ -135,60 +138,63 @@ export const RewardedAdModal: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Header Icon */}
-              <div className="my-2 flex items-center justify-center mx-auto text-[var(--theme-primary)]">
-                {isNative ? <Gift className="w-8 h-8" /> : <Smartphone className="w-8 h-8" />}
-              </div>
-
-              {/* Title & Description */}
-              <div>
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Günlük Şarkı Hakkın Doldu
-                </h3>
-                <p className="text-xs text-neutral-400 mt-1.5 leading-relaxed">
-                  {isNative ? (
-                    pendingRewardTrack ? (
-                      <>
-                        Seçtiğin <strong className="text-white">"{pendingRewardTrack.title}"</strong> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
-                      </>
-                    ) : (
-                      'Kısa bir ödüllü video izleyerek anında +1 ek şarkı istek hakkı kazanabilirsin.'
-                    )
-                  ) : (
-                    'Reklam izleyerek ücretsiz şarkı hakkı kazanmak için Muzikors mobil uygulaması gereklidir.'
-                  )}
-                </p>
-              </div>
-
-              {/* Track Preview Card if track is pending */}
-              {pendingRewardTrack && (
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] text-left">
-                  {pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl ? (
-                    <img
-                      src={pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl}
-                      alt={pendingRewardTrack.title}
-                      className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-[var(--theme-primary)] shrink-0">
-                      <Music className="w-5 h-5" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold text-white truncate">{pendingRewardTrack.title}</h4>
-                    <p className="text-[10px] text-neutral-400 truncate">{pendingRewardTrack.artist}</p>
-                  </div>
+            <div className="landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-center text-center landscape:text-left">
+              {/* Left Column in landscape */}
+              <div className="space-y-3">
+                {/* Header Icon */}
+                <div className="my-2 landscape:my-0 flex items-center justify-center landscape:justify-start text-[var(--theme-primary)]">
+                  {isNative ? <Gift className="w-8 h-8" /> : <Smartphone className="w-8 h-8" />}
                 </div>
-              )}
 
-              {/* Actions */}
-              <div className="space-y-2 pt-1">
+                {/* Title & Description */}
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Günlük Şarkı Hakkın Doldu
+                  </h3>
+                  <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+                    {isNative ? (
+                      pendingRewardTrack ? (
+                        <>
+                          Seçtiğin <strong className="text-white">"{pendingRewardTrack.title}"</strong> şarkısını çalmak için kısa bir video reklam izleyebilirsin.
+                        </>
+                      ) : (
+                        'Kısa bir ödüllü video izleyerek anında +1 ek şarkı istek hakkı kazanabilirsin.'
+                      )
+                    ) : (
+                      'Reklam izleyerek ücretsiz şarkı hakkı kazanmak için Muzikors mobil uygulaması gereklidir.'
+                    )}
+                  </p>
+                </div>
+
+                {/* Track Preview Card if track is pending */}
+                {pendingRewardTrack && (
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] text-left">
+                    {pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl ? (
+                      <img
+                        src={pendingRewardTrack.albumCover || pendingRewardTrack.coverUrl}
+                        alt={pendingRewardTrack.title}
+                        className="w-9 h-9 rounded-xl object-cover border border-white/10 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-white/[0.05] flex items-center justify-center text-[var(--theme-primary)] shrink-0">
+                        <Music className="w-4 h-4" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-white truncate">{pendingRewardTrack.title}</h4>
+                      <p className="text-[10px] text-neutral-400 truncate">{pendingRewardTrack.artist}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column in landscape: Actions */}
+              <div className="space-y-2 pt-3 landscape:pt-0">
                 {isNative ? (
                   <button
                     onClick={handleWatchAd}
                     disabled={isLoadingAd}
-                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {isLoadingAd ? (
                       <>
@@ -205,7 +211,7 @@ export const RewardedAdModal: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleWatchAd}
-                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                    className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
                   >
                     <Smartphone className="w-4 h-4" />
                     <span>Uygulamayı İndir & İzle</span>
@@ -218,18 +224,18 @@ export const RewardedAdModal: React.FC = () => {
                     closeModal();
                     openModal('premium');
                   }}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                 >
                   <Crown className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <span>Premium'a Geç (Reklamsız)</span>
                 </button>
-              </div>
 
-              <p className="text-[10px] text-neutral-500 font-medium">
-                {isNative
-                  ? 'Ödüllü reklam tamamlandığında şarkınız otomatik sıraya girer.'
-                  : 'Mobil uygulamamız ile sınırsız ödüllü reklam fırsatından yararlanabilirsiniz.'}
-              </p>
+                <p className="text-[10px] text-neutral-500 font-medium pt-1">
+                  {isNative
+                    ? 'Ödüllü reklam tamamlandığında şarkınız otomatik sıraya girer.'
+                    : 'Mobil uygulamamız ile sınırsız ödüllü reklam fırsatından yararlanabilirsiniz.'}
+                </p>
+              </div>
             </div>
           )}
         </motion.div>

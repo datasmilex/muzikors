@@ -105,15 +105,16 @@ export const MenuModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center">
+      <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center landscape:items-center landscape:justify-center landscape:p-2">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.18 }}
           onClick={closeModal}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-black/85"
+          style={{ willChange: 'opacity' }}
         />
 
         {/* Modal Container */}
@@ -121,22 +122,23 @@ export const MenuModal: React.FC = () => {
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-          className="relative w-full max-w-md h-[90vh] sm:h-[680px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          style={{ willChange: 'transform' }}
+          className="relative w-full max-w-md landscape:max-w-3xl h-[90vh] sm:h-[680px] landscape:max-h-[96vh] landscape:h-auto bg-[var(--theme-card)] sm:rounded-3xl landscape:rounded-2xl rounded-t-[2.5rem] flex flex-col border-t sm:border landscape:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] overflow-hidden"
         >
           {/* Handle */}
-          <div className="flex justify-center pt-3 pb-1 shrink-0">
+          <div className="flex justify-center pt-2.5 pb-1 shrink-0 landscape:hidden">
             <div className="w-12 h-1 bg-white/20 rounded-full" />
           </div>
 
           {/* Header */}
-          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/[0.08] bg-[var(--theme-card)]">
+          <div className="p-4 sm:p-5 landscape:py-2.5 landscape:px-4 flex items-center justify-between border-b border-white/[0.08] bg-[var(--theme-card)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
-                <UtensilsCrossed className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
+                <UtensilsCrossed className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <h2 className="text-base font-black text-white tracking-tight leading-tight">
+                <h2 className="text-sm sm:text-base font-black text-white tracking-tight leading-tight">
                   {activeVenue?.venue_name || activeVenue?.name || 'Mekân Menüsü'}
                 </h2>
                 <span className="text-[10px] text-[var(--theme-primary-light)] font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
@@ -147,14 +149,15 @@ export const MenuModal: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              aria-label="Kapat"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Search Bar */}
-          <div className="p-4 pb-2 bg-[var(--theme-card)]">
+          <div className="p-4 pb-2 landscape:py-2 landscape:px-4 bg-[var(--theme-card)]">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -214,7 +217,7 @@ export const MenuModal: React.FC = () => {
           )}
 
           {/* Menu Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar pb-10">
+          <div className={`flex-1 overflow-y-auto p-4 landscape:p-3 custom-scrollbar pb-10 landscape:pb-4 ${!loading && filteredItems.length > 0 ? 'landscape:grid landscape:grid-cols-2 landscape:gap-2.5 space-y-2.5 landscape:space-y-0' : 'space-y-2.5'}`}>
             {loading ? (
               <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />

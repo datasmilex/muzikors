@@ -134,15 +134,16 @@ export const LyricsModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[120] flex flex-col items-center justify-end sm:justify-center">
+      <div className="fixed inset-0 z-[120] flex flex-col items-center justify-end sm:justify-center landscape:justify-center landscape:p-2">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          style={{ willChange: 'opacity' }}
           onClick={closeModal}
-          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+          className="absolute inset-0 bg-black/85"
         />
 
         {/* Modal Sheet */}
@@ -150,8 +151,9 @@ export const LyricsModal: React.FC = () => {
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-          className="relative w-full max-w-md h-[86vh] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border border-white/[0.1] overflow-hidden"
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          style={{ willChange: 'transform' }}
+          className="relative w-full max-w-md landscape:max-w-2xl h-[86vh] landscape:h-[94vh] landscape:max-h-[420px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] landscape:rounded-2xl p-5 landscape:p-3.5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border landscape:border border-white/[0.1] overflow-hidden"
         >
           {/* Handle */}
           <div className="flex justify-center pt-0 pb-2 shrink-0">

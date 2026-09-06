@@ -532,14 +532,15 @@ export const ProfileView: React.FC = () => {
             )}
           </AnimatePresence>
 
-          <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center pointer-events-none">
+          <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center pointer-events-none landscape:justify-center landscape:p-2">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
+              style={{ willChange: 'opacity' }}
               onClick={closeModal}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto"
+              className="absolute inset-0 bg-black/85 pointer-events-auto"
             />
 
             <motion.div
@@ -547,8 +548,9 @@ export const ProfileView: React.FC = () => {
               initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-              className="relative w-full max-w-md bg-[var(--theme-card)] rounded-t-[2.5rem] overflow-y-auto max-h-[92vh] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.9)] pointer-events-auto custom-scrollbar"
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              style={{ willChange: 'transform' }}
+              className="relative w-full max-w-md landscape:max-w-4xl bg-[var(--theme-card)] rounded-t-[2.5rem] landscape:rounded-2xl overflow-y-auto max-h-[92vh] landscape:max-h-[94vh] landscape:max-h-[440px] border-t landscape:border border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.9)] pointer-events-auto custom-scrollbar"
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-1">
@@ -596,66 +598,100 @@ export const ProfileView: React.FC = () => {
 
                   <div className="text-center w-full">
                     {isEditing ? (
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-3">Fotoğraf Seç</p>
-                          <div className="flex gap-3 overflow-x-auto pb-2 px-1 scrollbar-hide justify-start">
-                            <div className="flex flex-col items-center gap-1.5 shrink-0">
-                              <button
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={uploadingAvatar}
-                                className="w-14 h-14 rounded-full border-2 border-dashed border-amber-400/50 flex items-center justify-center bg-white/5 active:bg-white/10 transition-colors text-amber-400"
-                              >
-                                {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-                              </button>
+                      <div className="space-y-4 landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:space-y-0 text-left">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-2">Fotoğraf Seç</p>
+                            <div className="flex gap-2.5 overflow-x-auto pb-2 px-1 scrollbar-hide justify-start">
+                              <div className="flex flex-col items-center gap-1.5 shrink-0">
+                                <button
+                                  onClick={() => fileInputRef.current?.click()}
+                                  disabled={uploadingAvatar}
+                                  className="w-12 h-12 rounded-full border-2 border-dashed border-amber-400/50 flex items-center justify-center bg-white/5 active:bg-white/10 transition-colors text-amber-400"
+                                >
+                                  {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                </button>
+                              </div>
+                              <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileSelect}
+                                accept="image/*"
+                                className="hidden"
+                              />
+                              {[
+                                ...(user?.avatar && !['/logo_gold.png', '/logo_cyan.png', '/logo_purple.png', '/logo_green.png', '/logo_blue.png', '/logo_red.png', '/logo.png'].includes(user.avatar) ? [{ id: 'custom', url: user.avatar }] : []),
+                                { id: 'gold', url: '/logo_gold.png' },
+                                { id: 'cyan', url: '/logo_cyan.png' },
+                                { id: 'purple', url: '/logo_purple.png' },
+                                { id: 'green', url: '/logo_green.png' },
+                                { id: 'blue', url: '/logo_blue.png' },
+                                { id: 'red', url: '/logo_red.png' },
+                                { id: 'classic', url: '/logo.png' },
+                              ].map((av) => (
+                                <button
+                                  key={av.id}
+                                  type="button"
+                                  onClick={() => setEditAvatar(av.url)}
+                                  className={`w-12 h-12 rounded-full border-2 overflow-hidden shrink-0 relative transition-transform active:scale-95 cursor-pointer ${
+                                    editAvatar === av.url ? 'border-amber-400 scale-105 shadow-md shadow-amber-500/20' : 'border-white/10 opacity-70 hover:opacity-100'
+                                  }`}
+                                >
+                                  <img src={av.url} alt="avatar" className={`w-full h-full ${av.url.startsWith('/logo') ? 'object-contain p-2 bg-black/60' : 'object-cover'}`} />
+                                  {editAvatar === av.url && (
+                                    <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                                      <Check className="w-4 h-4 text-amber-400 stroke-[3]" />
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
                             </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Görünen Ad</label>
                             <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleFileSelect}
-                              accept="image/*"
-                              className="hidden"
+                              type="text"
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 px-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors text-xs"
+                              placeholder="Ad Soyad"
                             />
-                            {[
-                              ...(user?.avatar && !['/logo_gold.png', '/logo_cyan.png', '/logo_purple.png', '/logo_green.png', '/logo_blue.png', '/logo_red.png', '/logo.png'].includes(user.avatar) ? [{ id: 'custom', url: user.avatar }] : []),
-                              { id: 'gold', url: '/logo_gold.png' },
-                              { id: 'cyan', url: '/logo_cyan.png' },
-                              { id: 'purple', url: '/logo_purple.png' },
-                              { id: 'green', url: '/logo_green.png' },
-                              { id: 'blue', url: '/logo_blue.png' },
-                              { id: 'red', url: '/logo_red.png' },
-                              { id: 'classic', url: '/logo.png' },
-                            ].map((av) => (
-                              <button
-                                key={av.id}
-                                type="button"
-                                onClick={() => setEditAvatar(av.url)}
-                                className={`w-14 h-14 rounded-full border-2 overflow-hidden shrink-0 relative transition-transform active:scale-95 cursor-pointer ${
-                                  editAvatar === av.url ? 'border-amber-400 scale-105 shadow-md shadow-amber-500/20' : 'border-white/10 opacity-70 hover:opacity-100'
-                                }`}
-                              >
-                                <img src={av.url} alt="avatar" className={`w-full h-full ${av.url.startsWith('/logo') ? 'object-contain p-2 bg-black/60' : 'object-cover'}`} />
-                                {editAvatar === av.url && (
-                                  <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
-                                    <Check className="w-5 h-5 text-amber-400 stroke-[3]" />
-                                  </div>
-                                )}
-                              </button>
-                            ))}
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Kullanıcı ID</label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-bold text-xs">@</span>
+                              <input
+                                type="text"
+                                value={editUsername}
+                                onChange={(e) => setEditUsername(e.target.value)}
+                                className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors text-xs"
+                                placeholder="kullanici_adi"
+                              />
+                            </div>
+                            <p className="text-[9px] text-neutral-500 mt-0.5">Haftada sadece 1 kez değiştirebilirsiniz.</p>
+                          </div>
+
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              onClick={() => setIsEditing(false)}
+                              className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95 transition-all"
+                            >
+                              İptal
+                            </button>
+                            <button
+                              onClick={handleSaveProfile}
+                              disabled={isSaving}
+                              className="flex-1 py-2.5 rounded-xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md"
+                            >
+                              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Kaydet'}
+                            </button>
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Görünen Ad</label>
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 px-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors"
-                            placeholder="Ad Soyad"
-                          />
-                        </div>
-
+                        {/* Right Column: Avatar Frames */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest block">Avatar Çerçevesi</label>
@@ -663,7 +699,7 @@ export const ProfileView: React.FC = () => {
                               Seviye: {levelInfo.level} ({levelInfo.title})
                             </span>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar text-left">
+                          <div className="grid grid-cols-2 gap-2 max-h-52 landscape:max-h-60 overflow-y-auto pr-1 custom-scrollbar text-left">
                             {AVATAR_FRAMES.map((frame) => {
                               const isUnlocked = isFrameUnlocked(frame.id, levelInfo.level, isProfileBetaTester);
                               const isSelected = selectedFrame === frame.id;
@@ -715,37 +751,6 @@ export const ProfileView: React.FC = () => {
                             })}
                           </div>
                         </div>
-
-                        <div>
-                          <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1 block">Kullanıcı ID</label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-bold">@</span>
-                            <input
-                              type="text"
-                              value={editUsername}
-                              onChange={(e) => setEditUsername(e.target.value)}
-                              className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-xl py-2 pl-7 pr-3 text-white font-bold focus:outline-none focus:border-[var(--theme-primary)]/50 transition-colors"
-                              placeholder="kullanici_adi"
-                            />
-                          </div>
-                          <p className="text-[9px] text-neutral-500 mt-1">Haftada sadece 1 kez değiştirebilirsiniz.</p>
-                        </div>
-
-                        <div className="flex gap-2 pt-1">
-                          <button
-                            onClick={() => setIsEditing(false)}
-                            className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95 transition-all"
-                          >
-                            İptal
-                          </button>
-                          <button
-                            onClick={handleSaveProfile}
-                            disabled={isSaving}
-                            className="flex-1 py-2.5 rounded-xl bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md"
-                          >
-                            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Kaydet'}
-                          </button>
-                        </div>
                       </div>
                     ) : (
                       <>
@@ -791,197 +796,203 @@ export const ProfileView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ─── Level & XP Progress Card (Anti-Slop Minimalist) ─── */}
-                <div className="w-full bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] p-3.5 mt-4 mb-2 shadow-sm space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border ${levelInfo.tier.badgeBg} ${levelInfo.tier.badgeText} ${levelInfo.tier.badgeBorder}`}>
-                        Lv. {levelInfo.level}
-                      </span>
-                      <span className="text-xs font-black text-white flex items-center gap-1">
-                        <span>{levelInfo.icon}</span>
-                        <span>{levelInfo.title}</span>
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-amber-400">
-                      {levelInfo.currentLevelXp} / {levelInfo.xpForNextLevel} XP
-                    </span>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/5">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${levelInfo.progressPercentage}%` }}
-                      transition={{ duration: 0.6, ease: 'easeOut' }}
-                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[9px] text-neutral-400 font-semibold px-0.5">
-                    <span>%{levelInfo.progressPercentage} tamamlandı</span>
-                    <span>Sonraki seviyeye {levelInfo.remainingXpForNext} XP</span>
-                  </div>
-                </div>
-
-                {/* ─── Profile Stats ─── */}
-                <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 my-3 shadow-inner">
-                  <div className="flex flex-col items-center flex-1">
-                    <span className="text-sm font-black text-white">
-                      {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
-                    </span>
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Toplam İstek</span>
-                  </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col items-center flex-1">
-                    <span className="text-sm font-black text-white">{stats.followers_count}</span>
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takipçi</span>
-                  </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col items-center flex-1">
-                    <span className="text-sm font-black text-white">{stats.following_count}</span>
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takip Edilen</span>
-                  </div>
-                </div>
-
-                {/* ─── Social Feed ─── */}
-                <div className="mt-2 relative">
-                  <h3 className="text-sm font-black text-white mb-4 border-b border-white/[0.08] pb-2">Gönderiler</h3>
-                  
-                  {isOwnProfile && (
-                    <div className="bg-[var(--theme-card-alt)] rounded-2xl p-4 border border-white/[0.08] mb-4 shadow-inner">
-                      <textarea
-                        placeholder="Yeni gönderi paylaş..."
-                        value={newPostContent}
-                        onChange={e => setNewPostContent(e.target.value)}
-                        maxLength={280}
-                        className="w-full bg-transparent text-sm text-white placeholder-neutral-500 resize-none focus:outline-none min-h-[50px]"
-                      />
-                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                        <span className={`text-[10px] font-bold ${newPostContent.length >= 280 ? 'text-red-400' : 'text-neutral-500'}`}>
-                          {newPostContent.length}/280
-                        </span>
-                        <button
-                          onClick={handleCreatePost}
-                          disabled={isPosting || !newPostContent.trim()}
-                          className="bg-[var(--theme-primary)] text-black px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
-                        >
-                          {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Paylaş'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {posts.length === 0 ? (
-                    <div className="text-center py-10 opacity-70">
-                      <p className="text-sm text-neutral-500 font-medium">Henüz gönderi yok.</p>
-                    </div>
-                  ) : (
-                    posts.map(post => (
-                      <SocialPost key={post.id} post={post} onPostUpdated={fetchProfileData} />
-                    ))
-                  )}
-                </div>
-
-                {/* Settings / Auth Actions for Own Profile */}
-                {isOwnProfile && (
-                  <div className="mt-6 border-t border-white/[0.08] pt-5 space-y-3">
-                    {/* Theme Switcher in Profile */}
-                    <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
-                      <div className="flex items-center justify-between mb-3 px-1">
+                {/* ─── Profile Details & Feed in 2 Columns on Landscape ─── */}
+                <div className="landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-start mt-2">
+                  {/* Left Column: Level, Stats, Theme & Auth Actions */}
+                  <div className="space-y-3">
+                    {/* ─── Level & XP Progress Card ─── */}
+                    <div className="w-full bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] p-3.5 shadow-sm space-y-2.5">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
-                          <span className="text-xs font-bold text-white">Renk Teması</span>
+                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border ${levelInfo.tier.badgeBg} ${levelInfo.tier.badgeText} ${levelInfo.tier.badgeBorder}`}>
+                            Lv. {levelInfo.level}
+                          </span>
+                          <span className="text-xs font-black text-white flex items-center gap-1">
+                            <span>{levelInfo.icon}</span>
+                            <span>{levelInfo.title}</span>
+                          </span>
                         </div>
-                        <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
-                          {THEMES.find((t) => t.id === theme)?.name}
+                        <span className="text-[10px] font-mono font-bold text-amber-400">
+                          {levelInfo.currentLevelXp} / {levelInfo.xpForNextLevel} XP
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {THEMES.map((t) => {
-                          const isSelected = theme === t.id;
-                          return (
-                            <button
-                              key={t.id}
-                              onClick={() => setTheme(t.id)}
-                              title={`${t.name} - ${t.subtitle}`}
-                              className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
-                                  : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
-                              }`}
-                            >
-                              <div
-                                className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
-                                style={{ backgroundColor: t.previewColor || t.accentColor }}
-                              >
-                                {isSelected && (
-                                  <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' ? 'text-black' : 'text-white'}`} />
-                                )}
-                              </div>
-                              <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
-                                {t.name}
-                              </span>
-                            </button>
-                          );
-                        })}
+                      {/* Progress Bar */}
+                      <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/5">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${levelInfo.progressPercentage}%` }}
+                          transition={{ duration: 0.6, ease: 'easeOut' }}
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-[9px] text-neutral-400 font-semibold px-0.5">
+                        <span>%{levelInfo.progressPercentage} tamamlandı</span>
+                        <span>Sonraki seviyeye {levelInfo.remainingXpForNext} XP</span>
                       </div>
                     </div>
 
-                    {!user ? (
-                      <button
-                        onClick={() => { closeModal(); loginWithProvider('google'); }}
-                        className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24">
-                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                        </svg>
-                        Google ile Giriş Yap
-                      </button>
-                    ) : (
-                      <div className="space-y-2 pt-1">
-                        <button
-                          onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
-                          className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                        >
-                          <LogOut className="w-3.5 h-3.5 text-neutral-400" />
-                          Çıkış Yap
-                        </button>
-                        <button
-                          onClick={() => setShowConfirmDelete(true)}
-                          className="w-full py-2.5 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Hesabı Sil
-                        </button>
+                    {/* ─── Profile Stats ─── */}
+                    <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 shadow-inner">
+                      <div className="flex flex-col items-center flex-1">
+                        <span className="text-sm font-black text-white">
+                          {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
+                        </span>
+                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Toplam İstek</span>
+                      </div>
+                      <div className="w-px h-8 bg-white/10" />
+                      <div className="flex flex-col items-center flex-1">
+                        <span className="text-sm font-black text-white">{stats.followers_count}</span>
+                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takipçi</span>
+                      </div>
+                      <div className="w-px h-8 bg-white/10" />
+                      <div className="flex flex-col items-center flex-1">
+                        <span className="text-sm font-black text-white">{stats.following_count}</span>
+                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takip Edilen</span>
+                      </div>
+                    </div>
 
-                        {showConfirmDelete && (
-                          <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-3 mt-2">
-                            <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => setShowConfirmDelete(false)}
-                                className="flex-1 py-2 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95"
-                              >
-                                İptal
-                              </button>
-                              <button
-                                onClick={() => { deleteAccount(); setShowConfirmDelete(false); }}
-                                className="flex-1 py-2 rounded-xl bg-red-600 text-white font-black text-xs active:scale-95"
-                              >
-                                Sil
-                              </button>
+                    {/* Settings / Auth Actions for Own Profile */}
+                    {isOwnProfile && (
+                      <div className="border-t border-white/[0.08] pt-4 space-y-3">
+                        {/* Theme Switcher in Profile */}
+                        <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
+                          <div className="flex items-center justify-between mb-3 px-1">
+                            <div className="flex items-center gap-2">
+                              <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
+                              <span className="text-xs font-bold text-white">Renk Teması</span>
                             </div>
+                            <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
+                              {THEMES.find((t) => t.id === theme)?.name}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-5 gap-1.5">
+                            {THEMES.map((t) => {
+                              const isSelected = theme === t.id;
+                              return (
+                                <button
+                                  key={t.id}
+                                  onClick={() => setTheme(t.id)}
+                                  title={`${t.name} - ${t.subtitle}`}
+                                  className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
+                                      : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
+                                  }`}
+                                >
+                                  <div
+                                    className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
+                                    style={{ backgroundColor: t.previewColor || t.accentColor }}
+                                  >
+                                    {isSelected && (
+                                      <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' ? 'text-black' : 'text-white'}`} />
+                                    )}
+                                  </div>
+                                  <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
+                                    {t.name}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {!user ? (
+                          <button
+                            onClick={() => { closeModal(); loginWithProvider('google'); }}
+                            className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24">
+                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                            </svg>
+                            Google ile Giriş Yap
+                          </button>
+                        ) : (
+                          <div className="space-y-2 pt-1">
+                            <button
+                              onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
+                              className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                              <LogOut className="w-3.5 h-3.5 text-neutral-400" />
+                              Çıkış Yap
+                            </button>
+                            <button
+                              onClick={() => setShowConfirmDelete(true)}
+                              className="w-full py-2.5 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Hesabı Sil
+                            </button>
+
+                            {showConfirmDelete && (
+                              <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-3 mt-2">
+                                <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setShowConfirmDelete(false)}
+                                    className="flex-1 py-2 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95"
+                                  >
+                                    İptal
+                                  </button>
+                                  <button
+                                    onClick={() => { deleteAccount(); setShowConfirmDelete(false); }}
+                                    className="flex-1 py-2 rounded-xl bg-red-600 text-white font-black text-xs active:scale-95"
+                                  >
+                                    Sil
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                )}
+
+                  {/* Right Column: Social Feed */}
+                  <div className="relative">
+                    <h3 className="text-sm font-black text-white mb-3 border-b border-white/[0.08] pb-2">Gönderiler</h3>
+                    
+                    {isOwnProfile && (
+                      <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08] mb-3 shadow-inner">
+                        <textarea
+                          placeholder="Yeni gönderi paylaş..."
+                          value={newPostContent}
+                          onChange={e => setNewPostContent(e.target.value)}
+                          maxLength={280}
+                          className="w-full bg-transparent text-xs text-white placeholder-neutral-500 resize-none focus:outline-none min-h-[46px]"
+                        />
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                          <span className={`text-[10px] font-bold ${newPostContent.length >= 280 ? 'text-red-400' : 'text-neutral-500'}`}>
+                            {newPostContent.length}/280
+                          </span>
+                          <button
+                            onClick={handleCreatePost}
+                            disabled={isPosting || !newPostContent.trim()}
+                            className="bg-[var(--theme-primary)] text-black px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
+                          >
+                            {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Paylaş'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {posts.length === 0 ? (
+                      <div className="text-center py-8 opacity-70">
+                        <p className="text-xs text-neutral-500 font-medium">Henüz gönderi yok.</p>
+                      </div>
+                    ) : (
+                      posts.map(post => (
+                        <SocialPost key={post.id} post={post} onPostUpdated={fetchProfileData} />
+                      ))
+                    )}
+                  </div>
+                </div>
               </>
             )}
           </div>

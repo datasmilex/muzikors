@@ -110,44 +110,48 @@ export const GlobalFeedView: React.FC = () => {
   return (
     <AnimatePresence>
       {activeModal === 'globalFeed' && (
-        <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center pointer-events-none">
+        <div className="fixed inset-0 z-[100] flex flex-col justify-end items-center landscape:justify-center p-0 landscape:p-2 pointer-events-none">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.18 }}
             onClick={closeModal}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm pointer-events-auto"
+            className="absolute inset-0 bg-black/85 pointer-events-auto"
+            style={{ willChange: 'opacity' }}
           />
 
           <motion.div
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full h-[92vh] max-w-md bg-[var(--theme-card)] rounded-t-[2.5rem] flex flex-col border-t border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] pointer-events-auto"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-full h-[92vh] max-w-md landscape:max-w-2xl landscape:max-h-[96vh] landscape:h-auto bg-[var(--theme-card)] rounded-t-[2.5rem] landscape:rounded-2xl flex flex-col border-t landscape:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] pointer-events-auto overflow-hidden"
           >
             {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="flex justify-center pt-2.5 pb-1 shrink-0 landscape:hidden">
               <div className="w-12 h-1 bg-white/20 rounded-full" />
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-3 pt-2 shrink-0 border-b border-white/[0.08]">
-              <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2">
+            <div className="flex items-center justify-between px-5 pb-3 pt-2 landscape:py-2.5 landscape:px-4 shrink-0 border-b border-white/[0.08]">
+              <h2 className="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2">
                 Canlı Akış
               </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => fetchPosts(true)}
                   disabled={isRefreshing || isLoading}
-                  className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-[var(--theme-primary)] transition-all disabled:opacity-50"
+                  className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-[var(--theme-primary)] transition-all disabled:opacity-50 cursor-pointer"
+                  aria-label="Yenile"
                 >
                   <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </button>
                 <button
                   onClick={closeModal}
-                  className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Kapat"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -155,7 +159,7 @@ export const GlobalFeedView: React.FC = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto px-5 pb-20 custom-scrollbar pt-4">
+            <div className="flex-1 overflow-y-auto px-5 pb-20 custom-scrollbar pt-4 landscape:px-4 landscape:pt-3 landscape:pb-4">
               {/* Post Composer */}
               <div className="bg-[var(--theme-card-alt)] rounded-2xl p-4 border border-white/[0.08] mb-5 shadow-sm relative">
                 <div className="flex gap-3">

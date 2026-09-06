@@ -50,15 +50,16 @@ export const VenueInfoModal: React.FC = () => {
   return (
     <AnimatePresence>
       {activeModal === 'venue_info' && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center landscape:items-center landscape:justify-center landscape:p-2">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18 }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/85"
+            style={{ willChange: 'opacity' }}
           />
 
           {/* Modal Container */}
@@ -66,16 +67,17 @@ export const VenueInfoModal: React.FC = () => {
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md max-h-[90vh] sm:max-h-[640px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] z-10"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-full max-w-md landscape:max-w-2xl max-h-[90vh] sm:max-h-[640px] landscape:max-h-[96vh] sm:rounded-3xl landscape:rounded-2xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border landscape:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)] z-10"
           >
             {/* Handle Bar */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="flex justify-center pt-2.5 pb-1 shrink-0 landscape:hidden">
               <div className="w-10 h-1 bg-white/20 rounded-full" />
             </div>
 
             {/* Header */}
-            <div className="flex-none px-5 py-3 flex items-center justify-between border-b border-white/[0.06]">
+            <div className="flex-none px-5 py-3 landscape:py-2.5 flex items-center justify-between border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Store className="w-4 h-4 text-[var(--theme-primary)]" />
                 <h2 className="text-sm font-bold tracking-wide text-white uppercase">Mekân Bilgileri</h2>
@@ -90,7 +92,7 @@ export const VenueInfoModal: React.FC = () => {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar pb-10">
+            <div className="flex-1 overflow-y-auto p-5 landscape:p-3.5 space-y-4 landscape:space-y-3 custom-scrollbar pb-8 landscape:pb-4">
               
               {/* Venue Profile Minimal Card */}
               <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
@@ -142,11 +144,11 @@ export const VenueInfoModal: React.FC = () => {
               )}
 
               {/* Minimalist Structured Info Section */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] divide-y divide-white/[0.06] overflow-hidden">
+              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] divide-y divide-white/[0.06] overflow-hidden landscape:grid landscape:grid-cols-2 landscape:divide-y-0 landscape:gap-3 landscape:bg-transparent landscape:border-0">
                 
                 {/* 1. Working Hours */}
                 {hasWorkingHours && (
-                  <div className="p-4 flex items-start gap-3.5">
+                  <div className="p-4 landscape:p-3 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5">
                     <div className="p-2 rounded-xl bg-white/[0.04] text-[var(--theme-primary)] shrink-0 mt-0.5">
                       <Clock className="w-4 h-4" />
                     </div>
@@ -172,7 +174,7 @@ export const VenueInfoModal: React.FC = () => {
                 )}
 
                 {/* 2. Vibe Guard (Müzik Tarzı Kuralı) */}
-                <div className="p-4 flex items-start gap-3.5">
+                <div className={`p-4 landscape:p-3 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5 ${!hasWorkingHours ? 'landscape:col-span-2' : ''}`}>
                   <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5 border border-amber-500/20">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
@@ -211,7 +213,7 @@ export const VenueInfoModal: React.FC = () => {
 
                 {/* 3. Wi-Fi Information */}
                 {hasWifi && (
-                  <div className="p-4 flex items-start gap-3.5">
+                  <div className="p-4 landscape:p-3 landscape:col-span-2 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5">
                     <div className="p-2 rounded-xl bg-white/[0.04] text-[var(--theme-primary)] shrink-0 mt-0.5">
                       <Wifi className="w-4 h-4" />
                     </div>

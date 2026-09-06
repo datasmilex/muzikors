@@ -14,11 +14,11 @@ export const WelcomeScreen: React.FC = () => {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
 
       {/* Top Bar Navigation */}
-      <header className="w-full px-5 pt-6 pb-3 flex items-center justify-between relative z-20">
+      <header className="w-full px-5 pt-6 landscape:pt-3 pb-3 landscape:pb-1 flex items-center justify-between relative z-20">
         <motion.div 
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.3 }}
           className="flex items-center gap-3"
         >
           <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/10 p-1.5 flex items-center justify-center shadow-md">
@@ -38,9 +38,9 @@ export const WelcomeScreen: React.FC = () => {
         <motion.button
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
+          transition={{ duration: 0.3, delay: 0.08 }}
           onClick={() => openModal(user ? 'profile' : 'login')}
-          className="h-9 px-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 active:scale-95 transition-all flex items-center gap-2"
+          className="h-9 px-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
         >
           {user && user.avatar ? (
             <img src={user.avatar} alt="Profile" className="w-5 h-5 object-cover rounded-full ring-1 ring-[var(--theme-primary)]/40" />
@@ -56,81 +56,83 @@ export const WelcomeScreen: React.FC = () => {
       </header>
 
       {/* Hero Body */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-5 relative z-20 py-4">
+      <main className="flex-1 flex flex-col landscape:flex-row items-center justify-center w-full px-5 landscape:px-8 relative z-20 py-4 landscape:py-2 landscape:gap-10">
         {/* Title and Subtitle */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12 }}
-          className="text-center max-w-xs mx-auto mb-8"
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="text-center landscape:text-left max-w-xs mx-auto landscape:mx-0 mb-8 landscape:mb-0"
         >
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-3xl landscape:text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
             Mekanın Ritmini <br />
             <span className="text-[var(--theme-primary)]">Sen Belirle.</span>
           </h1>
-          <p className="text-xs sm:text-sm font-normal text-neutral-400 mt-3 leading-relaxed">
+          <p className="text-xs sm:text-sm font-normal text-neutral-400 mt-3 landscape:mt-2 leading-relaxed">
             Masandaki QR kodu okut, çalan şarkıları oyla ve dilediğin parçayı anında sıraya ekle.
           </p>
         </motion.div>
 
         {/* Center Scanner Action Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.2 }}
-          className="relative flex flex-col items-center w-full max-w-[280px]"
-        >
-          <button
-            id="tour-qr-button"
-            onClick={() => openModal('qr')}
-            className="group w-full p-6 rounded-2xl bg-neutral-900/80 border border-white/10 hover:border-[var(--theme-primary)]/40 flex flex-col items-center justify-center gap-4 shadow-xl active:scale-[0.98] transition-all cursor-pointer"
+        <div className="flex flex-col items-center w-full max-w-[280px] landscape:max-w-[260px]">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.35, delay: 0.15 }}
+            className="relative flex flex-col items-center w-full"
           >
-            {/* Minimal Lens Reticle Frame */}
-            <div className="relative w-20 h-20 rounded-xl bg-black/60 border border-white/10 group-hover:border-[var(--theme-primary)]/40 flex items-center justify-center transition-colors">
-              <div className="w-2.5 h-2.5 border-t border-l border-[var(--theme-primary)]/70 absolute top-1 left-1" />
-              <div className="w-2.5 h-2.5 border-t border-r border-[var(--theme-primary)]/70 absolute top-1 right-1" />
-              <div className="w-2.5 h-2.5 border-b border-l border-[var(--theme-primary)]/70 absolute bottom-1 left-1" />
-              <div className="w-2.5 h-2.5 border-b border-r border-[var(--theme-primary)]/70 absolute bottom-1 right-1" />
-              
-              <QrCode className="w-10 h-10 text-[var(--theme-primary)] group-hover:scale-105 transition-transform" />
-            </div>
+            <button
+              id="tour-qr-button"
+              onClick={() => openModal('qr')}
+              className="group w-full p-6 landscape:p-4 rounded-2xl bg-neutral-900/80 border border-white/10 hover:border-[var(--theme-primary)]/40 flex flex-col items-center justify-center gap-3 landscape:gap-2 shadow-xl active:scale-[0.98] transition-all cursor-pointer"
+            >
+              {/* Minimal Lens Reticle Frame */}
+              <div className="relative w-18 h-18 landscape:w-14 landscape:h-14 rounded-xl bg-black/60 border border-white/10 group-hover:border-[var(--theme-primary)]/40 flex items-center justify-center transition-colors">
+                <div className="w-2 h-2 border-t border-l border-[var(--theme-primary)]/70 absolute top-1 left-1" />
+                <div className="w-2 h-2 border-t border-r border-[var(--theme-primary)]/70 absolute top-1 right-1" />
+                <div className="w-2 h-2 border-b border-l border-[var(--theme-primary)]/70 absolute bottom-1 left-1" />
+                <div className="w-2 h-2 border-b border-r border-[var(--theme-primary)]/70 absolute bottom-1 right-1" />
+                
+                <QrCode className="w-8 h-8 landscape:w-7 landscape:h-7 text-[var(--theme-primary)] group-hover:scale-105 transition-transform" />
+              </div>
 
-            <div className="text-center">
-              <span className="text-sm font-bold tracking-wide text-white block">
-                QR Kodu Tara & Bağlan
-              </span>
-              <span className="text-[11px] text-neutral-400 mt-0.5 block">
-                Masanızdaki karekodu okutun
-              </span>
-            </div>
-          </button>
-        </motion.div>
+              <div className="text-center">
+                <span className="text-sm font-bold tracking-wide text-white block">
+                  QR Kodu Tara & Bağlan
+                </span>
+                <span className="text-[10px] text-neutral-400 mt-0.5 block">
+                  Masanızdaki karekodu okutun
+                </span>
+              </div>
+            </button>
+          </motion.div>
 
-        {/* Secondary Action - Discover Venues */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-4 w-full max-w-[280px]"
-        >
-          <button
-            onClick={() => openModal('map')}
-            className="w-full flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/15 active:scale-[0.98] transition-all text-neutral-300 hover:text-white"
+          {/* Secondary Action - Discover Venues */}
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="mt-3 landscape:mt-2.5 w-full"
           >
-            <Compass className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-            <span className="text-xs font-semibold">
-              Yakındaki Muzikors Mekanları
-            </span>
-          </button>
-        </motion.div>
+            <button
+              onClick={() => openModal('map')}
+              className="w-full flex items-center justify-center gap-2 h-10 landscape:h-9 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/15 active:scale-[0.98] transition-all text-neutral-300 hover:text-white cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+              <span className="text-xs font-semibold">
+                Yakındaki Muzikors Mekanları
+              </span>
+            </button>
+          </motion.div>
+        </div>
       </main>
 
       {/* Footer Info */}
       <motion.footer 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="w-full pb-6 pt-2 flex items-center justify-center gap-2 text-neutral-500 text-[10px] font-medium tracking-wider uppercase"
+        transition={{ duration: 0.3, delay: 0.25 }}
+        className="w-full pb-6 landscape:pb-2 pt-2 flex items-center justify-center gap-2 text-neutral-500 text-[10px] font-medium tracking-wider uppercase"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span>Spotify Canlı Ses Sistemi Entegrasyonu</span>

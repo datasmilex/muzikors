@@ -345,15 +345,16 @@ export const MusicSearchModal: React.FC = () => {
   return (
     <AnimatePresence>
       {activeModal === 'search' && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center landscape:items-center landscape:justify-center landscape:p-2">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            style={{ willChange: 'opacity' }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/85"
           />
 
           {/* Bottom Sheet Container */}
@@ -361,8 +362,9 @@ export const MusicSearchModal: React.FC = () => {
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md h-[92vh] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] p-5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col justify-between overflow-hidden border-t sm:border border-white/[0.1]"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-full max-w-md landscape:max-w-4xl h-[92vh] landscape:h-[94vh] landscape:max-h-[440px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] landscape:rounded-2xl p-5 landscape:p-3.5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col justify-between overflow-hidden border-t sm:border landscape:border border-white/[0.1]"
           >
             {confirmingTrack ? (
               <div className="flex-1 flex flex-col pt-2 overflow-y-auto custom-scrollbar h-full relative z-10 pb-20">
@@ -380,110 +382,116 @@ export const MusicSearchModal: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="space-y-4 pt-4">
-                  {/* Track Info Box */}
-                  <div className="flex items-center gap-3.5 bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08] shadow-md">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
-                      <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
-                    </div>
-                    <div className="truncate flex-1 min-w-0">
-                      <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
-                      <p className="text-xs font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{confirmingTrack.artist}</p>
-                    </div>
-                  </div>
-
-                  {/* Anonymous Toggle (VIP Feature) */}
-                  <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs font-bold text-white tracking-wide">Hayalet Modu</p>
-                        {!user?.isPremium && (
-                          <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                        )}
+                <div className="space-y-4 pt-3 landscape:grid landscape:grid-cols-2 landscape:gap-3.5 landscape:space-y-0">
+                  {/* Left Column: Track Info & VIP Options */}
+                  <div className="space-y-3">
+                    {/* Track Info Box */}
+                    <div className="flex items-center gap-3.5 bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] shadow-md">
+                      <div className="w-13 h-13 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
+                        <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
                       </div>
-                      <p className="text-[10px] text-neutral-400 mt-0.5">
-                        {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => {
-                        if (!user?.isPremium) {
-                          showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
-                          return;
-                        }
-                        setIsAnonymous(!isAnonymous);
-                      }}
-                      className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
-                        !user?.isPremium ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
-                        isAnonymous ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </button>
-                  </div>
-
-                  {/* Priority / Boost Toggle (VIP Feature) */}
-                  <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
-                        {!user?.isPremium && (
-                          <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                        )}
+                      <div className="truncate flex-1 min-w-0">
+                        <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
+                        <p className="text-xs font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{confirmingTrack.artist}</p>
                       </div>
-                      <p className="text-[10px] text-neutral-400 mt-0.5">
-                        {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın en başına geçer)` : 'Sadece Premium üyeler için'}
-                      </p>
                     </div>
-                    <button 
-                      onClick={() => {
-                        if (!user?.isPremium) {
-                          showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
-                          return;
-                        }
-                        if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
-                          showToast('Günlük üste taşıma limitinize ulaştınız.');
-                          return;
-                        }
-                        setIsBoosted(!isBoosted);
-                      }}
-                      className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
-                        !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
-                        isBoosted ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </button>
+
+                    {/* Anonymous Toggle (VIP Feature) */}
+                    <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08]">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-white tracking-wide">Hayalet Modu</p>
+                          {!user?.isPremium && (
+                            <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-neutral-400 mt-0.5">
+                          {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          if (!user?.isPremium) {
+                            showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
+                            return;
+                          }
+                          setIsAnonymous(!isAnonymous);
+                        }}
+                        className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
+                          !user?.isPremium ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
+                          isAnonymous ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
+                    {/* Priority / Boost Toggle (VIP Feature) */}
+                    <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08]">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
+                          {!user?.isPremium && (
+                            <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-neutral-400 mt-0.5">
+                          {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın başına geçer)` : 'Sadece Premium üyeler için'}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          if (!user?.isPremium) {
+                            showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
+                            return;
+                          }
+                          if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
+                            showToast('Günlük üste taşıma limitinize ulaştınız.');
+                            return;
+                          }
+                          setIsBoosted(!isBoosted);
+                        }}
+                        className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
+                          !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
+                          isBoosted ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Message Input */}
-                  <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08] space-y-2">
-                    <p className="text-xs font-bold text-white">Not Ekle <span className="text-[10px] text-neutral-400">(İsteğe bağlı)</span></p>
-                    <input 
-                      type="text" 
-                      placeholder="Örn: Masamıza gelsin..." 
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      maxLength={60}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-neutral-500 focus:border-[var(--theme-primary)] focus:outline-none transition-colors"
-                    />
-                  </div>
-
-                  {/* Estimated Time */}
-                  {estimatedWaitMs > 0 && (
-                    <div className="flex items-center gap-2 justify-center text-xs text-neutral-400 mt-2">
-                      <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                      <span>Tahmini çalma süresi: <strong className="text-white">~{Math.round(estimatedWaitMs / 60000)} dk sonra</strong></span>
+                  {/* Right Column: Note, Estimated Time, Consent */}
+                  <div className="space-y-3">
+                    {/* Message Input */}
+                    <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] space-y-1.5">
+                      <p className="text-xs font-bold text-white">Not Ekle <span className="text-[10px] text-neutral-400">(İsteğe bağlı)</span></p>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: Masamıza gelsin..." 
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        maxLength={60}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-neutral-500 focus:border-[var(--theme-primary)] focus:outline-none transition-colors"
+                      />
                     </div>
-                  )}
 
-                  {/* Consent Text */}
-                  <div className="bg-[var(--theme-primary)]/10 rounded-2xl p-3 border border-[var(--theme-primary)]/25 text-[11px] leading-relaxed text-[var(--theme-primary-light)] font-medium">
-                    {isAnonymous ? (
-                      <p>Şarkı isteğin uygulamada <b className="text-white">Anonim</b> olarak yayınlanacaktır.</p>
-                    ) : (
-                      <p>Şarkı isteğin uygulamada (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) olarak yayınlanacaktır.</p>
+                    {/* Estimated Time */}
+                    {estimatedWaitMs > 0 && (
+                      <div className="flex items-center gap-2 justify-center text-xs text-neutral-400 py-1">
+                        <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                        <span>Tahmini çalma: <strong className="text-white">~{Math.round(estimatedWaitMs / 60000)} dk sonra</strong></span>
+                      </div>
                     )}
+
+                    {/* Consent Text */}
+                    <div className="bg-[var(--theme-primary)]/10 rounded-2xl p-2.5 border border-[var(--theme-primary)]/25 text-[11px] leading-relaxed text-[var(--theme-primary-light)] font-medium">
+                      {isAnonymous ? (
+                        <p>Şarkı isteğin <b className="text-white">Anonim</b> olarak yayınlanacaktır.</p>
+                      ) : (
+                        <p>Şarkı isteğin (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) olarak yayınlanacaktır.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -650,77 +658,79 @@ export const MusicSearchModal: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Allowed Tracks */}
-                      {allowedTracks.map((track) => {
-                        const isSelected = selectedTrack?.id === track.id;
-                        const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                        const isExplicitTrack = isTrackExplicit(track);
-                        const isTooLongForFree = !user?.isPremium && durMs > 240000;
-                        const isTooLongOverall = durMs > 420000;
+                      {/* Allowed Tracks Grid */}
+                      <div className="space-y-1.5 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
+                        {allowedTracks.map((track) => {
+                          const isSelected = selectedTrack?.id === track.id;
+                          const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
+                          const isExplicitTrack = isTrackExplicit(track);
+                          const isTooLongForFree = !user?.isPremium && durMs > 240000;
+                          const isTooLongOverall = durMs > 420000;
 
-                        return (
-                          <div
-                            key={track.id}
-                            onClick={() => {
-                              if ((cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
-                              setSelectedTrack(track);
-                            }}
-                            className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
-                                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                                <img
-                                  src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                                  alt={track.title}
-                                  className="w-full h-full object-cover"
-                                />
-                                {isSelected && (
-                                  <div className="absolute inset-0 bg-[var(--theme-primary)]/50 flex items-center justify-center backdrop-blur-xs">
-                                    <Check className="w-4 h-4 text-black stroke-[3]" />
+                          return (
+                            <div
+                              key={track.id}
+                              onClick={() => {
+                                if ((cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
+                                setSelectedTrack(track);
+                              }}
+                              className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
+                                  : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                                  <img
+                                    src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
+                                    alt={track.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {isSelected && (
+                                    <div className="absolute inset-0 bg-[var(--theme-primary)]/50 flex items-center justify-center backdrop-blur-xs">
+                                      <Check className="w-4 h-4 text-black stroke-[3]" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <h4 className="text-xs font-bold truncate text-white">
+                                      {track.title}
+                                    </h4>
+                                    {isExplicitTrack && (
+                                      <span className="text-[8px] font-black px-1 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 uppercase" title="Explicit (Sansürsüz İçerik)">
+                                        E
+                                      </span>
+                                    )}
+                                    {isTooLongOverall ? (
+                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
+                                        &gt;7 dk
+                                      </span>
+                                    ) : isTooLongForFree ? (
+                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
+                                        VIP (4+ dk)
+                                      </span>
+                                    ) : null}
                                   </div>
+                                  <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
+                                    {track.artist}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0 pl-2 text-right">
+                                {durMs > 0 && (
+                                  <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
+                                    {formatDuration(durMs)}
+                                  </span>
                                 )}
                               </div>
-
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <h4 className="text-xs font-bold truncate text-white">
-                                    {track.title}
-                                  </h4>
-                                  {isExplicitTrack && (
-                                    <span className="text-[8px] font-black px-1 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 uppercase" title="Explicit (Sansürsüz İçerik)">
-                                      E
-                                    </span>
-                                  )}
-                                  {isTooLongOverall ? (
-                                    <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
-                                      &gt;7 dk
-                                    </span>
-                                  ) : isTooLongForFree ? (
-                                    <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
-                                      VIP (4+ dk)
-                                    </span>
-                                  ) : null}
-                                </div>
-                                <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
-                                  {track.artist}
-                                </p>
-                              </div>
                             </div>
-
-                            <div className="shrink-0 pl-2 text-right">
-                              {durMs > 0 && (
-                                <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
-                                  {formatDuration(durMs)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
 
                       {/* Collapsible Blocked / Filtered Tracks Section */}
                       {blockedTracks.length > 0 && (

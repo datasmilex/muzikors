@@ -26,17 +26,18 @@ export const GatewayScreen: React.FC = () => {
   const hasMenu = isNativeMenu || Boolean(menuUrl?.trim());
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[var(--theme-bg)] p-4 relative overflow-hidden items-center text-white transition-colors duration-300">
+    <div className="flex-1 flex flex-col min-h-screen bg-[var(--theme-bg)] p-4 landscape:p-3 relative overflow-y-auto items-center text-white transition-colors duration-300">
       {/* Close Button */}
       <button 
         onClick={() => setHasEnteredGateway(true)}
-        className="absolute top-6 right-6 z-50 p-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-neutral-400 hover:text-white active:scale-95 transition-all shadow-lg"
+        className="absolute top-6 landscape:top-3 right-6 landscape:right-4 z-50 p-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-neutral-400 hover:text-white active:scale-95 transition-all shadow-lg cursor-pointer"
+        aria-label="Kapat"
       >
         <X className="w-5 h-5" />
       </button>
 
       {/* Header: Minimal Powered by Muzikors */}
-      <div className="w-full flex justify-center pt-8 pb-4 relative z-10">
+      <div className="w-full flex justify-center pt-8 landscape:pt-2 pb-4 landscape:pb-2 relative z-10">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08]">
           <Music className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
           <span className="text-[10px] font-black tracking-widest text-[var(--theme-primary-light)] uppercase">Powered by Muzikors</span>
@@ -44,12 +45,12 @@ export const GatewayScreen: React.FC = () => {
       </div>
 
       {/* Main Content Container */}
-      <div className="w-full max-w-sm mx-auto flex-1 flex flex-col items-center justify-center space-y-8 relative z-10 mb-16">
+      <div className="w-full max-w-sm landscape:max-w-2xl mx-auto flex-1 flex flex-col landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-8 items-center justify-center space-y-8 landscape:space-y-0 relative z-10 mb-16 landscape:mb-4">
         
         {/* Profile Card */}
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center space-y-4 landscape:space-y-2.5 shrink-0">
           <div className="relative">
-            <div className="w-28 h-28 rounded-3xl border border-[var(--theme-primary)]/30 p-1 flex items-center justify-center bg-[var(--theme-card)] shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative">
+            <div className="w-28 h-28 landscape:w-22 landscape:h-22 rounded-3xl landscape:rounded-2xl border border-[var(--theme-primary)]/30 p-1 flex items-center justify-center bg-[var(--theme-card)] shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden relative">
               {activeVenue.logo_url?.trim() ? (
                 <img 
                   src={activeVenue.logo_url} 
@@ -60,23 +61,23 @@ export const GatewayScreen: React.FC = () => {
                 <Store className="w-12 h-12 text-[var(--theme-primary)]/60 z-10" />
               )}
             </div>
-            <div className="absolute -bottom-1.5 -right-1.5 bg-[var(--theme-primary)] w-8 h-8 rounded-full flex items-center justify-center border-2 border-[var(--theme-bg)] shadow-md">
+            <div className="absolute -bottom-1.5 -right-1.5 bg-[var(--theme-primary)] w-8 h-8 landscape:w-7 landscape:h-7 rounded-full flex items-center justify-center border-2 border-[var(--theme-bg)] shadow-md">
               <Check className="w-4 h-4 text-black stroke-[3]" />
             </div>
           </div>
           <div className="text-center space-y-1">
-            <h1 className="text-xl font-black text-white tracking-tight">{activeVenue.venue_name}</h1>
+            <h1 className="text-xl landscape:text-lg font-black text-white tracking-tight">{activeVenue.venue_name}</h1>
             <p className="text-[11px] text-[var(--theme-primary-light)] font-bold tracking-widest uppercase">Hoş Geldiniz</p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-3 landscape:space-y-2.5 flex-1">
           <button
             onClick={() => setHasEnteredGateway(true)}
-            className="w-full h-14 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all"
+            className="w-full h-13 landscape:h-11 rounded-2xl bg-[var(--theme-primary)] text-black font-black text-sm flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all cursor-pointer"
           >
-            <Music className="w-5 h-5" />
+            <Music className="w-4.5 h-4.5" />
             Muzikors'a Başla
           </button>
 

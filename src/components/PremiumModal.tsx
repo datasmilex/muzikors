@@ -119,12 +119,14 @@ export const PremiumModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 landscape:p-2">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+          transition={{ duration: 0.2 }}
+          style={{ willChange: 'opacity' }}
+          className="absolute inset-0 bg-black/85"
           onClick={closeModal}
         />
 
@@ -132,20 +134,21 @@ export const PremiumModal: React.FC = () => {
           initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[var(--theme-card)] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/[0.1] flex flex-col max-h-[90vh]"
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          style={{ willChange: 'transform' }}
+          className="relative w-full max-w-md landscape:max-w-3xl bg-[var(--theme-card)] rounded-3xl landscape:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/[0.1] flex flex-col max-h-[90vh] landscape:max-h-[96vh]"
         >
           {/* Header Graphic */}
-          <div className="relative p-6 pb-4 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[var(--theme-card)]">
-            <div className="my-2">
-              <Crown className="w-10 h-10 text-[var(--theme-primary)]" strokeWidth={1.75} />
+          <div className="relative p-6 pb-4 landscape:p-3 landscape:pb-2 flex flex-col items-center justify-center text-center border-b border-white/[0.08] bg-[var(--theme-card)]">
+            <div className="my-1.5 landscape:my-0.5">
+              <Crown className="w-8 h-8 landscape:w-6 landscape:h-6 text-[var(--theme-primary)]" strokeWidth={1.75} />
             </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">
+            <h2 className="text-xl landscape:text-lg font-bold text-white tracking-tight">
               Muzikors Premium
             </h2>
             
             {/* Free Trial Highlight Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white/[0.04] border border-white/10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 mt-1.5 rounded-full bg-white/[0.04] border border-white/10">
               <span className="text-[10px] font-bold text-[var(--theme-primary-light)] uppercase tracking-wider">
                 İlk 3 Gün Ücretsiz Deneme
               </span>
@@ -153,16 +156,16 @@ export const PremiumModal: React.FC = () => {
 
             <button 
               onClick={closeModal}
-              className="absolute top-4 right-4 p-1.5 bg-white/[0.05] hover:bg-white/[0.1] rounded-full text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              className="absolute top-3 right-3 p-1.5 bg-white/[0.05] hover:bg-white/[0.1] rounded-full text-neutral-400 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Benefits list */}
-          <div className="p-5 overflow-y-auto custom-scrollbar space-y-2">
+          <div className="p-5 landscape:p-3 overflow-y-auto custom-scrollbar space-y-2 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
             {benefits.map((benefit, idx) => (
-              <div key={idx} className="flex gap-3 items-start bg-white/[0.02] p-3 rounded-2xl border border-white/[0.05]">
+              <div key={idx} className="flex gap-2.5 items-start bg-white/[0.02] p-2.5 rounded-2xl border border-white/[0.05]">
                 <div className="shrink-0 mt-0.5">
                   {benefit.icon}
                 </div>
@@ -175,7 +178,7 @@ export const PremiumModal: React.FC = () => {
           </div>
 
           {/* Footer & Subscribe CTA */}
-          <div className="p-5 border-t border-white/[0.08] bg-[var(--theme-card)]">
+          <div className="p-4 landscape:p-3 border-t border-white/[0.08] bg-[var(--theme-card)]">
             <button
               onClick={handleSubscribe}
               disabled={isProcessing}

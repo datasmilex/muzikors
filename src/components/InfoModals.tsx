@@ -47,15 +47,16 @@ export const InfoModals: React.FC = () => {
   return (
     <AnimatePresence>
       {isInfoModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 landscape:p-2">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            style={{ willChange: 'opacity' }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/85"
           />
 
           {/* Modal Container */}
@@ -63,8 +64,9 @@ export const InfoModals: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-sm bg-[var(--theme-card)] rounded-3xl p-5 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[85vh] flex flex-col justify-between border border-white/[0.1]"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-full max-w-sm landscape:max-w-2xl bg-[var(--theme-card)] rounded-3xl landscape:rounded-2xl p-5 landscape:p-3.5 z-10 shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[85vh] landscape:max-h-[94vh] flex flex-col justify-between border border-white/[0.1]"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4 relative z-10 shrink-0">
@@ -137,7 +139,7 @@ export const InfoModals: React.FC = () => {
                         Mekanınızda Muzikors Jukebox kullanmak için bilgilerinizi bırakın.
                       </p>
 
-                      <div className="space-y-2.5">
+                      <div className="space-y-2.5 landscape:grid landscape:grid-cols-2 landscape:gap-2.5 landscape:space-y-0">
                         <div>
                           <label className="block text-[10px] font-bold text-neutral-400 mb-1 uppercase tracking-wider pl-0.5">Mekan Adı *</label>
                           <input
@@ -199,12 +201,13 @@ export const InfoModals: React.FC = () => {
               )}
 
               {activeModal === 'contact' && (
-                <div className="space-y-4 text-center py-4 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08]">
+                <div className="p-4 bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-center text-center">
                   <div>
                     <p className="font-bold text-white text-sm mb-1">Destek &amp; İletişim</p>
                     <p className="text-[var(--theme-primary)] font-mono text-xs font-bold bg-black/40 py-1.5 px-3 rounded-lg inline-block border border-white/5">destek@muzikors.com</p>
+                    <p className="text-[10px] text-neutral-500 font-bold uppercase mt-2">Haftanın 7 günü 10:00 - 02:00</p>
                   </div>
-                  <div className="pt-3 border-t border-white/[0.06] space-y-2 px-4">
+                  <div className="pt-3 landscape:pt-0 border-t landscape:border-t-0 landscape:border-l border-white/[0.06] space-y-2 px-2 landscape:pl-4">
                     <a
                       href="https://wa.me/905068638306"
                       target="_blank"
@@ -221,18 +224,17 @@ export const InfoModals: React.FC = () => {
                       <Phone className="w-3.5 h-3.5 text-neutral-400" />
                       <span>+90 506 863 83 06</span>
                     </a>
-                    <p className="text-[10px] text-neutral-500 font-bold uppercase mt-2">Haftanın 7 günü 10:00 - 02:00</p>
                   </div>
                 </div>
               )}
 
               {activeModal === 'howitworks' && (
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 landscape:grid landscape:grid-cols-3 landscape:gap-2.5 landscape:space-y-0">
                   <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
                     <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">1</div>
                     <div>
                       <h4 className="font-bold text-white text-xs mb-0.5">Bir Mekana Bağlan</h4>
-                      <p className="text-neutral-400 text-[11px] leading-snug">Bulunduğun kafedeki QR kodu tarayarak mekan jukebox sistemine bağlan.</p>
+                      <p className="text-neutral-400 text-[11px] leading-snug">Kafedeki QR kodu okut, jukebox sistemine bağlan.</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-[var(--theme-card-alt)] p-3 rounded-2xl border border-white/[0.06]">
@@ -246,7 +248,7 @@ export const InfoModals: React.FC = () => {
                     <div className="w-7 h-7 rounded-full bg-[var(--theme-primary)] text-black font-black text-xs flex items-center justify-center shrink-0">3</div>
                     <div>
                       <h4 className="font-bold text-white text-xs mb-0.5">Şarkını Çaldır</h4>
-                      <p className="text-neutral-400 text-[11px] leading-snug">Sıraya ekle ve mekanın atmosferini şekillendir!</p>
+                      <p className="text-neutral-400 text-[11px] leading-snug">Sıraya ekle ve atmosferi yönet!</p>
                     </div>
                   </div>
                 </div>

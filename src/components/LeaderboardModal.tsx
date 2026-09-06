@@ -176,15 +176,16 @@ export const LeaderboardModal: React.FC = () => {
   return (
     <AnimatePresence>
       {activeModal === 'leaderboard' && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center landscape:items-center landscape:justify-center landscape:p-2">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            style={{ willChange: 'opacity' }}
             onClick={closeModal}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/85"
           />
 
           {/* Modal Container */}
@@ -192,11 +193,12 @@ export const LeaderboardModal: React.FC = () => {
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="relative w-full max-w-md h-[82vh] sm:h-[620px] sm:rounded-3xl rounded-t-[2.5rem] flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{ willChange: 'transform' }}
+            className="relative w-full max-w-md landscape:max-w-3xl h-[82vh] sm:h-[620px] landscape:h-[94vh] landscape:max-h-[420px] sm:rounded-3xl rounded-t-[2.5rem] landscape:rounded-2xl flex flex-col overflow-hidden bg-[var(--theme-card)] border-t sm:border landscape:border border-white/[0.1] shadow-[0_-20px_60px_rgba(0,0,0,0.95)]"
           >
             {/* Header */}
-            <div className="flex-none p-5 flex items-center justify-between border-b border-white/[0.08] relative z-10">
+            <div className="flex-none p-5 landscape:p-3 landscape:pb-2 flex items-center justify-between border-b border-white/[0.08] relative z-10">
               <div className="flex items-center gap-2.5">
                 <Trophy className="w-5 h-5 text-[var(--theme-primary)] shrink-0" />
                 <div>
@@ -412,109 +414,113 @@ export const LeaderboardModal: React.FC = () => {
                 </div>
               ) : activeTab === 'users' ? (
                 users.length > 0 ? (
-                  users.map((user, idx) => {
-                    const isTop = idx === 0;
-                    const isUserVip = user.is_premium || (currentUser?.id === user.id && currentUser?.isPremium);
-                    const isUserBeta = user.is_beta_tester || (currentUser?.id === user.id && currentUser?.is_beta_tester);
-                    const isCurrentLoggedUser = currentUser?.id === user.id;
+                  <div className="space-y-2 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
+                    {users.map((user, idx) => {
+                      const isTop = idx === 0;
+                      const isUserVip = user.is_premium || (currentUser?.id === user.id && currentUser?.isPremium);
+                      const isUserBeta = user.is_beta_tester || (currentUser?.id === user.id && currentUser?.is_beta_tester);
+                      const isCurrentLoggedUser = currentUser?.id === user.id;
 
-                    return (
-                      <div
-                        key={user.id}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
-                          isCurrentLoggedUser
-                            ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
-                            : isTop
-                            ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30'
-                            : 'bg-white/[0.02] border-white/[0.06]'
-                        }`}
-                      >
-                        <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
-                          idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
-                          idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
-                          idx + 1 === 3 ? 'bg-amber-700 text-white' : 
-                          'bg-white/10 text-neutral-400'
-                        }`}>
-                          {idx + 1}
-                        </div>
+                      return (
+                        <div
+                          key={user.id}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
+                            isCurrentLoggedUser
+                              ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
+                              : isTop
+                              ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30'
+                              : 'bg-white/[0.02] border-white/[0.06]'
+                          }`}
+                        >
+                          <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
+                            idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
+                            idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
+                            idx + 1 === 3 ? 'bg-amber-700 text-white' : 
+                            'bg-white/10 text-neutral-400'
+                          }`}>
+                            {idx + 1}
+                          </div>
 
-                        <div className="relative shrink-0">
-                          <AvatarFrame frameId={user.avatar_frame} size="md">
-                            <img
-                              src={user.avatar || '/logo.png'}
-                              alt={user.name}
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = '/logo.png';
-                              }}
-                              className="w-full h-full object-cover"
-                            />
-                          </AvatarFrame>
-                        </div>
+                          <div className="relative shrink-0">
+                            <AvatarFrame frameId={user.avatar_frame} size="md">
+                              <img
+                                src={user.avatar || '/logo.png'}
+                                alt={user.name}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = '/logo.png';
+                                }}
+                                className="w-full h-full object-cover"
+                              />
+                            </AvatarFrame>
+                          </div>
 
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-xs text-white truncate flex items-center gap-1.5">
-                            <span className="truncate">{formatUserDisplayName(user.username, user.name)}</span>
-                            {isUserVip && <PremiumBadge className="w-3.5 h-3.5 shrink-0" />}
-                            {isUserBeta && <BetaTesterBadge className="w-3.5 h-3.5 shrink-0" />}
-                          </p>
-                          <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5 flex items-center gap-1">
-                            <span>{user.title}</span>
-                          </p>
-                        </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-xs text-white truncate flex items-center gap-1.5">
+                              <span className="truncate">{formatUserDisplayName(user.username, user.name)}</span>
+                              {isUserVip && <PremiumBadge className="w-3.5 h-3.5 shrink-0" />}
+                              {isUserBeta && <BetaTesterBadge className="w-3.5 h-3.5 shrink-0" />}
+                            </p>
+                            <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5 flex items-center gap-1">
+                              <span>{user.title}</span>
+                            </p>
+                          </div>
 
-                        <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center min-w-[54px]">
-                          <span className="text-xs font-black text-[var(--theme-primary)]">Lv. {user.level}</span>
-                          <span className="text-[8px] font-bold text-neutral-500 uppercase">{user.xp} XP</span>
+                          <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center min-w-[54px]">
+                            <span className="text-xs font-black text-[var(--theme-primary)]">Lv. {user.level}</span>
+                            <span className="text-[8px] font-bold text-neutral-500 uppercase">{user.xp} XP</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div className="text-center text-neutral-500 py-10 text-xs">Henüz veri bulunmuyor.</div>
                 )
               ) : (
                 venues.length > 0 ? (
-                  venues.map((venue, idx) => {
-                    const isTop = idx === 0;
+                  <div className="space-y-2 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
+                    {venues.map((venue, idx) => {
+                      const isTop = idx === 0;
 
-                    return (
-                      <div
-                        key={venue.id}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
-                          isTop ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30' : 'bg-white/[0.02] border-white/[0.06]'
-                        }`}
-                      >
-                        <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
-                          idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
-                          idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
-                          idx + 1 === 3 ? 'bg-amber-700 text-white' : 
-                          'bg-white/10 text-neutral-400'
-                        }`}>
-                          {idx + 1}
-                        </div>
+                      return (
+                        <div
+                          key={venue.id}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
+                            isTop ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/30' : 'bg-white/[0.02] border-white/[0.06]'
+                          }`}
+                        >
+                          <div className={`w-7 h-7 flex-none flex items-center justify-center font-black text-xs rounded-full shadow-sm ${
+                            idx + 1 === 1 ? 'bg-[var(--theme-primary)] text-black' : 
+                            idx + 1 === 2 ? 'bg-slate-300 text-slate-900' : 
+                            idx + 1 === 3 ? 'bg-amber-700 text-white' : 
+                            'bg-white/10 text-neutral-400'
+                          }`}>
+                            {idx + 1}
+                          </div>
 
-                        <div className="relative w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center shrink-0 overflow-hidden">
-                          {venue.logo_url ? (
-                            <img src={venue.logo_url} alt={venue.venue_name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Store className="w-5 h-5 text-amber-400" />
-                          )}
-                        </div>
+                          <div className="relative w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center shrink-0 overflow-hidden">
+                            {venue.logo_url ? (
+                              <img src={venue.logo_url} alt={venue.venue_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Store className="w-5 h-5 text-amber-400" />
+                            )}
+                          </div>
 
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-xs text-white truncate">
-                            {venue.venue_name}
-                          </p>
-                        </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-xs text-white truncate">
+                              {venue.venue_name}
+                            </p>
+                          </div>
 
-                        <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
-                          <span className="text-xs font-black text-amber-400">{venue.total_songs_requested || 0}</span>
-                          <span className="text-[8px] font-bold text-neutral-500 uppercase">İstek</span>
+                          <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
+                            <span className="text-xs font-black text-amber-400">{venue.total_songs_requested || 0}</span>
+                            <span className="text-[8px] font-bold text-neutral-500 uppercase">İstek</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div className="text-center text-neutral-500 py-10 text-xs">Henüz kayıt bulunamadı.</div>
                 )
