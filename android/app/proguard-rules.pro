@@ -33,6 +33,10 @@
 -keep class com.google.android.gms.common.** { *; }
 -keep class com.google.android.ump.** { *; }
 
+# Firebase Messaging (Push Notifications)
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
 # Capacitor Plugins
 -keep class com.capacitorjs.plugins.** { *; }
 -keep class com.getcapacitor.community.** { *; }
@@ -40,3 +44,4 @@
 # Suppress common non-fatal warnings
 -dontwarn org.apache.cordova.**
 -dontwarn com.google.android.gms.**
+-dontwarn com.google.android.material.**
