@@ -146,7 +146,8 @@ export type ModalType =
   | 'rewarded_ad'
   | 'lyrics'
   | 'menu'
-  | 'venue_owner';
+  | 'venue_owner'
+  | 'story_share';
 
 export interface SocialPost {
   id: string;

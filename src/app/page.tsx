@@ -25,6 +25,7 @@ import { LeaderboardModal } from '../components/LeaderboardModal';
 import { LyricsModal } from '../components/LyricsModal';
 import { MenuModal } from '../components/MenuModal';
 import { VenueOwnerModal } from '../components/VenueOwnerModal';
+import { StoryShareModal } from '../components/StoryShareModal';
 
 import { QuickActionsBanner } from '../components/QuickActionsBanner';
 import { GatewayScreen } from '../components/GatewayScreen';
@@ -101,6 +102,7 @@ const AppContent = () => {
       <PremiumModal />
       <GlobalFeedView />
       <LyricsModal />
+      <StoryShareModal />
       <ToastNotification />
     </div>
   );

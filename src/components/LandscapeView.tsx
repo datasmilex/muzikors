@@ -21,7 +21,8 @@ import {
   Crown,
   X,
   ShieldCheck,
-  Loader2
+  Loader2,
+  Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
@@ -243,21 +244,34 @@ export const LandscapeNowPlaying: React.FC = () => {
         </div>
 
         {/* Quick actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={handleOpenSpotify}
-            className="flex-1 py-1.5 px-2 rounded-lg bg-[#1DB954]/10 hover:bg-[#1DB954]/20 active:bg-[#1DB954]/30 border border-[#1DB954]/30 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1 text-[11px] font-bold"
+            className="flex-1 py-1.5 px-1.5 rounded-lg bg-[#1DB954]/10 hover:bg-[#1DB954]/20 active:bg-[#1DB954]/30 border border-[#1DB954]/30 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1 text-[10px] font-bold"
           >
-            <ExternalLink className="w-3 h-3" />
-            <span>Spotify</span>
+            <ExternalLink className="w-3 h-3 shrink-0" />
+            <span className="truncate">Spotify</span>
           </button>
 
           <button
             onClick={() => openModal('lyrics')}
-            className="flex-1 py-1.5 px-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-200 active:scale-95 transition-all flex items-center justify-center gap-1 text-[11px] font-bold"
+            className="flex-1 py-1.5 px-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-200 active:scale-95 transition-all flex items-center justify-center gap-1 text-[10px] font-bold"
           >
-            <Mic2 className="w-3 h-3 text-[var(--theme-primary)]" />
-            <span>Sözler</span>
+            <Mic2 className="w-3 h-3 text-[var(--theme-primary)] shrink-0" />
+            <span className="truncate">Sözler</span>
+          </button>
+
+          <button
+            onClick={() => openModal('story_share')}
+            className={`flex-1 py-1.5 px-1.5 rounded-lg border active:scale-95 transition-all flex items-center justify-center gap-1 text-[10px] font-bold ${
+              user && nowPlaying.requestedByUserId === user.id
+                ? 'bg-[var(--theme-primary)]/15 hover:bg-[var(--theme-primary)]/25 active:bg-[var(--theme-primary)]/30 border-[var(--theme-primary)]/40 text-[var(--theme-primary-light)]'
+                : 'bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border-white/10 text-neutral-200'
+            }`}
+            title="Şarkıyı Instagram, WhatsApp veya X'te Paylaş"
+          >
+            <Share2 className="w-3 h-3 text-[var(--theme-primary)] shrink-0" />
+            <span className="truncate">{user && nowPlaying.requestedByUserId === user.id ? 'Hikayen' : 'Paylaş'}</span>
           </button>
         </div>
       </div>

@@ -159,6 +159,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Celebratory Toast
       showToast(`İstediğin şarkı başladı: "${nowPlaying.title}" şu an mekânda çalıyor.`);
 
+      // Automatically offer the Story Share celebration modal if user is on main screen
+      if (activeModalRef.current === 'none' || activeModalRef.current === 'drawer') {
+        setTimeout(() => {
+          if (activeModalRef.current === 'none' || activeModalRef.current === 'drawer') {
+            setActiveModal('story_share');
+          }
+        }, 1200);
+      }
+
       // Browser Notification if permitted
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         try {

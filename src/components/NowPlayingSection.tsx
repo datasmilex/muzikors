@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Play, Disc, User, Volume2, Music, Store, ExternalLink, Mic2 } from 'lucide-react';
+import { Play, Disc, User, Volume2, Music, Store, ExternalLink, Mic2, Share2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
 import { getUserDailySongRights } from '../lib/timeHelpers';
@@ -247,19 +247,33 @@ export const NowPlayingSection: React.FC = () => {
           {/* Spotify Direct Link */}
           <button
             onClick={handleOpenSpotify}
-            className="flex-1 py-2 px-3 rounded-xl bg-[#1DB954]/10 hover:bg-[#1DB954]/20 active:bg-[#1DB954]/30 border border-[#1DB954]/30 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1.5 text-xs font-bold"
+            className="flex-1 py-2 px-2 rounded-xl bg-[#1DB954]/10 hover:bg-[#1DB954]/20 active:bg-[#1DB954]/30 border border-[#1DB954]/30 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>Spotify'da Aç</span>
+            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Spotify</span>
           </button>
 
           {/* Lyrics Modal Trigger */}
           <button
             onClick={() => openModal('lyrics')}
-            className="flex-1 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-200 active:scale-95 transition-all flex items-center justify-center gap-1.5 text-xs font-bold"
+            className="flex-1 py-2 px-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-200 active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold"
           >
-            <Mic2 className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-            <span>Şarkı Sözleri</span>
+            <Mic2 className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
+            <span className="truncate">Sözler</span>
+          </button>
+
+          {/* Story Share Trigger */}
+          <button
+            onClick={() => openModal('story_share')}
+            className={`flex-1 py-2 px-2 rounded-xl border active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold ${
+              user && nowPlaying.requestedByUserId === user.id
+                ? 'bg-[var(--theme-primary)]/15 hover:bg-[var(--theme-primary)]/25 active:bg-[var(--theme-primary)]/30 border-[var(--theme-primary)]/40 text-[var(--theme-primary-light)]'
+                : 'bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border-white/10 text-neutral-200'
+            }`}
+            title="Şarkıyı Instagram, WhatsApp veya X'te Paylaş"
+          >
+            <Share2 className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
+            <span className="truncate">{user && nowPlaying.requestedByUserId === user.id ? 'Hikayen' : 'Paylaş'}</span>
           </button>
         </div>
 
