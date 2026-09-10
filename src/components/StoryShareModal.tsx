@@ -23,10 +23,11 @@ export const StoryShareModal: React.FC = () => {
   }
 
   const venueName = activeVenue?.name || activeVenue?.venue_name || 'Muzikors Mekânı';
-  const venueSlug = activeVenue?.slug || '';
-  const shareUrl = typeof window !== 'undefined' 
-    ? (venueSlug ? `${window.location.origin}/c/${venueSlug}` : window.location.href)
-    : 'https://muzikors.com.tr';
+  const venueId = activeVenue?.id || (activeVenue as any)?.kafe_id;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://muzikors.com.tr';
+  const shareUrl = venueId 
+    ? `${baseUrl}/?v=${venueId}` 
+    : (typeof window !== 'undefined' ? window.location.href : 'https://muzikors.com.tr');
 
   const trackTitle = nowPlaying.title || 'Bilinmeyen Şarkı';
   const trackArtist = nowPlaying.artist || 'Bilinmeyen Sanatçı';
@@ -292,7 +293,7 @@ export const StoryShareModal: React.FC = () => {
 
       ctx.fillStyle = '#F59E0B';
       ctx.font = '800 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('muzikors.com.tr', 540, footerY + 152);
+      ctx.fillText(venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr', 540, footerY + 152);
       ctx.restore();
 
       return canvas.toDataURL('image/png');
@@ -547,7 +548,7 @@ export const StoryShareModal: React.FC = () => {
               {/* Bottom Tag */}
               <div className="text-center pt-1.5 border-t border-white/[0.08]">
                 <p className="text-[8px] text-neutral-400 font-medium truncate">
-                  muzikors.com.tr • Sıradaki parçayı seç
+                  {venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr'} • Sıradaki parçayı seç
                 </p>
               </div>
             </div>
