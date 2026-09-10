@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, BookOpen, Wifi, Copy, Check, Clock, X, ShieldCheck, Music } from 'lucide-react';
+import { Store, BookOpen, Wifi, Copy, Check, Clock, X, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const VenueInfoModal: React.FC = () => {
@@ -77,14 +77,14 @@ export const VenueInfoModal: React.FC = () => {
             </div>
 
             {/* Header */}
-            <div className="flex-none px-5 py-3 landscape:py-2.5 flex items-center justify-between border-b border-white/[0.06]">
+            <div className="flex-none px-5 py-3.5 flex items-center justify-between border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
                 <Store className="w-4 h-4 text-[var(--theme-primary)]" />
-                <h2 className="text-sm font-bold tracking-wide text-white uppercase">Mekân Bilgileri</h2>
+                <h2 className="text-xs font-black tracking-wider text-[var(--theme-text)] uppercase">Mekân Bilgileri</h2>
               </div>
               <button
                 onClick={closeModal}
-                className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-full bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] transition-colors cursor-pointer border border-white/5 active:scale-95"
                 aria-label="Kapat"
               >
                 <X className="w-4 h-4" />
@@ -92,162 +92,159 @@ export const VenueInfoModal: React.FC = () => {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-5 landscape:p-3.5 space-y-4 landscape:space-y-3 custom-scrollbar pb-8 landscape:pb-4">
+            <div className="flex-1 overflow-y-auto p-5 landscape:p-3.5 space-y-3.5 custom-scrollbar pb-8 landscape:pb-4">
               
-              {/* Venue Profile Minimal Card */}
-              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                <div className="w-14 h-14 rounded-2xl border border-white/10 p-0.5 flex items-center justify-center bg-black/40 shadow-inner overflow-hidden shrink-0">
+              {/* Venue Profile Header */}
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--theme-card-alt)]/50 border border-white/[0.08]">
+                <div className="w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center bg-black/40 overflow-hidden shrink-0">
                   {(activeVenue as any).logo_url?.trim() ? (
                     <img 
                       src={(activeVenue as any).logo_url} 
                       alt={(activeVenue as any).venue_name || (activeVenue as any).name} 
-                      className="w-full h-full object-cover rounded-xl"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Store className="w-7 h-7 text-[var(--theme-primary)]" />
+                    <Store className="w-6 h-6 text-[var(--theme-primary)]" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-base font-black text-white truncate tracking-tight">
+                  <h1 className="text-sm font-black text-[var(--theme-text)] truncate tracking-tight">
                     {(activeVenue as any).venue_name || (activeVenue as any).name}
                   </h1>
-                  <p className="text-xs text-neutral-400 truncate mt-0.5">
-                    {(activeVenue as any).address || (activeVenue as any).city || 'Muzikors İşletmesi'}
+                  <p className="text-xs text-[var(--theme-text-muted)] truncate mt-0.5">
+                    {(activeVenue as any).full_address || (activeVenue as any).address || (activeVenue as any).district || (activeVenue as any).city || 'Muzikors İşletmesi'}
                   </p>
                 </div>
               </div>
 
-              {/* Digital Menu Button */}
+              {/* Digital Menu Button - Craftsmanship Tactile Card (No Neon Pink AI Slop) */}
               {hasMenu && (
                 <div>
                   {isNativeMenu ? (
                     <button
                       type="button"
                       onClick={() => openModal('menu')}
-                      className="w-full py-3.5 px-4 rounded-2xl bg-[var(--theme-primary)] hover:brightness-110 text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md cursor-pointer"
+                      className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-card-alt)]/90 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] font-bold text-xs flex items-center justify-between active:scale-[0.98] transition-all group cursor-pointer"
                     >
-                      <BookOpen className="w-4 h-4 text-black stroke-[2.5]" />
-                      <span>Dijital Menüyü Görüntüle</span>
+                      <div className="flex items-center gap-2.5">
+                        <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
+                        <span>Dijital Menüyü Görüntüle</span>
+                      </div>
+                      <span className="text-xs text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text)] group-hover:translate-x-0.5 transition-all font-medium">İncele →</span>
                     </button>
                   ) : (
                     <a
                       href={menuUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3.5 px-4 rounded-2xl bg-[var(--theme-primary)] hover:brightness-110 text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md text-center"
+                      className="w-full py-3 px-4 rounded-2xl bg-[var(--theme-card-alt)]/90 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] font-bold text-xs flex items-center justify-between active:scale-[0.98] transition-all group"
                     >
-                      <BookOpen className="w-4 h-4 text-black stroke-[2.5]" />
-                      <span>Dijital Menüyü Görüntüle</span>
+                      <div className="flex items-center gap-2.5">
+                        <BookOpen className="w-4 h-4 text-[var(--theme-primary)]" />
+                        <span>Dijital Menüyü Görüntüle</span>
+                      </div>
+                      <span className="text-xs text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text)] group-hover:translate-x-0.5 transition-all font-medium">Dış Bağlantı ↗</span>
                     </a>
                   )}
                 </div>
               )}
 
-              {/* Minimalist Structured Info Section */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] divide-y divide-white/[0.06] overflow-hidden landscape:grid landscape:grid-cols-2 landscape:divide-y-0 landscape:gap-3 landscape:bg-transparent landscape:border-0">
+              {/* Structured Info Sections - Zero Icon Capsules, Zero Pill Bloat */}
+              <div className="space-y-2.5">
                 
                 {/* 1. Working Hours */}
                 {hasWorkingHours && (
-                  <div className="p-4 landscape:p-3 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5">
-                    <div className="p-2 rounded-xl bg-white/[0.04] text-[var(--theme-primary)] shrink-0 mt-0.5">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Çalışma Saatleri</span>
-                        {isOpenNow !== null && (
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isOpenNow 
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' 
-                              : 'bg-neutral-800 text-neutral-400 border border-neutral-700'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isOpenNow ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-500'}`} />
-                            {isOpenNow ? 'Şu an Açık' : 'Şu an Kapalı'}
-                          </span>
-                        )}
+                  <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)]/40 border border-white/[0.08]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-[var(--theme-text-muted)]">
+                        <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                        <span className="uppercase tracking-wider text-[10px]">Çalışma Saatleri</span>
                       </div>
-                      <p className="text-xs font-bold text-white font-mono mt-1">
-                        {openingTime} - {closingTime}
-                      </p>
+                      {isOpenNow !== null && (
+                        <div className="flex items-center gap-1.5 text-xs font-bold">
+                          <span className={`w-1.5 h-1.5 rounded-full ${isOpenNow ? 'bg-emerald-400' : 'bg-neutral-500'}`} />
+                          <span className={isOpenNow ? 'text-emerald-400' : 'text-neutral-400'}>
+                            {isOpenNow ? 'Açık' : 'Kapalı'}
+                          </span>
+                        </div>
+                      )}
                     </div>
+                    <p className="text-sm font-black text-[var(--theme-text)] font-mono mt-2 tracking-wide">
+                      {openingTime} — {closingTime}
+                    </p>
                   </div>
                 )}
 
                 {/* 2. Vibe Guard (Müzik Tarzı Kuralı) */}
-                <div className={`p-4 landscape:p-3 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5 ${!hasWorkingHours ? 'landscape:col-span-2' : ''}`}>
-                  <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5 border border-amber-500/20">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Müzik Tarzı (Vibe Guard)</span>
-                      <span className="text-[10px] font-bold text-amber-300 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25">
-                        {hasVibeGuard ? `${allowedGenres.length} Tür İzinli` : 'Serbest'}
-                      </span>
+                <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)]/40 border border-white/[0.08]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--theme-text-muted)]">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                      <span className="uppercase tracking-wider text-[10px]">Müzik Tarzı (Vibe Guard)</span>
                     </div>
-
-                    {hasVibeGuard ? (
-                      <div className="space-y-1.5">
-                        <p className="text-[11px] text-neutral-400 leading-snug">
-                          Mekan atmosferini korumak için yalnızca bu müzik türlerinden istekler kabul edilir:
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {allowedGenres.map((genre) => (
-                            <span
-                              key={genre}
-                              className="px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-white text-[10px] font-semibold flex items-center gap-1"
-                            >
-                              <Music className="w-2.5 h-2.5 text-amber-400" />
-                              {genre}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-neutral-400">
-                        Bu mekânda tüm müzik türlerinden şarkı istekleri serbesttir.
-                      </p>
-                    )}
+                    <span className="text-[11px] font-bold text-[var(--theme-text-muted)]">
+                      {hasVibeGuard ? `${allowedGenres.length} Tür İzinli` : 'Serbest'}
+                    </span>
                   </div>
+
+                  {hasVibeGuard ? (
+                    <div className="mt-2.5 space-y-2">
+                      <p className="text-[11px] text-[var(--theme-text-muted)] leading-relaxed">
+                        Mekân atmosferini korumak için yalnızca bu müzik türlerinden istekler kabul edilir:
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {allowedGenres.map((genre) => (
+                          <span
+                            key={genre}
+                            className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-[var(--theme-text)] text-xs font-semibold"
+                          >
+                            {genre}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[var(--theme-text-muted)] mt-2">
+                      Bu mekânda tüm müzik türlerinden şarkı istekleri serbesttir.
+                    </p>
+                  )}
                 </div>
 
                 {/* 3. Wi-Fi Information */}
                 {hasWifi && (
-                  <div className="p-4 landscape:p-3 landscape:col-span-2 landscape:bg-white/[0.02] landscape:border landscape:border-white/[0.06] landscape:rounded-2xl flex items-start gap-3.5">
-                    <div className="p-2 rounded-xl bg-white/[0.04] text-[var(--theme-primary)] shrink-0 mt-0.5">
-                      <Wifi className="w-4 h-4" />
+                  <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)]/40 border border-white/[0.08]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--theme-text-muted)] mb-2.5">
+                      <Wifi className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                      <span className="uppercase tracking-wider text-[10px]">Mekân Wi-Fi</span>
                     </div>
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block">Mekân Wi-Fi</span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {wifiName?.trim() && (
-                          <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex flex-col justify-center">
-                            <span className="text-[9px] text-neutral-500 font-bold uppercase">Ağ Adı</span>
-                            <span className="text-xs font-bold text-white truncate mt-0.5">{wifiName}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {wifiName?.trim() && (
+                        <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
+                          <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider block">Ağ Adı</span>
+                          <span className="text-xs font-bold text-[var(--theme-text)] truncate block mt-0.5">{wifiName}</span>
+                        </div>
+                      )}
+                      {wifiPass?.trim() && (
+                        <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.06] flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider block">Şifre</span>
+                            <span className="text-xs font-mono font-bold text-[var(--theme-text)] truncate block mt-0.5">{wifiPass}</span>
                           </div>
-                        )}
-                        {wifiPass?.trim() && (
-                          <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <span className="text-[9px] text-neutral-500 font-bold uppercase block">Şifre</span>
-                              <span className="text-xs font-mono font-bold text-white truncate block mt-0.5">{wifiPass}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(wifiPass);
-                                setCopied(true);
-                                showToast('Wi-Fi Şifresi Kopyalandı!');
-                                setTimeout(() => setCopied(false), 2000);
-                              }}
-                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white transition-all active:scale-90 cursor-pointer shrink-0"
-                              title="Şifreyi Kopyala"
-                            >
-                              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(wifiPass);
+                              setCopied(true);
+                              showToast('Wi-Fi Şifresi Kopyalandı!');
+                              setTimeout(() => setCopied(false), 2000);
+                            }}
+                            className="p-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-[var(--theme-text)] transition-all active:scale-90 cursor-pointer shrink-0 border border-white/5"
+                            title="Şifreyi Kopyala"
+                          >
+                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
