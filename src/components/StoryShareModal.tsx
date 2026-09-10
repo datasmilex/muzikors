@@ -88,44 +88,40 @@ export const StoryShareModal: React.FC = () => {
         });
       };
 
-      // 3. Top Header: Clean Brand Architecture (No clunky scoreboard pill)
+      // 3. Top Header: Real Logo + Brand Wordmark & Sleek Minimal Live Status
       ctx.save();
-      // Brand Wordmark
+      // Load and draw Muzikors Logo
+      const logoImg = await loadImage('/logo.png');
+      const logoSize = 48;
+      const logoX = 130;
+      const logoY = 160 - logoSize / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(logoX, logoY, logoSize, logoSize, 12);
+      ctx.clip();
+      ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+      ctx.restore();
+
+      // Brand Wordmark next to logo
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('MUZIKORS', 130, 160);
+      ctx.fillText('MUZIKORS', logoX + logoSize + 16, 160);
 
-      // Gold Accent dot next to brand
-      ctx.fillStyle = '#F59E0B';
-      ctx.beginPath();
-      ctx.arc(325, 160, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Live Badge (Compact & Crisp)
-      const liveW = 240;
-      const liveH = 54;
-      const liveX = 950 - liveW;
-      const liveY = 133;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(liveX, liveY, liveW, liveH, 27);
-      ctx.fill();
-      ctx.stroke();
+      // Clean Live Status on Top-Right (No clunky oval AI slop pill)
+      const liveRightX = 950;
+      ctx.fillStyle = '#10B981';
+      ctx.font = '800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CANLI', liveRightX, 160);
 
       // Emerald Live Dot
-      ctx.fillStyle = '#10B981';
+      const liveTextW = ctx.measureText('CANLI').width;
       ctx.beginPath();
-      ctx.arc(liveX + 32, liveY + liveH / 2, 6, 0, Math.PI * 2);
+      ctx.arc(liveRightX - liveTextW - 14, 160, 6, 0, Math.PI * 2);
       ctx.fill();
-
-      ctx.fillStyle = '#E5E7EB';
-      ctx.font = '700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('ŞU AN ÇALIYOR', liveX + 52, liveY + liveH / 2 + 1);
       ctx.restore();
 
       // 4. Venue Identity Strip
@@ -463,19 +459,19 @@ export const StoryShareModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 8 }}
           transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 w-full max-w-2xl bg-[#0F0E17] border border-white/10 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:flex-row my-auto"
+          className="relative z-10 w-full max-w-2xl bg-[var(--theme-card)] border border-white/10 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:flex-row my-auto"
         >
           {/* Close Button */}
           <button
             onClick={closeModal}
             aria-label="Kapat"
-            className="absolute top-3.5 right-3.5 z-30 w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-neutral-300 hover:text-white flex items-center justify-center border border-white/10 active:scale-95 transition-all cursor-pointer"
+            className="absolute top-3.5 right-3.5 z-30 w-9 h-9 rounded-full bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] flex items-center justify-center border border-white/10 active:scale-95 transition-all cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* LEFT: 9:16 Story Card Live Preview */}
-          <div className="w-full md:w-[280px] shrink-0 p-4 sm:p-5 flex flex-col items-center justify-center bg-gradient-to-b from-[#13111C] to-[#0A0910] border-b md:border-b-0 md:border-r border-white/[0.08] relative overflow-hidden">
+          <div className="w-full md:w-[280px] shrink-0 p-4 sm:p-5 flex flex-col items-center justify-center bg-[var(--theme-bg)]/80 border-b md:border-b-0 md:border-r border-white/[0.08] relative overflow-hidden">
             
             {/* Ambient Lighting */}
             <div 
@@ -483,20 +479,20 @@ export const StoryShareModal: React.FC = () => {
               style={{ backgroundImage: `url(${albumSrc})` }}
             />
 
-            {/* The 9:16 Card Shell */}
-            <div className="relative z-10 w-full max-w-[230px] aspect-[9/16] rounded-2xl bg-[#0A0910] border border-white/15 p-3 flex flex-col justify-between shadow-2xl overflow-hidden">
+            {/* The 9:16 Card Shell (Exact 1:1 Parity with Generated HD Image) */}
+            <div className="relative z-10 w-full max-w-[230px] aspect-[9/16] rounded-2xl bg-[#09080E] border border-white/15 p-3 flex flex-col justify-between shadow-2xl overflow-hidden text-left">
               
               {/* Subtle Concentric Rings */}
               <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full border border-amber-500/[0.07] pointer-events-none" />
               <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full border border-amber-500/[0.04] pointer-events-none" />
 
-              {/* Story Header */}
+              {/* Story Header: Real Logo + Brand Wordmark & Clean Live Status */}
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[10px] font-black text-white tracking-widest">MUZIKORS</span>
+                  <img src="/logo.png" alt="Muzikors" className="w-4 h-4 rounded-md object-contain" />
+                  <span className="text-[10px] font-black text-white tracking-wider">MUZIKORS</span>
                 </div>
-                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
+                <div className="flex items-center gap-1 text-[8px] font-extrabold text-emerald-400 tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>CANLI</span>
                 </div>
@@ -509,12 +505,12 @@ export const StoryShareModal: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-bold text-white truncate leading-tight">{venueName}</p>
-                  <p className="text-[8px] text-amber-300/80 font-medium">Mekân Jukebox</p>
+                  <p className="text-[8px] text-[#E6C88B] font-medium">Mekân Canlı Jukebox</p>
                 </div>
               </div>
 
               {/* Central Artwork */}
-              <div className="relative w-28 h-28 mx-auto rounded-xl overflow-hidden border border-white/15 shadow-xl my-auto">
+              <div className="relative w-28 h-28 mx-auto rounded-2xl overflow-hidden border border-white/15 shadow-xl my-1">
                 <img 
                   src={albumSrc} 
                   alt={trackTitle}
@@ -527,49 +523,57 @@ export const StoryShareModal: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              {/* Modern Audio Waveform */}
-              <div className="flex items-center justify-center gap-1 h-3.5 my-1" aria-hidden="true">
-                <span className="w-0.5 h-2 bg-amber-400 rounded-full animate-pulse" />
-                <span className="w-0.5 h-3.5 bg-amber-400 rounded-full" />
-                <span className="w-0.5 h-2.5 bg-amber-400 rounded-full animate-pulse" />
-                <span className="w-0.5 h-3 bg-amber-400 rounded-full" />
-                <span className="w-0.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+              {/* Symmetrical Equalizer Waveform */}
+              <div className="flex items-center justify-center gap-[2.5px] h-3.5 my-0.5" aria-hidden="true">
+                {[5, 7, 10, 12, 14, 13, 11, 8, 6, 8, 11, 13, 14, 12, 10, 7, 5].map((h, idx) => (
+                  <span 
+                    key={idx} 
+                    className="w-[2px] bg-gradient-to-t from-amber-600 to-amber-400 rounded-full"
+                    style={{ height: `${h}px` }}
+                  />
+                ))}
               </div>
 
               {/* Track Info */}
               <div className="text-center w-full min-w-0">
-                <h4 className="text-xs font-black text-white truncate leading-tight">{trackTitle}</h4>
-                <p className="text-[10px] font-medium text-amber-200/90 truncate mt-0.5">{trackArtist}</p>
-                <div className="inline-block px-2.5 py-0.5 mt-1 rounded-full bg-white/[0.05] border border-white/10 text-[8px] text-neutral-300">
+                <h4 className="text-[11px] font-black text-white truncate leading-tight">{trackTitle}</h4>
+                <p className="text-[9px] font-medium text-[#E6C88B] truncate mt-0.5">{trackArtist}</p>
+                <div className={`inline-block px-2 py-0.5 mt-1 rounded-full text-[7.5px] font-medium border ${
+                  isMySong 
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-200' 
+                    : 'bg-white/[0.05] border-white/10 text-neutral-300'
+                }`}>
                   {requesterText}
                 </div>
               </div>
 
-              {/* Bottom Tag */}
-              <div className="text-center pt-1.5 border-t border-white/[0.08]">
-                <p className="text-[8px] text-neutral-400 font-medium truncate">
-                  {venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr'} • Sıradaki parçayı seç
+              {/* Bottom Invitation Card (1:1 with Canvas) */}
+              <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-1.5 text-center mt-1">
+                <p className="text-[8.5px] font-black text-white leading-tight">Sıradaki Parçayı Sen Seç</p>
+                <p className="text-[7px] text-neutral-400 mt-0.5 leading-tight">Masanızdaki QR kodu okutun veya adrese gidin:</p>
+                <p className="text-[8px] font-extrabold text-amber-400 tracking-tight mt-0.5">
+                  {venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr'}
                 </p>
               </div>
             </div>
 
-            <p className="text-[10px] text-neutral-400 mt-2 font-medium">9:16 Hikaye Önizlemesi</p>
+            <p className="text-[10px] text-[var(--theme-text-muted)] mt-2 font-medium">9:16 Hikaye Önizlemesi</p>
           </div>
 
           {/* RIGHT: Multi-Platform Sharing Hub */}
-          <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+          <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between space-y-4 bg-[var(--theme-card)]">
             
             {/* Clean, Non-Kicker Header */}
             <div>
-              <h3 className="text-xl font-black text-white tracking-tight">
+              <h3 className="text-xl font-black text-[var(--theme-text)] tracking-tight">
                 Şarkını Hikayende Paylaş
               </h3>
-              <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                Şu an <span className="text-white font-semibold">{venueName}</span> salonunda çalan parçanı tek tıkla hikayene ekle, masadaki herkesi sıraya davet et.
+              <p className="text-xs text-[var(--theme-text-muted)] mt-1 leading-relaxed">
+                Şu an <span className="text-[var(--theme-text)] font-semibold">{venueName}</span> salonunda çalan parçanı tek tıkla hikayene ekle, masadaki herkesi sıraya davet et.
               </p>
             </div>
 
-            {/* Platform Grid (Clean Obsidian Cards with Real Vector Glyphs) */}
+            {/* Platform Grid (Clean Themed Cards with Real Vector Glyphs) */}
             <div className="grid grid-cols-2 gap-2.5">
               
               {/* Instagram */}
@@ -577,7 +581,7 @@ export const StoryShareModal: React.FC = () => {
                 type="button"
                 onClick={handleInstagramShare}
                 disabled={isGenerating}
-                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
+                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 border border-[#DD2A7B]/30 flex items-center justify-center text-[#E1306C] shrink-0 group-hover:scale-105 transition-transform">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -587,8 +591,8 @@ export const StoryShareModal: React.FC = () => {
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">Instagram</p>
-                  <p className="text-[10px] text-neutral-400 truncate">Hikaye Kartı</p>
+                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">Instagram</p>
+                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Hikaye Kartı</p>
                 </div>
               </button>
 
@@ -596,7 +600,7 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
+                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-xl bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center text-[#25D366] shrink-0 group-hover:scale-105 transition-transform">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -604,8 +608,8 @@ export const StoryShareModal: React.FC = () => {
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">WhatsApp</p>
-                  <p className="text-[10px] text-neutral-400 truncate">Gruba Gönder</p>
+                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">WhatsApp</p>
+                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Gruba Gönder</p>
                 </div>
               </button>
 
@@ -614,16 +618,16 @@ export const StoryShareModal: React.FC = () => {
                 type="button"
                 onClick={handleTikTokShare}
                 disabled={isGenerating}
-                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
+                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-[var(--theme-text)] shrink-0 group-hover:scale-105 transition-transform">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.91-1.46c-.63-.64-1.03-1.48-1.13-2.38z"/>
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">TikTok</p>
-                  <p className="text-[10px] text-neutral-400 truncate">Video / Story</p>
+                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">TikTok</p>
+                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Video / Story</p>
                 </div>
               </button>
 
@@ -631,32 +635,32 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleTwitterShare}
-                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
+                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-[var(--theme-text)] shrink-0 group-hover:scale-105 transition-transform">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">X / Twitter</p>
-                  <p className="text-[10px] text-neutral-400 truncate">Tweet Paylaş</p>
+                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">X / Twitter</p>
+                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Tweet Paylaş</p>
                 </div>
               </button>
 
             </div>
 
-            {/* Action Row */}
+            {/* Action Row - UNIFIED SLEEK CARDS */}
             <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-white/[0.08]">
               
-              {/* Primary CTA: Download HD Story (Brand Gold - Never Hot Pink) */}
+              {/* Primary CTA: Download HD Story (Unified with adjacent buttons) */}
               <button
                 type="button"
                 onClick={handleDownload}
                 disabled={isGenerating}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-neutral-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(245,158,11,0.25)] cursor-pointer"
+                className="flex-1 py-3 px-4 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4 text-[var(--theme-primary)]" />
                 <span>{isGenerating ? 'Oluşturuluyor...' : 'HD Görseli İndir'}</span>
               </button>
 
@@ -664,9 +668,9 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleNativeShare}
-                className="py-3 px-4 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] active:bg-white/[0.13] border border-white/10 text-white text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="py-3 px-4 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Send className="w-4 h-4 text-amber-400" />
+                <Send className="w-4 h-4 text-[var(--theme-primary)]" />
                 <span>Arkadaşlarına Gönder</span>
               </button>
 
@@ -674,7 +678,7 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="py-3 px-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-300 hover:text-white text-xs font-medium active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-3 px-3.5 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] text-xs font-medium active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Bağlantıyı Kopyala"
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -684,7 +688,7 @@ export const StoryShareModal: React.FC = () => {
             </div>
 
             {/* Bottom Safe Note */}
-            <p className="text-[10px] text-neutral-500 text-center">
+            <p className="text-[10px] text-[var(--theme-text-muted)] text-center">
               Mekân ve çalan parçaya özel 1080x1920 HD dikey hikaye kartı olarak üretilir.
             </p>
           </div>
