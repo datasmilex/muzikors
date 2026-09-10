@@ -1,19 +1,14 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
-  Share2, 
   Download, 
   Copy, 
   Check, 
-  Music, 
-  Disc, 
-  Store, 
   Send,
-  MessageCircle,
-  ExternalLink
+  Disc3
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName } from '../utils/formatters';
@@ -42,13 +37,13 @@ export const StoryShareModal: React.FC = () => {
     ? 'Benim Seçimim' 
     : nowPlaying.requestedBy 
       ? `İsteyen: ${formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}`
-      : 'Kafede Çalıyor';
+      : 'Mekân Seçimi';
 
   const shareCaption = isMySong
-    ? `Şu an ${venueName} mekânında seçtiğim "${trackTitle} - ${trackArtist}" çalıyor! Sen de sıradaki şarkını ekle:`
-    : `Şu an ${venueName} mekânında "${trackTitle} - ${trackArtist}" dinliyoruz! Sen de sıraya şarkı ekle:`;
+    ? `Şu an ${venueName} salonunda seçtiğim "${trackTitle} - ${trackArtist}" çalıyor! Sen de sıradaki şarkını ekle:`
+    : `Şu an ${venueName} salonunda "${trackTitle} - ${trackArtist}" dinliyoruz! Sen de sıraya şarkı ekle:`;
 
-  // ── HTML5 CANVAS 1080x1920 HD STORY GENERATION ────────────────────────────
+  // ── HTML5 CANVAS 1080x1920 HD STORY GENERATION (STUDIO CRAFT) ────────────
   const generateStoryCanvas = async (): Promise<string | null> => {
     try {
       const canvas = document.createElement('canvas');
@@ -57,22 +52,22 @@ export const StoryShareModal: React.FC = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
-      // 1. Deep Obsidian Gradient Background
+      // 1. Deep Obsidian Atmosphere Background
       const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
-      bgGrad.addColorStop(0, '#0B0A10');
-      bgGrad.addColorStop(0.35, '#151320');
-      bgGrad.addColorStop(0.65, '#1B1728');
-      bgGrad.addColorStop(1, '#07060A');
+      bgGrad.addColorStop(0, '#09080E');
+      bgGrad.addColorStop(0.3, '#13111C');
+      bgGrad.addColorStop(0.7, '#161421');
+      bgGrad.addColorStop(1, '#060509');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 1080, 1920);
 
-      // 2. Subtle Acoustic / Vinyl Concentric Glow Rings
+      // 2. Subtle Acoustic Radial Grooves
       ctx.save();
-      ctx.strokeStyle = 'rgba(217, 163, 62, 0.08)';
-      ctx.lineWidth = 2;
-      for (let r = 240; r <= 800; r += 70) {
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.04)';
+      ctx.lineWidth = 1.5;
+      for (let r = 260; r <= 860; r += 75) {
         ctx.beginPath();
-        ctx.arc(540, 880, r, 0, Math.PI * 2);
+        ctx.arc(540, 800, r, 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.restore();
@@ -92,88 +87,108 @@ export const StoryShareModal: React.FC = () => {
         });
       };
 
-      // 3. Top Header: Muzikors Brand Pill
+      // 3. Top Header: Clean Brand Architecture (No clunky scoreboard pill)
       ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-      ctx.strokeStyle = 'rgba(217, 163, 62, 0.3)';
-      ctx.lineWidth = 2;
-      const pillX = 140;
-      const pillY = 130;
-      const pillW = 800;
-      const pillH = 90;
-      const pillR = 45;
-      ctx.beginPath();
-      ctx.roundRect(pillX, pillY, pillW, pillH, pillR);
-      ctx.fill();
-      ctx.stroke();
-
-      // Top Header Text
-      ctx.fillStyle = '#D9A33E';
-      ctx.font = 'bold 32px sans-serif';
+      // Brand Wordmark
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('MUZIKORS LIVE', pillX + 50, pillY + pillH / 2);
+      ctx.fillText('MUZIKORS', 130, 160);
+
+      // Gold Accent dot next to brand
+      ctx.fillStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.arc(325, 160, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Live Badge (Compact & Crisp)
+      const liveW = 240;
+      const liveH = 54;
+      const liveX = 950 - liveW;
+      const liveY = 133;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(liveX, liveY, liveW, liveH, 27);
+      ctx.fill();
+      ctx.stroke();
 
       // Emerald Live Dot
       ctx.fillStyle = '#10B981';
       ctx.beginPath();
-      ctx.arc(pillX + pillW - 220, pillY + pillH / 2, 10, 0, Math.PI * 2);
+      ctx.arc(liveX + 32, liveY + liveH / 2, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 26px sans-serif';
-      ctx.fillText('ŞU AN ÇALIYOR', pillX + pillW - 190, pillY + pillH / 2);
+      ctx.fillStyle = '#E5E7EB';
+      ctx.font = '700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('ŞU AN ÇALIYOR', liveX + 52, liveY + liveH / 2 + 1);
       ctx.restore();
 
-      // 4. Cafe Venue Badge (Venue Logo + Name)
+      // 4. Venue Identity Strip
       ctx.save();
-      const venueBoxY = 270;
-      const venueBoxH = 120;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 2;
+      const venueY = 240;
+      const venueH = 100;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.roundRect(140, venueBoxY, 800, venueBoxH, 28);
+      ctx.roundRect(130, venueY, 820, venueH, 24);
       ctx.fill();
       ctx.stroke();
+
+      // Vinyl Record Icon (Canvas Vector - Zero Emoji)
+      const iconCenterX = 185;
+      const iconCenterY = venueY + venueH / 2;
+      ctx.fillStyle = '#1A1824';
+      ctx.strokeStyle = '#D97706';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(iconCenterX, iconCenterY, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner Vinyl Rings
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(iconCenterX, iconCenterY, 18, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(iconCenterX, iconCenterY, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Spindle Center
+      ctx.fillStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.arc(iconCenterX, iconCenterY, 4, 0, Math.PI * 2);
+      ctx.fill();
 
       // Venue Name & Subtitle
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 38px sans-serif';
+      ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      const truncatedVenueName = venueName.length > 28 ? venueName.substring(0, 26) + '...' : venueName;
-      ctx.fillText(truncatedVenueName, 280, venueBoxY + 24);
+      const truncatedVenueName = venueName.length > 26 ? venueName.substring(0, 24) + '...' : venueName;
+      ctx.fillText(truncatedVenueName, 235, venueY + 20);
 
-      ctx.fillStyle = '#D9A33E';
-      ctx.font = '500 26px sans-serif';
-      ctx.fillText('Mekân Jukebox Listesi', 280, venueBoxY + 70);
-
-      // Draw Cafe Icon Circle
-      ctx.fillStyle = 'rgba(217, 163, 62, 0.15)';
-      ctx.strokeStyle = 'rgba(217, 163, 62, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(210, venueBoxY + venueBoxH / 2, 40, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#D9A33E';
-      ctx.font = 'bold 30px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('☕', 210, venueBoxY + venueBoxH / 2);
+      ctx.fillStyle = '#E6C88B';
+      ctx.font = '500 21px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('Mekân Canlı Jukebox', 235, venueY + 58);
       ctx.restore();
 
-      // 5. Hero Album Artwork (Centerpiece)
+      // 5. Centerpiece Artwork with Deep Luxury Drop Shadow
       ctx.save();
-      const artSize = 580;
+      const artSize = 620;
       const artX = (1080 - artSize) / 2;
-      const artY = 460;
+      const artY = 390;
 
-      // Glow behind artwork
-      ctx.shadowColor = 'rgba(217, 163, 62, 0.25)';
-      ctx.shadowBlur = 60;
+      // Soft deep drop shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowBlur = 70;
+      ctx.shadowOffsetY = 24;
 
       const albumImg = await loadImage(albumSrc);
       ctx.beginPath();
@@ -182,94 +197,102 @@ export const StoryShareModal: React.FC = () => {
       ctx.drawImage(albumImg, artX, artY, artSize, artSize);
       ctx.restore();
 
-      // Artwork Border
+      // Subtle Outer Glass Border on Artwork
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(artX, artY, artSize, artSize, 40);
       ctx.stroke();
       ctx.restore();
 
-      // 6. Audio Waveform Graphic
+      // 6. Refined Audio Equalizer Spectrum
       ctx.save();
-      const waveY = 1100;
-      const waveBarCount = 28;
-      const waveBarW = 12;
-      const waveGap = 16;
+      const waveY = 1080;
+      const waveBarCount = 30;
+      const waveBarW = 10;
+      const waveGap = 15;
       const totalWaveW = waveBarCount * (waveBarW + waveGap) - waveGap;
       const startWaveX = (1080 - totalWaveW) / 2;
 
       for (let i = 0; i < waveBarCount; i++) {
-        const height = 15 + Math.sin(i * 0.5) * 35 + ((i % 3) * 12);
+        // Tapered center-high profile
+        const distFromCenter = Math.abs(i - waveBarCount / 2) / (waveBarCount / 2);
+        const centerFactor = Math.cos(distFromCenter * Math.PI * 0.45);
+        const height = Math.max(12, Math.round(52 * centerFactor + Math.sin(i * 1.2) * 16));
         const bx = startWaveX + i * (waveBarW + waveGap);
         const by = waveY - height / 2;
 
-        ctx.fillStyle = i % 2 === 0 ? '#D9A33E' : '#E6C07B';
+        const barGrad = ctx.createLinearGradient(0, by, 0, by + height);
+        barGrad.addColorStop(0, '#F59E0B');
+        barGrad.addColorStop(1, '#D97706');
+
+        ctx.fillStyle = barGrad;
         ctx.beginPath();
-        ctx.roundRect(bx, by, waveBarW, height, 6);
+        ctx.roundRect(bx, by, waveBarW, height, 5);
         ctx.fill();
       }
       ctx.restore();
 
-      // 7. Track Title & Artist
+      // 7. Song Title, Artist & Requester
       ctx.save();
       ctx.textAlign = 'center';
 
-      // Song Title
+      // Title
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 54px sans-serif';
+      ctx.font = '800 52px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       const truncatedTitle = trackTitle.length > 25 ? trackTitle.substring(0, 23) + '...' : trackTitle;
-      ctx.fillText(truncatedTitle, 540, 1190);
+      ctx.fillText(truncatedTitle, 540, 1180);
 
-      // Artist Name
-      ctx.fillStyle = '#D9A33E';
-      ctx.font = 'bold 40px sans-serif';
+      // Artist
+      ctx.fillStyle = '#E6C88B';
+      ctx.font = '600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       const truncatedArtist = trackArtist.length > 30 ? trackArtist.substring(0, 28) + '...' : trackArtist;
-      ctx.fillText(truncatedArtist, 540, 1260);
+      ctx.fillText(truncatedArtist, 540, 1245);
 
-      // Requester Badge
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.strokeStyle = 'rgba(217, 163, 62, 0.35)';
-      ctx.lineWidth = 2;
-      const reqW = 440;
-      const reqH = 64;
+      // Requester Capsule
+      const reqW = 380;
+      const reqH = 58;
       const reqX = (1080 - reqW) / 2;
-      const reqY = 1320;
+      const reqY = 1305;
+      ctx.fillStyle = isMySong ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeStyle = isMySong ? 'rgba(245, 158, 11, 0.4)' : 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.roundRect(reqX, reqY, reqW, reqH, 32);
+      ctx.roundRect(reqX, reqY, reqW, reqH, 29);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#E5E7EB';
-      ctx.font = '600 28px sans-serif';
+      ctx.fillStyle = isMySong ? '#FDE68A' : '#D1D5DB';
+      ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.textBaseline = 'middle';
-      ctx.fillText(requesterText, 540, reqY + reqH / 2);
+      ctx.fillText(requesterText, 540, reqY + reqH / 2 + 1);
       ctx.restore();
 
-      // 8. Bottom Footer: Call to Action & Muzikors URL
+      // 8. Bottom Footer: Refined Invitation & URL
       ctx.save();
       const footerY = 1540;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      const footerH = 200;
+      ctx.fillStyle = 'rgba(20, 18, 28, 0.7)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.roundRect(140, footerY, 800, 220, 36);
+      ctx.roundRect(130, footerY, 820, footerH, 30);
       ctx.fill();
       ctx.stroke();
 
       ctx.textAlign = 'center';
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 36px sans-serif';
-      ctx.fillText('Sıradaki Parçayı Sen Seç', 540, footerY + 70);
+      ctx.font = '800 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('Sıradaki Parçayı Sen Seç', 540, footerY + 62);
 
       ctx.fillStyle = '#9CA3AF';
-      ctx.font = '500 26px sans-serif';
-      ctx.fillText('Masanızdaki QR kodu okutun veya adrese gidin:', 540, footerY + 115);
+      ctx.font = '500 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('Masanızdaki QR kodu okutun veya adrese gidin:', 540, footerY + 106);
 
-      ctx.fillStyle = '#D9A33E';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.fillText('muzikors.com.tr', 540, footerY + 165);
+      ctx.fillStyle = '#F59E0B';
+      ctx.font = '800 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('muzikors.com.tr', 540, footerY + 152);
       ctx.restore();
 
       return canvas.toDataURL('image/png');
@@ -392,7 +415,7 @@ export const StoryShareModal: React.FC = () => {
     }
   };
 
-  // 6. Generic System Share (AirDrop, Bluetooth, Telegram, etc.)
+  // 6. Generic System Share
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
@@ -402,7 +425,7 @@ export const StoryShareModal: React.FC = () => {
           url: shareUrl,
         });
       } catch (e) {
-        // user cancelled or failed
+        // user cancelled
       }
     } else {
       handleCopyLink();
@@ -423,8 +446,8 @@ export const StoryShareModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-        {/* Modal Backdrop click to close */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-lg overflow-y-auto">
+        {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -435,62 +458,62 @@ export const StoryShareModal: React.FC = () => {
 
         {/* Modal Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 10 }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 w-full max-w-2xl bg-[#100F17] border border-white/10 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:flex-row my-auto"
+          exit={{ opacity: 0, scale: 0.96, y: 8 }}
+          transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+          className="relative z-10 w-full max-w-2xl bg-[#0F0E17] border border-white/10 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:flex-row my-auto"
         >
           {/* Close Button */}
           <button
             onClick={closeModal}
             aria-label="Kapat"
-            className="absolute top-3 right-3 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-white/10 text-neutral-300 hover:text-white flex items-center justify-center border border-white/10 active:scale-95 transition-all"
+            className="absolute top-3.5 right-3.5 z-30 w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-neutral-300 hover:text-white flex items-center justify-center border border-white/10 active:scale-95 transition-all cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
 
           {/* LEFT: 9:16 Story Card Live Preview */}
-          <div className="w-full md:w-[290px] shrink-0 p-4 sm:p-5 flex flex-col items-center justify-center bg-gradient-to-b from-[#14121F] to-[#0A0910] border-b md:border-b-0 md:border-r border-white/[0.08] relative overflow-hidden">
+          <div className="w-full md:w-[280px] shrink-0 p-4 sm:p-5 flex flex-col items-center justify-center bg-gradient-to-b from-[#13111C] to-[#0A0910] border-b md:border-b-0 md:border-r border-white/[0.08] relative overflow-hidden">
             
-            {/* Background Artwork Ambient Blur */}
+            {/* Ambient Lighting */}
             <div 
-              className="absolute inset-0 bg-cover bg-center blur-2xl opacity-15 pointer-events-none scale-125"
+              className="absolute inset-0 bg-cover bg-center blur-3xl opacity-20 pointer-events-none scale-150"
               style={{ backgroundImage: `url(${albumSrc})` }}
             />
 
-            {/* The 9:16 Interactive Card Shell */}
-            <div className="relative z-10 w-full max-w-[240px] aspect-[9/16] rounded-2xl bg-[#0E0D16] border border-white/15 p-3 flex flex-col justify-between shadow-2xl overflow-hidden">
+            {/* The 9:16 Card Shell */}
+            <div className="relative z-10 w-full max-w-[230px] aspect-[9/16] rounded-2xl bg-[#0A0910] border border-white/15 p-3 flex flex-col justify-between shadow-2xl overflow-hidden">
               
-              {/* Subtle Vinyl Grooves */}
-              <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full border border-amber-500/10 pointer-events-none" />
-              <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full border border-amber-500/5 pointer-events-none" />
+              {/* Subtle Concentric Rings */}
+              <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full border border-amber-500/[0.07] pointer-events-none" />
+              <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full border border-amber-500/[0.04] pointer-events-none" />
 
               {/* Story Header */}
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/40 border border-[var(--theme-primary)]/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)]" />
-                  <span className="text-[9px] font-black text-[var(--theme-primary)] tracking-wider">MUZIKORS</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <span className="text-[10px] font-black text-white tracking-widest">MUZIKORS</span>
                 </div>
-                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400">
+                <div className="flex items-center gap-1 text-[8px] font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>CANLI</span>
                 </div>
               </div>
 
-              {/* Cafe Mini Banner */}
-              <div className="flex items-center gap-2 p-1.5 rounded-xl bg-white/[0.04] border border-white/10 my-1">
-                <div className="w-6 h-6 rounded-lg bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 flex items-center justify-center text-[var(--theme-primary)] shrink-0">
-                  <Store className="w-3.5 h-3.5" />
+              {/* Venue Tag */}
+              <div className="flex items-center gap-2 p-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                <div className="w-6 h-6 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                  <Disc3 className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-bold text-white truncate leading-tight">{venueName}</p>
-                  <p className="text-[8px] text-[var(--theme-primary-light)] font-medium">Mekân Jukebox</p>
+                  <p className="text-[8px] text-amber-300/80 font-medium">Mekân Jukebox</p>
                 </div>
               </div>
 
               {/* Central Artwork */}
-              <div className="relative w-28 h-28 mx-auto rounded-xl overflow-hidden border border-white/15 shadow-xl my-auto group">
+              <div className="relative w-28 h-28 mx-auto rounded-xl overflow-hidden border border-white/15 shadow-xl my-auto">
                 <img 
                   src={albumSrc} 
                   alt={trackTitle}
@@ -500,69 +523,71 @@ export const StoryShareModal: React.FC = () => {
                     e.currentTarget.src = '/logo.png';
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              {/* Soundwave Bars */}
-              <div className="flex items-center justify-center gap-1 h-3 my-1" aria-hidden="true">
-                <span className="w-0.5 h-2 bg-[var(--theme-primary)] rounded-full animate-bar-1" />
-                <span className="w-0.5 h-3.5 bg-[var(--theme-primary)] rounded-full animate-bar-2" />
-                <span className="w-0.5 h-2 bg-[var(--theme-primary)] rounded-full animate-bar-3" />
-                <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bar-4" />
-                <span className="w-0.5 h-1.5 bg-[var(--theme-primary)] rounded-full animate-bar-2" />
+              {/* Modern Audio Waveform */}
+              <div className="flex items-center justify-center gap-1 h-3.5 my-1" aria-hidden="true">
+                <span className="w-0.5 h-2 bg-amber-400 rounded-full animate-pulse" />
+                <span className="w-0.5 h-3.5 bg-amber-400 rounded-full" />
+                <span className="w-0.5 h-2.5 bg-amber-400 rounded-full animate-pulse" />
+                <span className="w-0.5 h-3 bg-amber-400 rounded-full" />
+                <span className="w-0.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
               </div>
 
               {/* Track Info */}
-              <div className="text-center w-full min-w-0 mb-1">
+              <div className="text-center w-full min-w-0">
                 <h4 className="text-xs font-black text-white truncate leading-tight">{trackTitle}</h4>
-                <p className="text-[10px] font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{trackArtist}</p>
-                <div className="inline-block px-2 py-0.5 mt-1 rounded-full bg-white/[0.06] border border-white/10 text-[8px] text-neutral-300">
+                <p className="text-[10px] font-medium text-amber-200/90 truncate mt-0.5">{trackArtist}</p>
+                <div className="inline-block px-2.5 py-0.5 mt-1 rounded-full bg-white/[0.05] border border-white/10 text-[8px] text-neutral-300">
                   {requesterText}
                 </div>
               </div>
 
               {/* Bottom Tag */}
-              <div className="text-center pt-1 border-t border-white/[0.08]">
+              <div className="text-center pt-1.5 border-t border-white/[0.08]">
                 <p className="text-[8px] text-neutral-400 font-medium truncate">
                   muzikors.com.tr • Sıradaki parçayı seç
                 </p>
               </div>
             </div>
 
-            <p className="text-[11px] text-neutral-400 mt-2.5 font-medium">9:16 Hikaye Önizlemesi</p>
+            <p className="text-[10px] text-neutral-400 mt-2 font-medium">9:16 Hikaye Önizlemesi</p>
           </div>
 
           {/* RIGHT: Multi-Platform Sharing Hub */}
           <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+            
+            {/* Clean, Non-Kicker Header */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] text-[11px] font-black uppercase tracking-wider mb-2">
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Mekânda Sahne Senin</span>
-              </div>
               <h3 className="text-xl font-black text-white tracking-tight">
                 Şarkını Hikayende Paylaş
               </h3>
               <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                Şu an {venueName} kafesinde çalan parçanı tek tıkla Instagram, WhatsApp, X ve TikTok'ta paylaşarak masayı havaya sok.
+                Şu an <span className="text-white font-semibold">{venueName}</span> salonunda çalan parçanı tek tıkla hikayene ekle, masadaki herkesi sıraya davet et.
               </p>
             </div>
 
-            {/* Social Share Buttons Grid */}
+            {/* Platform Grid (Clean Obsidian Cards with Real Vector Glyphs) */}
             <div className="grid grid-cols-2 gap-2.5">
               
-              {/* Instagram Stories */}
+              {/* Instagram */}
               <button
                 type="button"
                 onClick={handleInstagramShare}
                 disabled={isGenerating}
-                className="py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#E1306C]/20 to-[#833AB4]/20 hover:from-[#E1306C]/30 hover:to-[#833AB4]/30 border border-[#E1306C]/35 text-white active:scale-95 transition-all flex items-center gap-2.5 text-xs font-bold shadow-sm"
+                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-xl bg-[#E1306C] flex items-center justify-center text-white shrink-0 shadow-md">
-                  <span className="text-xs font-black">IG</span>
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 border border-[#DD2A7B]/30 flex items-center justify-center text-[#E1306C] shrink-0 group-hover:scale-105 transition-transform">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                  </svg>
                 </div>
-                <div className="text-left min-w-0">
-                  <p className="truncate font-bold text-white">Instagram</p>
-                  <p className="text-[10px] text-neutral-300 font-normal">Hikaye Kartı</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">Instagram</p>
+                  <p className="text-[10px] text-neutral-400 truncate">Hikaye Kartı</p>
                 </div>
               </button>
 
@@ -570,29 +595,16 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="py-3 px-3.5 rounded-2xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/35 text-white active:scale-95 transition-all flex items-center gap-2.5 text-xs font-bold shadow-sm"
+                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-xl bg-[#25D366] flex items-center justify-center text-black shrink-0 shadow-md">
-                  <MessageCircle className="w-4 h-4 fill-current" />
+                <div className="w-8 h-8 rounded-xl bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center text-[#25D366] shrink-0 group-hover:scale-105 transition-transform">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 20.15C10.57 20.15 9.12 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.98 3.8 13.47 3.8 11.91C3.8 7.37 7.5 3.67 12.05 3.67C14.25 3.67 16.32 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.59 20.15 12.05 20.15ZM16.57 14.39C16.32 14.26 15.1 13.66 14.87 13.58C14.65 13.5 14.48 13.46 14.32 13.71C14.15 13.96 13.68 14.51 13.53 14.68C13.39 14.85 13.24 14.87 12.99 14.75C12.74 14.62 11.94 14.36 10.99 13.52C10.25 12.86 9.75 12.04 9.61 11.79C9.46 11.54 9.59 11.41 9.72 11.28C9.83 11.17 9.97 10.99 10.1 10.84C10.22 10.69 10.26 10.59 10.34 10.42C10.43 10.25 10.39 10.11 10.32 9.98C10.26 9.86 9.77 8.65 9.56 8.16C9.37 7.68 9.17 7.74 9.02 7.73C8.88 7.73 8.71 7.72 8.54 7.72C8.37 7.72 8.1 7.78 7.87 8.03C7.65 8.28 7.02 8.87 7.02 10.07C7.02 11.27 7.89 12.43 8.02 12.59C8.14 12.76 9.74 15.23 12.2 16.29C12.78 16.54 13.24 16.69 13.59 16.81C14.18 16.99 14.71 16.97 15.14 16.9C15.61 16.83 16.59 16.31 16.79 15.72C17 15.13 17 14.63 16.93 14.52C16.87 14.41 16.72 14.35 16.57 14.39Z"/>
+                  </svg>
                 </div>
-                <div className="text-left min-w-0">
-                  <p className="truncate font-bold text-white">WhatsApp</p>
-                  <p className="text-[10px] text-neutral-300 font-normal">Gruba Gönder</p>
-                </div>
-              </button>
-
-              {/* X / Twitter */}
-              <button
-                type="button"
-                onClick={handleTwitterShare}
-                className="py-3 px-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 text-white active:scale-95 transition-all flex items-center gap-2.5 text-xs font-bold shadow-sm"
-              >
-                <div className="w-7 h-7 rounded-xl bg-black border border-white/20 flex items-center justify-center text-white shrink-0 shadow-md font-black text-xs">
-                  𝕏
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="truncate font-bold text-white">X / Twitter</p>
-                  <p className="text-[10px] text-neutral-300 font-normal">Tweet Paylaş</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">WhatsApp</p>
+                  <p className="text-[10px] text-neutral-400 truncate">Gruba Gönder</p>
                 </div>
               </button>
 
@@ -601,40 +613,59 @@ export const StoryShareModal: React.FC = () => {
                 type="button"
                 onClick={handleTikTokShare}
                 disabled={isGenerating}
-                className="py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#25F4EE]/15 to-[#FE2C55]/15 hover:from-[#25F4EE]/25 hover:to-[#FE2C55]/25 border border-white/20 text-white active:scale-95 transition-all flex items-center gap-2.5 text-xs font-bold shadow-sm"
+                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-xl bg-black border border-[#FE2C55]/40 flex items-center justify-center text-white shrink-0 shadow-md font-black text-[11px]">
-                  TT
+                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.91-1.46c-.63-.64-1.03-1.48-1.13-2.38z"/>
+                  </svg>
                 </div>
-                <div className="text-left min-w-0">
-                  <p className="truncate font-bold text-white">TikTok</p>
-                  <p className="text-[10px] text-neutral-300 font-normal">Video / Story</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">TikTok</p>
+                  <p className="text-[10px] text-neutral-400 truncate">Video / Story</p>
+                </div>
+              </button>
+
+              {/* X (Twitter) */}
+              <button
+                type="button"
+                onClick={handleTwitterShare}
+                className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">X / Twitter</p>
+                  <p className="text-[10px] text-neutral-400 truncate">Tweet Paylaş</p>
                 </div>
               </button>
 
             </div>
 
-            {/* Secondary Action Row */}
+            {/* Action Row */}
             <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-white/[0.08]">
               
-              {/* Download HD Story Image */}
+              {/* Primary CTA: Download HD Story (Brand Gold - Never Hot Pink) */}
               <button
                 type="button"
                 onClick={handleDownload}
                 disabled={isGenerating}
-                className="flex-1 py-3 px-4 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 active:scale-95 text-black font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md"
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-neutral-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(245,158,11,0.25)] cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>{isGenerating ? 'Oluşturuluyor...' : 'HD Görseli İndir'}</span>
               </button>
 
-              {/* Native System Share / Arkadaşlarına Gönder */}
+              {/* Native System Share */}
               <button
                 type="button"
                 onClick={handleNativeShare}
-                className="py-3 px-4 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] active:bg-white/[0.15] border border-white/10 text-white text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="py-3 px-4 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] active:bg-white/[0.13] border border-white/10 text-white text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Send className="w-4 h-4 text-[var(--theme-primary)]" />
+                <Send className="w-4 h-4 text-amber-400" />
                 <span>Arkadaşlarına Gönder</span>
               </button>
 
@@ -642,7 +673,7 @@ export const StoryShareModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="py-3 px-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-300 hover:text-white text-xs font-medium active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                className="py-3 px-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-300 hover:text-white text-xs font-medium active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Bağlantıyı Kopyala"
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -653,7 +684,7 @@ export const StoryShareModal: React.FC = () => {
 
             {/* Bottom Safe Note */}
             <p className="text-[10px] text-neutral-500 text-center">
-              Görsel kartı {venueName} mekanına ve Muzikors sistemine özel hazırlanmıştır.
+              Mekân ve çalan parçaya özel 1080x1920 HD dikey hikaye kartı olarak üretilir.
             </p>
           </div>
         </motion.div>
