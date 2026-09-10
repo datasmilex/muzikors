@@ -808,7 +808,7 @@ export const MusicSearchModal: React.FC = () => {
                                         &gt;7 dk
                                       </span>
                                     ) : isTooLongForFree ? (
-                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-[var(--theme-primary-light)] border border-amber-500/30 uppercase">
+                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 uppercase">
                                         VIP (4+ dk)
                                       </span>
                                     ) : null}
@@ -840,7 +840,7 @@ export const MusicSearchModal: React.FC = () => {
                             className="w-full py-2 px-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] flex items-center justify-between text-xs text-neutral-400 hover:text-neutral-200 transition-all active:scale-[0.99] cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)]" />
                               <span className="font-bold text-[11px] text-neutral-300">
                                 Mekan Kısıtlamasına Takılanlar ({blockedTracks.length})
                               </span>
@@ -871,7 +871,7 @@ export const MusicSearchModal: React.FC = () => {
                                     <div
                                       key={track.id}
                                       onClick={() => showToast(blockInfo.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.')}
-                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-amber-500/15 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
+                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-[var(--theme-primary)]/15 bg-[var(--theme-primary)]/[0.02] hover:bg-[var(--theme-primary)]/[0.05] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
                                     >
                                       <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10 grayscale">
@@ -882,7 +882,7 @@ export const MusicSearchModal: React.FC = () => {
                                           />
                                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                             {blockInfo.type === 'vibe' ? (
-                                              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                                              <ShieldAlert className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                                             ) : (
                                               <Ban className="w-3.5 h-3.5 text-rose-400" />
                                             )}
@@ -895,7 +895,7 @@ export const MusicSearchModal: React.FC = () => {
                                               {track.title}
                                             </h4>
                                             {blockInfo.type === 'vibe' ? (
-                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase flex items-center gap-0.5">
+                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 uppercase flex items-center gap-0.5">
                                                 <ShieldAlert className="w-2.5 h-2.5" /> {blockInfo.reason}
                                               </span>
                                             ) : (

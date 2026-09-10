@@ -29,6 +29,8 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
 
   const [showOptions, setShowOptions] = useState(false);
+  const [confirmDeletePost, setConfirmDeletePost] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLike = async () => {
@@ -135,13 +137,13 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   };
 
   const handleDeletePost = async () => {
-    if (!window.confirm("Bu gönderiyi silmek istediğinize emin misiniz?")) return;
     setIsDeleting(true);
     try {
       const { error } = await supabase.from('posts').delete().eq('id', post.id);
       if (error) throw error;
       showToast('Gönderi silindi.');
       setShowOptions(false);
+      setConfirmDeletePost(false);
       onPostUpdated?.();
     } catch (err) {
       console.error(err);
@@ -152,12 +154,12 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!window.confirm("Bu yorumu silmek istediğinize emin misiniz?")) return;
     try {
       const { error } = await supabase.from('post_comments').delete().eq('id', commentId);
       if (error) throw error;
       showToast('Yorum silindi.');
       setCommentsCount(c => Math.max(0, c - 1));
+      setDeletingCommentId(null);
       fetchComments();
       onPostUpdated?.();
     } catch (err) {
@@ -241,15 +243,46 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
         {/* Delete Post Menu */}
         {user?.id === post.user_id && (
           <div className="relative">
-            <button onClick={() => setShowOptions(!showOptions)} className="p-1 text-neutral-400 hover:text-white transition-colors">
+            <button 
+              onClick={() => {
+                setShowOptions(!showOptions);
+                setConfirmDeletePost(false);
+              }} 
+              className="p-1.5 text-neutral-400 hover:text-white transition-colors rounded-lg active:scale-95"
+              aria-label="Gönderi seçenekleri"
+            >
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {showOptions && (
-              <div className="absolute right-0 top-full mt-1 bg-[var(--theme-card)] border border-white/10 rounded-xl shadow-xl overflow-hidden z-10 w-28 text-xs">
-                <button onClick={handleDeletePost} disabled={isDeleting} className="w-full text-left px-3 py-2 text-rose-400 font-bold hover:bg-white/5 disabled:opacity-50 flex items-center justify-between">
-                  Sil
-                  {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                </button>
+              <div className="absolute right-0 top-full mt-1 bg-[var(--theme-card)] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20 min-w-[124px] text-xs animate-in fade-in duration-150">
+                {confirmDeletePost ? (
+                  <div className="p-2 space-y-1.5">
+                    <p className="text-[10px] text-neutral-300 font-bold text-center">Silinsin mi?</p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={handleDeletePost}
+                        disabled={isDeleting}
+                        className="flex-1 py-1 px-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-[10px] font-bold transition-all text-center active:scale-95 disabled:opacity-50"
+                      >
+                        {isDeleting ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Evet'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeletePost(false)}
+                        className="flex-1 py-1 px-1.5 rounded-lg bg-white/5 text-neutral-400 hover:text-white text-[10px] font-medium transition-all text-center active:scale-95"
+                      >
+                        Vazgeç
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setConfirmDeletePost(true)} 
+                    className="w-full text-left px-3 py-2 text-rose-400 font-bold hover:bg-white/5 flex items-center justify-between transition-colors active:scale-95"
+                  >
+                    <span>Sil</span>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -318,9 +351,31 @@ export const SocialPost: React.FC<SocialPostProps> = ({ post, onPostUpdated, onC
                           {cIsBetaTester && <BetaTesterBadge className="w-3 h-3 ml-0.5" />}
                         </div>
                         {(user?.id === comment.user_id || user?.id === post.user_id) && (
-                          <button onClick={() => handleDeleteComment(comment.id)} className="text-neutral-500 hover:text-rose-400 transition-colors p-0.5">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                          deletingCommentId === comment.id ? (
+                            <div className="flex items-center gap-1 ml-auto shrink-0 animate-in fade-in duration-150">
+                              <span className="text-[9px] text-neutral-400 font-medium">Silinsin mi?</span>
+                              <button 
+                                onClick={() => handleDeleteComment(comment.id)} 
+                                className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[9px] font-bold hover:bg-rose-500/30 active:scale-95 transition-all"
+                              >
+                                Evet
+                              </button>
+                              <button 
+                                onClick={() => setDeletingCommentId(null)} 
+                                className="px-1.5 py-0.5 rounded bg-white/10 text-neutral-300 text-[9px] hover:text-white active:scale-95 transition-all"
+                              >
+                                İptal
+                              </button>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => setDeletingCommentId(comment.id)} 
+                              className="text-neutral-500 hover:text-rose-400 transition-colors p-1 active:scale-90"
+                              aria-label="Yorumu sil"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )
                         )}
                       </div>
                       <span className="text-neutral-300 font-normal whitespace-pre-wrap break-words text-xs">{comment.content}</span>

@@ -328,8 +328,8 @@ export const LeaderboardModal: React.FC = () => {
 
                               {/* 2. KAZANANLAR VARSA GÖSTER */}
                               {rewardSettings.giveaway_winners && rewardSettings.giveaway_winners.length > 0 && (
-                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-                                  <p className="text-[11px] font-black text-amber-300 flex items-center gap-1">
+                                <div className="p-3 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 space-y-2">
+                                  <p className="text-[11px] font-black text-[var(--theme-primary-light)] flex items-center gap-1">
                                     <Crown className="w-3.5 h-3.5 fill-current" />
                                     <span>Son Çekilişin Kazananları:</span>
                                   </p>
@@ -348,7 +348,7 @@ export const LeaderboardModal: React.FC = () => {
                                           />
                                           <span className="text-xs font-bold text-white truncate">{winner.full_name}</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-amber-400 shrink-0 pl-2">
+                                        <span className="text-[10px] font-bold text-[var(--theme-primary-light)] shrink-0 pl-2">
                                           {winner.reward_title}
                                         </span>
                                       </div>
@@ -383,7 +383,7 @@ export const LeaderboardModal: React.FC = () => {
                             rewardSettings.venue_rewards && rewardSettings.venue_rewards.length > 0 ? (
                               rewardSettings.venue_rewards.map((rw, idx) => (
                                 <div key={idx} className="flex items-start gap-2.5 bg-black/40 p-2.5 rounded-xl border border-white/5">
-                                  <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center font-black text-black text-[10px] shrink-0">
+                                  <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] flex items-center justify-center font-black text-black text-[10px] shrink-0">
                                     {rw.rank || idx + 1}
                                   </div>
                                   <div>
@@ -504,7 +504,7 @@ export const LeaderboardModal: React.FC = () => {
                             {venue.logo_url ? (
                               <img src={venue.logo_url} alt={venue.venue_name} className="w-full h-full object-cover" />
                             ) : (
-                              <Store className="w-5 h-5 text-amber-400" />
+                              <Store className="w-5 h-5 text-[var(--theme-primary)]" />
                             )}
                           </div>
 
@@ -515,7 +515,7 @@ export const LeaderboardModal: React.FC = () => {
                           </div>
 
                           <div className="flex-none px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
-                            <span className="text-xs font-black text-amber-400">{venue.total_songs_requested || 0}</span>
+                            <span className="text-xs font-black text-[var(--theme-primary)]">{venue.total_songs_requested || 0}</span>
                             <span className="text-[8px] font-bold text-neutral-500 uppercase">İstek</span>
                           </div>
                         </div>

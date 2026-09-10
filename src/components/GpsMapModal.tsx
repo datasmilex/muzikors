@@ -224,7 +224,7 @@ export const GpsMapModal: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'map' ? 'bg-amber-400 text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
+              className={`flex-1 py-1.5 text-xs font-black rounded-lg flex items-center justify-center gap-1.5 transition-all ${viewMode === 'map' ? 'bg-[var(--theme-primary)] text-black shadow-sm' : 'text-white/60 hover:text-white'}`}
             >
               <MapIcon className="w-3.5 h-3.5" /> Harita
             </button>
@@ -237,7 +237,7 @@ export const GpsMapModal: React.FC = () => {
                 <button
                   key={r}
                   onClick={() => setRadiusFilter(r)}
-                  className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition-all whitespace-nowrap ${radiusFilter === r ? 'border-amber-400 bg-amber-400/15 text-amber-300' : 'border-white/[0.06] text-white/60 bg-white/[0.02]'}`}
+                  className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition-all whitespace-nowrap ${radiusFilter === r ? 'border-[var(--theme-primary)] bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)]' : 'border-white/[0.06] text-white/60 bg-white/[0.02]'}`}
                 >
                   {r === 0 ? 'Tümü' : `${r} km`}
                 </button>
@@ -248,8 +248,8 @@ export const GpsMapModal: React.FC = () => {
           {/* Content Area */}
           <div className="flex-1 overflow-y-auto custom-scrollbar relative rounded-2xl z-10">
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center text-amber-400/70 space-y-2 py-16">
-                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+              <div className="h-full flex flex-col items-center justify-center text-[var(--theme-primary)]/70 space-y-2 py-16">
+                <Loader2 className="w-6 h-6 animate-spin text-[var(--theme-primary)]" />
                 <span className="text-xs font-bold uppercase tracking-wider">Yükleniyor...</span>
               </div>
             ) : viewMode === 'map' ? (
@@ -356,9 +356,9 @@ export const GpsMapModal: React.FC = () => {
                       closeModal();
                       openModal('qr');
                     }}
-                    className="w-full mt-3 p-3.5 rounded-2xl border border-dashed border-amber-400/40 flex items-center gap-3 active:scale-95 transition-all text-white/80 bg-amber-400/[0.03]"
+                    className="w-full mt-3 p-3.5 rounded-2xl border border-dashed border-[var(--theme-primary)]/40 flex items-center gap-3 active:scale-95 transition-all text-white/80 bg-[var(--theme-primary)]/[0.03]"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center text-black shrink-0 shadow-sm">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)] flex items-center justify-center text-black shrink-0 shadow-sm">
                       <QrCode className="w-4 h-4" />
                     </div>
                     <div className="text-left">

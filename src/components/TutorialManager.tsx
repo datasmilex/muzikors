@@ -24,11 +24,9 @@ export const TutorialManager: React.FC = () => {
       prevBtnText: 'Geri',
       progressText: '{{current}} / {{total}}',
       onDestroyStarted: () => {
-        if (!driverObj.hasNextStep() || confirm('Tanıtımı atlamak istediğinize emin misiniz?')) {
-          driverObj.destroy();
-          localStorage.setItem('muzikors_tutorial_completed', 'true');
-          isRunning.current = false;
-        }
+        driverObj.destroy();
+        localStorage.setItem('muzikors_tutorial_completed', 'true');
+        isRunning.current = false;
       },
       steps: [
         {
@@ -44,7 +42,7 @@ export const TutorialManager: React.FC = () => {
           element: '#tour-wallet-button',
           popover: {
             title: 'Kullanım Hakları',
-            description: '<div class="space-y-3"><p>Muzikors tamamen ücretsizdir!</p><p>Buradan kalan günlük şarkı açma, beğenme ve diğer etkileşim haklarını anlık olarak takip edebilirsin.</p><p class="text-[10px] text-amber-200/50">Hakların her gece 00:00\'da sıfırlanır.</p></div>',
+            description: '<div class="space-y-3"><p>Muzikors tamamen ücretsizdir!</p><p>Buradan kalan günlük şarkı açma, beğenme ve diğer etkileşim haklarını anlık olarak takip edebilirsin.</p><p class="text-[10px] text-[var(--theme-primary-light)]/70">Hakların her gece 00:00\'da sıfırlanır.</p></div>',
             side: 'left',
             align: 'start'
           }

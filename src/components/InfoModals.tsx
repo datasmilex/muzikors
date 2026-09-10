@@ -148,7 +148,7 @@ export const InfoModals: React.FC = () => {
                             value={partnerForm.venueName}
                             onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
                             placeholder="Örn: Velvet Lounge"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)]/60 transition-all"
                           />
                         </div>
 
@@ -160,7 +160,7 @@ export const InfoModals: React.FC = () => {
                             value={partnerForm.contactPerson}
                             onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
                             placeholder="Örn: Ahmet Yılmaz"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)]/60 transition-all"
                           />
                         </div>
 
@@ -172,7 +172,7 @@ export const InfoModals: React.FC = () => {
                             value={partnerForm.phone}
                             onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
                             placeholder="Örn: 0555 123 4567"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)]/60 transition-all"
                           />
                         </div>
 
@@ -183,14 +183,14 @@ export const InfoModals: React.FC = () => {
                             value={partnerForm.email}
                             onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
                             placeholder="Örn: mekan@example.com"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400/60 transition-all"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)]/60 transition-all"
                           />
                         </div>
                       </div>
 
                       <button
                         type="submit"
-                        className="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all mt-4"
+                        className="w-full py-3 rounded-2xl bg-[var(--theme-primary)] hover:opacity-95 text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all mt-4 shadow-md"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>Başvuru Gönder</span>
@@ -295,21 +295,21 @@ export const InfoModals: React.FC = () => {
 
                     {activeLegalTab === 'consent' && (
                       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
-                        <h4 className="font-bold text-amber-400 text-xs">Açık Rıza Metni</h4>
+                        <h4 className="font-bold text-[var(--theme-primary-light)] text-xs">Açık Rıza Metni</h4>
                         <p>Kullanıcı, kişisel verilerinin ve oturum bilgilerinin güvenli veritabanı altyapısında işlenmesine rıza göstermektedir.</p>
                       </motion.div>
                     )}
 
                     {activeLegalTab === 'cookie' && (
                       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
-                        <h4 className="font-bold text-amber-400 text-xs">Çerez Politikası</h4>
+                        <h4 className="font-bold text-[var(--theme-primary-light)] text-xs">Çerez Politikası</h4>
                         <p>Muzikors, oturum durumunun korunması ve güvenlik amacıyla teknik çerezler kullanır. Reklam amacıyla satılmaz.</p>
                       </motion.div>
                     )}
 
                     {activeLegalTab === 'terms' && (
                       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 text-[11px] text-neutral-300">
-                        <h4 className="font-bold text-amber-400 text-xs">Hizmet Koşulları</h4>
+                        <h4 className="font-bold text-[var(--theme-primary-light)] text-xs">Hizmet Koşulları</h4>
                         <p>Muzikors uygulamasının son kullanıcı tarafı tamamen ücretsizdir.</p>
                       </motion.div>
                     )}
