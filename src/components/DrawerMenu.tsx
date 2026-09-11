@@ -19,7 +19,8 @@ import {
   Crown,
   Palette,
   Store,
-  Check
+  Check,
+  ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
@@ -60,6 +61,7 @@ export const DrawerMenu: React.FC = () => {
     { label: 'Ortaklık', icon: <Handshake className="w-4 h-4 text-neutral-400" />, modal: 'partners' },
     { label: 'İletişim & Destek', icon: <MessageCircle className="w-4 h-4 text-neutral-400" />, modal: 'contact' },
     { label: 'Nasıl Çalışır?', icon: <HelpCircle className="w-4 h-4 text-neutral-400" />, modal: 'howitworks' },
+    { label: 'Yasal Bilgiler & Şartlar', icon: <ShieldCheck className="w-4 h-4 text-neutral-400" />, modal: 'terms' },
   ];
 
   return (

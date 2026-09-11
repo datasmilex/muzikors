@@ -13,3 +13,8 @@ Always adhere to `PRODUCT.md` and `DESIGN.md` when creating or modifying fronten
 
 # Android Version Updates
 Whenever delivering a new update or making a release for Android, ALWAYS increment `versionCode` and update `versionName` in `android/app/build.gradle` automatically without asking.
+
+# Business & Payment Model Principles
+- **Abonelik Modeli:** Muzikors kullanıcı tarafında kredi satışı KESİNLİKLE YOKTUR. Yalnızca "Muzikors VIP / Premium Abonelik" modeli vardır.
+- **Ödeme Altyapısı:** Iyzico veya bağımsız sanal POS KULLANILMAZ. Tüm ödemeler ve abonelik tahsilatları doğrudan Google Play In-App Billing (Google Play Store faturalandırması) üzerinden yürütülür.
+- **Resmi İletişim:** İletişim e-postası yalnızca `destek@muzikors.com`dur (`kvkk@muzikors.com` gibi harici adresler kullanılmaz).

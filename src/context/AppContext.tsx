@@ -38,7 +38,7 @@ interface AppContextType {
   loginWithProvider: (provider: 'google') => Promise<void>;
   openModal: (modal: ModalType) => void;
   openProtectedModal: (modal: ModalType, reason?: string) => void;
-  closeModal: () => void;
+  closeModal: (arg?: any) => void;
   viewingProfileId: string | null;
   openProfile: (userId?: string) => void;
 
@@ -1125,7 +1125,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(timer);
   }, [cooldown.active, cooldown.remainingSeconds]);
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback((arg?: any) => {
+    const restorePrevious = arg === true || (typeof arg === 'object' && arg !== null && 'restorePrevious' in arg && arg.restorePrevious === true);
+    if (restorePrevious && modalHistoryRef.current.length > 0) {
+      const prev = modalHistoryRef.current.pop()!;
+      setActiveModal(prev);
+      return;
+    }
     modalHistoryRef.current = [];
     setActiveModal('none');
     setViewingProfileId(null);

@@ -88,15 +88,18 @@ export const LoginModal: React.FC = () => {
                       className="absolute opacity-0 cursor-pointer w-full h-full"
                     />
                     {legalConsent && (
-                      <div className="absolute inset-0 bg-amber-400 flex items-center justify-center pointer-events-none">
+                      <div className="absolute inset-0 bg-[var(--theme-primary)] flex items-center justify-center pointer-events-none">
                         <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] leading-relaxed text-neutral-400">
-                    <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-amber-400 hover:underline font-bold">KVKK</button>, <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-amber-400 hover:underline font-bold">Açık Rıza</button> ve <button type="button" onClick={(e) => { e.preventDefault(); openModal('terms'); }} className="text-amber-400 hover:underline font-bold">Çerez</button>&apos;i okudum.
+                  <span className="text-[10px] leading-relaxed text-neutral-400 select-none">
+                    <button type="button" onClick={(e) => { e.stopPropagation(); openModal('kvkk'); }} className="text-[var(--theme-primary-light)] hover:underline font-bold cursor-pointer">KVKK</button>,{' '}
+                    <button type="button" onClick={(e) => { e.stopPropagation(); openModal('consent'); }} className="text-[var(--theme-primary-light)] hover:underline font-bold cursor-pointer">Açık Rıza</button>,{' '}
+                    <button type="button" onClick={(e) => { e.stopPropagation(); openModal('cookie'); }} className="text-[var(--theme-primary-light)] hover:underline font-bold cursor-pointer">Çerez</button> ve{' '}
+                    <button type="button" onClick={(e) => { e.stopPropagation(); openModal('terms'); }} className="text-[var(--theme-primary-light)] hover:underline font-bold cursor-pointer">Kullanım Koşulları</button>&apos;nı okudum, onaylıyorum.
                   </span>
                 </label>
 
