@@ -6,9 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   QrCode,
   Play,
-  ShieldCheck,
-  Zap,
-  Crown,
   ArrowRight,
   ExternalLink,
   MessageCircle,
@@ -493,48 +490,24 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
             
             {/* Step 1 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-8 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-3.5">
-              <div className="flex items-baseline justify-between border-b border-white/[0.06] pb-2.5">
-                <span className="text-2xl sm:text-4xl font-mono font-bold text-[#E5A93C] tracking-tighter select-none">
-                  01
-                </span>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                  Adım
-                </span>
-              </div>
-              <h3 className="text-sm sm:text-lg font-bold text-white">Masadaki QR&apos;ı Okut</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+              <h3 className="text-base sm:text-lg font-bold text-white">Masadaki QR&apos;ı Okut</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Masanızdaki Muzikors QR kodunu telefonunuzun kamerasıyla veya web sitemizden tarayın. Tarayıcınız otomatik olarak bulunduğunuz mekana bağlanır.
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-8 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-3.5">
-              <div className="flex items-baseline justify-between border-b border-white/[0.06] pb-2.5">
-                <span className="text-2xl sm:text-4xl font-mono font-bold text-[#E5A93C] tracking-tighter select-none">
-                  02
-                </span>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                  Adım
-                </span>
-              </div>
-              <h3 className="text-sm sm:text-lg font-bold text-white">Parçanı Seç &amp; Sırala</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+              <h3 className="text-base sm:text-lg font-bold text-white">Parçanı Seç &amp; Sırala</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Milyonlarca Spotify şarkısı arasından en sevdiğini ara, 30 saniyelik önizlemeyi dinle ve mekanın canlı çalma sırasına anında gönder.
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-8 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-3.5">
-              <div className="flex items-baseline justify-between border-b border-white/[0.06] pb-2.5">
-                <span className="text-2xl sm:text-4xl font-mono font-bold text-[#E5A93C] tracking-tighter select-none">
-                  03
-                </span>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                  Adım
-                </span>
-              </div>
-              <h3 className="text-sm sm:text-lg font-bold text-white">Oyla &amp; Ritmi Yakala</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+              <h3 className="text-base sm:text-lg font-bold text-white">Oyla &amp; Ritmi Yakala</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Sıradaki şarkılara masandaki arkadaşlarınla oy ver. En çok oy alan şarkı en öne çıksın, gecenin havasını hep beraber belirleyin.
               </p>
@@ -561,27 +534,24 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             
             {/* Feature 1 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-3 hover:border-white/20 transition-all">
-              <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8 text-[#E5A93C]" />
-              <h3 className="text-sm sm:text-base font-bold text-white">Vibe Guard Koruma</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+              <h3 className="text-base font-bold text-white">Vibe Guard Koruma</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Mekanın tarzına uymayan parçalar filtrelenir. İşletme sahibi izin verilen müzik türlerini belirler, atmosfer daima korunur.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-3 hover:border-white/20 transition-all">
-              <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-[#E5A93C]" />
-              <h3 className="text-sm sm:text-base font-bold text-white">Muzikors VIP Abonelik</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+              <h3 className="text-base font-bold text-white">Muzikors VIP Abonelik</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Kredi satışı veya jeton hilesi yoktur. Google Play üzerinden tek bir VIP abonelikle reklamsız, limitsiz ve öncelikli şarkı isteyin.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-3 hover:border-white/20 transition-all">
-              <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-[#E5A93C]" />
-              <h3 className="text-sm sm:text-base font-bold text-white">Anlık Sıra &amp; Oylama</h3>
+            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+              <h3 className="text-base font-bold text-white">Anlık Sıra &amp; Oylama</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Her masadaki oylar anlık olarak toplanır. Popüler parçalar sıranın başına tırmanır, mekanın ortak enerjisi hoparlörlere yansır.
               </p>
