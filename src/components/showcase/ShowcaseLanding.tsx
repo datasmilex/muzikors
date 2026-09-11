@@ -70,7 +70,10 @@ export const ShowcaseLanding: React.FC = () => {
     e.preventDefault();
     const clean = quickCode.trim();
     if (!clean) return;
-    router.push(`/?v=${encodeURIComponent(clean)}`);
+    try {
+      localStorage.removeItem('muzikors_active_venue');
+    } catch {}
+    window.location.href = `/?v=${encodeURIComponent(clean)}`;
   };
 
   // Handle B2B Partner Lead Submit with Supabase Persistence

@@ -433,6 +433,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const parsedVenueId = parseInt(rawV.trim(), 10);
       if (parsedVenueId && !isNaN(parsedVenueId) && parsedVenueId > 0) {
         setKafeIdParam(String(parsedVenueId));
+        // Clear stale venue from localStorage if different from URL parameter
+        try {
+          const stored = localStorage.getItem(VENUE_STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && String(parsed.id) !== String(parsedVenueId)) {
+              localStorage.removeItem(VENUE_STORAGE_KEY);
+              setActiveVenue(null);
+            }
+          }
+        } catch {}
         bindVenueById(parsedVenueId);
       } else {
         showToast('Bir mekana bağlı değilsiniz.');
@@ -715,12 +726,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!supabase) return;
 
-    // Helper: get target integer venue_id from activeVenue or localStorage
+    // Helper: get target integer venue_id from URL params, activeVenue or localStorage
     const getActiveVenueIntId = (): number | null => {
+      // 1. Highest priority: raw URL parameter in browser
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        const rawV = searchParams.get('v') || searchParams.get('venue') || searchParams.get('kafe_id') || searchParams.get('venue_id');
+        if (rawV) {
+          const pid = parseInt(rawV.trim(), 10);
+          if (!isNaN(pid) && pid > 0) return pid;
+        }
+      }
+      // 2. Active venue from state
       if (activeVenue?.id) {
         const p = parseInt(activeVenue.id, 10);
         if (!isNaN(p)) return p;
       }
+      // 3. Last fallback: localStorage ONLY IF no URL parameter
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem(VENUE_STORAGE_KEY);
         if (stored) {

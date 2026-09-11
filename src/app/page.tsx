@@ -33,9 +33,10 @@ function HomeRouter() {
   const isNativeApp = isNative || (typeof window !== 'undefined' && (window as any)?.Capacitor?.isNativePlatform?.());
 
   if (isNativeApp || hasVenueParam) {
+    const venueKey = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('v')) || searchParams?.get('v') || 'native';
     return (
       <main className="min-h-screen landscape:min-h-0 landscape:h-screen landscape:h-[100dvh] bg-[var(--theme-bg)] text-white flex justify-center selection:bg-amber-400 selection:text-black transition-colors duration-300 overflow-x-hidden landscape:overflow-hidden">
-        <JukeboxView />
+        <JukeboxView key={venueKey} />
       </main>
     );
   }
@@ -46,9 +47,10 @@ function HomeRouter() {
       const winHasParams = /[?&](v|venue|kafe_id|venue_id)=/i.test(window.location.search);
       const winIsNative = (window as any)?.Capacitor?.isNativePlatform?.();
       if (winHasParams || winIsNative) {
+        const winVenueKey = new URLSearchParams(window.location.search).get('v') || 'native';
         return (
           <main className="min-h-screen landscape:min-h-0 landscape:h-screen landscape:h-[100dvh] bg-[var(--theme-bg)] text-white flex justify-center selection:bg-amber-400 selection:text-black transition-colors duration-300 overflow-x-hidden landscape:overflow-hidden">
-            <JukeboxView />
+            <JukeboxView key={winVenueKey} />
           </main>
         );
       }
