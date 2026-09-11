@@ -32,6 +32,7 @@ import { GatewayScreen } from '../components/GatewayScreen';
 import { WelcomeScreen } from '../components/WelcomeScreen';
 import { TutorialManager } from '../components/TutorialManager';
 import { BetaTesterWelcomeModal } from '../components/BetaTesterWelcomeModal';
+import { EntranceAnnouncementModal } from '../components/EntranceAnnouncementModal';
 import { LandscapeNowPlaying, LandscapeQueue, LandscapeNavRail } from '../components/LandscapeView';
 import { useApp } from '../context/AppContext';
 
@@ -86,6 +87,7 @@ const AppContent = () => {
 
       <TutorialManager />
       <BetaTesterWelcomeModal />
+      <EntranceAnnouncementModal />
       <DrawerMenu />
       <LeaderboardModal />
       <MusicSearchModal />
