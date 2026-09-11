@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className="dark h-full" data-theme="velvet">
+    <html lang="tr" className="dark h-full" data-theme="monochrome">
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -38,6 +38,7 @@ export default function RootLayout({
               (function() {
                 try {
                   var saved = localStorage.getItem('muzikors_theme');
+                  if (saved === 'velvet') saved = 'monochrome';
                   if (saved) {
                     document.documentElement.dataset.theme = saved;
                   }

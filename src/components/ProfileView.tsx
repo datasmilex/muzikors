@@ -887,7 +887,7 @@ export const ProfileView: React.FC = () => {
                                     style={{ backgroundColor: t.previewColor || t.accentColor }}
                                   >
                                     {isSelected && (
-                                      <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' ? 'text-black' : 'text-white'}`} />
+                                      <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} />
                                     )}
                                   </div>
                                   <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">

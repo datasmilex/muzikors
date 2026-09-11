@@ -1,4 +1,4 @@
-export type ThemeType = 'velvet' | 'crema' | 'emerald' | 'ruby' | 'sapphire';
+export type ThemeType = 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire';
 
 export interface ThemeConfig {
   id: ThemeType;
@@ -18,19 +18,19 @@ export interface ThemeConfig {
 
 export const THEMES: ThemeConfig[] = [
   {
-    id: 'velvet',
-    name: 'Midnight Navy',
-    subtitle: 'Gece Laciverti & Altın',
-    previewColor: '#1E3A8A',
-    accentColor: '#F59E0B',
-    accentLight: '#FBBF24',
-    accentDark: '#D97706',
-    bgColor: '#030712',
-    cardColor: '#090F1E',
-    gradient: 'from-amber-400 to-yellow-500',
-    badgeBg: 'bg-amber-400 text-black',
-    textAccent: 'text-amber-400',
-    glowColor: 'rgba(245, 158, 11, 0.18)',
+    id: 'monochrome',
+    name: 'Monochrome',
+    subtitle: 'Saf Siyah-Beyaz & Minimal',
+    previewColor: '#FFFFFF',
+    accentColor: '#FFFFFF',
+    accentLight: '#F4F4F5',
+    accentDark: '#E4E4E7',
+    bgColor: '#000000',
+    cardColor: '#0D0D0D',
+    gradient: 'from-white via-zinc-200 to-zinc-400',
+    badgeBg: 'bg-white text-black',
+    textAccent: 'text-white',
+    glowColor: 'rgba(255, 255, 255, 0.15)',
   },
   {
     id: 'crema',
@@ -93,16 +93,17 @@ export const THEMES: ThemeConfig[] = [
 export const THEME_STORAGE_KEY = 'muzikors_theme';
 
 export function getStoredTheme(): ThemeType {
-  if (typeof window === 'undefined') return 'velvet';
+  if (typeof window === 'undefined') return 'monochrome';
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'velvet') return 'monochrome';
     if (saved && THEMES.some((t) => t.id === saved)) {
       return saved as ThemeType;
     }
   } catch (e) {
     console.error('Failed to get theme from localStorage', e);
   }
-  return 'velvet';
+  return 'monochrome';
 }
 
 export function applyTheme(theme: ThemeType) {

@@ -196,10 +196,10 @@ export const ShowcaseLanding: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070604] text-white font-sans selection:bg-[#E5A93C] selection:text-black antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black antialiased overflow-x-hidden">
       
       {/* ── TOP NAV BAR ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#070604]/90 border-b border-white/[0.08]">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/90 border-b border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-20 flex items-center justify-between">
           
           {/* Logo (Clean, Enlarged, Slogan: İnteraktif Müzik) */}
@@ -213,7 +213,7 @@ export const ShowcaseLanding: React.FC = () => {
               <span className="text-base sm:text-xl font-black tracking-tight text-white leading-none">
                 Muzikors
               </span>
-              <span className="text-[9px] sm:text-[10px] font-bold text-[#E6C88B] uppercase tracking-wider mt-0.5 sm:mt-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5 sm:mt-1">
                 İnteraktif Müzik
               </span>
             </div>
@@ -261,13 +261,13 @@ export const ShowcaseLanding: React.FC = () => {
               href="/qr"
               className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold text-neutral-200 transition-all active:scale-95 min-h-[38px] sm:min-h-[44px]"
             >
-              <QrCode className="w-3.5 h-3.5 text-[#E5A93C]" />
+              <QrCode className="w-3.5 h-3.5 text-white" />
               <span className="hidden xs:inline">QR Okut</span>
             </Link>
 
             <Link
               href="/app"
-              className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-lg bg-[#E5A93C] hover:bg-[#F59E0B] text-black font-black text-xs transition-all shadow-[0_4px_20px_rgba(229,169,60,0.3)] active:scale-95 cursor-pointer min-h-[38px] sm:min-h-[44px]"
+              className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-black text-xs transition-all shadow-[0_4px_20px_rgba(255,255,255,0.15)] active:scale-95 cursor-pointer min-h-[38px] sm:min-h-[44px]"
             >
               <span>Uygulamayı Aç</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -287,7 +287,7 @@ export const ShowcaseLanding: React.FC = () => {
 
         {/* Mobile Dropdown Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/[0.08] bg-[#070604]/95 px-4 py-4 space-y-3 backdrop-blur-2xl">
+          <div className="md:hidden border-t border-white/[0.08] bg-black/95 px-4 py-4 space-y-3 backdrop-blur-2xl">
             <a
               href="#nasil-calisir"
               onClick={(e) => scrollToSection(e, 'nasil-calisir')}
@@ -331,7 +331,7 @@ export const ShowcaseLanding: React.FC = () => {
       <section className="relative pt-6 sm:pt-14 lg:pt-18 pb-12 sm:pb-20 border-b border-white/[0.06] overflow-hidden">
         
         {/* Crisp Top Line */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E5A93C]/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-10 items-center">
@@ -340,15 +340,15 @@ export const ShowcaseLanding: React.FC = () => {
             <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left">
               
               {/* Clean Kicker */}
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] sm:text-xs font-bold text-[#E5A93C] uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C]" />
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] sm:text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                 <span>Mekanların İnteraktif Müzik Platformu</span>
               </div>
 
               {/* Punchy Title (Compact on Mobile) */}
               <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight sm:leading-[1.1]">
                 Mekanların Ritmini <br />
-                <span className="text-[#E5A93C]">Sen Yönet.</span>
+                <span className="text-white">Sen Yönet.</span>
               </h1>
 
               {/* Subtitle (Readable on Mobile) */}
@@ -358,9 +358,9 @@ export const ShowcaseLanding: React.FC = () => {
 
               {/* Quick 4-Digit Venue Code / Table PIN Connector */}
               <form onSubmit={handleQuickConnect} className="pt-0.5 max-w-xs sm:max-w-md mx-auto lg:mx-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-lg bg-white/[0.04] border border-white/10 focus-within:border-[#E5A93C] transition-all shadow-inner">
+                <div className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-lg bg-white/[0.04] border border-white/10 focus-within:border-white transition-all shadow-inner">
                   <div className="pl-2 sm:pl-3 text-neutral-400">
-                    <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#E5A93C]" />
+                    <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                   </div>
                   <input
                     type="text"
@@ -372,7 +372,7 @@ export const ShowcaseLanding: React.FC = () => {
                   />
                   <button
                     type="submit"
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-[#E5A93C] hover:bg-[#F59E0B] text-black font-bold text-xs transition-all active:scale-95 cursor-pointer shrink-0"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all active:scale-95 cursor-pointer shrink-0"
                   >
                     Bağlan
                   </button>
@@ -383,7 +383,7 @@ export const ShowcaseLanding: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2.5 sm:gap-4 pt-1">
                 <Link
                   href="/app"
-                  className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-[#E5A93C] hover:bg-[#F59E0B] text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(229,169,60,0.25)] active:scale-95 transition-all cursor-pointer min-h-[42px] sm:min-h-[44px]"
+                  className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,255,255,0.15)] active:scale-95 transition-all cursor-pointer min-h-[42px] sm:min-h-[44px]"
                 >
                   <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black" />
                   <span>Web Uygulamasını Başlat</span>
@@ -410,7 +410,7 @@ export const ShowcaseLanding: React.FC = () => {
             {/* Right Column: 3-Photo Interactive Slideshow Carousel */}
             <div className="lg:col-span-5 flex justify-center w-full">
               <div
-                className="w-full max-w-[480px] aspect-video rounded-lg bg-[#0E0C0A] border border-white/10 shadow-2xl relative overflow-hidden group select-none flex items-center justify-center"
+                className="w-full max-w-[480px] aspect-video rounded-lg bg-[#0D0D0D] border border-white/10 shadow-2xl relative overflow-hidden group select-none flex items-center justify-center"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
@@ -463,7 +463,7 @@ export const ShowcaseLanding: React.FC = () => {
                       onClick={() => setCurrentSlide(index)}
                       className={`h-1.5 rounded-full transition-all cursor-pointer ${
                         currentSlide === index
-                          ? 'w-6 bg-[#E5A93C]'
+                          ? 'w-6 bg-white'
                           : 'w-2 bg-white/40 hover:bg-white/70'
                       }`}
                       aria-label={`Görsel ${index + 1}`}
@@ -490,7 +490,7 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
             
             {/* Step 1 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-white/30 transition-colors space-y-2.5">
               <h3 className="text-base sm:text-lg font-bold text-white">Masadaki QR&apos;ı Okut</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Masanızdaki Muzikors QR kodunu telefonunuzun kamerasıyla veya web sitemizden tarayın. Tarayıcınız otomatik olarak bulunduğunuz mekana bağlanır.
@@ -498,7 +498,7 @@ export const ShowcaseLanding: React.FC = () => {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-white/30 transition-colors space-y-2.5">
               <h3 className="text-base sm:text-lg font-bold text-white">Parçanı Seç &amp; Sırala</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Milyonlarca Spotify şarkısı arasından en sevdiğini ara, 30 saniyelik önizlemeyi dinle ve mekanın canlı çalma sırasına anında gönder.
@@ -506,7 +506,7 @@ export const ShowcaseLanding: React.FC = () => {
             </div>
 
             {/* Step 3 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-[#E5A93C]/40 transition-colors space-y-2.5">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] hover:border-white/30 transition-colors space-y-2.5">
               <h3 className="text-base sm:text-lg font-bold text-white">Oyla &amp; Ritmi Yakala</h3>
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
                 Sıradaki şarkılara masandaki arkadaşlarınla oy ver. En çok oy alan şarkı en öne çıksın, gecenin havasını hep beraber belirleyin.
@@ -534,7 +534,7 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             
             {/* Feature 1 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
               <h3 className="text-base font-bold text-white">Vibe Guard Koruma</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Mekanın tarzına uymayan parçalar filtrelenir. İşletme sahibi izin verilen müzik türlerini belirler, atmosfer daima korunur.
@@ -542,7 +542,7 @@ export const ShowcaseLanding: React.FC = () => {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
               <h3 className="text-base font-bold text-white">Muzikors VIP Abonelik</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Kredi satışı veya jeton hilesi yoktur. Google Play üzerinden tek bir VIP abonelikle reklamsız, limitsiz ve öncelikli şarkı isteyin.
@@ -550,7 +550,7 @@ export const ShowcaseLanding: React.FC = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-[#120D09] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
+            <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-7 border border-white/[0.08] space-y-2.5 hover:border-white/20 transition-all">
               <h3 className="text-base font-bold text-white">Anlık Sıra &amp; Oylama</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Her masadaki oylar anlık olarak toplanır. Popüler parçalar sıranın başına tırmanır, mekanın ortak enerjisi hoparlörlere yansır.
@@ -570,7 +570,7 @@ export const ShowcaseLanding: React.FC = () => {
             
             {/* Left Info */}
             <div className="lg:col-span-6 space-y-4 sm:space-y-6 text-center lg:text-left">
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#E5A93C]">İşletmeler İçin</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-zinc-400">İşletmeler İçin</span>
               <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
                 Kafenizde Müzik Karmaşasına Son Verin
               </h2>
@@ -615,7 +615,7 @@ export const ShowcaseLanding: React.FC = () => {
                   href="https://kafe.muzikors.com.tr"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-xs font-bold text-[#E5A93C] hover:underline min-h-[44px]"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-white hover:underline min-h-[44px]"
                 >
                   <span>Mevcut Ortak mısınız? Kafe Yönetim Paneline Giriş Yap</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -625,7 +625,7 @@ export const ShowcaseLanding: React.FC = () => {
 
             {/* Right Contact / Lead Form */}
             <div className="lg:col-span-6">
-              <div className="bg-[#120D09] rounded-lg p-5 sm:p-8 border border-white/10 shadow-2xl space-y-4 sm:space-y-5">
+              <div className="bg-[#0D0D0D] rounded-lg p-5 sm:p-8 border border-white/10 shadow-2xl space-y-4 sm:space-y-5">
                 <div className="border-b border-white/10 pb-3 sm:pb-4">
                   <h3 className="text-base sm:text-lg font-bold text-white">Mekan Ortaklığı Başvurusu</h3>
                   <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">Bilgilerinizi bırakın, ekibimiz kurulum için sizinle 24 saat içinde iletişime geçsin.</p>
@@ -671,8 +671,8 @@ export const ShowcaseLanding: React.FC = () => {
                         required
                         value={partnerForm.venueName}
                         onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
-                        placeholder="Örn: Velvet Lounge"
-                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E5A93C] transition-all"
+                        placeholder="Örn: Moda Sahne Cafe"
+                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-all"
                       />
                     </div>
 
@@ -688,7 +688,7 @@ export const ShowcaseLanding: React.FC = () => {
                           value={partnerForm.contactPerson}
                           onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
                           placeholder="Ad Soyad"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E5A93C] transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-all"
                         />
                       </div>
                       <div>
@@ -702,7 +702,7 @@ export const ShowcaseLanding: React.FC = () => {
                           value={partnerForm.city}
                           onChange={(e) => setPartnerForm({ ...partnerForm, city: e.target.value })}
                           placeholder="Örn: İstanbul / Kadıköy"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E5A93C] transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-all"
                         />
                       </div>
                     </div>
@@ -719,7 +719,7 @@ export const ShowcaseLanding: React.FC = () => {
                           value={partnerForm.phone}
                           onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
                           placeholder="05XX XXX XX XX"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E5A93C] transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-all"
                         />
                       </div>
                       <div>
@@ -732,7 +732,7 @@ export const ShowcaseLanding: React.FC = () => {
                           value={partnerForm.email}
                           onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
                           placeholder="iletisim@mekan.com"
-                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E5A93C] transition-all"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-all"
                         />
                       </div>
                     </div>
@@ -740,7 +740,7 @@ export const ShowcaseLanding: React.FC = () => {
                     <button
                       type="submit"
                       disabled={submittingLead}
-                      className="w-full py-2.5 sm:py-3 rounded-lg bg-[#E5A93C] hover:bg-[#F59E0B] disabled:opacity-50 text-black font-black text-xs transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+                      className="w-full py-2.5 sm:py-3 rounded-lg bg-white hover:bg-zinc-200 disabled:opacity-50 text-black font-black text-xs transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
                     >
                       {submittingLead ? (
                         <>
@@ -785,7 +785,7 @@ export const ShowcaseLanding: React.FC = () => {
               return (
                 <div
                   key={index}
-                  className="bg-[#120D09] rounded-lg border border-white/[0.08] overflow-hidden transition-colors"
+                  className="bg-[#0D0D0D] rounded-lg border border-white/[0.08] overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
@@ -795,7 +795,7 @@ export const ShowcaseLanding: React.FC = () => {
                   >
                     <span className="text-xs sm:text-base font-bold text-white">{faq.q}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-[#E5A93C] transition-transform duration-200 shrink-0 ${
+                      className={`w-4 h-4 text-white transition-transform duration-200 shrink-0 ${
                         isOpen ? 'rotate-180' : ''
                       }`}
                     />
@@ -853,7 +853,7 @@ export const ShowcaseLanding: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/delete-account" className="inline-flex items-center py-1.5 sm:py-2 text-amber-400/80 hover:text-amber-400 transition-colors min-h-[38px] sm:min-h-[44px]">
+                  <Link href="/delete-account" className="inline-flex items-center py-1.5 sm:py-2 text-neutral-400 hover:text-white transition-colors min-h-[38px] sm:min-h-[44px]">
                     Hesap ve Veri Silme Talebi
                   </Link>
                 </li>
