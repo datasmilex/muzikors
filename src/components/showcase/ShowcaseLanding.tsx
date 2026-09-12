@@ -828,8 +828,13 @@ export const ShowcaseLanding: React.FC = () => {
               <p className="text-xs text-neutral-400 leading-relaxed max-w-sm">
                 Muzikors, kafe ve mekanlarda müşterilerin dinlenen müziğe ortaklaşa karar verdiği interaktif sosyal müzik kutusu platformudur.
               </p>
-              <div className="text-[11px] text-neutral-500">
-                &copy; {new Date().getFullYear()} Muzikors Inc. Tüm hakları saklıdır.
+              <div className="text-[11px] text-neutral-500 space-y-1">
+                <div>&copy; {new Date().getFullYear()} Muzikors. Tüm hakları saklıdır.</div>
+                <div className="text-[11px] text-neutral-400 font-medium">
+                  Geliştirici &amp; Kurucu:{' '}
+                  <span className="text-white font-semibold">Yunus Emre Gedik</span>{' '}
+                  <span className="text-neutral-500 font-mono text-[10px]">(yunovax)</span>
+                </div>
               </div>
             </div>
 
