@@ -163,6 +163,12 @@ export const MusicSearchModal: React.FC = () => {
     }
   }, [confirmingTrack, registerBackHandler]);
 
+  const hasSpotify = Boolean(
+    activeVenue?.has_spotify ||
+    activeVenue?.current_track_info?.spotify_track_id ||
+    (activeVenue as any)?.spotify_refresh_token
+  );
+
   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
   const isVibeGuardActive = Array.isArray(activeVenue?.allowed_genres) && activeVenue.allowed_genres.length > 0;
 
@@ -215,9 +221,17 @@ export const MusicSearchModal: React.FC = () => {
       queryToFetch = 'yeni çıkanlar'; // all / default
     }
 
-    // Venue guard: if no spotify connection, block search
+    // Venue guard: if no venue selected, block search
     if (!activeVenue?.id) {
       setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // If venue doesn't have Spotify connected and not viewing history/top10
+    if (!hasSpotify && activeTab !== 'history' && activeTab !== 'top10') {
+      setSearchResults([]);
+      setIsLoading(false);
       return;
     }
 
@@ -269,7 +283,7 @@ export const MusicSearchModal: React.FC = () => {
             });
 
             // Parallel Spotify metadata enrichment for any history song lacking Spotify URI or album cover
-            if (activeVenue?.id) {
+            if (activeVenue?.id && hasSpotify) {
               const enrichedTracks = await Promise.all(
                 rawTracks.map(async (track) => {
                   if (track.spotifyUri && track.albumCover && !track.albumCover.includes('unsplash')) {
@@ -339,6 +353,12 @@ export const MusicSearchModal: React.FC = () => {
           return;
         }
 
+        if (!hasSpotify) {
+          setSearchResults([]);
+          setIsLoading(false);
+          return;
+        }
+
         console.log(`[MusicSearch] Invoking Edge Function spotify-search`);
         const { data: resData, error: invokeError } = await supabase.functions.invoke('spotify-search', {
           body: { q: queryToFetch, venueId: activeVenue.id }
@@ -373,7 +393,7 @@ export const MusicSearchModal: React.FC = () => {
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, activeVenue?.id]);
+  }, [searchQuery, activeTab, activeVenue?.id, hasSpotify]);
 
 
   
@@ -736,6 +756,18 @@ export const MusicSearchModal: React.FC = () => {
                       <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
                         {activeTab === 'history' ? 'Geçmiş İstekler Yükleniyor...' : 'Şarkılar Aranıyor...'}
                       </p>
+                    </div>
+                  ) : !hasSpotify && activeTab !== 'history' && activeTab !== 'top10' ? (
+                    <div className="text-center py-16 px-4 text-neutral-400 space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto text-neutral-500">
+                        <Music className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-white">Mekan Henüz Müzik Çalarını Bağlamadı</p>
+                        <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
+                          Mekan yetkilisi Spotify bağlantısını tamamladığında şarkı arama ve istek gönderme aktif olacaktır.
+                        </p>
+                      </div>
                     </div>
                   ) : allowedTracks.length === 0 && blockedTracks.length === 0 ? (
                     <div className="text-center py-16 text-neutral-500">

@@ -20,44 +20,14 @@ function AuthCallback() {
 
       try {
         const userId = session.user.id;
-        const provider = session.user.app_metadata?.provider ?? 'google';
-        const isSpotify = provider === 'spotify';
-        const hasSpotifyToken = !!session.provider_token;
-
-        let spotifyId = null;
-        let spotifyEmail = null;
-        let spotifyName = null;
-        let spotifyAvatar = null;
-
-        if (hasSpotifyToken) {
-          try {
-            const spRes = await fetch('https://api.spotify.com/v1/me', {
-              headers: { Authorization: `Bearer ${session.provider_token}` },
-            });
-            if (spRes.ok) {
-              const spData = await spRes.json();
-              spotifyId = spData.id;
-              spotifyEmail = spData.email;
-              spotifyName = spData.display_name;
-              const spImages = spData.images || [];
-              if (spImages.length > 0) {
-                spotifyAvatar = spImages[0].url;
-              }
-            }
-          } catch (err) {
-            console.warn('[Auth Callback] Could not fetch Spotify profile:', err);
-          }
-        }
 
         const fullName =
-          spotifyName ||
           session.user.user_metadata?.full_name ||
           session.user.user_metadata?.name ||
           session.user.email?.split('@')[0] ||
           'Kullanıcı';
 
         const avatarUrl =
-          spotifyAvatar ||
           session.user.user_metadata?.avatar_url ||
           session.user.user_metadata?.picture ||
           '';
@@ -69,14 +39,8 @@ function AuthCallback() {
               id: userId,
               full_name: fullName,
               avatar_url: avatarUrl,
-              email: session.user.email || spotifyEmail || '',
-              ...(isSpotify || hasSpotifyToken ? { is_spotify_connected: true } : {}),
-              ...(hasSpotifyToken ? {
-                spotify_id: spotifyId,
-                spotify_email: spotifyEmail,
-                spotify_access_token: session.provider_token,
-                spotify_refresh_token: session.provider_refresh_token,
-              } : {}),
+              email: session.user.email || '',
+              updated_at: new Date().toISOString(),
             },
             { onConflict: 'id' }
           );
