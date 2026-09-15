@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "build:android": "next build && npx cap sync android",
+    "build:ios": "next build && npx cap sync ios",
     "sync": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
     "start": "next start",
     "lint": "eslint"
   },
@@ -17,6 +19,7 @@
     "@capacitor/browser": "^8.0.4",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/ios": "^8.5.2",
     "@capacitor/push-notifications": "^8.1.2",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/supabase-js": "^2.110.8",

@@ -1,0 +1,87 @@
+name: Build & Deploy to App Store (iOS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_app_store:
+        description: 'App Store Connect / TestFlight yüklemesi yapılsın mı?'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  build-ios:
+    name: Build & Sign iOS IPA
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: 📥 Kodu Çek (Checkout)
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Node.js Kurulumu (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Bağımlılıkları Yükle (npm install)
+        run: npm install
+
+      - name: 🏗️ Web Uygulamasını Derle (Next.js Export)
+        run: npm run build
+
+      - name: 🔄 Capacitor iOS Senkronizasyonu
+        run: npx cap sync ios
+
+      - name: 🔑 App Store Connect API Anahtarını Hazırla
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY_CONTENT" > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+
+      - name: 🔨 Xcode Arşivi Oluştur (xcodebuild archive)
+        run: |
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
+            CODE_SIGN_STYLE="Automatic" \
+            DEVELOPMENT_TEAM="4A4X86HSR4"
+
+      - name: 📦 IPA Dosyasını Dışa Aktar (xcodebuild -exportArchive)
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ios/App/exportOptions.plist \
+            -exportPath build/out \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            -authenticationKeyIssuerID "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+
+      - name: 📤 IPA Dosyasını GitHub Artifacts Olarak Kaydet
+        uses: actions/upload-artifact@v4
+        with:
+          name: Muzikors-iOS-IPA
+          path: build/out/*.ipa
+          retention-days: 14
+
+      - name: 🚀 App Store Connect / TestFlight'a Yükle
+        if: ${{ inputs.upload_to_app_store == true }}
+        run: |
+          IPA_FILE=$(find build/out -name "*.ipa" | head -n 1)
+          echo "Yüklenecek IPA: $IPA_FILE"
+          xcrun altool --upload-app \
+            -f "$IPA_FILE" \
+            -t ios \
+            --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
