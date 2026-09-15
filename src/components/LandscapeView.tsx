@@ -657,22 +657,7 @@ export const LandscapeNavRail: React.FC = () => {
         </span>
       </div>
 
-      {/* 4. Sosyal Akış */}
-      <button
-        onClick={() => openModal('globalFeed')}
-        className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-all ${
-          activeModal === 'globalFeed'
-            ? 'text-[var(--theme-primary)] bg-[var(--theme-primary)]/10'
-            : 'text-neutral-400 hover:text-white'
-        } active:scale-90`}
-        title="Akış"
-      >
-        <MessageCircle className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'globalFeed' ? 2.5 : 2} />
-        <span className="text-[9px] font-bold tracking-tight">Akış</span>
-        {activeModal === 'globalFeed' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-      </button>
-
-      {/* 5. Sıralama / Liderlik Tablosu */}
+      {/* 4. Sıralama / Liderlik Tablosu */}
       <button
         onClick={() => openModal('leaderboard')}
         className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-all ${
@@ -685,6 +670,21 @@ export const LandscapeNavRail: React.FC = () => {
         <Trophy className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'leaderboard' ? 2.5 : 2} />
         <span className="text-[9px] font-bold tracking-tight">Sıralama</span>
         {activeModal === 'leaderboard' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
+      </button>
+
+      {/* 5. Profil */}
+      <button
+        onClick={() => openModal(user ? 'profile' : 'login')}
+        className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-all ${
+          activeModal === 'profile'
+            ? 'text-[var(--theme-primary)] bg-[var(--theme-primary)]/10'
+            : 'text-neutral-400 hover:text-white'
+        } active:scale-90`}
+        title="Profil"
+      >
+        <User className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'profile' ? 2.5 : 2} />
+        <span className="text-[9px] font-bold tracking-tight">Profil</span>
+        {activeModal === 'profile' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
       </button>
     </div>
   );

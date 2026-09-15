@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Store, Map, Plus, MessageCircle, Trophy } from 'lucide-react';
+import { Store, Map, Plus, Trophy, User as UserIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getUserDailySongRights } from '../lib/timeHelpers';
 
@@ -71,19 +71,6 @@ export const BottomNav: React.FC = () => {
           </span>
         </div>
 
-        {/* Akış */}
-        <button
-          onClick={() => openModal('globalFeed')}
-          aria-label="Küresel Akış"
-          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
-            activeModal === 'globalFeed' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
-          } active:scale-95`}
-        >
-          <MessageCircle className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'globalFeed' ? 2.5 : 2} />
-          <span className="text-[11px] font-bold tracking-tight">Akış</span>
-          {activeModal === 'globalFeed' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-        </button>
-
         {/* Sıralamalar */}
         <button
           onClick={() => openModal('leaderboard')}
@@ -95,6 +82,19 @@ export const BottomNav: React.FC = () => {
           <Trophy className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'leaderboard' ? 2.5 : 2} />
           <span className="text-[11px] font-bold tracking-tight">Sıralama</span>
           {activeModal === 'leaderboard' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
+        </button>
+
+        {/* Profil */}
+        <button
+          onClick={() => openModal(user ? 'profile' : 'login')}
+          aria-label="Profil"
+          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
+            activeModal === 'profile' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
+          } active:scale-95`}
+        >
+          <UserIcon className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'profile' ? 2.5 : 2} />
+          <span className="text-[11px] font-bold tracking-tight">Profil</span>
+          {activeModal === 'profile' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
         </button>
       </nav>
     </div>

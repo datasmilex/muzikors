@@ -20,7 +20,6 @@ import { PremiumModal } from './PremiumModal';
 import { DailyRewardModal } from './DailyRewardModal';
 import { RewardedAdModal } from './RewardedAdModal';
 import { ToastNotification } from './ToastNotification';
-import { GlobalFeedView } from './GlobalFeedView';
 import { LeaderboardModal } from './LeaderboardModal';
 import { LyricsModal } from './LyricsModal';
 import { MenuModal } from './MenuModal';
@@ -112,7 +111,6 @@ export const JukeboxView: React.FC<JukeboxViewProps> = ({ initialModal }) => {
       <DailyRewardModal />
       <RewardedAdModal />
       <PremiumModal />
-      <GlobalFeedView />
       <LyricsModal />
       <StoryShareModal />
       <ToastNotification />

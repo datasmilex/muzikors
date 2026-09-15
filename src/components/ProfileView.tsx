@@ -9,8 +9,6 @@ import { PremiumBadge, BetaTesterBadge } from './PremiumBadge';
 import Cropper from 'react-easy-crop';
 import { AvatarFrame } from './AvatarFrame';
 import { supabase } from '../lib/supabaseClient';
-import { SocialPost as SocialPostType, ProfileStats } from '../types';
-import { SocialPost } from './SocialPost';
 import { getLevelDetails, AVATAR_FRAMES, isFrameUnlocked } from '../utils/levelSystem';
 
 // ─── Crop helpers ─────────────────────────────────────────────────────────────
@@ -165,14 +163,9 @@ export const ProfileView: React.FC = () => {
     }
   }, [cropImageSrc, showConfirmDelete, isEditing, registerBackHandler]);
 
-  // Social & Stats state
+  // Profile state
   const [profileData, setProfileData] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [stats, setStats] = useState<ProfileStats>({ followers_count: 0, following_count: 0, posts_count: 0, is_following: false });
-  const [posts, setPosts] = useState<SocialPostType[]>([]);
-  const [newPostContent, setNewPostContent] = useState('');
-  const [isPosting, setIsPosting] = useState(false);
-  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,7 +179,7 @@ export const ProfileView: React.FC = () => {
 
     setIsLoadingProfile(true);
     try {
-      // 1. Fetch Profile
+      // Fetch Profile
       const { data: pData, error: pErr } = await supabase
         .from('profiles')
         .select('*')
@@ -195,75 +188,6 @@ export const ProfileView: React.FC = () => {
       
       if (!pErr && pData) {
         setProfileData(pData);
-      }
-
-      // 2. Fetch Stats
-      const { count: followersCount } = await supabase
-        .from('follows')
-        .select('*', { count: 'exact', head: true })
-        .eq('following_id', targetId);
-
-      const { count: followingCount } = await supabase
-        .from('follows')
-        .select('*', { count: 'exact', head: true })
-        .eq('follower_id', targetId);
-
-      let isFollowing = false;
-      if (user?.id && user.id !== targetId) {
-        const { data: followRel } = await supabase
-          .from('follows')
-          .select('id')
-          .eq('follower_id', user.id)
-          .eq('following_id', targetId)
-          .maybeSingle();
-        isFollowing = !!followRel;
-      }
-
-      setStats({
-        followers_count: followersCount || 0,
-        following_count: followingCount || 0,
-        posts_count: 0,
-        is_following: isFollowing,
-      });
-
-      // 3. Fetch Posts
-      const { data: postsData, error: postsErr } = await supabase
-        .from('posts')
-        .select(`
-          id, user_id, content, likes_count, comments_count, created_at,
-          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level),
-          post_likes ( user_id )
-        `)
-        .eq('user_id', targetId)
-        .order('created_at', { ascending: false });
-
-      if (!postsErr && postsData) {
-        const formattedPosts: SocialPostType[] = postsData.map((row: any) => {
-          const prof = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-          const authorFullName = prof?.full_name || (targetId === user?.id ? user?.name : pData?.full_name) || 'Muzikors Dinleyicisi';
-          const authorUsername = prof?.username || (targetId === user?.id ? user?.username : pData?.username) || '@dinleyici';
-          const authorAvatar = prof?.avatar_url || (targetId === user?.id ? user?.avatar : pData?.avatar_url);
-          const authorFrame = prof?.avatar_frame || (targetId === user?.id ? user?.avatar_frame : pData?.avatar_frame) || 'none';
-          const authorPremium = prof?.is_premium ?? (targetId === user?.id ? user?.isPremium : pData?.is_premium) ?? false;
-          const authorBeta = prof?.is_beta_tester ?? (targetId === user?.id ? user?.is_beta_tester : pData?.is_beta_tester) ?? false;
-
-          return {
-            id: row.id,
-            user_id: row.user_id,
-            content: row.content,
-            likes_count: row.likes_count || 0,
-            comments_count: row.comments_count || 0,
-            created_at: row.created_at,
-            user_full_name: authorFullName,
-            user_username: authorUsername,
-            user_avatar_url: authorAvatar,
-            user_avatar_frame: authorFrame,
-            user_is_beta_tester: authorBeta,
-            user_is_premium: authorPremium,
-            has_liked: user && row.post_likes ? row.post_likes.some((like: any) => like.user_id === user.id) : false,
-          };
-        });
-        setPosts(formattedPosts);
       }
     } catch (err) {
       console.error('[fetchProfileData error]', err);
@@ -339,100 +263,7 @@ export const ProfileView: React.FC = () => {
     }
   };
 
-  const handleCreatePost = async () => {
-    if (!newPostContent.trim() || !user || !supabase) return;
-    setIsPosting(true);
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .insert({
-          user_id: user.id,
-          content: newPostContent.trim(),
-        })
-        .select(`
-          id, user_id, content, likes_count, comments_count, created_at,
-          profiles:user_id (id, full_name, username, avatar_url, avatar_frame, is_premium, is_beta_tester, total_songs_requested, xp, level)
-        `)
-        .single();
 
-      if (error) throw error;
-      if (data) {
-        const prof = Array.isArray((data as any).profiles) ? (data as any).profiles[0] : (data as any).profiles;
-        const newFormattedPost: SocialPostType = {
-          id: data.id,
-          user_id: data.user_id,
-          content: data.content,
-          likes_count: data.likes_count || 0,
-          comments_count: data.comments_count || 0,
-          created_at: data.created_at,
-          user_full_name: prof?.full_name || user.name || 'Muzikors Dinleyicisi',
-          user_username: prof?.username || user.username || '@dinleyici',
-          user_avatar_url: prof?.avatar_url || user.avatar,
-          user_avatar_frame: prof?.avatar_frame || user.avatar_frame || 'none',
-          user_is_beta_tester: prof?.is_beta_tester ?? user.is_beta_tester ?? false,
-          user_is_premium: prof?.is_premium ?? user.isPremium ?? false,
-          has_liked: false,
-        };
-        setPosts(prev => [newFormattedPost, ...prev]);
-        setNewPostContent('');
-        showToast('Gönderi paylaşıldı!');
-      }
-    } catch (err) {
-      console.error('[Create Post Error]', err);
-      showToast('Gönderi paylaşılamadı.');
-    } finally {
-      setIsPosting(false);
-    }
-  };
-
-  const [isFollowingState, setIsFollowingState] = useState(false);
-
-  useEffect(() => {
-    setIsFollowingState(Boolean(stats.is_following));
-  }, [stats.is_following]);
-
-  const handleFollowToggle = async () => {
-    if (!user) {
-      showToast('Takip etmek için giriş yapmalısınız.');
-      return;
-    }
-    const targetId = viewingProfileId;
-    if (!targetId || targetId === user.id || !supabase) return;
-
-    setIsFollowLoading(true);
-    const nextState = !isFollowingState;
-    setIsFollowingState(nextState);
-    setStats(prev => ({
-      ...prev,
-      followers_count: prev.followers_count + (nextState ? 1 : -1),
-    }));
-
-    try {
-      if (!nextState) {
-        await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', targetId);
-        showToast('Takipten çıkıldı.');
-      } else {
-        await supabase
-          .from('follows')
-          .insert({ follower_id: user.id, following_id: targetId });
-        showToast('Takip edildi!');
-      }
-    } catch (err) {
-      console.error('[Follow Error]', err);
-      setIsFollowingState(!nextState);
-      setStats(prev => ({
-        ...prev,
-        followers_count: prev.followers_count + (!nextState ? 1 : -1),
-      }));
-      showToast('İşlem başarısız.');
-    } finally {
-      setIsFollowLoading(false);
-    }
-  };
 
   const handleSaveProfile = async () => {
     if (!user || !supabase) return;
@@ -769,224 +600,173 @@ export const ProfileView: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="mt-4 flex items-center gap-2 w-full justify-center">
-                          {isOwnProfile ? (
+                        {isOwnProfile && (
+                          <div className="mt-4 flex items-center gap-2 w-full justify-center">
                             <button
                               onClick={handleEditClick}
                               className="w-full py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs active:scale-95 transition-all shadow-sm"
                             >
                               Profili Düzenle
                             </button>
-                          ) : (
-                            <button
-                              onClick={handleFollowToggle}
-                              disabled={isFollowLoading}
-                              className={`w-full py-2.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md
-                                ${isFollowingState 
-                                  ? 'bg-white/5 border border-white/10 text-white' 
-                                  : 'bg-amber-400 text-black font-black'}`}
-                            >
-                              {isFollowLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                                isFollowingState ? <><Check className="w-4 h-4" /> Takip Ediliyor</> : 'Takip Et'
-                              )}
-                            </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
                 </div>
 
-                {/* ─── Profile Details & Feed in 2 Columns on Landscape ─── */}
-                <div className="landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-start mt-2">
-                  {/* Left Column: Level, Stats, Theme & Auth Actions */}
-                  <div className="space-y-3">
-                    {/* ─── Level & XP Progress Card ─── */}
-                    <div className="w-full bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] p-3.5 shadow-sm space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border ${levelInfo.tier.badgeBg} ${levelInfo.tier.badgeText} ${levelInfo.tier.badgeBorder}`}>
-                            Lv. {levelInfo.level}
-                          </span>
-                          <span className="text-xs font-black text-white flex items-center gap-1">
-                            <span>{levelInfo.icon}</span>
-                            <span>{levelInfo.title}</span>
+                {/* ─── Profile Details ─── */}
+                <div className="space-y-3 mt-2">
+                  {/* ─── Level & XP Progress Card ─── */}
+                  <div className="w-full bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] p-3.5 shadow-sm space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border ${levelInfo.tier.badgeBg} ${levelInfo.tier.badgeText} ${levelInfo.tier.badgeBorder}`}>
+                          Lv. {levelInfo.level}
+                        </span>
+                        <span className="text-xs font-black text-white flex items-center gap-1">
+                          <span>{levelInfo.icon}</span>
+                          <span>{levelInfo.title}</span>
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-amber-400">
+                        {levelInfo.currentLevelXp} / {levelInfo.xpForNextLevel} XP
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/5">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${levelInfo.progressPercentage}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[9px] text-neutral-400 font-semibold px-0.5">
+                      <span>%{levelInfo.progressPercentage} tamamlandı</span>
+                      <span>Sonraki seviyeye {levelInfo.remainingXpForNext} XP</span>
+                    </div>
+                  </div>
+
+                  {/* ─── Jukebox Stats ─── */}
+                  <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 shadow-inner">
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-sm font-black text-white">
+                        {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
+                      </span>
+                      <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Toplam İstek</span>
+                    </div>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-sm font-black text-amber-400">
+                        Lv. {levelInfo.level}
+                      </span>
+                      <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Seviye</span>
+                    </div>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-sm font-black text-emerald-400">
+                        {currentProfile?.daily_streak ?? currentProfile?.dailyStreak ?? 1} Gün
+                      </span>
+                      <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Günlük Seri</span>
+                    </div>
+                  </div>
+
+                  {/* Settings / Auth Actions for Own Profile */}
+                  {isOwnProfile && (
+                    <div className="border-t border-white/[0.08] pt-4 space-y-3">
+                      {/* Theme Switcher in Profile */}
+                      <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
+                        <div className="flex items-center justify-between mb-3 px-1">
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
+                            <span className="text-xs font-bold text-white">Renk Teması</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
+                            {THEMES.find((t) => t.id === theme)?.name}
                           </span>
                         </div>
-                        <span className="text-[10px] font-mono font-bold text-amber-400">
-                          {levelInfo.currentLevelXp} / {levelInfo.xpForNextLevel} XP
-                        </span>
-                      </div>
 
-                      {/* Progress Bar */}
-                      <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/5">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${levelInfo.progressPercentage}%` }}
-                          transition={{ duration: 0.6, ease: 'easeOut' }}
-                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between text-[9px] text-neutral-400 font-semibold px-0.5">
-                        <span>%{levelInfo.progressPercentage} tamamlandı</span>
-                        <span>Sonraki seviyeye {levelInfo.remainingXpForNext} XP</span>
-                      </div>
-                    </div>
-
-                    {/* ─── Profile Stats ─── */}
-                    <div className="flex justify-around items-center bg-[var(--theme-card-alt)] rounded-2xl border border-white/[0.08] py-3 shadow-inner">
-                      <div className="flex flex-col items-center flex-1">
-                        <span className="text-sm font-black text-white">
-                          {currentProfile?.totalSongsRequested ?? currentProfile?.total_songs_requested ?? 0}
-                        </span>
-                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Toplam İstek</span>
-                      </div>
-                      <div className="w-px h-8 bg-white/10" />
-                      <div className="flex flex-col items-center flex-1">
-                        <span className="text-sm font-black text-white">{stats.followers_count}</span>
-                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takipçi</span>
-                      </div>
-                      <div className="w-px h-8 bg-white/10" />
-                      <div className="flex flex-col items-center flex-1">
-                        <span className="text-sm font-black text-white">{stats.following_count}</span>
-                        <span className="text-[9px] text-neutral-400 uppercase tracking-widest font-bold">Takip Edilen</span>
-                      </div>
-                    </div>
-
-                    {/* Settings / Auth Actions for Own Profile */}
-                    {isOwnProfile && (
-                      <div className="border-t border-white/[0.08] pt-4 space-y-3">
-                        {/* Theme Switcher in Profile */}
-                        <div className="p-3.5 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08]">
-                          <div className="flex items-center justify-between mb-3 px-1">
-                            <div className="flex items-center gap-2">
-                              <Palette className="w-4 h-4 text-[var(--theme-primary)]" />
-                              <span className="text-xs font-bold text-white">Renk Teması</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
-                              {THEMES.find((t) => t.id === theme)?.name}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-5 gap-1.5">
-                            {THEMES.map((t) => {
-                              const isSelected = theme === t.id;
-                              return (
-                                <button
-                                  key={t.id}
-                                  onClick={() => setTheme(t.id)}
-                                  title={`${t.name} - ${t.subtitle}`}
-                                  className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all cursor-pointer ${
-                                    isSelected
-                                      ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
-                                      : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
-                                  }`}
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {THEMES.map((t) => {
+                            const isSelected = theme === t.id;
+                            return (
+                              <button
+                                key={t.id}
+                                onClick={() => setTheme(t.id)}
+                                title={`${t.name} - ${t.subtitle}`}
+                                className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-white/10 border border-[var(--theme-primary)] shadow-sm'
+                                    : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
+                                }`}
+                              >
+                                <div
+                                  className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
+                                  style={{ backgroundColor: t.previewColor || t.accentColor }}
                                 >
-                                  <div
-                                    className="w-7 h-7 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
-                                    style={{ backgroundColor: t.previewColor || t.accentColor }}
-                                  >
-                                    {isSelected && (
-                                      <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} />
-                                    )}
-                                  </div>
-                                  <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
-                                    {t.name}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {!user ? (
-                          <button
-                            onClick={() => { closeModal(); openModal('login'); }}
-                            className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg cursor-pointer"
-                          >
-                            <span>Giriş Yap / Kayıt Ol</span>
-                          </button>
-                        ) : (
-                          <div className="space-y-2 pt-1">
-                            <button
-                              onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
-                              className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                            >
-                              <LogOut className="w-3.5 h-3.5 text-neutral-400" />
-                              Çıkış Yap
-                            </button>
-                            <button
-                              onClick={() => setShowConfirmDelete(true)}
-                              className="w-full py-2.5 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              Hesabı Sil
-                            </button>
-
-                            {showConfirmDelete && (
-                              <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-3 mt-2">
-                                <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => setShowConfirmDelete(false)}
-                                    className="flex-1 py-2 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95"
-                                  >
-                                    İptal
-                                  </button>
-                                  <button
-                                    onClick={() => { deleteAccount(); setShowConfirmDelete(false); }}
-                                    className="flex-1 py-2 rounded-xl bg-red-600 text-white font-black text-xs active:scale-95"
-                                  >
-                                    Sil
-                                  </button>
+                                  {isSelected && (
+                                    <Check className={`w-3.5 h-3.5 stroke-[3] ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} />
+                                  )}
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right Column: Social Feed */}
-                  <div className="relative">
-                    <h3 className="text-sm font-black text-white mb-3 border-b border-white/[0.08] pb-2">Gönderiler</h3>
-                    
-                    {isOwnProfile && (
-                      <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3.5 border border-white/[0.08] mb-3 shadow-inner">
-                        <textarea
-                          placeholder="Yeni gönderi paylaş..."
-                          value={newPostContent}
-                          onChange={e => setNewPostContent(e.target.value)}
-                          maxLength={280}
-                          className="w-full bg-transparent text-xs text-white placeholder-neutral-500 resize-none focus:outline-none min-h-[46px]"
-                        />
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                          <span className={`text-[10px] font-bold ${newPostContent.length >= 280 ? 'text-red-400' : 'text-neutral-500'}`}>
-                            {newPostContent.length}/280
-                          </span>
-                          <button
-                            onClick={handleCreatePost}
-                            disabled={isPosting || !newPostContent.trim()}
-                            className="bg-[var(--theme-primary)] text-black px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
-                          >
-                            {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Paylaş'}
-                          </button>
+                                <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
+                                  {t.name}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
-                    )}
 
-                    {posts.length === 0 ? (
-                      <div className="text-center py-8 opacity-70">
-                        <p className="text-xs text-neutral-500 font-medium">Henüz gönderi yok.</p>
-                      </div>
-                    ) : (
-                      posts.map(post => (
-                        <SocialPost key={post.id} post={post} onPostUpdated={fetchProfileData} />
-                      ))
-                    )}
-                  </div>
+                      {!user ? (
+                        <button
+                          onClick={() => { closeModal(); openModal('login'); }}
+                          className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg cursor-pointer"
+                        >
+                          <span>Giriş Yap / Kayıt Ol</span>
+                        </button>
+                      ) : (
+                        <div className="space-y-2 pt-1">
+                          <button
+                            onClick={() => { closeModal(); setTimeout(() => logout(), 150); }}
+                            className="w-full py-2.5 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                          >
+                            <LogOut className="w-3.5 h-3.5 text-neutral-400" />
+                            Çıkış Yap
+                          </button>
+                          <button
+                            onClick={() => setShowConfirmDelete(true)}
+                            className="w-full py-2.5 px-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Hesabı Sil
+                          </button>
+
+                          {showConfirmDelete && (
+                            <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-3 mt-2">
+                              <p className="text-xs text-red-300 font-bold text-center">Hesabınız kalıcı olarak silinecek. Emin misiniz?</p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setShowConfirmDelete(false)}
+                                  className="flex-1 py-2 rounded-xl bg-white/10 text-white font-bold text-xs active:scale-95"
+                                >
+                                  İptal
+                                </button>
+                                <button
+                                  onClick={() => { deleteAccount(); setShowConfirmDelete(false); }}
+                                  className="flex-1 py-2 rounded-xl bg-red-600 text-white font-black text-xs active:scale-95"
+                                >
+                                  Sil
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}

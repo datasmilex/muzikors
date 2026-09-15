@@ -143,7 +143,6 @@ export type ModalType =
   | 'cookie'
   | 'daily_reward'
   | 'premium'
-  | 'globalFeed'
   | 'venue_info'
   | 'leaderboard'
   | 'rewarded_ad'
@@ -151,42 +150,6 @@ export type ModalType =
   | 'menu'
   | 'venue_owner'
   | 'story_share';
-
-export interface SocialPost {
-  id: string;
-  user_id: string;
-  content: string;
-  likes_count: number;
-  comments_count: number;
-  created_at: string;
-  user_full_name?: string;
-  user_username?: string;
-  user_avatar_url?: string;
-  user_avatar_frame?: string;
-  user_is_beta_tester?: boolean;
-  user_is_premium?: boolean;
-  has_liked?: boolean;
-}
-
-export interface SocialComment {
-  id: string;
-  post_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  user_full_name?: string;
-  user_username?: string;
-  user_avatar_url?: string;
-  user_is_beta_tester?: boolean;
-  user_is_premium?: boolean;
-}
-
-export interface ProfileStats {
-  posts_count: number;
-  followers_count: number;
-  following_count: number;
-  is_following?: boolean;
-}
 
 export interface CooldownState {
   active: boolean;

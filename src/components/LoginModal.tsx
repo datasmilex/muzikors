@@ -7,9 +7,14 @@ import { useApp } from '../context/AppContext';
 
 export const LoginModal: React.FC = () => {
   const { activeModal, closeModal, loginWithProvider, loginPromptReason, showToast, openModal } = useApp();
+  const [ageConsent, setAgeConsent] = useState(false);
   const [legalConsent, setLegalConsent] = useState(false);
 
   const handleLoginClick = (provider: 'google' | 'apple') => {
+    if (!ageConsent) {
+      showToast('Giriş yapabilmek için 13 yaş ve üzerinde olduğunuzu onaylamalısınız.');
+      return;
+    }
     if (!legalConsent) {
       showToast('Devam etmek için lütfen yasal metinleri onaylayın.');
       return;
@@ -77,6 +82,28 @@ export const LoginModal: React.FC = () => {
                     <span>{loginPromptReason}</span>
                   </div>
                 )}
+
+                {/* 13+ Age Checkbox */}
+                <label className="flex items-start gap-2.5 cursor-pointer bg-white/[0.03] p-2.5 rounded-2xl border border-white/[0.06] hover:bg-white/[0.06] transition-colors">
+                  <div className="mt-0.5 shrink-0 flex items-center justify-center w-4 h-4 rounded-md border border-neutral-600 bg-black overflow-hidden relative">
+                    <input
+                      type="checkbox"
+                      checked={ageConsent}
+                      onChange={(e) => setAgeConsent(e.target.checked)}
+                      className="absolute opacity-0 cursor-pointer w-full h-full"
+                    />
+                    {ageConsent && (
+                      <div className="absolute inset-0 bg-[var(--theme-primary)] flex items-center justify-center pointer-events-none">
+                        <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[10px] leading-relaxed text-neutral-300 font-semibold select-none">
+                    13 yaş ve üzerinde olduğumu beyan ve kabul ediyorum.
+                  </span>
+                </label>
 
                 {/* Legal Checkbox */}
                 <label className="flex items-start gap-2.5 cursor-pointer bg-white/[0.03] p-2.5 rounded-2xl border border-white/[0.06] hover:bg-white/[0.06] transition-colors">
