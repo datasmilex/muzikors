@@ -102,7 +102,7 @@ export interface UserProfile {
   avatar: string;
   totalSongsRequested: number;
   isSpotifyConnected?: boolean;
-  loginMethod: 'google' | 'spotify';
+  loginMethod: 'google' | 'spotify' | 'apple';
   lastDailyClaim?: string;
   isPremium?: boolean;
   daily_free_votes?: number;

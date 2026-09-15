@@ -9,7 +9,7 @@ export const LoginModal: React.FC = () => {
   const { activeModal, closeModal, loginWithProvider, loginPromptReason, showToast, openModal } = useApp();
   const [legalConsent, setLegalConsent] = useState(false);
 
-  const handleLoginClick = (provider: 'google') => {
+  const handleLoginClick = (provider: 'google' | 'apple') => {
     if (!legalConsent) {
       showToast('Devam etmek için lütfen yasal metinleri onaylayın.');
       return;
@@ -106,7 +106,7 @@ export const LoginModal: React.FC = () => {
                 {/* Google Button */}
                 <button
                   onClick={() => handleLoginClick('google')}
-                  className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-md hover:bg-neutral-100"
+                  className="w-full py-3 px-4 rounded-2xl bg-white text-black font-black text-xs flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-md hover:bg-neutral-100 cursor-pointer"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -115,6 +115,17 @@ export const LoginModal: React.FC = () => {
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                   </svg>
                   <span>Google ile Giriş Yap</span>
+                </button>
+
+                {/* Apple Button */}
+                <button
+                  onClick={() => handleLoginClick('apple')}
+                  className="w-full py-3 px-4 rounded-2xl bg-black hover:bg-neutral-900 border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2.5 active:scale-95 transition-all shadow-md cursor-pointer"
+                >
+                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 170 170">
+                    <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.6-7.79-11.71-14.25-5.78-9.08-10.36-19.14-13.73-30.19-3.37-11.05-5.06-21.72-5.06-32 0-14.15 3.37-26.04 10.11-35.66 6.74-9.62 15.44-14.54 26.1-14.76 4.35 0 9.29 1.14 14.83 3.42 5.54 2.28 9.38 3.53 11.53 3.75 1.85-.22 5.89-1.52 12.11-3.9 6.23-2.39 11.41-3.47 15.55-3.26 13.92.76 24.81 5.98 32.65 15.65-12.18 7.39-18.15 17.5-17.93 30.33.22 10.22 4.13 18.81 11.74 25.77 7.61 6.96 16.63 10.87 27.07 11.74-2.18 6.52-4.89 13.48-8.15 20.87zM119.22 31.85c0-7.39 2.61-14.13 7.83-20.22 5.22-6.09 11.63-9.9 19.24-11.41.22 1.3.33 2.5.33 3.59 0 7.39-2.72 14.35-8.15 20.87-5.43 6.52-12.07 10.33-19.89 11.41-.22-1.08-.36-2.5-.36-4.24z" />
+                  </svg>
+                  <span>Apple ile Giriş Yap</span>
                 </button>
               </div>
             </div>

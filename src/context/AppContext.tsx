@@ -35,7 +35,7 @@ interface AppContextType {
   loginPromptReason: string | null;
   audioProgress: number;
   isPlayingAudio: boolean;
-  loginWithProvider: (provider: 'google') => Promise<void>;
+  loginWithProvider: (provider: 'google' | 'apple') => Promise<void>;
   openModal: (modal: ModalType) => void;
   openProtectedModal: (modal: ModalType, reason?: string) => void;
   closeModal: (arg?: any) => void;
@@ -605,7 +605,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         daily_vetoes_count: dbProfile.daily_vetoes_count || 0,
         last_reset_date: dbProfile.last_reset_date || null,
         extra_song_credits: Number(dbProfile.extra_song_credits ?? prev?.extra_song_credits ?? 0),
-        loginMethod: 'google',
+        loginMethod: (authUser.app_metadata?.provider === 'apple' ? 'apple' : 'google') as 'google' | 'apple',
       }));
     };
 
@@ -1273,7 +1273,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [closeModal, showToast]);
 
-  const loginWithProvider = useCallback(async (provider: 'google') => {
+  const loginWithProvider = useCallback(async (provider: 'google' | 'apple') => {
     if (!supabase) return;
     const isNative = Capacitor.isNativePlatform();
     const redirectUrl = isNative 
@@ -1282,7 +1282,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
+          provider: provider,
           options: { 
             redirectTo: redirectUrl,
             skipBrowserRedirect: isNative
@@ -1290,7 +1290,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         
         if (error) { 
-          console.error('[OAuth Google]', error); 
+          console.error(`[OAuth ${provider}]`, error); 
           showToast('Giris yapilamadi.'); 
           return;
         }
