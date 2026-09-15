@@ -34,55 +34,21 @@ jobs:
       - name: 🔄 Capacitor iOS Senkronizasyonu
         run: npx cap sync ios
 
-      - name: 🔑 App Store Connect API Anahtarını Hazırla
+      - name: 🚀 Fastlane ile Sertifikaları Yönet, Derle ve Yükle
         env:
-          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          UPLOAD_TO_APP_STORE: ${{ inputs.upload_to_app_store }}
         run: |
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$KEY_CONTENT" > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
-
-      - name: 🔨 Xcode Arşivi Oluştur (xcodebuild archive)
-        run: |
-          xcodebuild archive \
-            -project ios/App/App.xcodeproj \
-            -scheme App \
-            -configuration Release \
-            -destination "generic/platform=iOS" \
-            -archivePath build/App.xcarchive \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
-            -authenticationKeyIssuerID "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" \
-            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
-            CODE_SIGN_STYLE="Automatic" \
-            DEVELOPMENT_TEAM="4A4X86HSR4"
-
-      - name: 📦 IPA Dosyasını Dışa Aktar (xcodebuild -exportArchive)
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist ios/App/exportOptions.plist \
-            -exportPath build/out \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
-            -authenticationKeyIssuerID "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" \
-            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          cd ios/App
+          fastlane ios release
 
       - name: 📤 IPA Dosyasını GitHub Artifacts Olarak Kaydet
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Muzikors-iOS-IPA
-          path: build/out/*.ipa
+          path: ios/App/build/out/*.ipa
           retention-days: 14
 
-      - name: 🚀 App Store Connect / TestFlight'a Yükle
-        if: ${{ inputs.upload_to_app_store == true }}
-        run: |
-          IPA_FILE=$(find build/out -name "*.ipa" | head -n 1)
-          echo "Yüklenecek IPA: $IPA_FILE"
-          xcrun altool --upload-app \
-            -f "$IPA_FILE" \
-            -t ios \
-            --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
-            --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
