@@ -19,10 +19,10 @@ jobs:
       - name: 📥 Kodu Çek (Checkout)
         uses: actions/checkout@v4
 
-      - name: ⚙️ Node.js Kurulumu (v20)
+      - name: ⚙️ Node.js Kurulumu (v22)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: 📦 Bağımlılıkları Yükle (npm install)
@@ -49,6 +49,7 @@ jobs:
             -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -archivePath build/App.xcarchive \
             -allowProvisioningUpdates \
             -authenticationKeyID "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
