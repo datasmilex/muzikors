@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const viewport: Viewport = {
   themeColor: '#120C08',
@@ -154,7 +151,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} min-h-full antialiased selection:bg-white selection:text-black`}>
+      <body className="min-h-full font-sans antialiased selection:bg-white selection:text-black">
         {children}
       </body>
     </html>

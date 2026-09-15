@@ -5,10 +5,12 @@ import { supabase } from '../lib/supabaseClient';
 
 export const PREMIUM_PRODUCT_ID = 'muzikors_premium';
 export const KAFE_PRODUCT_ID = 'kafe_abonelik';
+export const KAFE_ANNUAL_PRODUCT_ID = 'kafe_abonelik_yillik';
 
 class IAPService {
   private isInitialized = false;
   private activePendingVenueId: number | null = null;
+  private activePlanType: 'monthly' | 'annual' = 'monthly';
   private onPurchaseSuccessCallback: (() => void) | null = null;
   private onPurchaseErrorCallback: ((error: string) => void) | null = null;
 
@@ -47,6 +49,11 @@ class IAPService {
           id: KAFE_PRODUCT_ID,
           platform: CdvPurchase.Platform.GOOGLE_PLAY,
         },
+        {
+          type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+          id: KAFE_ANNUAL_PRODUCT_ID,
+          platform: CdvPurchase.Platform.GOOGLE_PLAY,
+        },
       ]);
 
       // Set up transaction listeners
@@ -56,11 +63,11 @@ class IAPService {
           try {
             const productId = transaction.products?.[0]?.id || transaction.id;
 
-            if (productId === KAFE_PRODUCT_ID || this.activePendingVenueId !== null) {
+            if (productId === KAFE_PRODUCT_ID || productId === KAFE_ANNUAL_PRODUCT_ID || this.activePendingVenueId !== null) {
               const targetVenueId = this.activePendingVenueId;
               const { data, error } = await supabase.rpc('activate_venue_subscription_self', {
                 p_venue_id: targetVenueId || null,
-                p_product_id: KAFE_PRODUCT_ID,
+                p_product_id: productId || (this.activePlanType === 'annual' ? KAFE_ANNUAL_PRODUCT_ID : KAFE_PRODUCT_ID),
                 p_order_id: transaction.transactionId || null,
                 p_purchase_token: transaction.purchaseToken || null,
               });
@@ -111,9 +118,11 @@ class IAPService {
     return this.orderProduct(PREMIUM_PRODUCT_ID);
   }
 
-  public async subscribeVenue(venueId: number): Promise<{ success: boolean; message?: string }> {
+  public async subscribeVenue(venueId: number, plan: 'monthly' | 'annual' = 'monthly'): Promise<{ success: boolean; message?: string }> {
     this.activePendingVenueId = venueId;
-    return this.orderProduct(KAFE_PRODUCT_ID);
+    this.activePlanType = plan;
+    const targetProductId = plan === 'annual' ? KAFE_ANNUAL_PRODUCT_ID : KAFE_PRODUCT_ID;
+    return this.orderProduct(targetProductId);
   }
 
   private async orderProduct(productId: string): Promise<{ success: boolean; message?: string }> {
