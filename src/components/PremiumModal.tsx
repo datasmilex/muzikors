@@ -479,14 +479,14 @@ export const PremiumModal: React.FC = () => {
                           <div className="w-2 h-2 rounded-full bg-amber-400" />
                         )}
                       </div>
-                      <div className="text-lg font-black text-white">700 TL <span className="text-[10px] font-normal text-neutral-400">/ Ay</span></div>
+                      <div className="text-lg font-black text-white">719,99 TL <span className="text-[10px] font-normal text-neutral-400">/ Ay</span></div>
                     </div>
-                    <p className="text-[10px] text-neutral-400 mt-2">
-                      Dijital QR kodları sisteme dahildir.
-                    </p>
+                    <div className="text-[10px] text-neutral-400 mt-2 pt-2 border-t border-white/5">
+                      600 TL + %20 KDV · 14 Gün Ücretsiz
+                    </div>
                   </div>
 
-                  {/* Annual Plan (10% Off + Free Kit) */}
+                  {/* Annual Plan (20% Off First Year) */}
                   <div
                     onClick={() => setSelectedCafePlan('annual')}
                     className={`p-3.5 rounded-lg border cursor-pointer transition-all relative flex flex-col justify-between ${
@@ -496,7 +496,7 @@ export const PremiumModal: React.FC = () => {
                     }`}
                   >
                     <div className="absolute -top-2.5 right-2 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-black uppercase tracking-wider">
-                      %10 Tasarruf
+                      %20 Tasarruf
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -505,12 +505,12 @@ export const PremiumModal: React.FC = () => {
                           <div className="w-2 h-2 rounded-full bg-emerald-400" />
                         )}
                       </div>
-                      <div className="text-lg font-black text-white">7.560 TL <span className="text-[10px] font-normal text-neutral-400">/ Yıl</span></div>
-                      <span className="text-[10px] text-neutral-400">(Aylık 630 TL&apos;ye denk gelir)</span>
+                      <div className="text-lg font-black text-white">6.911,99 TL <span className="text-[10px] font-normal text-neutral-400">/ Yıl</span></div>
+                      <span className="text-[10px] text-neutral-400">(Aylık 575,99 TL&apos;ye denk gelir)</span>
                     </div>
                     <div className="mt-2 pt-2 border-t border-white/5 text-[10px] text-emerald-300 font-bold flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3 shrink-0" />
-                      <span>Pleksi QR Stant Kiti Hediye</span>
+                      <span>İlk Yıl %20 İndirimli</span>
                     </div>
                   </div>
                 </div>
@@ -522,14 +522,14 @@ export const PremiumModal: React.FC = () => {
                       <MessageCircle className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white">Fiziksel Pleksi Stant &amp; Sticker Kiti</h4>
+                      <h4 className="text-xs font-bold text-white">Fiziksel Pleksi Stant &amp; Materyal Kiti</h4>
                       <p className="text-[10px] text-neutral-400">
-                        Aylık aboneler ve denemedekiler için IBAN ile doğrudan sipariş hattı.
+                        Masa sayısı ve mekan talebinize göre özel fiyat teklifi için bize yazabilirsiniz.
                       </p>
                     </div>
                   </div>
                   <a
-                    href="https://wa.me/905068638306?text=Merhaba%20Muzikors,%20kafem%20i%C3%A7in%20fiziksel%20pleksi%20QR%20stant%20ve%20sticker%20seti%20sat%C4%B1n%20almak%20istiyorum."
+                    href="https://wa.me/905068638306?text=Merhaba%20Muzikors,%20kafem%20i%C3%A7in%20pleksi%20QR%20stant%20ve%20masa%20kiti%20hakk%C4%B1nda%20fiyat%20teklifi%20almak%20istiyorum."
                     target="_blank"
                     rel="noreferrer"
                     className="shrink-0 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[11px] flex items-center gap-1 transition-all active:scale-95 cursor-pointer shadow-sm"
@@ -746,7 +746,7 @@ export const PremiumModal: React.FC = () => {
                 <div className="p-2.5 rounded-lg bg-neutral-900 border border-white/5 flex items-center justify-between text-[11px]">
                   <span className="text-neutral-400">Seçilen Plan:</span>
                   <span className="font-bold text-white">
-                    {selectedCafePlan === 'annual' ? 'Yıllık Plan (7.560 TL / Yıl - Pleksi Kit Hediyeli)' : 'Aylık Plan (700 TL / Ay)'}
+                    {selectedCafePlan === 'annual' ? 'Yıllık Plan (6.911,99 TL / Yıl - İlk Yıl %20 İndirimli)' : 'Aylık Plan (719,99 TL / Ay - 600 TL + KDV)'}
                   </span>
                 </div>
 

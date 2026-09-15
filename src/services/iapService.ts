@@ -22,7 +22,7 @@ class IAPService {
     if (onError) this.onPurchaseErrorCallback = onError;
 
     if (!Capacitor.isNativePlatform()) {
-      console.log('[IAPService] Web platform detected, native Google Play Billing disabled.');
+      console.log('[IAPService] Web platform detected, native In-App Purchase disabled.');
       return;
     }
 
@@ -36,23 +36,27 @@ class IAPService {
       }
 
       const store = CdvPurchase.store;
+      const isIos = Capacitor.getPlatform() === 'ios';
+      const targetPlatform = isIos
+        ? (CdvPurchase.Platform.APPLE_APPSTORE || 'apple-appstore')
+        : (CdvPurchase.Platform.GOOGLE_PLAY || 'google-play');
 
-      // Register Google Play Subscriptions
+      // Register Subscriptions for Google Play & Apple App Store
       store.register([
         {
           type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
           id: PREMIUM_PRODUCT_ID,
-          platform: CdvPurchase.Platform.GOOGLE_PLAY,
+          platform: targetPlatform,
         },
         {
           type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
           id: KAFE_PRODUCT_ID,
-          platform: CdvPurchase.Platform.GOOGLE_PLAY,
+          platform: targetPlatform,
         },
         {
           type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
           id: KAFE_ANNUAL_PRODUCT_ID,
-          platform: CdvPurchase.Platform.GOOGLE_PLAY,
+          platform: targetPlatform,
         },
       ]);
 
@@ -85,7 +89,7 @@ class IAPService {
               else console.log('[IAPService] Premium activated successfully:', data);
             }
 
-            // Finish the transaction with Google Play (Acknowledge)
+            // Finish the transaction (Acknowledge)
             await transaction.finish();
 
             if (this.onPurchaseSuccessCallback) {
@@ -105,10 +109,10 @@ class IAPService {
           console.log('[IAPService] Transaction finished:', transaction);
         });
 
-      // Initialize the store
-      await store.initialize([CdvPurchase.Platform.GOOGLE_PLAY]);
+      // Initialize the store with active platform
+      await store.initialize([targetPlatform]);
       this.isInitialized = true;
-      console.log('[IAPService] Google Play Billing Store initialized successfully.');
+      console.log(`[IAPService] In-App Purchase Store (${isIos ? 'Apple App Store' : 'Google Play'}) initialized successfully.`);
     } catch (err: any) {
       console.error('[IAPService] Initialization error:', err);
     }
@@ -129,14 +133,14 @@ class IAPService {
     if (!Capacitor.isNativePlatform()) {
       return {
         success: false,
-        message: 'Abonelik işlemi sadece Android mobil uygulaması üzerinden Google Play ile yapılabilir.',
+        message: 'Abonelik işlemi iOS ve Android mobil uygulamaları (App Store & Google Play) üzerinden başlatılabilir.',
       };
     }
 
     try {
       const CdvPurchase = (window as any).CdvPurchase;
       if (!CdvPurchase || !CdvPurchase.store) {
-        throw new Error('Google Play Faturalandırma Servisi başlatılamadı. Lütfen uygulamayı yeniden başlatın.');
+        throw new Error('Uygulama İçi Faturalandırma Servisi başlatılamadı. Lütfen uygulamayı yeniden başlatın.');
       }
 
       const store = CdvPurchase.store;
@@ -155,7 +159,7 @@ class IAPService {
           await store.order(fallbackOffer);
           return { success: true };
         }
-        throw new Error('Abonelik paketi Google Play üzerinden yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
+        throw new Error('Abonelik paketi mağaza üzerinden yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
       }
 
       const result = await store.order(offer);

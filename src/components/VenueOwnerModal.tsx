@@ -23,7 +23,8 @@ import {
   Radio,
   ArrowRight,
   MapPin,
-  Shield
+  Shield,
+  MessageCircle
 } from 'lucide-react';
 import { iapService } from '../services/iapService';
 
@@ -46,6 +47,7 @@ export const VenueOwnerModal: React.FC = () => {
   const [venues, setVenues] = useState<OwnedVenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingVenueId, setProcessingVenueId] = useState<number | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
 
   // Link manual venue state
   const [isLinking, setIsLinking] = useState(false);
@@ -91,7 +93,7 @@ export const VenueOwnerModal: React.FC = () => {
   const handleSubscribe = async (venueId: number) => {
     setProcessingVenueId(venueId);
     try {
-      const res = await iapService.subscribeVenue(venueId);
+      const res = await iapService.subscribeVenue(venueId, selectedPlan);
       if (!res.success && res.message) {
         showToast(res.message);
       }
@@ -358,78 +360,135 @@ export const VenueOwnerModal: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Transparent B2B Pricing Card */}
-                    <div
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(var(--theme-primary-rgb), 0.12) 0%, rgba(var(--theme-card-alt-rgb), 0.75) 100%)',
-                        borderColor: 'rgba(var(--theme-primary-rgb), 0.35)'
-                      }}
-                      className="p-4 rounded-2xl border space-y-3 shadow-inner"
-                    >
-                      <div className="flex items-center justify-between">
+                    {/* 14 Days Free Trial Banner */}
+                    <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                         <div>
-                          <div className="flex items-center gap-1.5">
-                            <Store
-                              style={{ color: 'var(--theme-primary)' }}
-                              className="w-3.5 h-3.5"
-                            />
-                            <span
-                              style={{ color: 'var(--theme-primary-light)' }}
-                              className="text-xs font-black uppercase tracking-wider"
-                            >
-                              Muzikors İşletme Paketi
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-1 mt-1">
-                            <span className="text-2xl font-black text-white">1.199 ₺</span>
-                            <span className="text-xs text-zinc-400">/ Ay</span>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <span
-                            style={{ color: 'var(--theme-primary)' }}
-                            className="text-xs font-bold block"
-                          >
-                            1.000 TL + %20 KDV
-                          </span>
-                          <span className="text-[10px] text-zinc-400 flex items-center gap-1 justify-end mt-0.5">
-                            <ShieldCheck className="w-3 h-3 text-emerald-400" /> Google Play Faturalı
-                          </span>
+                          <p className="text-xs font-black text-white">İlk 14 Gün Tamamen Ücretsiz</p>
+                          <p className="text-[10px] text-emerald-300/80">Deneme süresince tüm kafe paneli ve müzik sırası sınırsız aktiftir.</p>
                         </div>
                       </div>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider shrink-0">
+                        Sıfır Çekim
+                      </span>
+                    </div>
 
-                      {/* Included Features Checklist */}
-                      <div className="pt-2.5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-zinc-300">
+                    {/* Plan Selector: Monthly vs Annual */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {/* Monthly Plan */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlan('monthly')}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          selectedPlan === 'monthly'
+                            ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)] ring-1 ring-[var(--theme-primary)]/50 shadow-md'
+                            : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-neutral-200">Aylık Plan</span>
+                            {selectedPlan === 'monthly' && (
+                              <div className="w-2 h-2 rounded-full bg-[var(--theme-primary)]" />
+                            )}
+                          </div>
+                          <div className="text-lg font-black text-white">719,99 ₺ <span className="text-[10px] font-normal text-zinc-400">/ Ay</span></div>
+                        </div>
+                        <div className="text-[10px] text-zinc-400 mt-1.5 pt-1.5 border-t border-white/5">
+                          600 TL + %20 KDV
+                        </div>
+                      </button>
+
+                      {/* Annual Plan (20% Off First Year) */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlan('annual')}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                          selectedPlan === 'annual'
+                            ? 'bg-[var(--theme-card-alt)] border-emerald-400 ring-1 ring-emerald-400/50 shadow-md'
+                            : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="absolute -top-2.5 right-2 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-black uppercase tracking-wider">
+                          %20 Tasarruf
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-emerald-300">Yıllık Plan</span>
+                            {selectedPlan === 'annual' && (
+                              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                            )}
+                          </div>
+                          <div className="text-lg font-black text-white">6.911,99 ₺ <span className="text-[10px] font-normal text-zinc-400">/ Yıl</span></div>
+                          <span className="text-[10px] text-zinc-400 block mt-0.5">(Aylık 575,99 ₺)</span>
+                        </div>
+                        <div className="text-[10px] text-emerald-300 font-bold mt-1.5 pt-1.5 border-t border-white/5">
+                          İlk Yıl İndirimli
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Features Checklist */}
+                    <div
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(var(--theme-primary-rgb), 0.08) 0%, rgba(var(--theme-card-alt-rgb), 0.75) 100%)',
+                        borderColor: 'rgba(var(--theme-primary-rgb), 0.25)'
+                      }}
+                      className="p-3.5 rounded-2xl border space-y-2 shadow-inner"
+                    >
+                      <div className="flex items-center justify-between text-xs font-bold text-white">
+                        <span className="flex items-center gap-1.5">
+                          <Store style={{ color: 'var(--theme-primary)' }} className="w-3.5 h-3.5" />
+                          <span>Muzikors İşletme Paketi</span>
+                        </span>
+                        <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> Mağaza Faturalı
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-zinc-300 pt-1">
                         <div className="flex items-center gap-1.5">
-                          <Check
-                            style={{ color: 'var(--theme-primary)' }}
-                            className="w-3.5 h-3.5 shrink-0"
-                          />
+                          <Check style={{ color: 'var(--theme-primary)' }} className="w-3.5 h-3.5 shrink-0" />
                           <span>Sınırsız Şarkı İstek Kuyruğu</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Check
-                            style={{ color: 'var(--theme-primary)' }}
-                            className="w-3.5 h-3.5 shrink-0"
-                          />
+                          <Check style={{ color: 'var(--theme-primary)' }} className="w-3.5 h-3.5 shrink-0" />
                           <span>Masadan QR / Web ile Bağlantı</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Check
-                            style={{ color: 'var(--theme-primary)' }}
-                            className="w-3.5 h-3.5 shrink-0"
-                          />
+                          <Check style={{ color: 'var(--theme-primary)' }} className="w-3.5 h-3.5 shrink-0" />
                           <span>Spotify ile Otomatik Çalma</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Check
-                            style={{ color: 'var(--theme-primary)' }}
-                            className="w-3.5 h-3.5 shrink-0"
-                          />
-                          <span>Küfür & Kara Liste Filtresi</span>
+                          <Check style={{ color: 'var(--theme-primary)' }} className="w-3.5 h-3.5 shrink-0" />
+                          <span>Küfür &amp; Vibe Guard Filtresi</span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* WhatsApp Pleksi QR Stant / Material Offer */}
+                    <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+                          <MessageCircle className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">Pleksi QR Stant &amp; Materyal Seti</h4>
+                          <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
+                            Masa sayısı ve mekana özel stant/kit teklifi için bize yazabilirsiniz.
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href="https://wa.me/905068638306?text=Merhaba%20Muzikors,%20kafem%20i%C3%A7in%20pleksi%20QR%20stant%20ve%20masa%20kiti%20hakk%C4%B1nda%20fiyat%20teklifi%20almak%20istiyorum."
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shrink-0 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[11px] flex items-center gap-1 transition-all active:scale-95 cursor-pointer shadow-sm"
+                      >
+                        <span>WhatsApp</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
 
                     {/* Subscription CTA Button */}
@@ -445,15 +504,15 @@ export const VenueOwnerModal: React.FC = () => {
                       {processingVenueId === venue.id ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin text-stone-950" />
-                          <span>Google Play Bağlanıyor...</span>
+                          <span>Mağaza Bağlantısı Kuruluyor...</span>
                         </>
                       ) : (
                         <>
                           <CreditCard className="w-4 h-4 text-stone-950" />
                           <span>
                             {isExpired
-                              ? 'Aboneliği Başlat & Paneli Aç (1.199 ₺ / Ay)'
-                              : '+30 Gün Süre Ekle / Yenile (1.199 ₺)'}
+                              ? `14 Gün Ücretsiz Deneme Başlat (${selectedPlan === 'annual' ? '6.911,99 ₺ / Yıl' : '719,99 ₺ / Ay'})`
+                              : `Aboneliği Yenile (${selectedPlan === 'annual' ? '6.911,99 ₺ / Yıl' : '719,99 ₺ / Ay'})`}
                           </span>
                         </>
                       )}
@@ -461,7 +520,7 @@ export const VenueOwnerModal: React.FC = () => {
 
                     <p className="text-[10px] text-center text-zinc-400 flex items-center justify-center gap-1">
                       <Lock className="w-3 h-3 text-zinc-400" />
-                      Google Play ile güvenli faturalandırma. İstediğiniz an tek tıkla iptal edebilirsiniz.
+                      Google Play &amp; App Store ile güvenli faturalandırma. İlk 14 gün ücretsizdir, dilediğiniz an tek tıkla iptal edebilirsiniz.
                     </p>
 
                     {/* Quick Panel Tools */}
