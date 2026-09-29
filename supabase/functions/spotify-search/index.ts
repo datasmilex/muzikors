@@ -228,6 +228,8 @@ serve(async (req) => {
         spotifyUrl:   item.external_urls?.spotify ?? '',
         genres:       Array.from(trackGenres),
         explicit:     item.explicit ?? false,
+        preview_url:  item.preview_url ?? null,
+        previewUrl:   item.preview_url ?? null,
       };
     });
 

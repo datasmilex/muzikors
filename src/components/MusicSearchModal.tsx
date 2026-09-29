@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown, Ban, ChevronDown, ShieldAlert } from 'lucide-react';
+import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown, Ban, ChevronDown, ShieldAlert, Play, Pause, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
@@ -10,6 +10,7 @@ import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration, formatUserDisplayName } from '../utils/formatters';
 import { isTrackAllowedByVibeGuard, classifyTrackGenres } from '../utils/genreMatcher';
 import { getUserDailySongRights } from '../lib/timeHelpers';
+import { useAudioPreview } from '../services/audioPreviewService';
 
 interface SwipeToDropCoinProps {
   onConfirm: () => void;
@@ -154,14 +155,28 @@ export const MusicSearchModal: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const audioPreview = useAudioPreview();
+
+  const handleCloseModal = () => {
+    audioPreview.stopPreview();
+    closeModal();
+  };
+
+  useEffect(() => {
+    if (activeModal !== 'search') {
+      audioPreview.stopPreview();
+    }
+  }, [activeModal, audioPreview]);
+
   useEffect(() => {
     if (confirmingTrack) {
       return registerBackHandler(() => {
+        audioPreview.stopPreview();
         setConfirmingTrack(null);
         return true;
       });
     }
-  }, [confirmingTrack, registerBackHandler]);
+  }, [confirmingTrack, registerBackHandler, audioPreview]);
 
   const hasSpotify = Boolean(
     activeVenue?.has_spotify ||
@@ -405,6 +420,7 @@ export const MusicSearchModal: React.FC = () => {
   };
 
   const handleConfirmRequest = async (trackToRequest?: Track) => {
+    audioPreview.stopPreview();
     const target = trackToRequest || selectedTrack;
     if (target) {
       const blockStatus = getTrackBlockStatus(target);
@@ -452,6 +468,7 @@ export const MusicSearchModal: React.FC = () => {
   };
 
   const handleFinalRequest = async () => {
+    audioPreview.stopPreview();
     if (confirmingTrack && !submittingTrackId) {
       if (message.trim().length > 0 && containsProfanity(message)) {
         showToast('Lütfen küfür veya argo içeren kelimeler kullanmayın.');
@@ -482,7 +499,7 @@ export const MusicSearchModal: React.FC = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             style={{ willChange: 'opacity' }}
-            onClick={closeModal}
+            onClick={handleCloseModal}
             className="fixed inset-0 bg-black/85"
           />
 
@@ -503,7 +520,10 @@ export const MusicSearchModal: React.FC = () => {
                     <span className="text-xs font-black text-white uppercase tracking-wider">İsteği Onayla</span>
                   </div>
                   <button
-                    onClick={() => setConfirmingTrack(null)}
+                    onClick={() => {
+                      audioPreview.stopPreview();
+                      setConfirmingTrack(null);
+                    }}
                     className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
                     aria-label="Geri"
                   >
@@ -514,16 +534,58 @@ export const MusicSearchModal: React.FC = () => {
                 <div className="space-y-4 pt-3 landscape:grid landscape:grid-cols-2 landscape:gap-3.5 landscape:space-y-0">
                   {/* Left Column: Track Info & VIP Options */}
                   <div className="space-y-3">
-                    {/* Track Info Box */}
-                    <div className="flex items-center gap-3.5 bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] shadow-md">
-                      <div className="w-13 h-13 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
-                        <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
+                    {/* Track Info Box with Audio Preview */}
+                    <div className="flex items-center justify-between gap-3 bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] shadow-md">
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="w-13 h-13 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
+                          <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
+                        </div>
+                        <div className="truncate flex-1 min-w-0">
+                          <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
+                          <p className="text-xs font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{confirmingTrack.artist}</p>
+                        </div>
                       </div>
-                      <div className="truncate flex-1 min-w-0">
-                        <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
-                        <p className="text-xs font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{confirmingTrack.artist}</p>
-                      </div>
+
+                      {/* 30s Audio Preview Play/Pause button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          audioPreview.togglePreview(confirmingTrack, () => {
+                            showToast('Bu şarkı için ses önizlemesi bulunamadı.');
+                          });
+                        }}
+                        aria-label={audioPreview.isPlaying(confirmingTrack.id) ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
+                          audioPreview.isPlaying(confirmingTrack.id)
+                            ? 'bg-[var(--theme-primary)] text-black shadow-md ring-2 ring-[var(--theme-primary)]/40'
+                            : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border border-white/10'
+                        }`}
+                        title={audioPreview.isPlaying(confirmingTrack.id) ? 'Önizlemeyi durdur' : '30 sn Ses Önizlemesi'}
+                      >
+                        {audioPreview.isLoading(confirmingTrack.id) ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
+                        ) : audioPreview.isPlaying(confirmingTrack.id) ? (
+                          <Pause className="w-4 h-4 text-black fill-current" />
+                        ) : (
+                          <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
+                        )}
+                      </button>
                     </div>
+
+                    {/* Active preview indicator in confirmation screen */}
+                    {audioPreview.isPlaying(confirmingTrack.id) && (
+                      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[11px] text-[var(--theme-primary-light)]">
+                        <div className="flex items-center gap-2">
+                          <Volume2 className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-pulse" />
+                          <span className="font-semibold">30 sn Ses Önizlemesi Çalıyor</span>
+                        </div>
+                        <div className="flex items-end gap-0.5 h-3">
+                          <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
+                          <span className="w-0.5 h-2 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
+                          <span className="w-0.5 h-3.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
+                        </div>
+                      </div>
+                    )}
 
                     {/* Anonymous Toggle (VIP Feature) */}
                     <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08]">
@@ -655,7 +717,7 @@ export const MusicSearchModal: React.FC = () => {
                     </div>
 
                     <button
-                      onClick={closeModal}
+                      onClick={handleCloseModal}
                       className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
                       aria-label="Kapat"
                     >
@@ -671,6 +733,7 @@ export const MusicSearchModal: React.FC = () => {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => {
+                        audioPreview.stopPreview();
                         setSearchQuery(e.target.value);
                         if (e.target.value.trim() !== '') {
                           setActiveTab(null);
@@ -685,7 +748,10 @@ export const MusicSearchModal: React.FC = () => {
                       <Loader2 className="w-4 h-4 text-[var(--theme-primary)] animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
                     ) : searchQuery ? (
                       <button
-                        onClick={() => setSearchQuery('')}
+                        onClick={() => {
+                          audioPreview.stopPreview();
+                          setSearchQuery('');
+                        }}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
                       >
                         <X className="w-4 h-4" />
@@ -707,6 +773,7 @@ export const MusicSearchModal: React.FC = () => {
                   <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
                     <button
                       onClick={() => {
+                        audioPreview.stopPreview();
                         setActiveTab('all');
                         setSearchQuery('');
                       }}
@@ -720,6 +787,7 @@ export const MusicSearchModal: React.FC = () => {
                     </button>
                     <button
                       onClick={() => {
+                        audioPreview.stopPreview();
                         setActiveTab('top10');
                         setSearchQuery('');
                       }}
@@ -733,6 +801,7 @@ export const MusicSearchModal: React.FC = () => {
                     </button>
                     <button
                       onClick={() => {
+                        audioPreview.stopPreview();
                         setActiveTab('history');
                         setSearchQuery('');
                       }}
@@ -797,6 +866,8 @@ export const MusicSearchModal: React.FC = () => {
                           const isExplicitTrack = isTrackExplicit(track);
                           const isTooLongForFree = !user?.isPremium && durMs > 240000;
                           const isTooLongOverall = durMs > 420000;
+                          const isAudioPlaying = audioPreview.isPlaying(track.id);
+                          const isAudioLoading = audioPreview.isLoading(track.id);
 
                           return (
                             <div
@@ -827,9 +898,16 @@ export const MusicSearchModal: React.FC = () => {
 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <h4 className="text-xs font-bold truncate text-white">
+                                    <h4 className={`text-xs font-bold truncate ${isSelected ? 'text-[var(--theme-primary-light)]' : 'text-white'}`}>
                                       {track.title}
                                     </h4>
+                                    {isAudioPlaying && (
+                                      <div className="flex items-end gap-0.5 h-2.5 shrink-0" title="Önizleme çalıyor">
+                                        <span className="w-0.5 h-2.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
+                                        <span className="w-0.5 h-1.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
+                                        <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
+                                      </div>
+                                    )}
                                     {isExplicitTrack && (
                                       <span className="text-[8px] font-black px-1 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 uppercase" title="Explicit (Sansürsüz İçerik)">
                                         E
@@ -851,12 +929,36 @@ export const MusicSearchModal: React.FC = () => {
                                 </div>
                               </div>
 
-                              <div className="shrink-0 pl-2 text-right">
+                              <div className="shrink-0 pl-2 flex items-center gap-2">
                                 {durMs > 0 && (
-                                  <span className={`text-[10px] font-mono font-bold ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
+                                  <span className={`text-[10px] font-mono font-bold hidden sm:inline ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
                                     {formatDuration(durMs)}
                                   </span>
                                 )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    audioPreview.togglePreview(track, () => {
+                                      showToast('Bu şarkı için 30 saniyelik ses önizlemesi bulunamadı.');
+                                    });
+                                  }}
+                                  aria-label={isAudioPlaying ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
+                                  className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
+                                    isAudioPlaying
+                                      ? 'bg-[var(--theme-primary)] text-black shadow-md ring-2 ring-[var(--theme-primary)]/40'
+                                      : 'bg-white/[0.04] hover:bg-white/[0.1] text-neutral-300 hover:text-white border border-white/[0.06]'
+                                  }`}
+                                  title={isAudioPlaying ? 'Önizlemeyi durdur' : '30 sn Önizleme Dinle'}
+                                >
+                                  {isAudioLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
+                                  ) : isAudioPlaying ? (
+                                    <Pause className="w-4 h-4 text-black fill-current" />
+                                  ) : (
+                                    <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
+                                  )}
+                                </button>
                               </div>
                             </div>
                           );
@@ -899,6 +1001,9 @@ export const MusicSearchModal: React.FC = () => {
                                 {blockedTracks.map((track) => {
                                   const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
                                   const blockInfo = getTrackBlockStatus(track);
+                                  const isAudioPlaying = audioPreview.isPlaying(track.id);
+                                  const isAudioLoading = audioPreview.isLoading(track.id);
+
                                   return (
                                     <div
                                       key={track.id}
@@ -926,6 +1031,13 @@ export const MusicSearchModal: React.FC = () => {
                                             <h4 className="text-xs font-bold truncate text-neutral-300">
                                               {track.title}
                                             </h4>
+                                            {isAudioPlaying && (
+                                              <div className="flex items-end gap-0.5 h-2.5 shrink-0" title="Önizleme çalıyor">
+                                                <span className="w-0.5 h-2.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
+                                                <span className="w-0.5 h-1.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
+                                                <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
+                                              </div>
+                                            )}
                                             {blockInfo.type === 'vibe' ? (
                                               <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 uppercase flex items-center gap-0.5">
                                                 <ShieldAlert className="w-2.5 h-2.5" /> {blockInfo.reason}
@@ -942,10 +1054,31 @@ export const MusicSearchModal: React.FC = () => {
                                         </div>
                                       </div>
 
-                                      <div className="shrink-0 pl-2 text-right">
-                                        <span className="text-[9px] font-bold text-neutral-500 uppercase">
-                                          Kısıtlı
-                                        </span>
+                                      <div className="shrink-0 pl-2 flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            audioPreview.togglePreview(track, () => {
+                                              showToast('Bu şarkı için 30 saniyelik ses önizlemesi bulunamadı.');
+                                            });
+                                          }}
+                                          aria-label={isAudioPlaying ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
+                                          className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
+                                            isAudioPlaying
+                                              ? 'bg-[var(--theme-primary)] text-black shadow-md'
+                                              : 'bg-white/[0.04] hover:bg-white/[0.08] text-neutral-400 hover:text-white border border-white/[0.06]'
+                                          }`}
+                                          title={isAudioPlaying ? 'Önizlemeyi durdur' : '30 sn Önizleme Dinle'}
+                                        >
+                                          {isAudioLoading ? (
+                                            <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
+                                          ) : isAudioPlaying ? (
+                                            <Pause className="w-4 h-4 text-black fill-current" />
+                                          ) : (
+                                            <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
+                                          )}
+                                        </button>
                                       </div>
                                     </div>
                                   );

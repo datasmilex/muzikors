@@ -23,6 +23,8 @@ export interface Track {
   isAnonymous?: boolean;
   is_anonymous?: boolean;
   message?: string;
+  preview_url?: string | null;
+  previewUrl?: string | null;
 }
 
 export interface Venue {
