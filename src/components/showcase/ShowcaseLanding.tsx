@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   QrCode,
@@ -9,6 +9,8 @@ import {
   MessageCircle,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Menu,
   X,
   Loader2,
@@ -38,26 +40,59 @@ export const ShowcaseLanding: React.FC = () => {
   // FAQ Accordion State (first item open by default)
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Interactive Live Jukebox Simulator State (Patron experience demo)
-  const [demoVotes, setDemoVotes] = useState<Record<string, number>>({
-    'song-1': 8,
-    'song-2': 5,
-    'song-3': 3,
-  });
-  const [userVotedSong, setUserVotedSong] = useState<string | null>(null);
-
-  const handleVoteDemo = (songId: string) => {
-    if (userVotedSong === songId) {
-      setDemoVotes((prev) => ({ ...prev, [songId]: prev[songId] - 1 }));
-      setUserVotedSong(null);
-    } else {
-      setDemoVotes((prev) => ({
-        ...prev,
-        [songId]: prev[songId] + 1,
-        ...(userVotedSong ? { [userVotedSong]: prev[userVotedSong] - 1 } : {}),
-      }));
-      setUserVotedSong(songId);
+  // 3-Slide Interactive Slideshow State
+  const showcaseSlides = [
+    {
+      src: '/showcase/slide-1.png',
+      alt: 'Muzikors İle Müziği Sen Seç - Bir Mekana Bağlan',
+      title: 'Müziği Sen Seç',
+      caption: 'Masandaki QR kodu okut, mekana anında bağlan'
+    },
+    {
+      src: '/showcase/slide-2.png',
+      alt: 'Dilediğin Parçayı Saniyeler İçerisinde Bul',
+      title: 'Saniyeler İçinde Parçanı Bul',
+      caption: 'Geniş müzik kataloğundan dilediğin şarkıyı sıraya ekle'
+    },
+    {
+      src: '/showcase/slide-3.png',
+      alt: 'Muzikors - Müzik Sizin Elinizde',
+      title: 'Müzik Sizin Elinizde',
+      caption: 'Kafede çalan şarkılara oy ver, ritmi mekanla birlikte yakala'
     }
+  ];
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  // Auto-advance slides every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % showcaseSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [showcaseSlides.length]);
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + showcaseSlides.length) % showcaseSlides.length);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % showcaseSlides.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 45) {
+      nextSlide();
+    } else if (diff < -45) {
+      prevSlide();
+    }
+    setTouchStartX(null);
   };
 
   // Lead Form State
@@ -244,13 +279,13 @@ export const ShowcaseLanding: React.FC = () => {
               <span>QR Okut</span>
             </Link>
 
-            {/* Satın Al / Ücretsiz Dene */}
+            {/* Satın Al */}
             <a
               href="#hero-form"
               onClick={(e) => scrollToSection(e, 'hero-form')}
               className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-xs transition-all shadow-sm active:scale-95 cursor-pointer min-h-[42px]"
             >
-              <span>14 Gün Ücretsiz Dene</span>
+              <span>Hemen Satın Al</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
 
@@ -316,20 +351,14 @@ export const ShowcaseLanding: React.FC = () => {
         )}
       </header>
 
-      {/* ── HERO SECTION (OYUNLUK BİLGİ VE KANCA DİLİ) ────────────────────────── */}
+      {/* ── HERO SECTION ──────────────────────────────────────────────────────── */}
       <section className="relative pt-8 sm:pt-16 pb-14 sm:pb-24 border-b border-zinc-200/80 bg-gradient-to-b from-zinc-50/80 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
             {/* Sol Sütun: Değer Önermesi ve Sürtünmesiz Giriş */}
-            <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               
-              {/* Üst Kicker Rozeti */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs font-bold tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Kafe, Bar ve Restoranlar İçin Karekodlu Müzik</span>
-              </div>
-
               {/* Ana Başlık */}
               <h1 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-[1.12]">
                 Masana karekod koy, <br />
@@ -341,16 +370,6 @@ export const ShowcaseLanding: React.FC = () => {
                 Milyonlarca Spotify şarkısı, masa oylaması ve mekan atmosferini koruyan Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
               </p>
 
-              {/* Misafir Ayrıştırması (Patron vs. Mekan Sahibi İkilemini Çözen Kanca) */}
-              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 max-w-xl mx-auto lg:mx-0 text-left flex items-start gap-2.5">
-                <div className="p-1 rounded-md bg-amber-100 text-amber-800 shrink-0 mt-0.5">
-                  <Coffee className="w-4 h-4" />
-                </div>
-                <div className="text-xs text-amber-950 leading-relaxed">
-                  <strong>Misafir misin?</strong> Müzik sırası yalnızca masadaki karekod okutularak açılır. Masandaki akrilik stantta bulunan QR kodu kameranla taratarak sıraya şarkı ekleyebilirsin. · <Link href="/privacy" className="underline font-bold text-amber-900 hover:text-black">Aydınlatma Metni</Link>
-                </div>
-              </div>
-
               {/* CTA Buton Çifti */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
                 <a
@@ -358,7 +377,7 @@ export const ShowcaseLanding: React.FC = () => {
                   onClick={(e) => scrollToSection(e, 'hero-form')}
                   className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer min-h-[46px]"
                 >
-                  <span>14 Gün Ücretsiz Başla</span>
+                  <span>Hemen Satın Al</span>
                   <ArrowRight className="w-4 h-4" />
                 </a>
 
@@ -379,7 +398,7 @@ export const ShowcaseLanding: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Alt Güven Vurguları */}
+              {/* Alt Güven Vurguları (Kredi kartı çıkarıldı) */}
               <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-zinc-500">
                 <span className="flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
@@ -389,119 +408,73 @@ export const ShowcaseLanding: React.FC = () => {
                   <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                   <span>Akrilik QR pleksiler kargoyla gelir</span>
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                  <span>Kredi kartı gerekmez</span>
-                </span>
               </div>
 
             </div>
 
-            {/* Sağ Sütun: Canlı Masadaki Telefon Deneyimi Simülatörü */}
+            {/* Sağ Sütun: 3-Fotoğraflı İnteraktif Slayt Gösterimi (Kırmızı Alan) */}
             <div className="lg:col-span-5 flex justify-center w-full">
-              <div className="w-full max-w-[380px] bg-white rounded-2xl border-2 border-zinc-200 shadow-xl overflow-hidden p-4 space-y-4">
-                
-                {/* Mekan Başlığı & Canlı Göstergesi */}
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                      <Store className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-zinc-900">Kadıköy Demo Kafe</h4>
-                      <p className="text-[10px] text-zinc-500 font-medium">Masa #04 · Canlı Sıra</p>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                    Canlı
-                  </span>
-                </div>
-
-                {/* Şu An Çalan Parça */}
-                <div className="p-3.5 rounded-xl bg-zinc-900 text-white space-y-2 shadow-sm">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                    <span>Şu An Çalıyor</span>
-                    <span className="text-emerald-400 flex items-center gap-1">
-                      <Volume2 className="w-3 h-3" /> Hoparlörde
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 shrink-0 border border-white/10">
-                      <Music2 className="w-5 h-5 text-amber-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="text-xs font-bold text-white truncate">Get Lucky (feat. Pharrell Williams)</h5>
-                      <p className="text-[11px] text-zinc-400 truncate">Daft Punk</p>
-                    </div>
-                  </div>
-                  {/* Mini Progress */}
-                  <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-amber-400 h-full w-2/3 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Sırada Bekleyen Şarkılar (Canlı Oylama Test Alanı) */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-zinc-500 px-1">
-                    <span>Sıradaki Parçalar (Canlı Oylama)</span>
-                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                      Test Et &amp; Oy Ver
-                    </span>
-                  </div>
-
-                  {/* Demo Song 1 */}
-                  <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/90 flex items-center justify-between gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center shrink-0">
-                      <Disc3 className="w-4 h-4 text-zinc-700" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 truncate">Kuzu Kuzu</p>
-                      <p className="text-[10px] text-zinc-500 truncate">Tarkan</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleVoteDemo('song-1')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        userVotedSong === 'song-1'
-                          ? 'bg-amber-500 text-black shadow-sm'
-                          : 'bg-white hover:bg-zinc-100 border border-zinc-300 text-zinc-800'
+              <div
+                className="w-full max-w-[480px] aspect-video rounded-2xl bg-zinc-950 border-2 border-zinc-200 shadow-xl relative overflow-hidden group select-none flex items-center justify-center"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Slides Layer */}
+                <div className="relative w-full h-full">
+                  {showcaseSlides.map((slide, index) => (
+                    <div
+                      key={slide.src}
+                      className={`absolute inset-0 transition-opacity duration-500 flex items-center justify-center bg-black ${
+                        currentSlide === index
+                          ? 'opacity-100 pointer-events-auto z-10'
+                          : 'opacity-0 pointer-events-none z-0'
                       }`}
                     >
-                      <ThumbsUp className="w-3.5 h-3.5" />
-                      <span>{demoVotes['song-1']}</span>
-                    </button>
-                  </div>
-
-                  {/* Demo Song 2 */}
-                  <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/90 flex items-center justify-between gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center shrink-0">
-                      <Disc3 className="w-4 h-4 text-zinc-700" />
+                      <img
+                        src={slide.src}
+                        alt={slide.alt}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 truncate">Blinding Lights</p>
-                      <p className="text-[10px] text-zinc-500 truncate">The Weeknd</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleVoteDemo('song-2')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        userVotedSong === 'song-2'
-                          ? 'bg-amber-500 text-black shadow-sm'
-                          : 'bg-white hover:bg-zinc-100 border border-zinc-300 text-zinc-800'
-                      }`}
-                    >
-                      <ThumbsUp className="w-3.5 h-3.5" />
-                      <span>{demoVotes['song-2']}</span>
-                    </button>
-                  </div>
+                  ))}
                 </div>
 
-                {/* Alt Mikro Not */}
-                <p className="text-[10px] text-center text-zinc-500 pt-1">
-                  En çok oy alan şarkı sıranın başına tırmanır, hoparlörden çalar.
-                </p>
+                {/* Prev Navigation Button */}
+                <button
+                  type="button"
+                  onClick={prevSlide}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 p-2 rounded-xl bg-black/60 hover:bg-black/90 border border-white/20 text-white transition-all active:scale-95 cursor-pointer"
+                  aria-label="Önceki Görsel"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
 
+                {/* Next Navigation Button */}
+                <button
+                  type="button"
+                  onClick={nextSlide}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 p-2 rounded-xl bg-black/60 hover:bg-black/90 border border-white/20 text-white transition-all active:scale-95 cursor-pointer"
+                  aria-label="Sonraki Görsel"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                {/* Bottom Slide Indicators */}
+                <div className="absolute bottom-3 inset-x-0 z-20 flex items-center justify-center gap-1.5">
+                  {showcaseSlides.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setCurrentSlide(index)}
+                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                        currentSlide === index
+                          ? 'w-6 bg-white'
+                          : 'w-2 bg-white/40 hover:bg-white/70'
+                      }`}
+                      aria-label={`Görsel ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -574,7 +547,7 @@ export const ShowcaseLanding: React.FC = () => {
               onClick={(e) => scrollToSection(e, 'hero-form')}
               className="inline-flex items-center gap-2 text-xs font-black text-zinc-900 hover:text-black uppercase tracking-wider underline cursor-pointer"
             >
-              <span>Mekanına Özel 14 Günlük Ücretsiz Denemeyi Başlat</span>
+              <span>Mekanını Muzikors ile Donat</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -683,7 +656,7 @@ export const ShowcaseLanding: React.FC = () => {
               Tek Fiyat. Bütün Özellikler Dahil.
             </h2>
             <p className="text-sm text-zinc-600 mt-2">
-              Kurulum ücreti yok. Donanım masrafı yok. İlk 14 gün tamamen ücretsiz deneyin.
+              Kurulum ücreti yok. Donanım masrafı yok. Pleksiler kargoyla masanıza gelir.
             </p>
           </div>
 
@@ -774,11 +747,11 @@ export const ShowcaseLanding: React.FC = () => {
                 onClick={(e) => scrollToSection(e, 'hero-form')}
                 className="w-full py-4 rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md cursor-pointer"
               >
-                <span>14 Gün Ücretsiz Denemeyi Başlat</span>
+                <span>Hemen Satın Al &amp; Başvur</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
               <p className="text-[11px] text-center text-zinc-500 mt-2">
-                14 gün boyunca hiçbir taahhüt ve ücret yoktur.
+                Ödeme sonrası pleksiler hazırlanıp adresinize kargolanır.
               </p>
             </div>
 
@@ -801,7 +774,7 @@ export const ShowcaseLanding: React.FC = () => {
                 Mekanınızı Muzikors ile Tanıştırın
               </h3>
               <p className="text-xs sm:text-sm text-zinc-600 mt-1">
-                Bilgilerinizi bırakın, 14 günlük ücretsiz denemenizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
+                Bilgilerinizi bırakın, aboneliğinizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
               </p>
             </div>
 
@@ -945,7 +918,7 @@ export const ShowcaseLanding: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <span>Ücretsiz Başvuru Gönder</span>
+                        <span>Siparişi &amp; Başvuruyu Gönder</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
