@@ -18,7 +18,6 @@ import {
   PlaySquare,
   Crown,
   Palette,
-  Store,
   Check,
   ShieldCheck
 } from 'lucide-react';
@@ -51,7 +50,6 @@ export const DrawerMenu: React.FC = () => {
   const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean; isPremiumBtn?: boolean }[] = [
     { label: 'Profilim', icon: <User className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'profile', isProtected: true },
     { label: 'Muzikors Premium', icon: <Crown className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'premium', isPremiumBtn: true },
-    { label: 'İşletmem & Kafe Paneli', icon: <Store className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'venue_owner', isProtected: true },
     { label: 'Günlük Ödül', icon: <Gift className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
     { label: 'Kampanyalar', icon: <Tag className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'campaigns' },
   ];

@@ -22,7 +22,7 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 };
 
 export const GpsMapModal: React.FC = () => {
-  const { activeModal, closeModal, activeVenue, openModal, bindVenueById, showToast } = useApp();
+  const { activeModal, closeModal, activeVenue, openModal, showToast } = useApp();
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [locError, setLocError] = useState<string | null>(null);
@@ -315,25 +315,15 @@ export const GpsMapModal: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1.5 shrink-0">
-                        <button
-                          onClick={() => {
-                            bindVenueById(v.id.toString());
-                            closeModal();
-                            showToast('Mekana bağlanıldı!');
-                          }}
-                          className="w-9 h-9 rounded-xl bg-[var(--theme-primary)] text-black flex items-center justify-center active:scale-95 transition-all shadow-sm"
-                          title="Mekana Git"
-                        >
-                          <Store className="w-4 h-4" />
-                        </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
                         {v.latitude && v.longitude && (
                           <button
                             onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}`, '_blank')}
-                            className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[var(--theme-primary)] active:scale-95 transition-all"
-                            title="Yol Tarifi"
+                            className="px-2.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 flex items-center gap-1 text-[11px] font-bold text-white active:scale-95 transition-all cursor-pointer"
+                            title="Yol Tarifi Al"
                           >
-                            <Navigation className="w-4 h-4" />
+                            <Navigation className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                            <span>Yol Tarifi</span>
                           </button>
                         )}
                       </div>

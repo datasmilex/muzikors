@@ -23,7 +23,6 @@ import { ToastNotification } from './ToastNotification';
 import { LeaderboardModal } from './LeaderboardModal';
 import { LyricsModal } from './LyricsModal';
 import { MenuModal } from './MenuModal';
-import { VenueOwnerModal } from './VenueOwnerModal';
 import { StoryShareModal } from './StoryShareModal';
 import { QuickActionsBanner } from './QuickActionsBanner';
 import { GatewayScreen } from './GatewayScreen';
@@ -106,7 +105,6 @@ export const JukeboxView: React.FC<JukeboxViewProps> = ({ initialModal }) => {
       <GpsMapModal />
       <VenueInfoModal />
       <MenuModal />
-      <VenueOwnerModal />
       <InfoModals />
       <DailyRewardModal />
       <RewardedAdModal />
