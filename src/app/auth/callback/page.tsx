@@ -13,8 +13,10 @@ function AuthCallback() {
     let mounted = true;
 
     const processSession = async (session: any) => {
+      const returnUrl = typeof window !== 'undefined' ? localStorage.getItem('muzikors_auth_return_url') || '/' : '/';
+      
       if (!session) {
-        if (mounted) router.replace('/');
+        if (mounted) router.replace(returnUrl);
         return;
       }
 
@@ -48,13 +50,15 @@ function AuthCallback() {
         if (upsertErr) {
           console.error('[Auth Callback] Profile upsert error:', upsertErr.message);
         }
-
-        if (mounted) router.replace('/');
+        
+        if (typeof window !== 'undefined') localStorage.removeItem('muzikors_auth_return_url');
+        if (mounted) router.replace(returnUrl);
       } catch (err: any) {
         console.error('[Auth Callback Error]', err);
         if (mounted) setError(err.message || 'An error occurred during authentication.');
         setTimeout(() => {
-          if (mounted) router.replace('/');
+          if (typeof window !== 'undefined') localStorage.removeItem('muzikors_auth_return_url');
+          if (mounted) router.replace(returnUrl);
         }, 3000);
       }
     };
@@ -105,7 +109,8 @@ function AuthCallback() {
           setTimeout(() => {
             if (mounted && !error) {
               console.warn('[Auth Callback] Timeout waiting for session, redirecting to home...');
-              router.replace('/');
+              const fallbackUrl = typeof window !== 'undefined' ? localStorage.getItem('muzikors_auth_return_url') || '/' : '/';
+              router.replace(fallbackUrl);
             }
           }, 8000);
 
@@ -117,7 +122,8 @@ function AuthCallback() {
         console.error('[Auth Callback Error]', err);
         if (mounted) setError(err.message || 'An error occurred during authentication.');
         setTimeout(() => {
-          if (mounted) router.replace('/');
+          const fallbackUrl = typeof window !== 'undefined' ? localStorage.getItem('muzikors_auth_return_url') || '/' : '/';
+          if (mounted) router.replace(fallbackUrl);
         }, 3000);
       }
     };

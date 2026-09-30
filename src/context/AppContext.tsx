@@ -1275,6 +1275,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loginWithProvider = useCallback(async (provider: 'google' | 'apple') => {
     if (!supabase) return;
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('muzikors_auth_return_url', window.location.pathname + window.location.search);
+    }
+
     const isNative = Capacitor.isNativePlatform();
     const redirectUrl = isNative 
       ? 'muzikors://auth/callback' 
