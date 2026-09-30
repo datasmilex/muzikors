@@ -14,22 +14,8 @@ import {
   Menu,
   X,
   Loader2,
-  ShieldCheck,
-  Music2,
-  Disc3,
-  Volume2,
-  Sliders,
   Check,
-  Store,
-  Clock,
-  Zap,
-  Navigation,
-  Headphones,
-  CheckCheck,
-  ThumbsUp,
-  Building2,
-  AlertCircle,
-  Coffee
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -482,12 +468,12 @@ export const ShowcaseLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* ── 3 ADIMLI YOLCULUK (01 - 02 - 03 OYUNLUK ŞABLONU) ─────────────────── */}
+      {/* ── 3 ADIMLI YOLCULUK (1 - 2 - 3 MİNİMAL ŞABLON) ───────────────────── */}
       <section id="nasil-calisir" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="inline-block px-3.5 py-1 rounded-full bg-[#EFE6DC] text-[#7A4B24] border border-[#DDD0C0] text-xs font-bold uppercase tracking-widest mb-3">
+            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
               Nasıl Çalışır?
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
@@ -500,39 +486,33 @@ export const ShowcaseLanding: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             
-            {/* Adım 01 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-4 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <div className="w-12 h-12 rounded-xl bg-[#2E1D13] text-[#FAF6F0] flex items-center justify-center font-mono font-black text-base shadow-sm">
-                01
-              </div>
-              <h3 className="text-lg font-black text-[#26170F]">
-                Karekodların masana gelir
+            {/* Adım 1 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
+                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">1.</span>
+                <span>Karekodların masana gelir</span>
               </h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Masa sayın kadar lazer kesim akrilik pleksi stant kargoyla kapına gelir. Kurulum ücreti yok, vidalama yok; masaya koyman yeter.
               </p>
             </div>
 
-            {/* Adım 02 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-4 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <div className="w-12 h-12 rounded-xl bg-[#2E1D13] text-[#FAF6F0] flex items-center justify-center font-mono font-black text-base shadow-sm">
-                02
-              </div>
-              <h3 className="text-lg font-black text-[#26170F]">
-                Müşterin okutur, parçayı seçer
+            {/* Adım 2 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
+                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">2.</span>
+                <span>Müşterin okutur, parçayı seçer</span>
               </h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Uygulama indirmeden Spotify kataloğundan dilediği şarkıyı arar, mekanının logosu ve Wi-Fi bilgisiyle açılan sayfadan sıraya ekler.
               </p>
             </div>
 
-            {/* Adım 03 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-4 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <div className="w-12 h-12 rounded-xl bg-[#2E1D13] text-[#FAF6F0] flex items-center justify-center font-mono font-black text-base shadow-sm">
-                03
-              </div>
-              <h3 className="text-lg font-black text-[#26170F]">
-                Sen panelden yönetirsin
+            {/* Adım 3 */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
+                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">3.</span>
+                <span>Sen panelden yönetirsin</span>
               </h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Vibe Guard™ ile uygunsuz türleri filtrelersin; hangi şarkıların sevildiğini görür, istenmeyen şarkıyı tek dokunuşla atlayıp kontrolü sağlarsın.
@@ -560,7 +540,7 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="inline-block px-3.5 py-1 rounded-full bg-[#E8DDD0] text-[#7A4B24] border border-[#D8C7B5] text-xs font-bold uppercase tracking-widest mb-3">
+            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
               Ayrı Ayrı Satılmaz
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
@@ -574,66 +554,48 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Panel 1: Masaya koy, bitti */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <Store className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Masaya koy, bitti</h3>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Masaya koy, bitti</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Pleksiler kargoyla adresinize gelir. Cihaz maliyeti, kablolama, ek ekran yatırımı ve eleman eğitimi yoktur.
               </p>
             </div>
 
             {/* Panel 2: Boş saatte masada bir sebep */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <Coffee className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Boş saatte masada bir sebep</h3>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Boş saatte masada bir sebep</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Öğleden sonra veya sakin saatlerde oturan müşterinin masasında etkileşim kuracağı bir sebep olur; masa enerjinin merkezi haline gelir.
               </p>
             </div>
 
-            {/* Panel 3: Tekrar gelen müşteri & Adisyon */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Masada kalma süresinde artış</h3>
+            {/* Panel 3: Masada kalma süresinde artış */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Masada kalma süresinde artış</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Kendi şarkısının çalmasını bekleyen ve sıradaki parçaları masasıyla oylayan misafirler mekanda daha uzun süre kalır, ek sipariş verir.
               </p>
             </div>
 
             {/* Panel 4: Vibe Guard */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <ShieldCheck className="w-5 h-5 text-[#8C5226]" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Vibe Guard™ ile tarzın güvende</h3>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Vibe Guard™ ile tarzın güvende</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Rock kafede arabesk, caz barda uygunsuz müzik çalmaz. İzin verilen türleri ve çalma listelerini siz belirlersiniz.
               </p>
             </div>
 
             {/* Panel 5: Mekanının adıyla açılır */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Senin mekanının adıyla açılır</h3>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Senin mekanının adıyla açılır</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Müşteri QR kodu okuttuğunda sayfa mekanınızın logosu, adı ve Wi-Fi şifresiyle açılır; kurumsal prestijiniz artar.
               </p>
             </div>
 
             {/* Panel 6: Garson & Personel Rahatlığı */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-3 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-[#F4ECE2] flex items-center justify-center text-[#78431C]">
-                <Headphones className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-black text-[#26170F]">Personel müzik baskısından kurtulur</h3>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
+              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Personel müzik baskısından kurtulur</h3>
               <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
                 Garsonların veya baristaların telefondan şarkı değiştirme baskısı biter. Personel yalnızca siparişe ve kaliteli servise odaklanır.
               </p>
@@ -649,7 +611,7 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="inline-block px-3.5 py-1 rounded-full bg-[#EFE6DC] text-[#7A4B24] border border-[#DDD0C0] text-xs font-bold uppercase tracking-widest mb-3">
+            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
               Şeffaf Fiyatlandırma
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
@@ -666,7 +628,7 @@ export const ShowcaseLanding: React.FC = () => {
             {/* Üst Vurgu */}
             <div className="flex items-center justify-between pb-6 border-b border-[#E4D7C8]">
               <div>
-                <span className="inline-block px-3 py-1 rounded-full bg-[#EBDDCF] text-[#6E3C17] border border-[#D5C2AF] text-xs font-bold mb-1">
+                <span className="text-xs font-bold text-[#8C5226] uppercase tracking-wider block mb-1 font-mono">
                   Kurumsal Kafe Paketi
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Standart</h3>
@@ -942,7 +904,7 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-[#EFE6DC] text-[#7A4B24] border border-[#DDD0C0] tracking-wide mb-3">
+            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
               Merak Edilenler
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
