@@ -16,17 +16,39 @@ async function getAccessTokenForVenue(venueId: string, supabaseAdmin: any): Prom
     return cached.token;
   }
 
-  const { data: venue, error } = await supabaseAdmin
-    .from('venues')
+  const numericVenueId = Number(venueId);
+
+  // 1. Try venue_secrets first (secure store)
+  let spotify_client_id: string | null = null;
+  let spotify_client_secret: string | null = null;
+  let spotify_refresh_token: string | null = null;
+
+  const { data: sec } = await supabaseAdmin
+    .from('venue_secrets')
     .select('spotify_client_id, spotify_client_secret, spotify_refresh_token')
-    .eq('id', venueId)
-    .single();
+    .eq('venue_id', numericVenueId)
+    .maybeSingle();
 
-  if (error || !venue) {
-    throw new Error(`Mekan bulunamadı veya Supabase hatası: ${error?.message}`);
+  if (sec?.spotify_client_id && sec?.spotify_client_secret && sec?.spotify_refresh_token) {
+    spotify_client_id = sec.spotify_client_id;
+    spotify_client_secret = sec.spotify_client_secret;
+    spotify_refresh_token = sec.spotify_refresh_token;
+  } else {
+    // 2. Fallback to venues table
+    const { data: venue, error } = await supabaseAdmin
+      .from('venues')
+      .select('spotify_client_id, spotify_client_secret, spotify_refresh_token')
+      .eq('id', numericVenueId)
+      .maybeSingle();
+
+    if (error || !venue) {
+      throw new Error(`Mekan bulunamadı veya Supabase hatası: ${error?.message || 'Mekan kaydı yok'}`);
+    }
+
+    spotify_client_id = venue.spotify_client_id || sec?.spotify_client_id || null;
+    spotify_client_secret = venue.spotify_client_secret || sec?.spotify_client_secret || null;
+    spotify_refresh_token = venue.spotify_refresh_token || sec?.spotify_refresh_token || null;
   }
-
-  const { spotify_client_id, spotify_client_secret, spotify_refresh_token } = venue;
 
   if (!spotify_client_id || !spotify_client_secret || !spotify_refresh_token) {
     const err = new Error('Mekan Spotify bağlantısını henüz kurmamış');
@@ -55,8 +77,12 @@ async function getAccessTokenForVenue(venueId: string, supabaseAdmin: any): Prom
     if (tokenRes.status === 400 || tokenRes.status === 401) {
       await supabaseAdmin
         .from('venues')
+        .update({ spotify_refresh_token: null, has_spotify: false })
+        .eq('id', numericVenueId);
+      await supabaseAdmin
+        .from('venue_secrets')
         .update({ spotify_refresh_token: null })
-        .eq('id', venueId);
+        .eq('venue_id', numericVenueId);
     }
     throw new Error(`Spotify token yenilenemedi (${tokenRes.status}): ${errText}`);
   }
@@ -71,12 +97,16 @@ async function getAccessTokenForVenue(venueId: string, supabaseAdmin: any): Prom
   const accessToken = tokenData.access_token;
   tokenCache.set(venueId, { token: accessToken, expiresAt: Date.now() + expiresIn * 1000 });
 
-  // If Spotify returned a new refresh_token, persist it
+  // If Spotify returned a new refresh_token, persist it to both tables
   if (tokenData.refresh_token) {
     await supabaseAdmin
       .from('venues')
       .update({ spotify_refresh_token: tokenData.refresh_token })
-      .eq('id', venueId);
+      .eq('id', numericVenueId);
+    await supabaseAdmin
+      .from('venue_secrets')
+      .update({ spotify_refresh_token: tokenData.refresh_token })
+      .eq('venue_id', numericVenueId);
   }
 
   return accessToken;
@@ -98,7 +128,7 @@ serve(async (req) => {
 
     const body = await req.json();
     const q = body.q?.trim();
-    const venueId = body.venueId?.trim();
+    const venueId = body.venueId !== undefined && body.venueId !== null ? String(body.venueId).trim() : '';
 
     if (!q) {
       return new Response(JSON.stringify({ tracks: [] }), {
