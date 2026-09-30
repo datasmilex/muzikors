@@ -1,4 +1,4 @@
-export type ThemeType = 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire';
+export type ThemeType = 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire' | 'obsidian';
 
 export interface ThemeConfig {
   id: ThemeType;
@@ -87,6 +87,20 @@ export const THEMES: ThemeConfig[] = [
     badgeBg: 'bg-sky-400 text-black',
     textAccent: 'text-sky-400',
     glowColor: 'rgba(56, 189, 248, 0.18)',
+  },
+  {
+    id: 'obsidian',
+    name: 'Obsidian Gold',
+    subtitle: 'Muzikors Klasik',
+    accentColor: '#D4AF37',
+    accentLight: '#F3D573',
+    accentDark: '#B49326',
+    bgColor: '#070604',
+    cardColor: '#110F0A',
+    gradient: 'from-[#F3D573] to-[#D4AF37]',
+    badgeBg: 'bg-[#D4AF37] text-black',
+    textAccent: 'text-[#D4AF37]',
+    glowColor: 'rgba(212, 175, 55, 0.18)',
   },
 ];
 

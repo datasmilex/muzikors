@@ -89,6 +89,22 @@
     --theme-text-muted: rgba(224, 242, 254, 0.65);
   }
 
+  [data-theme="obsidian"] {
+    --theme-bg: #070604;
+    --theme-bg-rgb: 7, 6, 4;
+    --theme-card: #110F0A;
+    --theme-card-rgb: 17, 15, 10;
+    --theme-card-alt: #1A170F;
+    --theme-card-alt-rgb: 26, 23, 15;
+    --theme-primary: #D4AF37;
+    --theme-primary-rgb: 212, 175, 55;
+    --theme-primary-light: #F3D573;
+    --theme-primary-dark: #B49326;
+    --theme-glow: rgba(212, 175, 55, 0.18);
+    --theme-text: #FBF9F6;
+    --theme-text-muted: rgba(251, 249, 246, 0.65);
+  }
+
   body {
     background-color: var(--theme-bg);
     color: var(--theme-text);

@@ -259,7 +259,7 @@ export const DrawerMenu: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-6 gap-1">
                   {THEMES.map((t) => {
                     const isSelected = theme === t.id;
                     return (
