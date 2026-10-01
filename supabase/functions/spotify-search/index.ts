@@ -100,10 +100,6 @@ async function getAccessTokenForVenue(venueId: string, supabaseAdmin: any): Prom
   // If Spotify returned a new refresh_token, persist it to both tables
   if (tokenData.refresh_token) {
     await supabaseAdmin
-      .from('venues')
-      .update({ spotify_refresh_token: tokenData.refresh_token })
-      .eq('id', numericVenueId);
-    await supabaseAdmin
       .from('venue_secrets')
       .update({ spotify_refresh_token: tokenData.refresh_token })
       .eq('venue_id', numericVenueId);
