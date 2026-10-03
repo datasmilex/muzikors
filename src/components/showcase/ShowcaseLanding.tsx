@@ -17,7 +17,8 @@ import {
   Check,
   AlertCircle,
   Pause,
-  Play
+  Play,
+  Copy
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -135,9 +136,9 @@ const NAV_LINKS = [
 ];
 
 const INPUT_CLASS =
-  'w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#7E6C60] focus:border-[#8C5226] focus:bg-white transition-colors duration-150 font-medium min-h-[44px]';
+  'w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#7E6C60] focus:border-[#8C5226] focus:bg-white transition-colors duration-150 font-medium min-h-[46px]';
 
-const LABEL_CLASS = 'block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5';
+const LABEL_CLASS = 'block text-xs font-bold text-[#4A3426] uppercase tracking-wider mb-1.5';
 
 /** Kullanıcının "hareketi azalt" tercihini canlı takip eder. */
 function usePrefersReducedMotion() {
@@ -257,6 +258,23 @@ export const ShowcaseLanding: React.FC = () => {
   const [submittingLead, setSubmittingLead] = useState(false);
   const [partnerSubmitted, setPartnerSubmitted] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
+  const [leadCopied, setLeadCopied] = useState(false);
+
+  // Fallback durumunda işletme bilgilerini panoya kopyalama
+  const copyLeadDetails = () => {
+    const text = `Muzikors İşletme Başvurusu:\nMekan Adı: ${partnerForm.venueName}\nYetkili: ${partnerForm.contactPerson}\nTelefon: ${partnerForm.phone}\nŞehir: ${partnerForm.city || 'Belirtilmedi'}\nMasa Sayısı: ${partnerForm.tableCount}\nE-posta: ${partnerForm.email || 'Belirtilmedi'}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setLeadCopied(true);
+      setTimeout(() => setLeadCopied(false), 2500);
+    }
+  };
+
+  // WhatsApp doğrudan başvuru bağlantısı
+  const getWhatsAppLeadUrl = () => {
+    const text = `Merhaba Muzikors, web sitenizden işletme başvurumu iletiyorum:\n- Mekan: ${partnerForm.venueName}\n- Yetkili: ${partnerForm.contactPerson}\n- Telefon: ${partnerForm.phone}\n- Şehir: ${partnerForm.city || 'Belirtilmedi'}\n- Masa Sayısı: ${partnerForm.tableCount}${partnerForm.email ? `\n- E-posta: ${partnerForm.email}` : ''}`;
+    return `https://wa.me/905068638306?text=${encodeURIComponent(text)}`;
+  };
 
   // Smooth Scroll Navigation (hareketi azalt tercihinde anında kaydırır)
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -289,30 +307,21 @@ export const ShowcaseLanding: React.FC = () => {
         city: partnerForm.city.trim() || 'Belirtilmedi',
         address: partnerForm.email.trim() ? `E-posta: ${partnerForm.email.trim()} | Masa: ${partnerForm.tableCount}` : `Masa: ${partnerForm.tableCount} | Web Başvurusu`,
         status: 'yeni_basvuru',
-        visit_notes: `Web sitesi (Beyaz Açık Tema Vitrin) üzerinden B2B ortaklık başvurusu. Masa sayısı: ${partnerForm.tableCount}, E-posta: ${partnerForm.email || 'Belirtilmedi'}`,
+        visit_notes: `Web sitesi (Açık Tema Vitrin) üzerinden B2B ortaklık başvurusu. Masa sayısı: ${partnerForm.tableCount}, E-posta: ${partnerForm.email || 'Belirtilmedi'}`,
         package_price: 1500,
         last_visited_at: new Date().toISOString()
       });
 
       if (error) {
         console.error('Lead submission error:', error);
-        // Fallback to mailto
-        const subject = encodeURIComponent(`Mekan Ortaklığı Başvurusu: ${partnerForm.venueName}`);
-        const body = encodeURIComponent(
-          `Mekan Adı: ${partnerForm.venueName}\n` +
-          `Yetkili: ${partnerForm.contactPerson}\n` +
-          `Telefon: ${partnerForm.phone}\n` +
-          `Şehir: ${partnerForm.city || 'Belirtilmedi'}\n` +
-          `Masa Sayısı: ${partnerForm.tableCount}\n` +
-          `E-posta: ${partnerForm.email || 'Belirtilmedi'}\n`
-        );
-        window.location.href = `mailto:destek@muzikors.com?subject=${subject}&body=${body}`;
+        setLeadError('Sunucu bağlantısı sırasında bir gecikme oluştu. Bilgileriniz kaybolmadı; tek tıkla WhatsApp üzerinden iletebilir veya tekrar gönderebilirsiniz.');
+        return;
       }
 
       setPartnerSubmitted(true);
     } catch (err: any) {
       console.error('Lead error:', err);
-      setLeadError('Başvuru gönderilirken bir hata oluştu. Lütfen doğrudan kurumsal WhatsApp hattımızdan bize ulaşın.');
+      setLeadError('Sunucu bağlantısı kurulamadı. Bilgileriniz formda korundu; WhatsApp hattımızdan tek tıkla bize iletebilirsiniz.');
     } finally {
       setSubmittingLead(false);
     }
@@ -384,13 +393,13 @@ export const ShowcaseLanding: React.FC = () => {
               <span>QR Okut</span>
             </Link>
 
-            {/* Satın Al */}
+            {/* Mekanını Başlat */}
             <a
               href="#hero-form"
               onClick={(e) => scrollToSection(e, 'hero-form')}
               className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-bold text-xs transition duration-150 shadow-sm active:scale-95 cursor-pointer min-h-[44px]"
             >
-              <span>Hemen Satın Al</span>
+              <span>Mekanınızı Başlatın</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
 
@@ -474,14 +483,14 @@ export const ShowcaseLanding: React.FC = () => {
                 Milyonlarca Spotify şarkısı, masa oylaması ve mekan atmosferini koruyan Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
               </p>
 
-              {/* CTA Buton Çifti */}
+              {/* CTA Butonları: B2B ve B2C rolleri net ayrılmış */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
                 <a
                   href="#hero-form"
                   onClick={(e) => scrollToSection(e, 'hero-form')}
                   className="group w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition duration-150 cursor-pointer min-h-[46px]"
                 >
-                  <span>Hemen Satın Al</span>
+                  <span>Mekanınızı Başlatın</span>
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
                 </a>
 
@@ -496,9 +505,10 @@ export const ShowcaseLanding: React.FC = () => {
                 <Link
                   href="/qr"
                   className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[46px]"
+                  title="Kafe müşterisi gözünden masada müzik seçme deneyimini test edin"
                 >
                   <QrCode className="w-4 h-4 text-[#8C5226]" />
-                  <span>Masa QR&apos;ı Okut</span>
+                  <span>Müşteri QR Önizleme</span>
                 </Link>
               </div>
 
@@ -516,16 +526,16 @@ export const ShowcaseLanding: React.FC = () => {
 
             </div>
 
-            {/* Sağ Sütun: 3-Fotoğraflı İnteraktif Slayt Gösterimi */}
+            {/* Sağ Sütun: İnteraktif Görsel Önizleme (Kusursuz Krem Arka Plan & Stüdyo Çerçevesi) */}
             <div className="lg:col-span-5 flex justify-center w-full">
-              <div className="w-full max-w-[480px]">
+              <div className="w-full max-w-[500px]">
                 <div
                   ref={carouselRef}
                   role="region"
                   aria-roledescription="carousel"
-                  aria-label="Muzikors uygulama görselleri"
+                  aria-label="Muzikors uygulama ve masa deneyimi"
                   tabIndex={0}
-                  className="w-full aspect-video rounded-2xl bg-black border border-[#D8C7B5] shadow-[0_12px_40px_rgba(36,26,20,0.10)] relative overflow-hidden select-none"
+                  className="w-full aspect-video rounded-2xl bg-[#F7F7F7] border border-[#DACDC0] shadow-[0_12px_40px_rgba(36,26,20,0.08)] relative overflow-hidden select-none"
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
                   onMouseEnter={() => setHoverPaused(true)}
@@ -534,7 +544,7 @@ export const ShowcaseLanding: React.FC = () => {
                   onBlur={handleCarouselBlur}
                   onKeyDown={handleCarouselKey}
                 >
-                  {/* Slides Layer — yalnızca opacity + transform geçişi */}
+                  {/* Slides Layer — temiz arka planla kusursuz entegre */}
                   {SHOWCASE_SLIDES.map((slide, index) => {
                     const isActive = currentSlide === index;
                     return (
@@ -544,7 +554,7 @@ export const ShowcaseLanding: React.FC = () => {
                         aria-roledescription="slide"
                         aria-label={`${index + 1} / ${slideCount}: ${slide.title}`}
                         aria-hidden={!isActive}
-                        className="sc-slide absolute inset-0 flex items-center justify-center bg-black"
+                        className="sc-slide absolute inset-0 flex items-center justify-center bg-[#F7F7F7]"
                         data-active={isActive}
                       >
                         {primedSlides.has(index) && (
@@ -568,7 +578,7 @@ export const ShowcaseLanding: React.FC = () => {
                   <button
                     type="button"
                     onClick={prevSlide}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-black/55 hover:bg-black/85 border border-white/20 text-white flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/90 hover:bg-white border border-[#DACDC0] text-[#26170F] shadow-md flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
                     aria-label="Önceki Görsel"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -578,7 +588,7 @@ export const ShowcaseLanding: React.FC = () => {
                   <button
                     type="button"
                     onClick={nextSlide}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-black/55 hover:bg-black/85 border border-white/20 text-white flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/90 hover:bg-white border border-[#DACDC0] text-[#26170F] shadow-md flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
                     aria-label="Sonraki Görsel"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -647,11 +657,8 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-sm font-bold text-[#8C5226] block mb-2">
-              Nasıl Çalışır?
-            </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
-              3 Adımda Mekanında Canlı Müzik
+              3 Adımda Mekanınızda Canlı Müzik
             </h2>
             <p className="text-sm text-[#635044] mt-2">
               Karmaşık kablolar, pahalı cihazlar ve eleman eğitimi yok.
@@ -679,7 +686,7 @@ export const ShowcaseLanding: React.FC = () => {
               onClick={(e) => scrollToSection(e, 'hero-form')}
               className="group inline-flex items-center gap-2 min-h-[44px] text-xs font-black text-[#8C5226] hover:text-[#6E3C17] uppercase tracking-wider underline underline-offset-4 decoration-[#8C5226]/40 hover:decoration-[#6E3C17] transition-colors duration-150 cursor-pointer"
             >
-              <span>Mekanını Muzikors ile Donat</span>
+              <span>Mekanınızı Muzikors ile Başlatın</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
             </a>
           </div>
@@ -692,9 +699,6 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-sm font-bold text-[#8C5226] block mb-2">
-              Ayrı Ayrı Satılmaz
-            </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               Masanızdaki Aynı Karekod Hepsini Açar
             </h2>
@@ -720,11 +724,8 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-sm font-bold text-[#8C5226] block mb-2">
-              Şeffaf Fiyatlandırma
-            </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
-              Tek Fiyat. Bütün Özellikler Dahil.
+              Şeffaf Fiyatlandırma: Tek Paket, Tüm Özellikler Dahil
             </h2>
             <p className="text-sm text-[#635044] mt-2">
               Kurulum ücreti yok. Donanım masrafı yok. Pleksiler kargoyla masanıza gelir.
@@ -737,16 +738,14 @@ export const ShowcaseLanding: React.FC = () => {
             {/* Üst Vurgu */}
             <div className="flex items-end justify-between gap-4 pb-6 border-b border-[#E4D7C8]">
               <div>
-                <span className="text-xs font-bold text-[#8C5226] block mb-1">
-                  Kurumsal Kafe Paketi
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Standart</h3>
+                <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Standart Paketi</h3>
+                <span className="text-xs text-[#6B584C] font-semibold mt-1 block">Kurumsal Kafe &amp; Bar Lisansı</span>
               </div>
               <div className="text-right">
                 <div className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight tabular-nums">
                   ₺1.500 <span className="text-xs sm:text-sm text-[#6B584C] font-bold">+ KDV</span>
                 </div>
-                <div className="text-[11px] text-[#6B584C] mt-0.5 tabular-nums">
+                <div className="text-xs text-[#6B584C] mt-0.5 tabular-nums">
                   %20 KDV dahil ₺1.800 / Ay
                 </div>
               </div>
@@ -780,10 +779,10 @@ export const ShowcaseLanding: React.FC = () => {
                 onClick={(e) => scrollToSection(e, 'hero-form')}
                 className="group w-full py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 transition duration-150 active:scale-95 shadow-md cursor-pointer min-h-[48px]"
               >
-                <span>Hemen Satın Al &amp; Başvur</span>
+                <span>Mekanınızı Başlatın &amp; Başvurun</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
               </a>
-              <p className="text-[11px] text-center text-[#6B584C] mt-2">
+              <p className="text-xs text-center text-[#6B584C] mt-2">
                 Ödeme sonrası pleksiler hazırlanıp adresinize kargolanır.
               </p>
             </div>
@@ -800,30 +799,48 @@ export const ShowcaseLanding: React.FC = () => {
           <div className="bg-white rounded-2xl p-6 sm:p-10 border border-[#E8DFD3] shadow-[0_8px_30px_rgba(36,26,20,0.05)] space-y-6">
 
             <div className="border-b border-[#EFE7DC] pb-5 text-center sm:text-left">
-              <span className="text-xs font-bold text-[#8C5226] block mb-1">
-                İşletme Başvurusu
-              </span>
-              <h3 className="text-xl sm:text-3xl font-black text-[#26170F] tracking-tight text-balance">
+              <h2 className="text-xl sm:text-3xl font-black text-[#26170F] tracking-tight text-balance">
                 Mekanınızı Muzikors ile Tanıştırın
-              </h3>
-              <p className="text-xs sm:text-sm text-[#635044] mt-1">
+              </h2>
+              <p className="text-xs sm:text-sm text-[#635044] mt-1.5">
                 Bilgilerinizi bırakın, aboneliğinizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
               </p>
             </div>
 
             {leadError && (
-              <div role="alert" className="sc-fade p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{leadError}</span>
+              <div role="alert" className="sc-fade p-4 rounded-xl bg-amber-50/90 border border-amber-300 text-[#362217] text-xs space-y-3">
+                <div className="flex items-start gap-2 text-amber-900 font-semibold leading-relaxed">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-700 mt-0.5" />
+                  <span>{leadError}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                  <a
+                    href={getWhatsAppLeadUrl()}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#241A14] hover:bg-black text-white font-bold text-xs transition duration-150 active:scale-95 min-h-[44px]"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <span>WhatsApp ile Hemen İlet</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={copyLeadDetails}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white border border-[#DACDC0] hover:bg-[#FAF4ED] text-[#26170F] font-bold text-xs transition duration-150 active:scale-95 min-h-[44px] cursor-pointer"
+                  >
+                    {leadCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-[#8C5226]" />}
+                    <span>{leadCopied ? 'Bilgiler Kopyalandı!' : 'Bilgilerimi Kopyala'}</span>
+                  </button>
+                </div>
               </div>
             )}
 
             {partnerSubmitted ? (
               <div className="sc-fade text-center py-8 sm:py-12 space-y-4" role="status">
                 <CheckCircle2 className="w-10 h-10 text-[#8C5226] mx-auto" strokeWidth={1.75} />
-                <h4 className="text-lg font-black text-[#26170F]">
+                <h3 className="text-lg font-black text-[#26170F]">
                   Başvurunuz Başarıyla Kaydedildi!
-                </h4>
+                </h3>
                 <p className="text-xs sm:text-sm text-[#635044] max-w-md mx-auto leading-relaxed">
                   Talebiniz ekibimize ulaştı. 24 saat içinde sizinle telefon üzerinden iletişime geçip akrilik QR kiti ve panel aktivasyonunuzu tamamlayacağız.
                 </p>
@@ -964,7 +981,7 @@ export const ShowcaseLanding: React.FC = () => {
                   </button>
                 </div>
 
-                <p className="text-[11px] text-[#6B584C] text-center pt-1">
+                <p className="text-xs text-[#6B584C] text-center pt-1 font-medium">
                   Bilgileriniz Gizlilik Politikamız ve KVKK kapsamında korunur. Doğrudan WhatsApp hattımız: <span className="font-bold text-[#26170F] tabular-nums">0506 863 83 06</span>
                 </p>
 
@@ -981,9 +998,6 @@ export const ShowcaseLanding: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-sm font-bold text-[#8C5226] block mb-2">
-              Merak Edilenler
-            </span>
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               Sıkça Sorulan Sorular
             </h2>
@@ -1056,7 +1070,7 @@ export const ShowcaseLanding: React.FC = () => {
               <p className="text-xs text-[#5C4A3E] leading-relaxed max-w-sm">
                 Muzikors; kafe, bar ve restoranlarda misafirlerin dinlenen müziğe ortaklaşa karar verdiği interaktif sosyal müzik kutusu altyapısıdır.
               </p>
-              <div className="text-[11px] text-[#6B584C] space-y-0.5 pt-1">
+              <div className="text-xs text-[#6B584C] space-y-0.5 pt-1">
                 <div>&copy; {new Date().getFullYear()} Muzikors. Tüm hakları saklıdır.</div>
                 <div>Geliştirici &amp; Kurucu: <strong className="text-[#26170F] font-semibold">Yunus Emre Gedik</strong></div>
               </div>
@@ -1114,7 +1128,7 @@ export const ShowcaseLanding: React.FC = () => {
                   </a>
                 </li>
                 <li>
-                  <span className="text-[11px] text-[#6B584C] block pt-1 tabular-nums">
+                  <span className="text-xs text-[#6B584C] block pt-1 tabular-nums">
                     Haftanın 7 Günü: 10:00 - 02:00
                   </span>
                 </li>
@@ -1123,7 +1137,7 @@ export const ShowcaseLanding: React.FC = () => {
 
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#6B584C] gap-2">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#6B584C] gap-2">
             <span>Muzikors Türkiye · İstanbul</span>
             <div className="flex items-center gap-4">
               <a href="https://kafe.muzikors.com.tr" target="_blank" rel="noreferrer" className="py-1 text-[#5C4A3E] hover:text-[#26170F] font-bold transition-colors duration-150">
