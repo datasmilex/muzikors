@@ -61,12 +61,16 @@ const FAQS = [
     a: 'Vibe Guard™ teknolojisi mekanınızın atmosfer sigortasıdır. Çalınabilecek müzik türlerini, sanatçıları veya Spotify çalma listesi sınırlarını Kafe Panelinden siz belirlersiniz. Mekanınızın tarzına uymayan parçalar arama sonuçlarında filtrelenir; ayrıca istemediğiniz herhangi bir şarkıyı panelden tek tıkla sıradan atlayabilirsiniz.'
   },
   {
-    q: 'Fiyat ne kadar ve nasıl tahsil edilir?',
-    a: 'Tüm Muzikors sisteminde sabit tek fiyat geçerlidir: Aylık 1.500 ₺ + %20 KDV (1.800 ₺ KDV dahil). Tahsilat üç aylık dönemlerle peşin alınır (3 x 1.500 = 4.500 ₺ + KDV). Masa sayınıza göre hazırlanan lazer kesim akrilik QR pleksileri, Kafe Yönetim Paneli ve sınırsız müşteri istekleri bu fiyata dahildir; kurulum ücreti veya cihaz maliyeti yoktur.'
+    q: 'Fiyat ne kadar ve ödeme nasıl yapılır?',
+    a: 'Muzikors mekanlar için tek ve şeffaf bir başlangıç paketi sunar: 1 Yıllık Her Şey Dahil Kurulum & Pleksi Paketi: ₺5.000. Aylık aidat veya gizli abonelik ücreti KESİNLİKLE YOKTUR. 30 adede kadar lazer kesim akrilik QR pleksileri, Spotify ses sistemi entegrasyonu, Vibe Guard™ koruması ve 1 yıllık kesintisiz bulut sunucu altyapısı bu fiyata dahildir. Ödeme havale/EFT ile fatura karşılığı tek seferde alınır.'
   },
   {
     q: 'Karekod pleksiler masamıza nasıl gelir?',
     a: 'Başvurunuz onaylandıktan sonra masa sayınıza özel hazırlanan yüksek kaliteli, şeffaf akrilik masa stantları ve QR kod etiketleri kargoyla kapınıza teslim edilir. Vida, kablo, delme ya da montaj gerekmez; masaya koymanız yeterlidir.'
+  },
+  {
+    q: 'Olası bir sistem kesintisinde veya ileride masadaki pleksilerim çöp olur mu?',
+    a: 'Asla! Muzikors Dinamik QR altyapısı kullanır. Masalarınızdaki pleksi QR kodları yalnızca müziğe değil, dilediğiniz an tek bir tıkla mekanınızın kendi PDF dijital menüsüne, Wi-Fi karşılama ekranına veya Instagram hesabına yönlendirilebilir. Pleksileriniz mekanınızda ömür boyu hizmet etmeye devam eder.'
   },
   {
     q: 'Kafede şarkı istemek misafirler için ücretli mi?',
@@ -117,10 +121,12 @@ const FEATURES = [
 ];
 
 const PRICE_INCLUDES = [
-  'Masa sayınız kadar lazer kazımalı akrilik QR pleksi stantları kapınıza teslim',
-  'Spotify entegrasyonu ve sınırsız müşteri şarkı isteği & oylama kuyruğu',
-  'Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik engelleme)',
+  '30 adede kadar lazer kazımalı akrilik QR pleksi stantları kapınıza teslim',
+  'Spotify ses sistemi entegrasyonu ve sınırsız müşteri istek & oylama kuyruğu',
+  'Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik filtreleme)',
   'Gelişmiş Kafe Yönetim Paneli (kafe.muzikors.com.tr) & Anlık Şarkı Atlama (Skip)',
+  '1 Yıl Kesintisiz Bulut Sunucu & Realtime Senkronizasyon Altyapısı (Aylık aidatsız)',
+  'Dinamik QR Güvencesi (İstendiğinde kafenin dijital menüsüne anında yönlendirme)',
   '7/24 Doğrudan Kurumsal WhatsApp & E-posta Destek Hattı'
 ];
 
@@ -302,8 +308,8 @@ export const ShowcaseLanding: React.FC = () => {
         city: partnerForm.city.trim() || 'Belirtilmedi',
         address: partnerForm.email.trim() ? `E-posta: ${partnerForm.email.trim()} | Masa: ${partnerForm.tableCount}` : `Masa: ${partnerForm.tableCount} | Web Başvurusu`,
         status: 'yeni_basvuru',
-        visit_notes: `Web sitesi (Açık Tema Vitrin) üzerinden B2B ortaklık başvurusu. Masa sayısı: ${partnerForm.tableCount}, E-posta: ${partnerForm.email || 'Belirtilmedi'}`,
-        package_price: 1500,
+        visit_notes: `Web sitesi (Açık Tema Vitrin) üzerinden B2B ortaklık başvurusu. Paket: 1 Yıllık Her Şey Dahil Kurulum & Pleksi (5.000 TL), Masa sayısı: ${partnerForm.tableCount}, E-posta: ${partnerForm.email || 'Belirtilmedi'}`,
+        package_price: 5000,
         last_visited_at: new Date().toISOString()
       });
 
@@ -685,16 +691,16 @@ export const ShowcaseLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* ── ŞEFFAF FİYATLANDIRMA (1500 TL + KDV SABİT / 3 AYLIK PEŞİN) ──────── */}
+      {/* ── ŞEFFAF FİYATLANDIRMA (5000 TL 1 YILLIK HER ŞEY DAHİL PAKET) ──────── */}
       <section id="fiyat" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
-              Şeffaf Fiyatlandırma: Tek Paket, Tüm Özellikler Dahil
+              1 Yıllık Her Şey Dahil Kurulum &amp; Pleksi Paketi
             </h2>
             <p className="text-sm text-[#635044] mt-2">
-              Kurulum ücreti yok. Donanım masrafı yok. Pleksiler kargoyla masanıza gelir.
+              Aylık aidat yok. Gizli fatura yok. 1 yıl boyunca tüm özellikler ve masa pleksileri dahil.
             </p>
           </div>
 
@@ -704,27 +710,27 @@ export const ShowcaseLanding: React.FC = () => {
             {/* Üst Vurgu */}
             <div className="flex items-end justify-between gap-4 pb-6 border-b border-[#E4D7C8]">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Standart Paketi</h3>
-                <span className="text-xs text-[#6B584C] font-semibold mt-1 block">Kurumsal Kafe &amp; Bar Lisansı</span>
+                <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Mekan Başlangıç Kiti</h3>
+                <span className="text-xs text-[#6B584C] font-semibold mt-1 block">1 Yıllık Kurumsal Lisans &amp; Pleksi Stand Paketi</span>
               </div>
               <div className="text-right">
                 <div className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight tabular-nums">
-                  ₺1.500 <span className="text-xs sm:text-sm text-[#6B584C] font-bold">+ KDV</span>
+                  ₺5.000
                 </div>
-                <div className="text-xs text-[#6B584C] mt-0.5 tabular-nums">
-                  %20 KDV dahil ₺1.800 / Ay
+                <div className="text-xs text-[#6B584C] mt-0.5 font-bold">
+                  Aylık Aidat: ₺0 / Ay
                 </div>
               </div>
             </div>
 
-            {/* Tahsilat ve Koşul Notu — iç kutu yerine düz blok */}
+            {/* Tahsilat ve Koşul Notu */}
             <div className="text-xs text-[#5C4A3E] space-y-1">
               <div className="font-bold text-[#26170F] flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-[#8C5226]" />
-                <span>Tahsilat 3 Aylık Dönemlerle Peşin Alınır</span>
+                <span>Tahsilat Kurumsal Havale / EFT ile Tek Seferde Alınır</span>
               </div>
               <p className="text-[#6B584C] text-xs leading-relaxed pl-[22px]">
-                3 aylık toplam ödeme: ₺4.500 + KDV (₺5.400 KDV Dahil). Ne seçerseniz seçin bütün özellikler, masa pleksileri ve Kafe Paneli dahildir.
+                1 yıllık toplam ödeme: ₺5.000. Aylık aidat veya komisyon yoktur. 30 adede kadar mekana özel lazer kesim pleksi stantları, Spotify ses sistemi entegrasyonu, Vibe Guard™ ve 1 yıllık kesintisiz bulut sunucu altyapısı dahildir.
               </p>
             </div>
 
@@ -745,11 +751,11 @@ export const ShowcaseLanding: React.FC = () => {
                 onClick={(e) => scrollToSection(e, 'hero-form')}
                 className="group w-full py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 transition duration-150 active:scale-95 shadow-md cursor-pointer min-h-[48px]"
               >
-                <span>Mekanınızı Başlatın &amp; Başvurun</span>
+                <span>Mekanınızı Başlatın &amp; Kurulum Kitini Alın</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
               </a>
               <p className="text-xs text-center text-[#6B584C] mt-2">
-                Ödeme sonrası pleksiler hazırlanıp adresinize kargolanır.
+                Ödeme sonrası pleksiler lazer kesime girer ve adresinize kargolanır.
               </p>
             </div>
 
@@ -769,7 +775,7 @@ export const ShowcaseLanding: React.FC = () => {
                 Mekanınızı Muzikors ile Tanıştırın
               </h2>
               <p className="text-xs sm:text-sm text-[#635044] mt-1.5">
-                Bilgilerinizi bırakın, aboneliğinizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
+                Bilgilerinizi bırakın, 1 yıllık kurulum kitinizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
               </p>
             </div>
 
@@ -808,7 +814,7 @@ export const ShowcaseLanding: React.FC = () => {
                   Başvurunuz Başarıyla Kaydedildi!
                 </h3>
                 <p className="text-xs sm:text-sm text-[#635044] max-w-md mx-auto leading-relaxed">
-                  Talebiniz ekibimize ulaştı. 24 saat içinde sizinle telefon üzerinden iletişime geçip akrilik QR kiti ve panel aktivasyonunuzu tamamlayacağız.
+                  Talebiniz ekibimize ulaştı. 24 saat içinde sizinle iletişime geçip 1 yıllık pleksi kiti ve panel aktivasyonunuzu tamamlayacağız.
                 </p>
                 <div className="pt-3">
                   <a
