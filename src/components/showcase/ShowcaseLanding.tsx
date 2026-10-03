@@ -450,48 +450,37 @@ export const ShowcaseLanding: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ──────────────────────────────────────────────────────── */}
-      {/* ── HERO SECTION (EDİTORYAL KATMANLI MİMARİ) ───────────────────────── */}
-      <section className="relative pt-8 sm:pt-14 pb-14 sm:pb-20 border-b border-[#E8DFD3] bg-gradient-to-b from-[#F3ECE4]/80 to-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+      {/* ── HERO SECTION (KOMPAKT & ORTALANMIŞ ZARİF DÜZEN) ───────────────────── */}
+      <section className="relative pt-6 sm:pt-10 pb-10 sm:pb-14 border-b border-[#E8DFD3] bg-gradient-to-b from-[#F3ECE4]/80 to-[#FAF7F2]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
 
-          {/* ── 1. ÜST KATMAN: Sol Başlık / Sağ Alt Başlık ──────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end">
-            {/* Sol: Büyük, Vurucu H1 Manşet */}
-            <div className="lg:col-span-7 text-center lg:text-left">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#26170F] tracking-tight leading-[1.12] text-balance">
-                <span className="sc-line">
-                  <span>Masana karekod koy,</span>
+          {/* ── 1. Başlık ve Açıklama (Kompakt, Dengeli & Ortalanmış) ───────── */}
+          <div className="text-center space-y-2.5">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#26170F] tracking-tight leading-tight max-w-2xl mx-auto text-balance">
+              <span className="sc-line">
+                <span>Masana karekod koy,</span>
+              </span>
+              <span className="sc-line sc-line-2">
+                <span>
+                  <span className="sc-ink text-[#8C5226]">müşterin çalan müziği yönetsin.</span>
                 </span>
-                <span className="sc-line sc-line-2">
-                  <span>
-                    <span className="sc-ink text-[#8C5226]">müşterin çalan müziği yönetsin.</span>
-                  </span>
-                </span>
-              </h1>
-            </div>
+              </span>
+            </h1>
 
-            {/* Sağ: Editoryal Açıklama ve Değer Önermesi */}
-            <div className="lg:col-span-5 space-y-3 pb-1 text-center lg:text-left">
-              <p className="text-sm sm:text-base text-[#635044] leading-relaxed font-normal">
-                Milyonlarca Spotify şarkısı, masa oylaması ve mekan atmosferini koruyan Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
-              </p>
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-bold text-[#8C5226]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8C5226]" />
-                <span>Lazer kesim akrilik stantlar kapınıza kargolanır</span>
-              </div>
-            </div>
+            <p className="text-xs sm:text-sm text-[#635044] max-w-lg mx-auto leading-relaxed font-normal">
+              Milyonlarca Spotify şarkısı, masa oylaması ve Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
+            </p>
           </div>
 
-          {/* ── 2. ORTA KATMAN: Geniş Stüdyo Çerçevesi & Sekmeli Akış ─────────── */}
-          <div className="w-full max-w-4xl mx-auto">
-            {/* Slayt Çerçevesi */}
+          {/* ── 2. Kompakt Vitrin Çerçevesi (max-w-2xl) ──────────────────────── */}
+          <div className="w-full max-w-xl sm:max-w-2xl mx-auto">
             <div
               ref={carouselRef}
               role="region"
               aria-roledescription="carousel"
               aria-label="Muzikors uygulama ve masa deneyimi"
               tabIndex={0}
-              className="w-full aspect-video rounded-2xl sm:rounded-3xl bg-[#F7F7F7] border border-[#DACDC0] shadow-[0_16px_50px_rgba(36,26,20,0.08)] relative overflow-hidden select-none"
+              className="w-full aspect-video rounded-2xl bg-[#F7F7F7] border border-[#DACDC0] shadow-[0_8px_24px_rgba(36,26,20,0.06)] relative overflow-hidden select-none"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               onMouseEnter={() => setHoverPaused(true)}
@@ -530,72 +519,62 @@ export const ShowcaseLanding: React.FC = () => {
               })}
             </div>
 
-            {/* Slaytın Altındaki 3 Temiz Sekme (Oklar yerine şık, dokunmatik başlıklar) */}
+            {/* Slayt Bilgisi ve Minimal İlerleme Çizgileri */}
             <div
-              className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3"
+              className="mt-2.5 flex items-center justify-between px-1"
               data-paused={!progressRunning}
             >
-              {SHOWCASE_SLIDES.map((slide, index) => {
-                const isActive = currentSlide === index;
-                return (
-                  <button
-                    key={slide.src}
-                    type="button"
-                    onClick={() => goToSlide(index)}
-                    className={`p-3 sm:p-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer border flex flex-col justify-between ${
-                      isActive
-                        ? 'bg-white border-[#8C5226]/40 shadow-sm'
-                        : 'bg-[#F4EEE7]/60 border-transparent hover:bg-white/80 hover:border-[#DACDC0]'
-                    }`}
-                    aria-label={`${index + 1}. Adım: ${slide.title}`}
-                    aria-current={isActive ? 'true' : undefined}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-[#8C5226]' : 'text-[#7E6C60]'}`}>
-                          0{index + 1}. Adım
-                        </span>
-                        {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#8C5226]" />
-                        )}
-                      </div>
-                      <div className={`text-xs sm:text-sm font-black ${isActive ? 'text-[#26170F]' : 'text-[#635044]'}`}>
-                        {slide.title}
-                      </div>
-                      <div className="text-[11px] text-[#7E6C60] line-clamp-1 mt-0.5">
-                        {slide.caption}
-                      </div>
-                    </div>
+              <div className="min-w-0 pr-4">
+                <span className="text-xs font-bold text-[#26170F] truncate block">
+                  {SHOWCASE_SLIDES[currentSlide].title}
+                </span>
+                <span className="text-[11px] text-[#7E6C60] truncate block">
+                  {SHOWCASE_SLIDES[currentSlide].caption}
+                </span>
+              </div>
 
-                    {/* Canlı İlerleme Çubuğu */}
-                    <div className="w-full h-[2px] bg-[#D8C7B5]/40 rounded-full overflow-hidden mt-2.5">
-                      {isActive ? (
-                        <span
-                          key={`tab-progress-${currentSlide}`}
-                          className={`block h-full bg-[#8C5226] origin-left rounded-full ${reducedMotion ? '' : 'sc-progress'}`}
-                          style={{ ['--sc-slide-ms' as string]: `${SLIDE_MS}ms` }}
-                          onAnimationEnd={nextSlide}
-                        />
-                      ) : (
-                        <span
-                          className="block h-full bg-[#8C5226]/30 rounded-full"
-                          style={{ width: index < currentSlide ? '100%' : '0%' }}
-                        />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+              {/* 3 İlerleme Çizgisi */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {SHOWCASE_SLIDES.map((slide, index) => {
+                  const isActive = currentSlide === index;
+                  return (
+                    <button
+                      key={slide.src}
+                      type="button"
+                      onClick={() => goToSlide(index)}
+                      className="h-8 px-1 flex items-center cursor-pointer group"
+                      aria-label={`Görsel ${index + 1}: ${slide.title}`}
+                      aria-current={isActive ? 'true' : undefined}
+                    >
+                      <span className="relative block w-7 h-[3px] rounded-full bg-[#D8C7B5] overflow-hidden group-hover:bg-[#C9B49E] transition-colors">
+                        {isActive ? (
+                          <span
+                            key={`fill-${currentSlide}`}
+                            className={`absolute inset-0 origin-left bg-[#8C5226] rounded-full ${reducedMotion ? '' : 'sc-progress'}`}
+                            style={{ ['--sc-slide-ms' as string]: `${SLIDE_MS}ms` }}
+                            onAnimationEnd={nextSlide}
+                          />
+                        ) : (
+                          <span
+                            className="absolute inset-0 origin-left bg-[#8C5226]/40 rounded-full"
+                            style={{ transform: index < currentSlide ? 'scaleX(1)' : 'scaleX(0)' }}
+                          />
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* ── 3. ALT KATMAN: Ortalanmış CTA Butonları ve Rozetler ──────────── */}
-          <div className="pt-2 text-center space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* ── 3. Butonlar ve Güven Rozetleri (Hemen Slaytın Altında) ──────── */}
+          <div className="pt-2 text-center space-y-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
               <a
                 href="#hero-form"
                 onClick={(e) => scrollToSection(e, 'hero-form')}
-                className="group w-full sm:w-auto px-7 py-3.5 sm:py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition duration-150 cursor-pointer min-h-[48px]"
+                className="group w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition min-h-[44px]"
               >
                 <span>Mekanınızı Başlatın</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
@@ -604,14 +583,14 @@ export const ShowcaseLanding: React.FC = () => {
               <a
                 href="#nasil-calisir"
                 onClick={(e) => scrollToSection(e, 'nasil-calisir')}
-                className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[48px]"
+                className="w-full sm:w-auto px-5 py-2.5 sm:py-3 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition min-h-[44px]"
               >
                 <span>Nasıl Çalışır?</span>
               </a>
 
               <Link
                 href="/qr"
-                className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[48px]"
+                className="w-full sm:w-auto px-5 py-2.5 sm:py-3 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition min-h-[44px]"
                 title="Kafe müşterisi gözünden masada müzik seçme deneyimini test edin"
               >
                 <QrCode className="w-4 h-4 text-[#8C5226]" />
@@ -619,8 +598,8 @@ export const ShowcaseLanding: React.FC = () => {
               </Link>
             </div>
 
-            {/* Alt Güven Rozetleri */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#6B584C] pt-1">
+            {/* Güven Rozetleri */}
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs font-semibold text-[#6B584C]">
               <span className="flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
                 <span>Cihaz / donanım gerekmez</span>
