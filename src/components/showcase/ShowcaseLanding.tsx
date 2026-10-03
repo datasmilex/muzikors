@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   QrCode,
@@ -15,70 +15,234 @@ import {
   X,
   Loader2,
   Check,
-  AlertCircle
+  AlertCircle,
+  Pause,
+  Play
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
+// ── Statik içerik (her render'da yeniden oluşturulmasın diye modül seviyesinde) ──
+const SHOWCASE_SLIDES = [
+  {
+    src: '/showcase/slide-1.png',
+    alt: 'Muzikors İle Müziği Sen Seç - Bir Mekana Bağlan',
+    title: 'Müziği Sen Seç',
+    caption: 'Masandaki QR kodu okut, mekana anında bağlan'
+  },
+  {
+    src: '/showcase/slide-2.png',
+    alt: 'Dilediğin Parçayı Saniyeler İçerisinde Bul',
+    title: 'Saniyeler İçinde Parçanı Bul',
+    caption: 'Geniş müzik kataloğundan dilediğin şarkıyı sıraya ekle'
+  },
+  {
+    src: '/showcase/slide-3.png',
+    alt: 'Muzikors - Müzik Sizin Elinizde',
+    title: 'Müzik Sizin Elinizde',
+    caption: 'Kafede çalan şarkılara oy ver, ritmi mekanla birlikte yakala'
+  }
+];
+
+/** Bir slaydın ekranda kalma süresi. İlerleme çizgisi animasyonu bu süreyle çalışır ve bitişi slaydı ilerletir. */
+const SLIDE_MS = 5000;
+
+const FAQS = [
+  {
+    q: 'Karekod müzik sistemi nedir?',
+    a: 'Karekod müzik sistemi; bir karekodu telefon kamerasıyla okutunca doğrudan tarayıcıda açılan sosyal jukebox deneyimidir. Müşterinizin uygulama indirmesi gerekmez. Masadaki akrilik stantta bulunan QR kod okutulduğunda mekanınızın logosuyla açılır; misafirleriniz Spotify arşivi üzerinden şarkı seçer ve sıradaki parçaları masasıyla oylar.'
+  },
+  {
+    q: 'Müşterilerimin herhangi bir uygulama indirmesi gerekir mi?',
+    a: 'Kesinlikle hayır! Masadaki QR kodu standart telefon kamerasıyla okutmaları yeterlidir. Muzikors tamamen web tabanlı (PWA) çalıştığı için müşteriniz hiçbir uygulama yüklemeden, şifre girmeden 3 saniye içinde parçalarını sıraya ekleyebilir.'
+  },
+  {
+    q: 'Mekanım küçük veya 3. nesil kahveci, bize uyar mı?',
+    a: 'Müşterinin masada oturduğu her mekana uygundur: kafe, 3. nesil coffee shop, bar, pub, restoran, pastane, otel lobisi ve co-working alanları. Masa sayınız fiyatı değiştirmez; her masa için özel pleksi stant hazırlanır.'
+  },
+  {
+    q: 'Müşteriler mekanımızın havasına uymayan şarkılar açarsa ne olur? (Vibe Guard)',
+    a: 'Vibe Guard™ teknolojisi mekanınızın atmosfer sigortasıdır. Çalınabilecek müzik türlerini, sanatçıları veya Spotify çalma listesi sınırlarını Kafe Panelinden siz belirlersiniz. Mekanınızın tarzına uymayan parçalar arama sonuçlarında filtrelenir; ayrıca istemediğiniz herhangi bir şarkıyı panelden tek tıkla sıradan atlayabilirsiniz.'
+  },
+  {
+    q: 'Fiyat ne kadar ve nasıl tahsil edilir?',
+    a: 'Tüm Muzikors sisteminde sabit tek fiyat geçerlidir: Aylık 1.500 ₺ + %20 KDV (1.800 ₺ KDV dahil). Tahsilat üç aylık dönemlerle peşin alınır (3 x 1.500 = 4.500 ₺ + KDV). Masa sayınıza göre hazırlanan lazer kesim akrilik QR pleksileri, Kafe Yönetim Paneli ve sınırsız müşteri istekleri bu fiyata dahildir; kurulum ücreti veya cihaz maliyeti yoktur.'
+  },
+  {
+    q: 'Karekod pleksiler masamıza nasıl gelir?',
+    a: 'Başvurunuz onaylandıktan sonra masa sayınıza özel hazırlanan yüksek kaliteli, şeffaf akrilik masa stantları ve QR kod etiketleri kargoyla kapınıza teslim edilir. Vida, kablo, delme ya da montaj gerekmez; masaya koymanız yeterlidir.'
+  },
+  {
+    q: 'Kafede şarkı istemek misafirler için ücretli mi?',
+    a: 'Hayır, misafirler için tamamen ücretsizdir! Masadaki QR kodu okutan her müşteri şarkı seçebilir, sıraya ekleyebilir ve sıradaki şarkılara oy verebilir. Bireysel VIP abonelik ise yalnızca ekstra ayrıcalıklar (reklamsız deneyim, öncelikli istekler) isteyen kullanıcılar içindir; sistemde jeton veya kredi satışı kesinlikle yoktur.'
+  }
+];
+
+const STEPS = [
+  {
+    title: 'Karekodların masana gelir',
+    body: 'Masa sayın kadar lazer kesim akrilik pleksi stant kargoyla kapına gelir. Kurulum ücreti yok, vidalama yok; masaya koyman yeter.'
+  },
+  {
+    title: 'Müşterin okutur, parçayı seçer',
+    body: 'Uygulama indirmeden Spotify kataloğundan dilediği şarkıyı arar, mekanının logosu ve Wi-Fi bilgisiyle açılan sayfadan sıraya ekler.'
+  },
+  {
+    title: 'Sen panelden yönetirsin',
+    body: 'Vibe Guard™ ile uygunsuz türleri filtrelersin; hangi şarkıların sevildiğini görür, istenmeyen şarkıyı tek dokunuşla atlayıp kontrolü sağlarsın.'
+  }
+];
+
+const FEATURES = [
+  {
+    title: 'Masaya koy, bitti',
+    body: 'Pleksiler kargoyla adresinize gelir. Cihaz maliyeti, kablolama, ek ekran yatırımı ve eleman eğitimi yoktur.'
+  },
+  {
+    title: 'Boş saatte masada bir sebep',
+    body: 'Öğleden sonra veya sakin saatlerde oturan müşterinin masasında etkileşim kuracağı bir sebep olur; masa enerjinin merkezi haline gelir.'
+  },
+  {
+    title: 'Masada kalma süresinde artış',
+    body: 'Kendi şarkısının çalmasını bekleyen ve sıradaki parçaları masasıyla oylayan misafirler mekanda daha uzun süre kalır, ek sipariş verir.'
+  },
+  {
+    title: 'Vibe Guard™ ile tarzın güvende',
+    body: 'Rock kafede arabesk, caz barda uygunsuz müzik çalmaz. İzin verilen türleri ve çalma listelerini siz belirlersiniz.'
+  },
+  {
+    title: 'Senin mekanının adıyla açılır',
+    body: 'Müşteri QR kodu okuttuğunda sayfa mekanınızın logosu, adı ve Wi-Fi şifresiyle açılır; kurumsal prestijiniz artar.'
+  },
+  {
+    title: 'Personel müzik baskısından kurtulur',
+    body: 'Garsonların veya baristaların telefondan şarkı değiştirme baskısı biter. Personel yalnızca siparişe ve kaliteli servise odaklanır.'
+  }
+];
+
+const PRICE_INCLUDES = [
+  'Masa sayınız kadar lazer kazımalı akrilik QR pleksi stantları kapınıza teslim',
+  'Spotify entegrasyonu ve sınırsız müşteri şarkı isteği & oylama kuyruğu',
+  'Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik engelleme)',
+  'Gelişmiş Kafe Yönetim Paneli (kafe.muzikors.com.tr) & Anlık Şarkı Atlama (Skip)',
+  '7/24 Doğrudan Kurumsal WhatsApp & E-posta Destek Hattı'
+];
+
+const NAV_LINKS = [
+  { id: 'nasil-calisir', label: 'Nasıl Çalışır?', mobileLabel: 'Nasıl Çalışır?' },
+  { id: 'ozellikler', label: 'Özellikler', mobileLabel: 'Özellikler' },
+  { id: 'fiyat', label: 'Fiyat', mobileLabel: 'Fiyat' },
+  { id: 'sss', label: 'SSS', mobileLabel: 'Sıkça Sorulanlar (SSS)' }
+];
+
+const INPUT_CLASS =
+  'w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#7E6C60] focus:border-[#8C5226] focus:bg-white transition-colors duration-150 font-medium min-h-[44px]';
+
+const LABEL_CLASS = 'block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5';
+
+/** Kullanıcının "hareketi azalt" tercihini canlı takip eder. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return reduced;
+}
+
 export const ShowcaseLanding: React.FC = () => {
+  const reducedMotion = usePrefersReducedMotion();
+
   // Mobile Navigation State
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // FAQ Accordion State (first item open by default)
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // 3-Slide Interactive Slideshow State
-  const showcaseSlides = [
-    {
-      src: '/showcase/slide-1.png',
-      alt: 'Muzikors İle Müziği Sen Seç - Bir Mekana Bağlan',
-      title: 'Müziği Sen Seç',
-      caption: 'Masandaki QR kodu okut, mekana anında bağlan'
-    },
-    {
-      src: '/showcase/slide-2.png',
-      alt: 'Dilediğin Parçayı Saniyeler İçerisinde Bul',
-      title: 'Saniyeler İçinde Parçanı Bul',
-      caption: 'Geniş müzik kataloğundan dilediğin şarkıyı sıraya ekle'
-    },
-    {
-      src: '/showcase/slide-3.png',
-      alt: 'Muzikors - Müzik Sizin Elinizde',
-      title: 'Müzik Sizin Elinizde',
-      caption: 'Kafede çalan şarkılara oy ver, ritmi mekanla birlikte yakala'
-    }
-  ];
+  // ── Slayt gösterisi ──────────────────────────────────────────────────────
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [userPaused, setUserPaused] = useState(false);   // pause/play butonu
+  const [hoverPaused, setHoverPaused] = useState(false); // fare üstünde / klavye odağında
+  const [inView, setInView] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
+  // Sadece gösterilen ve sıradaki slaydın görseli yüklenir (slide-3 ≈ 550 KB ilk yüklemeyi şişirmesin)
+  const [primedSlides, setPrimedSlides] = useState<Set<number>>(() => new Set([0]));
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
 
-  // Auto-advance slides every 5 seconds
+  const slideCount = SHOWCASE_SLIDES.length;
+  const autoplay = !reducedMotion && !userPaused;
+  const progressRunning = autoplay && !hoverPaused && inView && pageVisible;
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(((index % slideCount) + slideCount) % slideCount);
+  }, [slideCount]);
+
+  const prevSlide = () => goToSlide(currentSlide - 1);
+  const nextSlide = useCallback(() => goToSlide(currentSlide + 1), [goToSlide, currentSlide]);
+
+  // Gösterilen + bir sonraki slaydı önceden hazırla
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % showcaseSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [showcaseSlides.length]);
+    setPrimedSlides((prev) => {
+      const next = (currentSlide + 1) % slideCount;
+      if (prev.has(currentSlide) && prev.has(next)) return prev;
+      const updated = new Set(prev);
+      updated.add(currentSlide);
+      updated.add(next);
+      return updated;
+    });
+  }, [currentSlide, slideCount]);
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + showcaseSlides.length) % showcaseSlides.length);
-  };
+  // Ekran dışındayken ve sekme gizliyken ilerleme durur (gereksiz döngü yok)
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.25 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % showcaseSlides.length);
-  };
+  useEffect(() => {
+    const onVisibility = () => setPageVisible(document.visibilityState === 'visible');
+    onVisibility();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  // Mobil menü: Escape ile kapanır
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileMenuOpen]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+    touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
-    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (diff > 45) {
       nextSlide();
     } else if (diff < -45) {
       prevSlide();
     }
-    setTouchStartX(null);
+    touchStartX.current = null;
+  };
+
+  const handleCarouselKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  };
+
+  const handleCarouselBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHoverPaused(false);
   };
 
   // Lead Form State
@@ -94,18 +258,16 @@ export const ShowcaseLanding: React.FC = () => {
   const [partnerSubmitted, setPartnerSubmitted] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
 
-  // Smooth Scroll Navigation
+  // Smooth Scroll Navigation (hareketi azalt tercihinde anında kaydırır)
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     const element = document.getElementById(targetId);
     if (element) {
       const headerOffset = 84;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
+      const offsetPosition = element.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: reducedMotion ? 'auto' : 'smooth'
       });
     }
     setMobileMenuOpen(false);
@@ -156,50 +318,25 @@ export const ShowcaseLanding: React.FC = () => {
     }
   };
 
-  const faqs = [
-    {
-      q: 'Karekod müzik sistemi nedir?',
-      a: 'Karekod müzik sistemi; bir karekodu telefon kamerasıyla okutunca doğrudan tarayıcıda açılan sosyal jukebox deneyimidir. Müşterinizin uygulama indirmesi gerekmez. Masadaki akrilik stantta bulunan QR kod okutulduğunda mekanınızın logosuyla açılır; misafirleriniz Spotify arşivi üzerinden şarkı seçer ve sıradaki parçaları masasıyla oylar.'
-    },
-    {
-      q: 'Müşterilerimin herhangi bir uygulama indirmesi gerekir mi?',
-      a: 'Kesinlikle hayır! Masadaki QR kodu standart telefon kamerasıyla okutmaları yeterlidir. Muzikors tamamen web tabanlı (PWA) çalıştığı için müşteriniz hiçbir uygulama yüklemeden, şifre girmeden 3 saniye içinde parçalarını sıraya ekleyebilir.'
-    },
-    {
-      q: 'Mekanım küçük veya 3. nesil kahveci, bize uyar mı?',
-      a: 'Müşterinin masada oturduğu her mekana uygundur: kafe, 3. nesil coffee shop, bar, pub, restoran, pastane, otel lobisi ve co-working alanları. Masa sayınız fiyatı değiştirmez; her masa için özel pleksi stant hazırlanır.'
-    },
-    {
-      q: 'Müşteriler mekanımızın havasına uymayan şarkılar açarsa ne olur? (Vibe Guard)',
-      a: 'Vibe Guard™ teknolojisi mekanınızın atmosfer sigortasıdır. Çalınabilecek müzik türlerini, sanatçıları veya Spotify çalma listesi sınırlarını Kafe Panelinden siz belirlersiniz. Mekanınızın tarzına uymayan parçalar arama sonuçlarında filtrelenir; ayrıca istemediğiniz herhangi bir şarkıyı panelden tek tıkla sıradan atlayabilirsiniz.'
-    },
-    {
-      q: 'Fiyat ne kadar ve nasıl tahsil edilir?',
-      a: 'Tüm Muzikors sisteminde sabit tek fiyat geçerlidir: Aylık 1.500 ₺ + %20 KDV (1.800 ₺ KDV dahil). Tahsilat üç aylık dönemlerle peşin alınır (3 x 1.500 = 4.500 ₺ + KDV). Masa sayınıza göre hazırlanan lazer kesim akrilik QR pleksileri, Kafe Yönetim Paneli ve sınırsız müşteri istekleri bu fiyata dahildir; kurulum ücreti veya cihaz maliyeti yoktur.'
-    },
-    {
-      q: 'Karekod pleksiler masamıza nasıl gelir?',
-      a: 'Başvurunuz onaylandıktan sonra masa sayınıza özel hazırlanan yüksek kaliteli, şeffaf akrilik masa stantları ve QR kod etiketleri kargoyla kapınıza teslim edilir. Vida, kablo, delme ya da montaj gerekmez; masaya koymanız yeterlidir.'
-    },
-    {
-      q: 'Kafede şarkı istemek misafirler için ücretli mi?',
-      a: 'Hayır, misafirler için tamamen ücretsizdir! Masadaki QR kodu okutan her müşteri şarkı seçebilir, sıraya ekleyebilir ve sıradaki şarkılara oy verebilir. Bireysel VIP abonelik ise yalnızca ekstra ayrıcalıklar (reklamsız deneyim, öncelikli istekler) isteyen kullanıcılar içindir; sistemde jeton veya kredi satışı kesinlikle yoktur.'
-    }
-  ];
+  const activeSlide = SHOWCASE_SLIDES[currentSlide];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#241A14] font-sans selection:bg-[#E8D0B5] selection:text-[#241A14] antialiased overflow-x-hidden">
-      
+    <div className="sc-root min-h-screen bg-[#FAF7F2] text-[#241A14] font-sans selection:bg-[#E8D0B5] selection:text-[#241A14] antialiased overflow-x-hidden">
+
       {/* ── TOP NAV BAR (AÇIK TEMA - ILIK KAHVE TONLARI) ────────────────────────── */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FAF7F2]/95 border-b border-[#E8DFD3]">
+      {/* Not: %95 opak zeminde backdrop-blur görünmüyordu ama her kaydırmada GPU'ya maliyet çıkarıyordu; düz zemin kullanılıyor. */}
+      <header className="sticky top-0 z-50 bg-[#FAF7F2] border-b border-[#E8DFD3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
-          
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#241A14] flex items-center justify-center p-2 shadow-sm transition-transform group-hover:scale-105">
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer rounded-xl">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#241A14] flex items-center justify-center p-2 shadow-sm transition-transform duration-200 ease-out group-hover:scale-105">
               <img
                 src="/logo.png"
                 alt="Muzikors Logo"
+                width={44}
+                height={44}
+                decoding="async"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -215,42 +352,24 @@ export const ShowcaseLanding: React.FC = () => {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-[#69574D]">
-            <a
-              href="#nasil-calisir"
-              onClick={(e) => scrollToSection(e, 'nasil-calisir')}
-              className="hover:text-[#241A14] transition-colors cursor-pointer"
-            >
-              Nasıl Çalışır?
-            </a>
-            <a
-              href="#ozellikler"
-              onClick={(e) => scrollToSection(e, 'ozellikler')}
-              className="hover:text-[#241A14] transition-colors cursor-pointer"
-            >
-              Özellikler
-            </a>
-            <a
-              href="#fiyat"
-              onClick={(e) => scrollToSection(e, 'fiyat')}
-              className="hover:text-[#241A14] transition-colors cursor-pointer"
-            >
-              Fiyat
-            </a>
-            <a
-              href="#sss"
-              onClick={(e) => scrollToSection(e, 'sss')}
-              className="hover:text-[#241A14] transition-colors cursor-pointer"
-            >
-              SSS
-            </a>
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                onClick={(e) => scrollToSection(e, link.id)}
+                className="sc-navlink hover:text-[#241A14] transition-colors duration-150 cursor-pointer py-2"
+              >
+                {link.label}
+              </a>
+            ))}
             <a
               href="https://kafe.muzikors.com.tr"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-[#241A14] transition-colors inline-flex items-center gap-1"
+              className="hover:text-[#241A14] transition-colors duration-150 inline-flex items-center gap-1 py-2"
             >
               <span>Kafe Girişi</span>
-              <ExternalLink className="w-3 h-3 text-[#A8988C]" />
+              <ExternalLink className="w-3 h-3 text-[#8C7A6F]" />
             </a>
           </nav>
 
@@ -259,7 +378,7 @@ export const ShowcaseLanding: React.FC = () => {
             {/* QR Okut (Patron direct scanner) */}
             <Link
               href="/qr"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[#EFE6DC] hover:bg-[#E4D9CD] border border-[#DDD0C0] text-xs font-bold text-[#3D281B] transition-all active:scale-95 min-h-[42px]"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[#EFE6DC] hover:bg-[#E4D9CD] border border-[#DDD0C0] text-xs font-bold text-[#3D281B] transition duration-150 active:scale-95 min-h-[44px]"
             >
               <QrCode className="w-4 h-4 text-[#8C5226]" />
               <span>QR Okut</span>
@@ -269,7 +388,7 @@ export const ShowcaseLanding: React.FC = () => {
             <a
               href="#hero-form"
               onClick={(e) => scrollToSection(e, 'hero-form')}
-              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-bold text-xs transition-all shadow-sm active:scale-95 cursor-pointer min-h-[42px]"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-bold text-xs transition duration-150 shadow-sm active:scale-95 cursor-pointer min-h-[44px]"
             >
               <span>Hemen Satın Al</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -279,76 +398,75 @@ export const ShowcaseLanding: React.FC = () => {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl bg-[#EFE6DC] border border-[#DDD0C0] text-[#3D281B] hover:text-[#241A14] active:scale-95 min-h-[42px] min-w-[42px] flex items-center justify-center cursor-pointer"
-              aria-label="Menüyü Aç"
+              className="md:hidden p-2 rounded-xl bg-[#EFE6DC] border border-[#DDD0C0] text-[#3D281B] hover:text-[#241A14] transition duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+              aria-label={mobileMenuOpen ? 'Menüyü Kapat' : 'Menüyü Aç'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="sc-mobile-menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[#E8DFD3] bg-[#FAF7F2] px-5 py-4 space-y-3 shadow-lg">
-            <a
-              href="#nasil-calisir"
-              onClick={(e) => scrollToSection(e, 'nasil-calisir')}
-              className="block text-sm font-bold text-[#4D392C] hover:text-[#241A14] py-1.5"
-            >
-              Nasıl Çalışır?
-            </a>
-            <a
-              href="#ozellikler"
-              onClick={(e) => scrollToSection(e, 'ozellikler')}
-              className="block text-sm font-bold text-[#4D392C] hover:text-[#241A14] py-1.5"
-            >
-              Özellikler
-            </a>
-            <a
-              href="#fiyat"
-              onClick={(e) => scrollToSection(e, 'fiyat')}
-              className="block text-sm font-bold text-[#4D392C] hover:text-[#241A14] py-1.5"
-            >
-              Fiyat
-            </a>
-            <a
-              href="#sss"
-              onClick={(e) => scrollToSection(e, 'sss')}
-              className="block text-sm font-bold text-[#4D392C] hover:text-[#241A14] py-1.5"
-            >
-              Sıkça Sorulanlar (SSS)
-            </a>
-            <a
-              href="https://kafe.muzikors.com.tr"
-              target="_blank"
-              rel="noreferrer"
-              className="block text-sm font-bold text-[#4D392C] hover:text-[#241A14] py-1.5"
-            >
-              Kafe Girişi (kafe.muzikors.com.tr)
-            </a>
-            <Link
-              href="/privacy"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm font-bold text-[#8C7A6F] hover:text-[#241A14] py-1.5"
-            >
-              Yasal Bilgiler &amp; KVKK
-            </Link>
+        {/* Mobile Dropdown Drawer — yükseklik ölçmeden grid-rows ile açılır */}
+        <div
+          id="sc-mobile-menu"
+          className="sc-collapse md:hidden"
+          data-open={mobileMenuOpen}
+          inert={!mobileMenuOpen}
+        >
+          <div className="sc-collapse-inner">
+            <div className="border-t border-[#E8DFD3] bg-[#FAF7F2] px-5 py-3 shadow-[0_12px_24px_-12px_rgba(36,26,20,0.18)]">
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.id}
+                  href={`#${link.id}`}
+                  onClick={(e) => scrollToSection(e, link.id)}
+                  className="flex items-center text-sm font-bold text-[#4D392C] hover:text-[#241A14] min-h-[44px]"
+                >
+                  {link.mobileLabel}
+                </a>
+              ))}
+              <a
+                href="https://kafe.muzikors.com.tr"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center text-sm font-bold text-[#4D392C] hover:text-[#241A14] min-h-[44px]"
+              >
+                Kafe Girişi (kafe.muzikors.com.tr)
+              </a>
+              <Link
+                href="/privacy"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center text-sm font-bold text-[#6B584C] hover:text-[#241A14] min-h-[44px]"
+              >
+                Yasal Bilgiler &amp; KVKK
+              </Link>
+            </div>
           </div>
-        )}
+        </div>
       </header>
 
       {/* ── HERO SECTION ──────────────────────────────────────────────────────── */}
       <section className="relative pt-8 sm:pt-16 pb-14 sm:pb-24 border-b border-[#E8DFD3] bg-gradient-to-b from-[#F3ECE4]/80 to-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-            
+
             {/* Sol Sütun: Değer Önermesi ve Sürtünmesiz Giriş */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              
-              {/* Ana Başlık */}
-              <h1 className="text-3xl sm:text-5xl font-black text-[#26170F] tracking-tight leading-[1.14]">
-                Masana karekod koy, <br />
-                <span className="text-[#8C5226]">müşterin çalan müziği yönetsin.</span>
+
+              {/* Ana Başlık — sayfanın tek kurgulanmış hareketi:
+                  satırlar maskeden yükselir, ardından vurgu cümlesinin altına
+                  bir şarkı ilerleme çubuğu gibi çizgi çekilir. */}
+              <h1 className="text-3xl sm:text-5xl font-black text-[#26170F] tracking-tight leading-[1.14] text-balance">
+                <span className="sc-line">
+                  <span>Masana karekod koy,</span>
+                </span>
+                <span className="sc-line sc-line-2">
+                  <span>
+                    <span className="sc-ink text-[#8C5226]">müşterin çalan müziği yönetsin.</span>
+                  </span>
+                </span>
               </h1>
 
               {/* Alt Metin (Oyunluk netliği) */}
@@ -361,23 +479,23 @@ export const ShowcaseLanding: React.FC = () => {
                 <a
                   href="#hero-form"
                   onClick={(e) => scrollToSection(e, 'hero-form')}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer min-h-[46px]"
+                  className="group w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition duration-150 cursor-pointer min-h-[46px]"
                 >
                   <span>Hemen Satın Al</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
                 </a>
 
                 <a
                   href="#nasil-calisir"
                   onClick={(e) => scrollToSection(e, 'nasil-calisir')}
-                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all min-h-[46px]"
+                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[46px]"
                 >
                   <span>Nasıl Çalışır?</span>
                 </a>
 
                 <Link
                   href="/qr"
-                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all min-h-[46px]"
+                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[46px]"
                 >
                   <QrCode className="w-4 h-4 text-[#8C5226]" />
                   <span>Masa QR&apos;ı Okut</span>
@@ -385,7 +503,7 @@ export const ShowcaseLanding: React.FC = () => {
               </div>
 
               {/* Alt Güven Vurguları */}
-              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-[#7A675B]">
+              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-[#6B584C]">
                 <span className="flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
                   <span>Cihaz / donanım gerekmez</span>
@@ -400,66 +518,122 @@ export const ShowcaseLanding: React.FC = () => {
 
             {/* Sağ Sütun: 3-Fotoğraflı İnteraktif Slayt Gösterimi */}
             <div className="lg:col-span-5 flex justify-center w-full">
-              <div
-                className="w-full max-w-[480px] aspect-video rounded-2xl bg-black border-2 border-[#D8C7B5] shadow-[0_12px_40px_rgba(36,26,20,0.08)] relative overflow-hidden group select-none flex items-center justify-center"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                {/* Slides Layer */}
-                <div className="relative w-full h-full">
-                  {showcaseSlides.map((slide, index) => (
-                    <div
-                      key={slide.src}
-                      className={`absolute inset-0 transition-opacity duration-500 flex items-center justify-center bg-black ${
-                        currentSlide === index
-                          ? 'opacity-100 pointer-events-auto z-10'
-                          : 'opacity-0 pointer-events-none z-0'
-                      }`}
-                    >
-                      <img
-                        src={slide.src}
-                        alt={slide.alt}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  ))}
+              <div className="w-full max-w-[480px]">
+                <div
+                  ref={carouselRef}
+                  role="region"
+                  aria-roledescription="carousel"
+                  aria-label="Muzikors uygulama görselleri"
+                  tabIndex={0}
+                  className="w-full aspect-video rounded-2xl bg-black border border-[#D8C7B5] shadow-[0_12px_40px_rgba(36,26,20,0.10)] relative overflow-hidden select-none"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  onMouseEnter={() => setHoverPaused(true)}
+                  onMouseLeave={() => setHoverPaused(false)}
+                  onFocus={() => setHoverPaused(true)}
+                  onBlur={handleCarouselBlur}
+                  onKeyDown={handleCarouselKey}
+                >
+                  {/* Slides Layer — yalnızca opacity + transform geçişi */}
+                  {SHOWCASE_SLIDES.map((slide, index) => {
+                    const isActive = currentSlide === index;
+                    return (
+                      <div
+                        key={slide.src}
+                        role="group"
+                        aria-roledescription="slide"
+                        aria-label={`${index + 1} / ${slideCount}: ${slide.title}`}
+                        aria-hidden={!isActive}
+                        className="sc-slide absolute inset-0 flex items-center justify-center bg-black"
+                        data-active={isActive}
+                      >
+                        {primedSlides.has(index) && (
+                          <img
+                            src={slide.src}
+                            alt={slide.alt}
+                            width={1024}
+                            height={576}
+                            decoding="async"
+                            loading={index === 0 ? 'eager' : 'lazy'}
+                            fetchPriority={index === 0 ? 'high' : 'low'}
+                            draggable={false}
+                            className="w-full h-full object-contain"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Prev Navigation Button */}
+                  <button
+                    type="button"
+                    onClick={prevSlide}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-black/55 hover:bg-black/85 border border-white/20 text-white flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
+                    aria-label="Önceki Görsel"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  {/* Next Navigation Button */}
+                  <button
+                    type="button"
+                    onClick={nextSlide}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-black/55 hover:bg-black/85 border border-white/20 text-white flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
+                    aria-label="Sonraki Görsel"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
 
-                {/* Prev Navigation Button */}
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 p-2 rounded-xl bg-black/60 hover:bg-black/90 border border-white/20 text-white transition-all active:scale-95 cursor-pointer"
-                  aria-label="Önceki Görsel"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
+                {/* Altyazı + ilerleme çubukları (hero'daki çizginin devamı: şarkı ilerlemesi motifi) */}
+                <div className="mt-4 flex items-start justify-between gap-4 text-left">
+                  <div key={currentSlide} className="sc-fade min-w-0" aria-live={autoplay ? 'off' : 'polite'}>
+                    <p className="text-sm font-black text-[#26170F] leading-snug">{activeSlide.title}</p>
+                    <p className="text-xs text-[#635044] mt-0.5 leading-relaxed">{activeSlide.caption}</p>
+                  </div>
 
-                {/* Next Navigation Button */}
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 p-2 rounded-xl bg-black/60 hover:bg-black/90 border border-white/20 text-white transition-all active:scale-95 cursor-pointer"
-                  aria-label="Sonraki Görsel"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-
-                {/* Bottom Slide Indicators */}
-                <div className="absolute bottom-3 inset-x-0 z-20 flex items-center justify-center gap-1.5">
-                  {showcaseSlides.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setCurrentSlide(index)}
-                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                        currentSlide === index
-                          ? 'w-6 bg-white'
-                          : 'w-2 bg-white/40 hover:bg-white/70'
-                      }`}
-                      aria-label={`Görsel ${index + 1}`}
-                    />
-                  ))}
+                  <div className="flex items-center shrink-0 -mr-2" data-paused={!progressRunning}>
+                    {SHOWCASE_SLIDES.map((slide, index) => {
+                      const isActive = currentSlide === index;
+                      const isPast = index < currentSlide;
+                      return (
+                        <button
+                          key={slide.src}
+                          type="button"
+                          onClick={() => goToSlide(index)}
+                          className="h-11 px-1 flex items-center cursor-pointer group"
+                          aria-label={`Görsel ${index + 1}: ${slide.title}`}
+                          aria-current={isActive ? 'true' : undefined}
+                        >
+                          <span className="relative block w-7 h-[3px] rounded-full bg-[#D8C7B5] overflow-hidden group-hover:bg-[#C9B49E] transition-colors duration-150">
+                            {isActive ? (
+                              <span
+                                key={`fill-${currentSlide}`}
+                                className={`absolute inset-0 origin-left bg-[#8C5226] rounded-full ${reducedMotion ? '' : 'sc-progress'}`}
+                                style={{ ['--sc-slide-ms' as string]: `${SLIDE_MS}ms` }}
+                                onAnimationEnd={nextSlide}
+                              />
+                            ) : (
+                              <span
+                                className="absolute inset-0 origin-left bg-[#8C5226]/45 rounded-full transition-transform duration-300 ease-out"
+                                style={{ transform: isPast ? 'scaleX(1)' : 'scaleX(0)' }}
+                              />
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {!reducedMotion && (
+                      <button
+                        type="button"
+                        onClick={() => setUserPaused((p) => !p)}
+                        className="w-11 h-11 flex items-center justify-center rounded-xl text-[#6B584C] hover:text-[#26170F] transition-colors duration-150 cursor-pointer"
+                        aria-label={userPaused ? 'Slaytları oynat' : 'Slaytları duraklat'}
+                      >
+                        {userPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -471,12 +645,12 @@ export const ShowcaseLanding: React.FC = () => {
       {/* ── 3 ADIMLI YOLCULUK (1 - 2 - 3 MİNİMAL ŞABLON) ───────────────────── */}
       <section id="nasil-calisir" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
+            <span className="text-sm font-bold text-[#8C5226] block mb-2">
               Nasıl Çalışır?
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               3 Adımda Mekanında Canlı Müzik
             </h2>
             <p className="text-sm text-[#635044] mt-2">
@@ -484,66 +658,44 @@ export const ShowcaseLanding: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            
-            {/* Adım 1 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
-                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">1.</span>
-                <span>Karekodların masana gelir</span>
-              </h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Masa sayın kadar lazer kesim akrilik pleksi stant kargoyla kapına gelir. Kurulum ücreti yok, vidalama yok; masaya koyman yeter.
-              </p>
-            </div>
+          {/* Kart kutuları yerine ince çizgiyle ayrılan sütunlar */}
+          <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            {STEPS.map((step, index) => (
+              <li key={step.title} className="pt-5 border-t border-[#D8C7B5] space-y-2.5">
+                <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
+                  <span className="text-[#8C5226] tabular-nums text-base sm:text-lg font-black shrink-0">{index + 1}.</span>
+                  <span>{step.title}</span>
+                </h3>
+                <p className="text-sm text-[#635044] leading-relaxed max-w-[42ch]">
+                  {step.body}
+                </p>
+              </li>
+            ))}
+          </ol>
 
-            {/* Adım 2 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
-                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">2.</span>
-                <span>Müşterin okutur, parçayı seçer</span>
-              </h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Uygulama indirmeden Spotify kataloğundan dilediği şarkıyı arar, mekanının logosu ve Wi-Fi bilgisiyle açılan sayfadan sıraya ekler.
-              </p>
-            </div>
-
-            {/* Adım 3 */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md transition-all space-y-2.5 shadow-[0_2px_12px_rgba(36,26,20,0.03)]">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F] flex items-baseline gap-2">
-                <span className="text-[#8C5226] font-mono text-base sm:text-lg font-black shrink-0">3.</span>
-                <span>Sen panelden yönetirsin</span>
-              </h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Vibe Guard™ ile uygunsuz türleri filtrelersin; hangi şarkıların sevildiğini görür, istenmeyen şarkıyı tek dokunuşla atlayıp kontrolü sağlarsın.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="pt-10 text-center">
+          <div className="pt-12 text-center">
             <a
               href="#hero-form"
               onClick={(e) => scrollToSection(e, 'hero-form')}
-              className="inline-flex items-center gap-2 text-xs font-black text-[#8C5226] hover:text-[#6E3C17] uppercase tracking-wider underline cursor-pointer"
+              className="group inline-flex items-center gap-2 min-h-[44px] text-xs font-black text-[#8C5226] hover:text-[#6E3C17] uppercase tracking-wider underline underline-offset-4 decoration-[#8C5226]/40 hover:decoration-[#6E3C17] transition-colors duration-150 cursor-pointer"
             >
               <span>Mekanını Muzikors ile Donat</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
             </a>
           </div>
 
         </div>
       </section>
 
-      {/* ── BENTO BİLGİ PANELLERİ (OYUNLUK BİLGİ MİMARİSİ) ─────────────────────── */}
+      {/* ── ÖZELLİKLER ───────────────────────────────────────────────────────── */}
       <section id="ozellikler" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#F4EEE7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
+            <span className="text-sm font-bold text-[#8C5226] block mb-2">
               Ayrı Ayrı Satılmaz
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               Masanızdaki Aynı Karekod Hepsini Açar
             </h2>
             <p className="text-sm text-[#635044] mt-2">
@@ -551,57 +703,14 @@ export const ShowcaseLanding: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            {/* Panel 1: Masaya koy, bitti */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Masaya koy, bitti</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Pleksiler kargoyla adresinize gelir. Cihaz maliyeti, kablolama, ek ekran yatırımı ve eleman eğitimi yoktur.
-              </p>
-            </div>
-
-            {/* Panel 2: Boş saatte masada bir sebep */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Boş saatte masada bir sebep</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Öğleden sonra veya sakin saatlerde oturan müşterinin masasında etkileşim kuracağı bir sebep olur; masa enerjinin merkezi haline gelir.
-              </p>
-            </div>
-
-            {/* Panel 3: Masada kalma süresinde artış */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Masada kalma süresinde artış</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Kendi şarkısının çalmasını bekleyen ve sıradaki parçaları masasıyla oylayan misafirler mekanda daha uzun süre kalır, ek sipariş verir.
-              </p>
-            </div>
-
-            {/* Panel 4: Vibe Guard */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Vibe Guard™ ile tarzın güvende</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Rock kafede arabesk, caz barda uygunsuz müzik çalmaz. İzin verilen türleri ve çalma listelerini siz belirlersiniz.
-              </p>
-            </div>
-
-            {/* Panel 5: Mekanının adıyla açılır */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Senin mekanının adıyla açılır</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Müşteri QR kodu okuttuğunda sayfa mekanınızın logosu, adı ve Wi-Fi şifresiyle açılır; kurumsal prestijiniz artar.
-              </p>
-            </div>
-
-            {/* Panel 6: Garson & Personel Rahatlığı */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DFD3] hover:border-[#D8C7B5] hover:shadow-md shadow-[0_2px_12px_rgba(36,26,20,0.03)] space-y-2 transition-all">
-              <h3 className="text-base sm:text-lg font-black text-[#26170F]">Personel müzik baskısından kurtulur</h3>
-              <p className="text-xs sm:text-sm text-[#635044] leading-relaxed">
-                Garsonların veya baristaların telefondan şarkı değiştirme baskısı biter. Personel yalnızca siparişe ve kaliteli servise odaklanır.
-              </p>
-            </div>
-
-          </div>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8 sm:gap-y-10">
+            {FEATURES.map((feature) => (
+              <div key={feature.title} className="pt-5 border-t border-[#D9CBBB] space-y-2">
+                <dt className="text-base sm:text-lg font-black text-[#26170F]">{feature.title}</dt>
+                <dd className="text-sm text-[#635044] leading-relaxed max-w-[44ch]">{feature.body}</dd>
+              </div>
+            ))}
+          </dl>
 
         </div>
       </section>
@@ -609,12 +718,12 @@ export const ShowcaseLanding: React.FC = () => {
       {/* ── ŞEFFAF FİYATLANDIRMA (1500 TL + KDV SABİT / 3 AYLIK PEŞİN) ──────── */}
       <section id="fiyat" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
+            <span className="text-sm font-bold text-[#8C5226] block mb-2">
               Şeffaf Fiyatlandırma
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               Tek Fiyat. Bütün Özellikler Dahil.
             </h2>
             <p className="text-sm text-[#635044] mt-2">
@@ -623,96 +732,58 @@ export const ShowcaseLanding: React.FC = () => {
           </div>
 
           {/* Fiyat Kartı (Ilık Kahve & Crema Şablonu) */}
-          <div className="max-w-xl mx-auto bg-[#F8F2EA] rounded-3xl border-2 border-[#D8C7B5] p-6 sm:p-10 shadow-[0_8px_30px_rgba(36,26,20,0.06)] space-y-6">
-            
+          <div className="max-w-xl mx-auto bg-[#F8F2EA] rounded-2xl border border-[#D8C7B5] p-6 sm:p-10 shadow-[0_8px_30px_rgba(36,26,20,0.06)] space-y-6">
+
             {/* Üst Vurgu */}
-            <div className="flex items-center justify-between pb-6 border-b border-[#E4D7C8]">
+            <div className="flex items-end justify-between gap-4 pb-6 border-b border-[#E4D7C8]">
               <div>
-                <span className="text-xs font-bold text-[#8C5226] uppercase tracking-wider block mb-1 font-mono">
+                <span className="text-xs font-bold text-[#8C5226] block mb-1">
                   Kurumsal Kafe Paketi
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Standart</h3>
               </div>
               <div className="text-right">
-                <div className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
-                  ₺1.500 <span className="text-xs sm:text-sm font-bold text-[#7A675B] font-normal">+ KDV</span>
+                <div className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight tabular-nums">
+                  ₺1.500 <span className="text-xs sm:text-sm text-[#6B584C] font-bold">+ KDV</span>
                 </div>
-                <div className="text-[11px] text-[#7A675B] mt-0.5">
+                <div className="text-[11px] text-[#6B584C] mt-0.5 tabular-nums">
                   %20 KDV dahil ₺1.800 / Ay
                 </div>
               </div>
             </div>
 
-            {/* Tahsilat ve Koşul Notu */}
-            <div className="p-3.5 rounded-xl bg-white border border-[#E4D7C8] text-xs text-[#5C4A3E] space-y-1">
+            {/* Tahsilat ve Koşul Notu — iç kutu yerine düz blok */}
+            <div className="text-xs text-[#5C4A3E] space-y-1">
               <div className="font-bold text-[#26170F] flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-[#8C5226]" />
                 <span>Tahsilat 3 Aylık Dönemlerle Peşin Alınır</span>
               </div>
-              <p className="text-[#7A675B] text-[11px] leading-relaxed">
+              <p className="text-[#6B584C] text-xs leading-relaxed pl-[22px]">
                 3 aylık toplam ödeme: ₺4.500 + KDV (₺5.400 KDV Dahil). Ne seçerseniz seçin bütün özellikler, masa pleksileri ve Kafe Paneli dahildir.
               </p>
             </div>
 
             {/* Dahil Olan Özellikler Listesi */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-md bg-[#EBDDCF] text-[#6E3C17] flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-[#362217]">
-                  Masa sayınız kadar lazer kazımalı akrilik QR pleksi stantları kapınıza teslim
-                </span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-md bg-[#EBDDCF] text-[#6E3C17] flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-[#362217]">
-                  Spotify entegrasyonu ve sınırsız müşteri şarkı isteği &amp; oylama kuyruğu
-                </span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-md bg-[#EBDDCF] text-[#6E3C17] flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-[#362217]">
-                  Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik engelleme)
-                </span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-md bg-[#EBDDCF] text-[#6E3C17] flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-[#362217]">
-                  Gelişmiş Kafe Yönetim Paneli (kafe.muzikors.com.tr) &amp; Anlık Şarkı Atlama (Skip)
-                </span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-md bg-[#EBDDCF] text-[#6E3C17] flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-[#362217]">
-                  7/24 Doğrudan Kurumsal WhatsApp &amp; E-posta Destek Hattı
-                </span>
-              </div>
-            </div>
+            <ul className="space-y-3 pt-4 border-t border-[#E4D7C8]">
+              {PRICE_INCLUDES.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-[#8C5226] stroke-[3] shrink-0 mt-0.5" />
+                  <span className="text-xs sm:text-sm font-semibold text-[#362217]">{item}</span>
+                </li>
+              ))}
+            </ul>
 
             {/* Aksiyon Butonu */}
             <div className="pt-4">
               <a
                 href="#hero-form"
                 onClick={(e) => scrollToSection(e, 'hero-form')}
-                className="w-full py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md cursor-pointer"
+                className="group w-full py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 transition duration-150 active:scale-95 shadow-md cursor-pointer min-h-[48px]"
               >
                 <span>Hemen Satın Al &amp; Başvur</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
               </a>
-              <p className="text-[11px] text-center text-[#7A675B] mt-2">
+              <p className="text-[11px] text-center text-[#6B584C] mt-2">
                 Ödeme sonrası pleksiler hazırlanıp adresinize kargolanır.
               </p>
             </div>
@@ -725,14 +796,14 @@ export const ShowcaseLanding: React.FC = () => {
       {/* ── B2B BAŞVURU FORMU (#hero-form) ─────────────────────────────────── */}
       <section id="hero-form" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#F4EEE7] scroll-mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E8DFD3] shadow-[0_8px_30px_rgba(36,26,20,0.05)] space-y-6">
-            
+
+          <div className="bg-white rounded-2xl p-6 sm:p-10 border border-[#E8DFD3] shadow-[0_8px_30px_rgba(36,26,20,0.05)] space-y-6">
+
             <div className="border-b border-[#EFE7DC] pb-5 text-center sm:text-left">
-              <span className="text-xs font-bold text-[#8C5226] uppercase tracking-widest block mb-1">
+              <span className="text-xs font-bold text-[#8C5226] block mb-1">
                 İşletme Başvurusu
               </span>
-              <h3 className="text-xl sm:text-3xl font-black text-[#26170F] tracking-tight">
+              <h3 className="text-xl sm:text-3xl font-black text-[#26170F] tracking-tight text-balance">
                 Mekanınızı Muzikors ile Tanıştırın
               </h3>
               <p className="text-xs sm:text-sm text-[#635044] mt-1">
@@ -741,17 +812,15 @@ export const ShowcaseLanding: React.FC = () => {
             </div>
 
             {leadError && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div role="alert" className="sc-fade p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{leadError}</span>
               </div>
             )}
 
             {partnerSubmitted ? (
-              <div className="text-center py-8 sm:py-12 space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#EFE7DC] border border-[#DDD0C0] flex items-center justify-center mx-auto text-[#8C5226] shadow-sm">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
+              <div className="sc-fade text-center py-8 sm:py-12 space-y-4" role="status">
+                <CheckCircle2 className="w-10 h-10 text-[#8C5226] mx-auto" strokeWidth={1.75} />
                 <h4 className="text-lg font-black text-[#26170F]">
                   Başvurunuz Başarıyla Kaydedildi!
                 </h4>
@@ -763,7 +832,7 @@ export const ShowcaseLanding: React.FC = () => {
                     href="https://wa.me/905068638306?text=Merhaba%20Muzikors,%20web%20sitenizden%20mekan%20ba%C5%9Fvurusu%20yapt%C4%B1m.%20Kurulum%20i%C3%A7in%20bilgi%20almak%20istiyorum."
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#241A14] text-white text-xs font-bold hover:bg-black transition-all active:scale-95 shadow-sm min-h-[46px]"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#241A14] text-white text-xs font-bold hover:bg-black transition duration-150 active:scale-95 shadow-sm min-h-[46px]"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-400" />
                     <span>Hızlı Aktivasyon İçin WhatsApp&apos;tan Yazın</span>
@@ -772,98 +841,105 @@ export const ShowcaseLanding: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handlePartnerSubmit} className="space-y-4">
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="venue-name" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                    <label htmlFor="venue-name" className={LABEL_CLASS}>
                       Mekan Adı *
                     </label>
                     <input
                       id="venue-name"
                       type="text"
                       required
+                      autoComplete="organization"
                       value={partnerForm.venueName}
                       onChange={(e) => setPartnerForm({ ...partnerForm, venueName: e.target.value })}
                       placeholder="Örn: Moda Sahne Cafe"
-                      className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                      className={INPUT_CLASS}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="contact-person" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                    <label htmlFor="contact-person" className={LABEL_CLASS}>
                       Yetkili Adı Soyadı *
                     </label>
                     <input
                       id="contact-person"
                       type="text"
                       required
+                      autoComplete="name"
                       value={partnerForm.contactPerson}
                       onChange={(e) => setPartnerForm({ ...partnerForm, contactPerson: e.target.value })}
                       placeholder="Ad Soyad"
-                      className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                      className={INPUT_CLASS}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label htmlFor="phone" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                    <label htmlFor="phone" className={LABEL_CLASS}>
                       Telefon Numarası *
                     </label>
                     <input
                       id="phone"
                       type="tel"
                       required
+                      autoComplete="tel"
+                      inputMode="tel"
                       value={partnerForm.phone}
                       onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
                       placeholder="05XX XXX XX XX"
-                      className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                      className={INPUT_CLASS}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="city" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                    <label htmlFor="city" className={LABEL_CLASS}>
                       Şehir / İlçe *
                     </label>
                     <input
                       id="city"
                       type="text"
                       required
+                      autoComplete="address-level2"
                       value={partnerForm.city}
                       onChange={(e) => setPartnerForm({ ...partnerForm, city: e.target.value })}
                       placeholder="Örn: İstanbul / Kadıköy"
-                      className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                      className={INPUT_CLASS}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="table-count" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                    <label htmlFor="table-count" className={LABEL_CLASS}>
                       Masa Sayısı (Pleksi İçin)
                     </label>
                     <input
                       id="table-count"
                       type="number"
+                      inputMode="numeric"
                       min={1}
                       max={200}
                       value={partnerForm.tableCount}
                       onChange={(e) => setPartnerForm({ ...partnerForm, tableCount: e.target.value })}
                       placeholder="15"
-                      className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                      className={`${INPUT_CLASS} tabular-nums`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-[11px] font-bold text-[#4A3426] uppercase tracking-wider mb-1.5">
+                  <label htmlFor="email" className={LABEL_CLASS}>
                     E-posta Adresi (İsteğe Bağlı)
                   </label>
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     value={partnerForm.email}
                     onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
                     placeholder="iletisim@mekan.com"
-                    className="w-full bg-[#FAF6F1] border border-[#DACDC0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#26170F] placeholder-[#A08E82] focus:outline-none focus:border-[#8C5226] focus:bg-white transition-all font-medium"
+                    className={INPUT_CLASS}
                   />
                 </div>
 
@@ -871,7 +947,8 @@ export const ShowcaseLanding: React.FC = () => {
                   <button
                     type="submit"
                     disabled={submittingLead}
-                    className="w-full py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] disabled:opacity-50 text-[#FAF6F0] font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[46px]"
+                    aria-busy={submittingLead}
+                    className="w-full py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] disabled:opacity-60 disabled:cursor-wait text-[#FAF6F0] font-black text-sm transition duration-150 shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[46px]"
                   >
                     {submittingLead ? (
                       <>
@@ -887,8 +964,8 @@ export const ShowcaseLanding: React.FC = () => {
                   </button>
                 </div>
 
-                <p className="text-[11px] text-[#7A675B] text-center pt-1">
-                  Bilgileriniz Gizlilik Politikamız ve KVKK kapsamında korunur. Doğrudan WhatsApp hattımız: <span className="font-bold text-[#26170F] font-mono">0506 863 83 06</span>
+                <p className="text-[11px] text-[#6B584C] text-center pt-1">
+                  Bilgileriniz Gizlilik Politikamız ve KVKK kapsamında korunur. Doğrudan WhatsApp hattımız: <span className="font-bold text-[#26170F] tabular-nums">0506 863 83 06</span>
                 </p>
 
               </form>
@@ -902,12 +979,12 @@ export const ShowcaseLanding: React.FC = () => {
       {/* ── SSS (SIKÇA SORULAN SORULAR) ACCORDION ──────────────────────────── */}
       <section id="sss" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <span className="text-xs sm:text-sm font-bold text-[#8C5226] uppercase tracking-[0.2em] block mb-2 font-mono">
+            <span className="text-sm font-bold text-[#8C5226] block mb-2">
               Merak Edilenler
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
               Sıkça Sorulan Sorular
             </h2>
             <p className="text-sm text-[#635044] mt-2">
@@ -915,32 +992,45 @@ export const ShowcaseLanding: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-3">
-            {faqs.map((faq, index) => {
+          {/* Kart yığını yerine çizgiyle ayrılan liste; cevaplar DOM'da kalır (SEO) ve grid-rows ile açılır */}
+          <div className="border-t border-[#E0D4C6]">
+            {FAQS.map((faq, index) => {
               const isOpen = openFaq === index;
+              const panelId = `sc-faq-panel-${index}`;
+              const buttonId = `sc-faq-button-${index}`;
               return (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl border border-[#E8DFD3] overflow-hidden transition-all shadow-[0_2px_12px_rgba(36,26,20,0.03)] hover:border-[#D8C7B5]"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer active:bg-[#FAF6F1] min-h-[48px]"
-                    aria-expanded={isOpen}
+                <div key={faq.q} className="border-b border-[#E0D4C6]">
+                  <h3>
+                    <button
+                      id={buttonId}
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                      className="group w-full py-4 sm:py-5 text-left flex items-center justify-between gap-4 cursor-pointer min-h-[48px]"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                    >
+                      <span className="text-sm sm:text-base font-bold text-[#26170F] group-hover:text-[#8C5226] transition-colors duration-150">{faq.q}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-[#8C5226] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                  </h3>
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    className="sc-collapse"
+                    data-open={isOpen}
+                    inert={!isOpen}
                   >
-                    <span className="text-sm sm:text-base font-bold text-[#26170F]">{faq.q}</span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-[#8C5226] transition-transform duration-200 shrink-0 ${
-                        isOpen ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-xs sm:text-sm text-[#635044] leading-relaxed border-t border-[#F0EAE1] pt-3">
-                      {faq.a}
+                    <div className="sc-collapse-inner">
+                      <p className="pb-5 pr-8 text-sm text-[#635044] leading-relaxed max-w-[68ch]">
+                        {faq.a}
+                      </p>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
@@ -952,21 +1042,21 @@ export const ShowcaseLanding: React.FC = () => {
       {/* ── FOOTER (ILIK KAHVE & CREMA TEMASI) ─────────────────────────────── */}
       <footer className="bg-[#EFE7DC] pt-12 pb-16 text-[#635044] border-t border-[#DFD3C4]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-10 border-b border-[#DFD3C4]">
-            
+
             {/* Marka & Tanım */}
             <div className="md:col-span-6 lg:col-span-5 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#241A14] flex items-center justify-center p-1.5 shadow-sm">
-                  <img src="/logo.png" alt="Muzikors Logo" className="w-full h-full object-contain" />
+                  <img src="/logo.png" alt="Muzikors Logo" width={32} height={32} loading="lazy" decoding="async" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-base font-black text-[#26170F] tracking-tight">Muzikors İnteraktif Müzik</span>
               </div>
-              <p className="text-xs text-[#635044] leading-relaxed max-w-sm">
+              <p className="text-xs text-[#5C4A3E] leading-relaxed max-w-sm">
                 Muzikors; kafe, bar ve restoranlarda misafirlerin dinlenen müziğe ortaklaşa karar verdiği interaktif sosyal müzik kutusu altyapısıdır.
               </p>
-              <div className="text-[11px] text-[#7A675B] space-y-0.5 pt-1">
+              <div className="text-[11px] text-[#6B584C] space-y-0.5 pt-1">
                 <div>&copy; {new Date().getFullYear()} Muzikors. Tüm hakları saklıdır.</div>
                 <div>Geliştirici &amp; Kurucu: <strong className="text-[#26170F] font-semibold">Yunus Emre Gedik</strong></div>
               </div>
@@ -979,22 +1069,22 @@ export const ShowcaseLanding: React.FC = () => {
               </span>
               <ul className="space-y-1 text-xs">
                 <li>
-                  <Link href="/privacy" className="inline-flex items-center py-1 text-[#635044] hover:text-[#26170F] transition-colors">
+                  <Link href="/privacy" className="inline-flex items-center py-1.5 text-[#5C4A3E] hover:text-[#26170F] transition-colors duration-150">
                     KVKK ve Gizlilik Politikası
                   </Link>
                 </li>
                 <li>
-                  <Link href="/legal/terms" className="inline-flex items-center py-1 text-[#635044] hover:text-[#26170F] transition-colors">
+                  <Link href="/legal/terms" className="inline-flex items-center py-1.5 text-[#5C4A3E] hover:text-[#26170F] transition-colors duration-150">
                     Kullanıcı Hizmet Sözleşmesi
                   </Link>
                 </li>
                 <li>
-                  <Link href="/legal/refund" className="inline-flex items-center py-1 text-[#635044] hover:text-[#26170F] transition-colors">
+                  <Link href="/legal/refund" className="inline-flex items-center py-1.5 text-[#5C4A3E] hover:text-[#26170F] transition-colors duration-150">
                     Abonelik İptal &amp; İade Koşulları
                   </Link>
                 </li>
                 <li>
-                  <Link href="/delete-account" className="inline-flex items-center py-1 text-[#7A675B] hover:text-[#26170F] transition-colors">
+                  <Link href="/delete-account" className="inline-flex items-center py-1.5 text-[#6B584C] hover:text-[#26170F] transition-colors duration-150">
                     Hesap ve Veri Silme Talebi
                   </Link>
                 </li>
@@ -1008,7 +1098,7 @@ export const ShowcaseLanding: React.FC = () => {
               </span>
               <ul className="space-y-1.5 text-xs">
                 <li>
-                  <a href="mailto:destek@muzikors.com" className="inline-flex items-center text-[#3D281B] hover:text-[#26170F] font-mono font-medium transition-colors">
+                  <a href="mailto:destek@muzikors.com" className="inline-flex items-center py-1 text-[#3D281B] hover:text-[#26170F] font-medium transition-colors duration-150">
                     destek@muzikors.com
                   </a>
                 </li>
@@ -1017,14 +1107,14 @@ export const ShowcaseLanding: React.FC = () => {
                     href="https://wa.me/905068638306"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-emerald-700 font-bold hover:underline"
+                    className="inline-flex items-center gap-1.5 py-1 text-emerald-800 font-bold hover:underline underline-offset-4"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp: 0506 863 83 06</span>
+                    <span className="tabular-nums">WhatsApp: 0506 863 83 06</span>
                   </a>
                 </li>
                 <li>
-                  <span className="text-[11px] text-[#7A675B] block pt-1">
+                  <span className="text-[11px] text-[#6B584C] block pt-1 tabular-nums">
                     Haftanın 7 Günü: 10:00 - 02:00
                   </span>
                 </li>
@@ -1033,13 +1123,13 @@ export const ShowcaseLanding: React.FC = () => {
 
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#7A675B] gap-2">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#6B584C] gap-2">
             <span>Muzikors Türkiye · İstanbul</span>
             <div className="flex items-center gap-4">
-              <a href="https://kafe.muzikors.com.tr" target="_blank" rel="noreferrer" className="text-[#5C4A3E] hover:text-[#26170F] font-bold transition-colors">
+              <a href="https://kafe.muzikors.com.tr" target="_blank" rel="noreferrer" className="py-1 text-[#5C4A3E] hover:text-[#26170F] font-bold transition-colors duration-150">
                 Kafe Yönetim Paneli
               </a>
-              <a href="https://admin.muzikors.com.tr" target="_blank" rel="noreferrer" className="text-[#5C4A3E] hover:text-[#26170F] font-bold transition-colors">
+              <a href="https://admin.muzikors.com.tr" target="_blank" rel="noreferrer" className="py-1 text-[#5C4A3E] hover:text-[#26170F] font-bold transition-colors duration-150">
                 Admin Panel
               </a>
             </div>
