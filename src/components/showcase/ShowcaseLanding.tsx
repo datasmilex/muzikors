@@ -9,15 +9,11 @@ import {
   MessageCircle,
   CheckCircle2,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Menu,
   X,
   Loader2,
   Check,
   AlertCircle,
-  Pause,
-  Play,
   Copy
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -164,8 +160,7 @@ export const ShowcaseLanding: React.FC = () => {
 
   // ── Slayt gösterisi ──────────────────────────────────────────────────────
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [userPaused, setUserPaused] = useState(false);   // pause/play butonu
-  const [hoverPaused, setHoverPaused] = useState(false); // fare üstünde / klavye odağında
+  const [hoverPaused, setHoverPaused] = useState(false); // fare üstünde / klavye odağında duraklar
   const [inView, setInView] = useState(true);
   const [pageVisible, setPageVisible] = useState(true);
   // Sadece gösterilen ve sıradaki slaydın görseli yüklenir (slide-3 ≈ 550 KB ilk yüklemeyi şişirmesin)
@@ -174,7 +169,7 @@ export const ShowcaseLanding: React.FC = () => {
   const touchStartX = useRef<number | null>(null);
 
   const slideCount = SHOWCASE_SLIDES.length;
-  const autoplay = !reducedMotion && !userPaused;
+  const autoplay = !reducedMotion;
   const progressRunning = autoplay && !hoverPaused && inView && pageVisible;
 
   const goToSlide = useCallback((index: number) => {
@@ -327,8 +322,6 @@ export const ShowcaseLanding: React.FC = () => {
     }
   };
 
-  const activeSlide = SHOWCASE_SLIDES[currentSlide];
-
   return (
     <div className="sc-root min-h-screen bg-[#FAF7F2] text-[#241A14] font-sans selection:bg-[#E8D0B5] selection:text-[#241A14] antialiased overflow-x-hidden">
 
@@ -457,17 +450,15 @@ export const ShowcaseLanding: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ──────────────────────────────────────────────────────── */}
-      <section className="relative pt-8 sm:pt-16 pb-14 sm:pb-24 border-b border-[#E8DFD3] bg-gradient-to-b from-[#F3ECE4]/80 to-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      {/* ── HERO SECTION (EDİTORYAL KATMANLI MİMARİ) ───────────────────────── */}
+      <section className="relative pt-8 sm:pt-14 pb-14 sm:pb-20 border-b border-[#E8DFD3] bg-gradient-to-b from-[#F3ECE4]/80 to-[#FAF7F2]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
 
-            {/* Sol Sütun: Değer Önermesi ve Sürtünmesiz Giriş */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-
-              {/* Ana Başlık — sayfanın tek kurgulanmış hareketi:
-                  satırlar maskeden yükselir, ardından vurgu cümlesinin altına
-                  bir şarkı ilerleme çubuğu gibi çizgi çekilir. */}
-              <h1 className="text-3xl sm:text-5xl font-black text-[#26170F] tracking-tight leading-[1.14] text-balance">
+          {/* ── 1. ÜST KATMAN: Sol Başlık / Sağ Alt Başlık ──────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end">
+            {/* Sol: Büyük, Vurucu H1 Manşet */}
+            <div className="lg:col-span-7 text-center lg:text-left">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#26170F] tracking-tight leading-[1.12] text-balance">
                 <span className="sc-line">
                   <span>Masana karekod koy,</span>
                 </span>
@@ -477,178 +468,174 @@ export const ShowcaseLanding: React.FC = () => {
                   </span>
                 </span>
               </h1>
+            </div>
 
-              {/* Alt Metin (Oyunluk netliği) */}
-              <p className="text-sm sm:text-base text-[#635044] max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+            {/* Sağ: Editoryal Açıklama ve Değer Önermesi */}
+            <div className="lg:col-span-5 space-y-3 pb-1 text-center lg:text-left">
+              <p className="text-sm sm:text-base text-[#635044] leading-relaxed font-normal">
                 Milyonlarca Spotify şarkısı, masa oylaması ve mekan atmosferini koruyan Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
               </p>
-
-              {/* CTA Butonları: B2B ve B2C rolleri net ayrılmış */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-                <a
-                  href="#hero-form"
-                  onClick={(e) => scrollToSection(e, 'hero-form')}
-                  className="group w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition duration-150 cursor-pointer min-h-[46px]"
-                >
-                  <span>Mekanınızı Başlatın</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
-                </a>
-
-                <a
-                  href="#nasil-calisir"
-                  onClick={(e) => scrollToSection(e, 'nasil-calisir')}
-                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[46px]"
-                >
-                  <span>Nasıl Çalışır?</span>
-                </a>
-
-                <Link
-                  href="/qr"
-                  className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[46px]"
-                  title="Kafe müşterisi gözünden masada müzik seçme deneyimini test edin"
-                >
-                  <QrCode className="w-4 h-4 text-[#8C5226]" />
-                  <span>Müşteri QR Önizleme</span>
-                </Link>
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-bold text-[#8C5226]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8C5226]" />
+                <span>Lazer kesim akrilik stantlar kapınıza kargolanır</span>
               </div>
-
-              {/* Alt Güven Vurguları */}
-              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-[#6B584C]">
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
-                  <span>Cihaz / donanım gerekmez</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
-                  <span>Akrilik QR pleksiler kargoyla gelir</span>
-                </span>
-              </div>
-
             </div>
+          </div>
 
-            {/* Sağ Sütun: İnteraktif Görsel Önizleme (Kusursuz Krem Arka Plan & Stüdyo Çerçevesi) */}
-            <div className="lg:col-span-5 flex justify-center w-full">
-              <div className="w-full max-w-[500px]">
-                <div
-                  ref={carouselRef}
-                  role="region"
-                  aria-roledescription="carousel"
-                  aria-label="Muzikors uygulama ve masa deneyimi"
-                  tabIndex={0}
-                  className="w-full aspect-video rounded-2xl bg-[#F7F7F7] border border-[#DACDC0] shadow-[0_12px_40px_rgba(36,26,20,0.08)] relative overflow-hidden select-none"
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  onMouseEnter={() => setHoverPaused(true)}
-                  onMouseLeave={() => setHoverPaused(false)}
-                  onFocus={() => setHoverPaused(true)}
-                  onBlur={handleCarouselBlur}
-                  onKeyDown={handleCarouselKey}
-                >
-                  {/* Slides Layer — temiz arka planla kusursuz entegre */}
-                  {SHOWCASE_SLIDES.map((slide, index) => {
-                    const isActive = currentSlide === index;
-                    return (
-                      <div
-                        key={slide.src}
-                        role="group"
-                        aria-roledescription="slide"
-                        aria-label={`${index + 1} / ${slideCount}: ${slide.title}`}
-                        aria-hidden={!isActive}
-                        className="sc-slide absolute inset-0 flex items-center justify-center bg-[#F7F7F7]"
-                        data-active={isActive}
-                      >
-                        {primedSlides.has(index) && (
-                          <img
-                            src={slide.src}
-                            alt={slide.alt}
-                            width={1024}
-                            height={576}
-                            decoding="async"
-                            loading={index === 0 ? 'eager' : 'lazy'}
-                            fetchPriority={index === 0 ? 'high' : 'low'}
-                            draggable={false}
-                            className="w-full h-full object-contain"
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* Prev Navigation Button */}
-                  <button
-                    type="button"
-                    onClick={prevSlide}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/90 hover:bg-white border border-[#DACDC0] text-[#26170F] shadow-md flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
-                    aria-label="Önceki Görsel"
+          {/* ── 2. ORTA KATMAN: Geniş Stüdyo Çerçevesi & Sekmeli Akış ─────────── */}
+          <div className="w-full max-w-4xl mx-auto">
+            {/* Slayt Çerçevesi */}
+            <div
+              ref={carouselRef}
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Muzikors uygulama ve masa deneyimi"
+              tabIndex={0}
+              className="w-full aspect-video rounded-2xl sm:rounded-3xl bg-[#F7F7F7] border border-[#DACDC0] shadow-[0_16px_50px_rgba(36,26,20,0.08)] relative overflow-hidden select-none"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onMouseEnter={() => setHoverPaused(true)}
+              onMouseLeave={() => setHoverPaused(false)}
+              onFocus={() => setHoverPaused(true)}
+              onBlur={handleCarouselBlur}
+              onKeyDown={handleCarouselKey}
+            >
+              {SHOWCASE_SLIDES.map((slide, index) => {
+                const isActive = currentSlide === index;
+                return (
+                  <div
+                    key={slide.src}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${index + 1} / ${slideCount}: ${slide.title}`}
+                    aria-hidden={!isActive}
+                    className="sc-slide absolute inset-0 flex items-center justify-center bg-[#F7F7F7]"
+                    data-active={isActive}
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-
-                  {/* Next Navigation Button */}
-                  <button
-                    type="button"
-                    onClick={nextSlide}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl bg-white/90 hover:bg-white border border-[#DACDC0] text-[#26170F] shadow-md flex items-center justify-center transition duration-150 active:scale-95 cursor-pointer"
-                    aria-label="Sonraki Görsel"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Altyazı + ilerleme çubukları (hero'daki çizginin devamı: şarkı ilerlemesi motifi) */}
-                <div className="mt-4 flex items-start justify-between gap-4 text-left">
-                  <div key={currentSlide} className="sc-fade min-w-0" aria-live={autoplay ? 'off' : 'polite'}>
-                    <p className="text-sm font-black text-[#26170F] leading-snug">{activeSlide.title}</p>
-                    <p className="text-xs text-[#635044] mt-0.5 leading-relaxed">{activeSlide.caption}</p>
-                  </div>
-
-                  <div className="flex items-center shrink-0 -mr-2" data-paused={!progressRunning}>
-                    {SHOWCASE_SLIDES.map((slide, index) => {
-                      const isActive = currentSlide === index;
-                      const isPast = index < currentSlide;
-                      return (
-                        <button
-                          key={slide.src}
-                          type="button"
-                          onClick={() => goToSlide(index)}
-                          className="h-11 px-1 flex items-center cursor-pointer group"
-                          aria-label={`Görsel ${index + 1}: ${slide.title}`}
-                          aria-current={isActive ? 'true' : undefined}
-                        >
-                          <span className="relative block w-7 h-[3px] rounded-full bg-[#D8C7B5] overflow-hidden group-hover:bg-[#C9B49E] transition-colors duration-150">
-                            {isActive ? (
-                              <span
-                                key={`fill-${currentSlide}`}
-                                className={`absolute inset-0 origin-left bg-[#8C5226] rounded-full ${reducedMotion ? '' : 'sc-progress'}`}
-                                style={{ ['--sc-slide-ms' as string]: `${SLIDE_MS}ms` }}
-                                onAnimationEnd={nextSlide}
-                              />
-                            ) : (
-                              <span
-                                className="absolute inset-0 origin-left bg-[#8C5226]/45 rounded-full transition-transform duration-300 ease-out"
-                                style={{ transform: isPast ? 'scaleX(1)' : 'scaleX(0)' }}
-                              />
-                            )}
-                          </span>
-                        </button>
-                      );
-                    })}
-                    {!reducedMotion && (
-                      <button
-                        type="button"
-                        onClick={() => setUserPaused((p) => !p)}
-                        className="w-11 h-11 flex items-center justify-center rounded-xl text-[#6B584C] hover:text-[#26170F] transition-colors duration-150 cursor-pointer"
-                        aria-label={userPaused ? 'Slaytları oynat' : 'Slaytları duraklat'}
-                      >
-                        {userPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-                      </button>
+                    {primedSlides.has(index) && (
+                      <img
+                        src={slide.src}
+                        alt={slide.alt}
+                        width={1024}
+                        height={576}
+                        decoding="async"
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        fetchPriority={index === 0 ? 'high' : 'low'}
+                        draggable={false}
+                        className="w-full h-full object-contain"
+                      />
                     )}
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
 
+            {/* Slaytın Altındaki 3 Temiz Sekme (Oklar yerine şık, dokunmatik başlıklar) */}
+            <div
+              className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3"
+              data-paused={!progressRunning}
+            >
+              {SHOWCASE_SLIDES.map((slide, index) => {
+                const isActive = currentSlide === index;
+                return (
+                  <button
+                    key={slide.src}
+                    type="button"
+                    onClick={() => goToSlide(index)}
+                    className={`p-3 sm:p-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer border flex flex-col justify-between ${
+                      isActive
+                        ? 'bg-white border-[#8C5226]/40 shadow-sm'
+                        : 'bg-[#F4EEE7]/60 border-transparent hover:bg-white/80 hover:border-[#DACDC0]'
+                    }`}
+                    aria-label={`${index + 1}. Adım: ${slide.title}`}
+                    aria-current={isActive ? 'true' : undefined}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-[#8C5226]' : 'text-[#7E6C60]'}`}>
+                          0{index + 1}. Adım
+                        </span>
+                        {isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#8C5226]" />
+                        )}
+                      </div>
+                      <div className={`text-xs sm:text-sm font-black ${isActive ? 'text-[#26170F]' : 'text-[#635044]'}`}>
+                        {slide.title}
+                      </div>
+                      <div className="text-[11px] text-[#7E6C60] line-clamp-1 mt-0.5">
+                        {slide.caption}
+                      </div>
+                    </div>
+
+                    {/* Canlı İlerleme Çubuğu */}
+                    <div className="w-full h-[2px] bg-[#D8C7B5]/40 rounded-full overflow-hidden mt-2.5">
+                      {isActive ? (
+                        <span
+                          key={`tab-progress-${currentSlide}`}
+                          className={`block h-full bg-[#8C5226] origin-left rounded-full ${reducedMotion ? '' : 'sc-progress'}`}
+                          style={{ ['--sc-slide-ms' as string]: `${SLIDE_MS}ms` }}
+                          onAnimationEnd={nextSlide}
+                        />
+                      ) : (
+                        <span
+                          className="block h-full bg-[#8C5226]/30 rounded-full"
+                          style={{ width: index < currentSlide ? '100%' : '0%' }}
+                        />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* ── 3. ALT KATMAN: Ortalanmış CTA Butonları ve Rozetler ──────────── */}
+          <div className="pt-2 text-center space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="#hero-form"
+                onClick={(e) => scrollToSection(e, 'hero-form')}
+                className="group w-full sm:w-auto px-7 py-3.5 sm:py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition duration-150 cursor-pointer min-h-[48px]"
+              >
+                <span>Mekanınızı Başlatın</span>
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
+              </a>
+
+              <a
+                href="#nasil-calisir"
+                onClick={(e) => scrollToSection(e, 'nasil-calisir')}
+                className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-[#FAF4ED] border border-[#D8C7B5] text-[#362217] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[48px]"
+              >
+                <span>Nasıl Çalışır?</span>
+              </a>
+
+              <Link
+                href="/qr"
+                className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-xl bg-[#EFE5D8] hover:bg-[#E5D7C7] border border-[#D9C8B5] text-[#54341E] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition duration-150 min-h-[48px]"
+                title="Kafe müşterisi gözünden masada müzik seçme deneyimini test edin"
+              >
+                <QrCode className="w-4 h-4 text-[#8C5226]" />
+                <span>Müşteri QR Önizleme</span>
+              </Link>
+            </div>
+
+            {/* Alt Güven Rozetleri */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#6B584C] pt-1">
+              <span className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
+                <span>Cihaz / donanım gerekmez</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
+                <span>Akrilik QR pleksiler kargoyla gelir</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#8C5226] stroke-[3]" />
+                <span>Taahhüt ve vidalama yok</span>
+              </span>
+            </div>
+          </div>
+
         </div>
       </section>
 
