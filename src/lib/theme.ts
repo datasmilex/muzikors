@@ -1,6 +1,6 @@
 import { clearLivePalette } from './albumColor';
 
-export type ThemeType = 'live' | 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire' | 'obsidian';
+export type ThemeType = 'live' | 'monochrome' | 'crema' | 'ruby' | 'sapphire';
 
 export const DEFAULT_THEME: ThemeType = 'live';
 
@@ -22,7 +22,7 @@ export interface ThemeConfig {
 
 export const THEMES: ThemeConfig[] = [
   {
-    // Çalan şarkının kapak rengine göre boyanır; şarkı yokken Obsidian Gold görünür.
+    // Çalan şarkının kapak rengine göre boyanır; şarkı yokken klasik altın tonları görünür.
     id: 'live',
     name: 'Canlı Renk',
     subtitle: 'Çalan şarkının kapağına göre',
@@ -67,20 +67,6 @@ export const THEMES: ThemeConfig[] = [
     glowColor: 'rgba(243, 213, 115, 0.18)',
   },
   {
-    id: 'emerald',
-    name: 'Emerald Jazz',
-    subtitle: 'Zümrüt Yeşili',
-    accentColor: '#10B981',
-    accentLight: '#34D399',
-    accentDark: '#059669',
-    bgColor: '#020C07',
-    cardColor: '#071A11',
-    gradient: 'from-emerald-400 to-teal-500',
-    badgeBg: 'bg-emerald-400 text-black',
-    textAccent: 'text-emerald-400',
-    glowColor: 'rgba(16, 185, 129, 0.18)',
-  },
-  {
     id: 'ruby',
     name: 'Ruby Rosé',
     subtitle: 'Krem Beyazı & Yakut',
@@ -108,20 +94,6 @@ export const THEMES: ThemeConfig[] = [
     textAccent: 'text-sky-400',
     glowColor: 'rgba(56, 189, 248, 0.18)',
   },
-  {
-    id: 'obsidian',
-    name: 'Obsidian Gold',
-    subtitle: 'Muzikors Klasik',
-    accentColor: '#D4AF37',
-    accentLight: '#F3D573',
-    accentDark: '#B49326',
-    bgColor: '#070604',
-    cardColor: '#110F0A',
-    gradient: 'from-[#F3D573] to-[#D4AF37]',
-    badgeBg: 'bg-[#D4AF37] text-black',
-    textAccent: 'text-[#D4AF37]',
-    glowColor: 'rgba(212, 175, 55, 0.18)',
-  },
 ];
 
 export const THEME_STORAGE_KEY = 'muzikors_theme';
@@ -137,6 +109,8 @@ export function getStoredTheme(): ThemeType {
       if (!saved || saved === 'monochrome' || saved === 'velvet') return DEFAULT_THEME;
     }
     if (saved === 'velvet') return 'monochrome';
+    // Kaldırılan temalar (Obsidian Gold, Emerald Jazz) Canlı Renk'e döner.
+    if (saved === 'obsidian' || saved === 'emerald') return DEFAULT_THEME;
     if (saved && THEMES.some((t) => t.id === saved)) {
       return saved as ThemeType;
     }

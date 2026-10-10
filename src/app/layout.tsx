@@ -144,6 +144,7 @@ export default function RootLayout({
                   var migrated = localStorage.getItem('muzikors_theme_v2');
                   if (!migrated && (!saved || saved === 'monochrome' || saved === 'velvet')) saved = 'live';
                   if (saved === 'velvet') saved = 'monochrome';
+                  if (saved === 'obsidian' || saved === 'emerald') saved = 'live';
                   if (saved) {
                     document.documentElement.dataset.theme = saved;
                   }

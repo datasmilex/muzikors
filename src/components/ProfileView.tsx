@@ -689,7 +689,7 @@ export const ProfileView: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-6 gap-1.5">
+                        <div className="grid grid-cols-5 gap-1.5">
                           {THEMES.map((t) => {
                             const isSelected = theme === t.id;
                             return (
