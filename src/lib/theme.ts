@@ -1,4 +1,8 @@
-export type ThemeType = 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire' | 'obsidian';
+import { clearLivePalette } from './albumColor';
+
+export type ThemeType = 'live' | 'monochrome' | 'crema' | 'emerald' | 'ruby' | 'sapphire' | 'obsidian';
+
+export const DEFAULT_THEME: ThemeType = 'live';
 
 export interface ThemeConfig {
   id: ThemeType;
@@ -17,6 +21,22 @@ export interface ThemeConfig {
 }
 
 export const THEMES: ThemeConfig[] = [
+  {
+    // Çalan şarkının kapak rengine göre boyanır; şarkı yokken Obsidian Gold görünür.
+    id: 'live',
+    name: 'Canlı Renk',
+    subtitle: 'Çalan şarkının kapağına göre',
+    previewColor: 'conic-gradient(#D4AF37, #E11D48, #0EA5E9, #10B981, #D4AF37)',
+    accentColor: '#D4AF37',
+    accentLight: '#F3D573',
+    accentDark: '#B49326',
+    bgColor: '#070604',
+    cardColor: '#110F0A',
+    gradient: 'from-[#F3D573] to-[#D4AF37]',
+    badgeBg: 'bg-[#D4AF37] text-black',
+    textAccent: 'text-[#D4AF37]',
+    glowColor: 'rgba(212, 175, 55, 0.18)',
+  },
   {
     id: 'monochrome',
     name: 'Monochrome',
@@ -105,11 +125,17 @@ export const THEMES: ThemeConfig[] = [
 ];
 
 export const THEME_STORAGE_KEY = 'muzikors_theme';
+// Eski varsayılan (monochrome) ile kalmış kullanıcıları bir kereliğine Canlı Renk'e taşır.
+const THEME_MIGRATION_KEY = 'muzikors_theme_v2';
 
 export function getStoredTheme(): ThemeType {
-  if (typeof window === 'undefined') return 'monochrome';
+  if (typeof window === 'undefined') return DEFAULT_THEME;
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (!localStorage.getItem(THEME_MIGRATION_KEY)) {
+      localStorage.setItem(THEME_MIGRATION_KEY, '1');
+      if (!saved || saved === 'monochrome' || saved === 'velvet') return DEFAULT_THEME;
+    }
     if (saved === 'velvet') return 'monochrome';
     if (saved && THEMES.some((t) => t.id === saved)) {
       return saved as ThemeType;
@@ -117,22 +143,19 @@ export function getStoredTheme(): ThemeType {
   } catch (e) {
     console.error('Failed to get theme from localStorage', e);
   }
-  return 'monochrome';
+  return DEFAULT_THEME;
 }
 
 export function applyTheme(theme: ThemeType) {
   if (typeof document === 'undefined') return;
   const config = THEMES.find((t) => t.id === theme) || THEMES[0];
-  
+
+  // Renkler globals.css'teki [data-theme] bloklarından gelir; Canlı Renk'in
+  // önceki şarkıdan kalan satır içi değişkenleri temizlenir.
   document.documentElement.dataset.theme = theme;
-  document.documentElement.style.setProperty('--theme-bg', config.bgColor);
-  document.documentElement.style.setProperty('--theme-card', config.cardColor);
-  document.documentElement.style.setProperty('--theme-primary', config.accentColor);
-  document.documentElement.style.setProperty('--theme-primary-light', config.accentLight);
-  document.documentElement.style.setProperty('--theme-primary-dark', config.accentDark);
-  document.documentElement.style.setProperty('--theme-glow', config.glowColor);
+  clearLivePalette();
   if (document.body) {
-    document.body.style.backgroundColor = config.bgColor;
+    document.body.style.backgroundColor = 'var(--theme-bg)';
   }
 
   try {

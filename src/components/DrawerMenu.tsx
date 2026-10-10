@@ -259,7 +259,7 @@ export const DrawerMenu: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-6 gap-1">
+                <div className="grid grid-cols-7 gap-1">
                   {THEMES.map((t) => {
                     const isSelected = theme === t.id;
                     return (
@@ -275,7 +275,7 @@ export const DrawerMenu: React.FC = () => {
                       >
                         <div
                           className="w-6 h-6 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
-                          style={{ backgroundColor: t.previewColor || t.accentColor }}
+                          style={{ background: t.previewColor || t.accentColor }}
                         >
                           {isSelected && (
                             <Check className={`w-3 h-3 stroke-[3] ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} />

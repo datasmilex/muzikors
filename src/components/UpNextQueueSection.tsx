@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ListMusic, ThumbsUp, Flame, User, Clock, X, QrCode, Music, Store, Trash2, ShieldCheck, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ListMusic, ThumbsUp, Flame, User, Clock, X, Music, Store, Trash2, ShieldCheck, Loader2, Plus } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
+import { triggerHaptic } from '../../utils/haptics';
+
+// Sıradaki kartların yer değiştirmesi için yumuşak yay animasyonu
+const QUEUE_SPRING = { type: 'spring' as const, stiffness: 420, damping: 34, mass: 0.8 };
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast } = useApp();
+  const { queue, nowPlaying, voteTrack, vetoTrack, openProfile, user, showToast, openProtectedModal } = useApp();
+  const reduceMotion = useReducedMotion();
+  // Oy verilen şarkının yanında beliren "+1" (aynı şarkıya art arda oyda yeniden oynasın diye sayaçlı)
+  const [votePop, setVotePop] = useState<{ id: string; n: number } | null>(null);
   const [votingCooldowns, setVotingCooldowns] = useState<Record<string, boolean>>({});
   const [vetoingTrackId, setVetoingTrackId] = useState<string | null>(null);
   const [trackToVeto, setTrackToVeto] = useState<any | null>(null);
@@ -51,6 +58,8 @@ export const UpNextQueueSection: React.FC = () => {
     if (votingCooldowns[trackId]) return;
 
     setVotingCooldowns(prev => ({ ...prev, [trackId]: true }));
+    setVotePop((prev) => ({ id: trackId, n: (prev?.n ?? 0) + 1 }));
+    triggerHaptic('light');
     voteTrack(trackId);
     
     setTimeout(() => {
@@ -167,19 +176,29 @@ export const UpNextQueueSection: React.FC = () => {
 
         {/* Queue Stack / List */}
         {filteredQueue.length === 0 ? (
-          <div className="rounded-2xl p-4 sm:p-5 border border-white/[0.06] bg-[var(--theme-card)] flex items-center gap-3.5 my-1 transition-colors duration-300">
-            <QrCode className="w-5 h-5 text-neutral-500 shrink-0" strokeWidth={1.75} />
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-white tracking-wide">Sırada Şarkı Yok</h4>
-              <p className="text-[11px] text-neutral-400 leading-snug mt-0.5">
-                Masadaki QR kodu okutarak sıradaki şarkıyı sen seç!
-              </p>
-            </div>
-          </div>
+          nowPlaying ? (
+            <button
+              type="button"
+              onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
+              className="w-full rounded-2xl p-4 border border-dashed border-[var(--theme-primary)]/35 bg-[var(--theme-primary)]/[0.06] hover:bg-[var(--theme-primary)]/10 flex items-center gap-3.5 my-1 text-left active:scale-[0.98] transition-all"
+            >
+              <div className="w-10 h-10 rounded-xl bg-[var(--theme-primary)]/15 flex items-center justify-center text-[var(--theme-primary)] shrink-0">
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-bold text-white">Sıra boş, sıradaki sen ol</h4>
+                <p className="text-[11px] text-neutral-300 leading-snug mt-0.5">
+                  Bu şarkı bitince seninki çalsın.
+                </p>
+              </div>
+            </button>
+          ) : (
+            <p className="px-1 py-2 text-xs text-neutral-400">Henüz sırada şarkı yok.</p>
+          )
         ) : (
-          <div 
+          <div
             onClick={() => setIsExpanded(true)}
-            className="relative w-full h-[95px] cursor-pointer group select-none"
+            className="relative w-full h-[95px] cursor-pointer group select-none active:scale-[0.98] transition-transform"
           >
             {filteredQueue.slice(0, 3).map((track, index) => {
               const isFirst = index === 0;
@@ -189,14 +208,13 @@ export const UpNextQueueSection: React.FC = () => {
               const zIndex = 10 - index;
 
               return (
-                <div
+                <motion.div
                   key={track.id}
-                  className="absolute left-0 right-0 mx-auto transition-all duration-300 group-active:scale-95"
-                  style={{
-                    zIndex,
-                    transform: `scale(${scale}) translateY(${topOffset}px)`,
-                    opacity,
-                  }}
+                  className="absolute left-0 right-0 mx-auto"
+                  style={{ zIndex }}
+                  initial={reduceMotion ? false : { opacity: 0, y: -14, scale: 0.96 }}
+                  animate={{ opacity, y: topOffset, scale }}
+                  transition={reduceMotion ? { duration: 0 } : QUEUE_SPRING}
                 >
                   <div className={`rounded-2xl flex items-center justify-between border backdrop-blur-xl transition-all ${
                     isFirst
@@ -232,7 +250,7 @@ export const UpNextQueueSection: React.FC = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -368,8 +386,17 @@ export const UpNextQueueSection: React.FC = () => {
                             </div>
                           ) : (
                             <div className="flex items-center gap-1">
-                              <span className="text-xs font-black text-[var(--theme-primary)] min-w-[20px] text-right">
+                              <span className="relative text-xs font-black text-[var(--theme-primary)] min-w-[20px] text-right tabular-nums">
                                 {track.votes > 900000 ? 0 : track.votes}
+                                {votePop?.id === track.id && (
+                                  <span
+                                    key={votePop.n}
+                                    aria-hidden="true"
+                                    className="vote-pop absolute -top-3 right-0 text-[11px] font-black text-[var(--theme-primary-light)] pointer-events-none"
+                                  >
+                                    +1
+                                  </span>
+                                )}
                               </span>
                               {user && track.requestedByUserId === user.id ? (
                                 <button

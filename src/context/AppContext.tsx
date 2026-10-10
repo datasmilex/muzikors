@@ -4,7 +4,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
 import { supabase } from '../lib/supabaseClient';
-import { ThemeType, getStoredTheme, applyTheme } from '../lib/theme';
+import { ThemeType, getStoredTheme, applyTheme, DEFAULT_THEME } from '../lib/theme';
+import { extractDominantColor, paletteFromColor, applyLivePalette } from '../lib/albumColor';
 import { formatUserDisplayName } from '../utils/formatters';
 import { containsProfanity } from '../utils/profanityFilter';
 import { isTrackAllowedByVibeGuard } from '../utils/genreMatcher';
@@ -66,11 +67,30 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const COOLDOWN_DURATION_SECONDS = 120;
 const DEFAULT_CREDITS = 10;
 
+// Kafe paneli kapanırken "durdu" bilgisini gönderemeyebilir. Süresi çoktan geçmiş
+// "çalıyor" bilgisi gösterilmez (ör. dün geceden kalma, 4:13/4:13'te takılı kart).
+const STALE_TRACK_GRACE_MS = 90_000;
+const STALE_PAUSED_TRACK_MS = 3 * 60 * 60 * 1000;
+
+function isTrackInfoStale(info: any, isVenuePaused?: boolean): boolean {
+  if (!info) return false;
+  const refIso = info.updated_at || info.started_at;
+  if (!refIso) return false;
+  const ageMs = Date.now() - new Date(refIso).getTime();
+  if (info.is_playing === false || isVenuePaused) return ageMs > STALE_PAUSED_TRACK_MS;
+  const durationMs = info.duration_ms || (info.duration ? info.duration * 1000 : 210000);
+  const progressMs = info.updated_at && typeof info.progress_ms === 'number' ? info.progress_ms : 0;
+  return ageMs > Math.max(0, durationMs - progressMs) + STALE_TRACK_GRACE_MS;
+}
+
+// Kapak yoksa kullanılan stok fotoğraf, "Canlı Renk" için gerçek bir kapak sayılmaz.
+const FALLBACK_COVER_HOST = 'images.unsplash.com';
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>('none');
-  const [theme, setThemeState] = useState<ThemeType>('monochrome');
+  const [theme, setThemeState] = useState<ThemeType>(DEFAULT_THEME);
   const [pendingModal, setPendingModal] = useState<ModalType | null>(null);
   const [loginPromptReason, setLoginPromptReason] = useState<string | null>(null);
   const [activeVenue, setActiveVenue] = useState<Venue | null>(null);
@@ -862,7 +882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
 
         // PRIMARY SOURCE OF TRUTH FOR NOW PLAYING: venues.current_track_info
-        if (venueData?.current_track_info) {
+        if (venueData?.current_track_info && !isTrackInfoStale(venueData.current_track_info, venueData.is_paused)) {
           const trackInfo = venueData.current_track_info;
           const trackDurationMs = trackInfo.duration_ms || (trackInfo.duration ? trackInfo.duration * 1000 : (playingRow?.duration_ms || 210000));
           const trackDurationSec = Math.round(trackDurationMs / 1000);
@@ -1134,6 +1154,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => clearInterval(timer);
   }, [nowPlaying?.id, nowPlaying?.title, nowPlaying?.isPlaying, isPlayingAudio, activeVenue?.is_paused, nowPlaying?.duration, nowPlaying?.durationMs]);
+
+  // ── ŞARKI BİTTİ AMA YENİSİ GELMEDİ: kafe paneli kapandıysa kartı kaldır ─────
+  const nowPlayingDurationSec = nowPlaying
+    ? nowPlaying.duration || (nowPlaying.durationMs ? Math.round(nowPlaying.durationMs / 1000) : 180)
+    : 0;
+  const hasReachedTrackEnd = !!nowPlaying && isPlayingAudio && audioProgress >= nowPlayingDurationSec;
+  useEffect(() => {
+    if (!hasReachedTrackEnd || !nowPlaying) return;
+    const endedTrackId = nowPlaying.id;
+    const timer = setTimeout(() => {
+      setNowPlaying((prev) => (prev && prev.id === endedTrackId ? null : prev));
+      setIsPlayingAudio(false);
+    }, STALE_TRACK_GRACE_MS);
+    return () => clearTimeout(timer);
+  }, [hasReachedTrackEnd, nowPlaying?.id]);
+
+  // ── CANLI RENK: çalan şarkının kapağından tema rengi ──────────────────────
+  const liveCoverSrc =
+    theme === 'live' && nowPlaying
+      ? nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || ''
+      : '';
+  useEffect(() => {
+    if (theme !== 'live') return;
+    if (!liveCoverSrc || liveCoverSrc.includes(FALLBACK_COVER_HOST)) {
+      applyLivePalette(null);
+      return;
+    }
+    let cancelled = false;
+    extractDominantColor(liveCoverSrc).then((rgb) => {
+      if (!cancelled) applyLivePalette(rgb ? paletteFromColor(rgb) : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [theme, liveCoverSrc]);
 
   // ── COOLDOWN TIMER ───────────────────────────────────────────────────────
   useEffect(() => {

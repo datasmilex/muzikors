@@ -17,6 +17,16 @@ Muzikors uses a dynamic multi-theme system rooted in CSS variables (`--theme-bg`
   - Medium Emphasis: `#a1a1aa` / `text-neutral-400`
   - Subtle / Metadata: `#71717a` / `text-neutral-500`
 
+### Canlı Renk (default theme: `live`)
+- The default theme tints the whole app with the dominant color of the **currently playing album cover** (`src/lib/albumColor.ts`, applied from `AppContext`). With no track or a colorless cover it falls back to Obsidian Gold.
+- The palette is derived for contrast on dark surfaces: accent at ~62% lightness, backgrounds at ~6–15% lightness. Never hardcode track colors in components; use the `--theme-*` variables so every theme keeps working.
+- Theme colors are registered with `@property` so a track change cross-fades over ~0.9s.
+
+### Motion
+- Animate only `transform` / `opacity` (smooth on low-end Android WebViews). Shared keyframes live in `globals.css`: `eq-bar`, `cover-breathe`, `spin-slow`, `ring-out`, `vote-pop`.
+- Queue reordering and track changes use `framer-motion` springs; always respect `useReducedMotion()` / `prefers-reduced-motion`.
+- Celebrations (e.g. "Şarkın çalıyor") use the cover color wave — never stars, sparkles or confetti bursts.
+
 ## 3. Typography & Hierarchy
 - **Font Families:** Clean modern sans-serif (Inter / System UI font stack).
 - **Hierarchy:**

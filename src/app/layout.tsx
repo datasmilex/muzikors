@@ -127,7 +127,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className="dark h-full" data-theme="monochrome">
+    <html lang="tr" className="dark h-full" data-theme="live">
       <head>
         <script
           type="application/ld+json"
@@ -141,6 +141,8 @@ export default function RootLayout({
               (function() {
                 try {
                   var saved = localStorage.getItem('muzikors_theme');
+                  var migrated = localStorage.getItem('muzikors_theme_v2');
+                  if (!migrated && (!saved || saved === 'monochrome' || saved === 'velvet')) saved = 'live';
                   if (saved === 'velvet') saved = 'monochrome';
                   if (saved) {
                     document.documentElement.dataset.theme = saved;
