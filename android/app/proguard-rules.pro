@@ -27,11 +27,8 @@
 -keep class com.android.billingclient.** { *; }
 -keep class com.android.vending.billing.** { *; }
 
-# Google AdMob & Google Play Services
--keep public class com.google.android.gms.ads.** { public *; }
--keep public class com.google.ads.** { public *; }
+# Google Play Services
 -keep class com.google.android.gms.common.** { *; }
--keep class com.google.android.ump.** { *; }
 
 # Firebase Messaging (Push Notifications)
 -keep class com.google.firebase.** { *; }

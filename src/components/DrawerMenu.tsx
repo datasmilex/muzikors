@@ -1,326 +1,163 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import {
-  X,
-  User,
-  Gift,
-  Info,
-  Handshake,
-  MessageCircle,
-  HelpCircle,
-  ChevronRight,
-  LogOut,
-  Tag,
-  Music,
-  LogIn,
-  PlaySquare,
-  Crown,
-  Palette,
   Check,
-  ShieldCheck
+  ChevronRight,
+  Crown,
+  Gift,
+  HelpCircle,
+  Info,
+  LogOut,
+  MessageCircle,
+  ShieldCheck,
+  Store,
+  Tag,
+  User,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { supabase } from '../lib/supabaseClient';
 import { isClaimedTodayTR } from '../lib/timeHelpers';
 import { ModalType } from '../types';
 import { THEMES } from '../lib/theme';
+import { Sheet } from './ui/Sheet';
+import { btn, groupCard, groupRow, sectionLabel } from './ui/controls';
+import { SPRING_SNAPPY } from '../lib/motion';
 
+// "Menü" penceresi: hesap, kısayollar, tema ve kurumsal bağlantılar.
 export const DrawerMenu: React.FC = () => {
-  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, loginWithProvider, showToast, activeVenue, theme, setTheme, openRewardedAdModal } = useApp();
+  const { activeModal, closeModal, openModal, openProtectedModal, user, logout, theme, setTheme } = useApp();
 
-  const [isDj, setIsDj] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const rewardWaiting = Boolean(user) && !isClaimedTodayTR(user?.lastDailyClaim || null);
 
-  useEffect(() => {
-    if (activeModal === 'drawer' && user?.id && activeVenue?.id) {
-      supabase.rpc('get_user_venue_stats', { p_user_id: user.id, p_venue_id: Number(activeVenue.id) })
-        .then(({ data, error }) => {
-          if (!error && data && data.length > 0) {
-            setIsDj(data[0].is_venue_dj);
-          }
-        });
+  const go = (modal: ModalType, isProtected = false) => {
+    if (isProtected && !user) {
+      openProtectedModal(modal, 'Bu bölüm için giriş yapman gerekiyor.');
+      return;
     }
-  }, [activeModal, user, activeVenue]);
+    openModal(modal);
+  };
 
-  const hasClaimedToday = isClaimedTodayTR(user?.lastDailyClaim || null);
-  const showRewardDot = !!user && !hasClaimedToday;
-
-  const primaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean; isPremiumBtn?: boolean }[] = [
-    { label: 'Profilim', icon: <User className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'profile', isProtected: true },
-    { label: 'Muzikors Premium', icon: <Crown className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'premium', isPremiumBtn: true },
-    { label: 'Günlük Ödül', icon: <Gift className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'daily_reward', isProtected: true, showBadge: showRewardDot },
-    { label: 'Kampanyalar', icon: <Tag className="w-4 h-4 text-[var(--theme-primary)]" />, modal: 'campaigns' },
+  const tiles: { label: string; hint: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; dot?: boolean; accent?: boolean }[] = [
+    { label: 'Muzikors VIP', hint: 'Daha fazla şarkı', icon: <Crown className="w-5 h-5" />, modal: 'premium', accent: true },
+    { label: 'Günlük ödül', hint: rewardWaiting ? 'Bugünkü ödülün hazır' : 'Seriyi koru', icon: <Gift className="w-5 h-5" />, modal: 'daily_reward', isProtected: true, dot: rewardWaiting },
+    { label: 'Kampanyalar', hint: 'Fırsatlar', icon: <Tag className="w-5 h-5" />, modal: 'campaigns' },
+    { label: 'Nasıl çalışır?', hint: '3 adımda', icon: <HelpCircle className="w-5 h-5" />, modal: 'howitworks' },
   ];
 
-  const secondaryNavItems: { label: string; icon: React.ReactNode; modal: ModalType; isProtected?: boolean; showBadge?: boolean }[] = [
-    { label: 'Hakkımızda', icon: <Info className="w-4 h-4 text-neutral-400" />, modal: 'about' },
-    { label: 'Ortaklık', icon: <Handshake className="w-4 h-4 text-neutral-400" />, modal: 'partners' },
-    { label: 'İletişim & Destek', icon: <MessageCircle className="w-4 h-4 text-neutral-400" />, modal: 'contact' },
-    { label: 'Nasıl Çalışır?', icon: <HelpCircle className="w-4 h-4 text-neutral-400" />, modal: 'howitworks' },
-    { label: 'Yasal Bilgiler & Şartlar', icon: <ShieldCheck className="w-4 h-4 text-neutral-400" />, modal: 'terms' },
+  const links: { label: string; icon: React.ReactNode; modal: ModalType }[] = [
+    { label: 'Hakkımızda', icon: <Info className="w-[18px] h-[18px]" />, modal: 'about' },
+    { label: 'İletişim ve destek', icon: <MessageCircle className="w-[18px] h-[18px]" />, modal: 'contact' },
+    { label: 'Mekânınız için Muzikors', icon: <Store className="w-[18px] h-[18px]" />, modal: 'partners' },
+    { label: 'Yasal metinler', icon: <ShieldCheck className="w-[18px] h-[18px]" />, modal: 'terms' },
   ];
+
+  const hasCustomAvatar = Boolean(user?.avatar && !user.avatar.includes('googleusercontent'));
 
   return (
-    <AnimatePresence>
-      {activeModal === 'drawer' && (
-        <div className="fixed inset-0 z-[100] flex">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ willChange: 'opacity' }}
-            onClick={closeModal}
-            className="fixed inset-0 bg-black/85"
-          />
-
-          {/* Drawer Sheet */}
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            style={{ willChange: 'transform' }}
-            className="relative w-[82%] max-w-[300px] landscape:max-w-[340px] h-full bg-[var(--theme-card)] border-r border-white/[0.08] flex flex-col justify-between p-5 landscape:p-3.5 z-10 shadow-[20px_0_50px_rgba(0,0,0,0.9)] overflow-y-auto custom-scrollbar"
+    <Sheet open={activeModal === 'drawer'} onClose={closeModal} title="Menü" width="md">
+      <div className="space-y-6 pb-2">
+        {/* Hesap */}
+        {user ? (
+          <button
+            type="button"
+            onClick={() => openModal('profile')}
+            className="w-full flex items-center gap-3 rounded-2xl bg-white/[0.04] px-4 py-3.5 text-left active:scale-[0.98] transition-transform duration-150"
           >
-            <div className="relative z-10">
-              {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center p-2 shrink-0">
-                    <img src="/logo.png" alt="Muzikors" className="w-full h-full object-contain" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-tight">Muzikors</h2>
-                    <span className="text-[9px] text-[var(--theme-primary-light)] font-medium uppercase tracking-widest">Mobile Jukebox</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={closeModal}
-                  className="p-2 rounded-full bg-white/[0.05] text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                  aria-label="Kapat"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* User Card / Login Banner */}
-              {!user ? (
-                <div className="my-3 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center space-y-3 shadow-sm">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-xs font-bold text-white">Giriş Yap ve Şarkı İste</span>
-                    <span className="text-[10px] text-neutral-400">Favori parçalarını sıraya ekle</span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      closeModal();
-                      openModal('login');
-                    }}
-                    className="w-full py-2.5 px-3 rounded-xl bg-white text-black font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md cursor-pointer"
-                  >
-                    <span>Giriş Yap / Kayıt Ol</span>
-                  </button>
-                </div>
+            <span className="w-12 h-12 rounded-full overflow-hidden bg-white/[0.06] grid place-items-center shrink-0">
+              {hasCustomAvatar ? (
+                <img src={user.avatar} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div 
-                  onClick={() => { closeModal(); openModal('profile'); }}
-                  className="my-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/15 flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-sm group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-black border border-white/15 overflow-hidden shrink-0">
-                      {user.avatar ? (
-                        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="w-5 h-5 text-[var(--theme-primary)] m-auto" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-xs font-bold text-white truncate group-hover:text-[var(--theme-primary-light)] transition-colors">
-                        {user.name}
-                      </h3>
-                      <span className="text-[10px] text-neutral-400 font-medium block truncate">
-                        {user.isPremium ? 'Premium Üye' : 'Standart Üye'}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-[var(--theme-primary)] group-hover:translate-x-0.5 transition-all" />
-                </div>
+                <User className="w-5 h-5 text-white/60" />
               )}
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-[15px] font-semibold truncate">{user.name}</span>
+              <span className="block text-[12px] text-white/50 mt-0.5">{user.isPremium ? 'VIP üye' : 'Standart üye'} · Profili gör</span>
+            </span>
+            <ChevronRight className="w-4 h-4 text-white/30 shrink-0" />
+          </button>
+        ) : (
+          <div className="rounded-2xl bg-white/[0.04] px-4 py-4">
+            <p className="text-[15px] font-semibold">Giriş yap, şarkını iste</p>
+            <p className="text-[13px] text-white/50 mt-0.5">Şarkı istemek ve oy vermek için hesap gerekir.</p>
+            <button type="button" onClick={() => openModal('login')} className={`${btn.primary} w-full mt-3`}>
+              Giriş yap
+            </button>
+          </div>
+        )}
 
-              {/* Navigation Items */}
-              <nav className="space-y-1 my-3">
-                {primaryNavItems.map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => {
-                      closeModal();
-                      if (item.isProtected && !user) {
-                        openProtectedModal(item.modal, 'Bu bölümü görüntülemek için lütfen giriş yapın.');
-                      } else {
-                        openModal(item.modal);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-                      item.isPremiumBtn
-                        ? 'bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[var(--theme-primary-light)] hover:bg-[var(--theme-primary)]/15'
-                        : 'bg-transparent hover:bg-white/[0.04] text-neutral-300 hover:text-white'
-                    } active:scale-95`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
-                        {item.icon}
-                      </div>
-                      <span>{item.label}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {item.showBadge && (
-                        <span className="w-2 h-2 rounded-full bg-[var(--theme-primary)] animate-pulse shadow-[0_0_6px_var(--theme-glow)]" />
-                      )}
-                      <ChevronRight className="w-4 h-4 text-neutral-600" />
-                    </div>
-                  </button>
-                ))}
-
-                {/* More toggle */}
-                <button
-                  onClick={() => setIsMoreOpen(!isMoreOpen)}
-                  className="w-full flex items-center justify-between px-3.5 py-2 mt-1 rounded-xl text-neutral-400 font-semibold text-[11px] hover:text-neutral-200 transition-colors"
-                >
-                  <span className="uppercase tracking-wider">Kurumsal & Destek</span>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isMoreOpen ? 'rotate-90' : ''}`} />
-                </button>
-
-                <AnimatePresence>
-                  {isMoreOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden space-y-1 pl-3 border-l border-white/[0.08] ml-3"
-                    >
-                      {secondaryNavItems.map((item) => (
-                        <button
-                          key={item.label}
-                          onClick={() => {
-                            closeModal();
-                            openModal(item.modal);
-                          }}
-                          className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-colors text-left"
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.icon}
-                            <span>{item.label}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Rewarded Ad */}
-                <button
-                  onClick={() => {
-                    closeModal();
-                    openRewardedAdModal();
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 mt-2 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-[var(--theme-primary)]/40 active:scale-95 transition-all text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-neutral-900/90 border-t border-l border-[var(--theme-primary)]/60 border-b border-r border-[var(--theme-primary)]/15 flex items-center justify-center text-[var(--theme-primary)] shadow-inner relative">
-                      <PlaySquare className="w-3.5 h-3.5" />
-                      <div className="absolute inset-0.5 rounded-md border border-white/5 pointer-events-none" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-white block">Reklam İzle & Kazan</span>
-                      <span className="text-[9px] text-neutral-400">+1 Şarkı İstek Hakkı</span>
-                    </div>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-[var(--theme-primary)] text-black text-[9px] font-black uppercase">
-                    +1 Hak
-                  </span>
-                </button>
-              </nav>
-
-              {/* Theme Switcher Widget */}
-              <div className="mt-3 p-3 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.08] shadow-inner">
-                <div className="flex items-center justify-between mb-2.5 px-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <Palette className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                    <span className="text-[11px] font-bold text-white">Renk Teması</span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[var(--theme-primary-light)]">
-                    {THEMES.find((t) => t.id === theme)?.name}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-5 gap-1">
-                  {THEMES.map((t) => {
-                    const isSelected = theme === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => setTheme(t.id)}
-                        title={`${t.name} - ${t.subtitle}`}
-                        className={`flex flex-col items-center gap-1 p-1 rounded-xl transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-white/10 border border-[var(--theme-primary)] scale-105 shadow-sm'
-                            : 'hover:bg-white/[0.04] border border-transparent opacity-60 hover:opacity-100 active:scale-95'
-                        }`}
-                      >
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center border border-white/20 shadow-sm"
-                          style={{ background: t.previewColor || t.accentColor }}
-                        >
-                          {isSelected && (
-                            <Check className={`w-3 h-3 stroke-[3] ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} />
-                          )}
-                        </div>
-                        <span className="text-[8px] font-bold text-neutral-300 truncate w-full text-center leading-none mt-0.5">
-                          {t.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Footer */}
-            <div className="pt-3 border-t border-white/[0.08] space-y-2.5 text-center">
-              {user ? (
-                <button
-                  onClick={logout}
-                  className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Çıkış Yap</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    closeModal();
-                    openModal('login');
-                  }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-                >
-                  <LogIn className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <span>Giriş Yap / Kaydol</span>
-                </button>
-              )}
-
-              <span className="text-[9px] font-semibold text-neutral-500 block uppercase tracking-wider">
-                Muzikors Mobile © 2026
-              </span>
-            </div>
-          </motion.div>
+        {/* Kısayollar */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {tiles.map((tile) => (
+            <button
+              key={tile.label}
+              type="button"
+              onClick={() => go(tile.modal, tile.isProtected)}
+              className="relative rounded-2xl bg-white/[0.04] p-4 text-left active:scale-[0.97] transition-transform duration-150"
+            >
+              <span className={`${tile.accent ? 'text-[var(--theme-primary)]' : 'text-white/70'} block`}>{tile.icon}</span>
+              <span className="block text-[14px] font-semibold mt-3">{tile.label}</span>
+              <span className="block text-[12px] text-white/45 mt-0.5 truncate">{tile.hint}</span>
+              {tile.dot && <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--theme-primary)]" />}
+            </button>
+          ))}
         </div>
-      )}
-    </AnimatePresence>
+
+        {/* Tema */}
+        <div>
+          <p className={sectionLabel}>Görünüm</p>
+          <div className="grid grid-cols-5 gap-2">
+            {THEMES.map((t) => {
+              const selected = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTheme(t.id)}
+                  aria-label={`${t.name} teması`}
+                  aria-pressed={selected}
+                  className="flex flex-col items-center gap-1.5 py-1 active:scale-95 transition-transform duration-150"
+                >
+                  <span className="relative w-11 h-11 rounded-full grid place-items-center">
+                    {selected && (
+                      <motion.span
+                        layoutId="theme-ring"
+                        transition={SPRING_SNAPPY}
+                        className="absolute inset-0 rounded-full ring-2 ring-white/80"
+                      />
+                    )}
+                    <span className="w-9 h-9 rounded-full grid place-items-center" style={{ background: t.previewColor || t.accentColor }}>
+                      {selected && (
+                        <Check className={`w-4 h-4 ${t.id === 'crema' || t.id === 'monochrome' ? 'text-black' : 'text-white'}`} strokeWidth={3} />
+                      )}
+                    </span>
+                  </span>
+                  <span className={`text-[11px] leading-tight text-center ${selected ? 'text-white' : 'text-white/45'}`}>{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Kurumsal */}
+        <div className={groupCard}>
+          {links.map((link) => (
+            <button key={link.label} type="button" onClick={() => go(link.modal)} className={groupRow}>
+              <span className="text-white/55">{link.icon}</span>
+              <span className="flex-1 text-[14px] font-medium">{link.label}</span>
+              <ChevronRight className="w-4 h-4 text-white/25" />
+            </button>
+          ))}
+        </div>
+
+        {user && (
+          <button type="button" onClick={logout} className={`${btn.quiet} w-full text-red-300/90 hover:text-red-300`}>
+            <LogOut className="w-4 h-4" />
+            Çıkış yap
+          </button>
+        )}
+      </div>
+    </Sheet>
   );
 };

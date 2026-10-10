@@ -1,249 +1,111 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Search, X, Music, Check, Clock, Coins, Loader2, Heart, ExternalLink, Plus, AlertTriangle, Crown, Ban, ChevronDown, ShieldAlert, Play, Pause, Volume2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowUpToLine, ChevronDown, Clock, Ghost, Loader2, Music, Pause, Play, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
 import { Track } from '../types';
 import { containsProfanity, maskProfanity } from '../utils/profanityFilter';
 import { formatDuration, formatUserDisplayName } from '../utils/formatters';
-import { isTrackAllowedByVibeGuard, classifyTrackGenres } from '../utils/genreMatcher';
+import { isTrackAllowedByVibeGuard } from '../utils/genreMatcher';
 import { getUserDailySongRights } from '../lib/timeHelpers';
 import { useAudioPreview } from '../services/audioPreviewService';
+import { Sheet } from './ui/Sheet';
+import { EmptyState, SkeletonRows, Switch, btn, groupCard, groupRow, inputBase, sectionLabel } from './ui/controls';
+import { EASE_OUT } from '../lib/motion';
+import { trackCover } from '../utils/queueLabels';
 
-interface SwipeToDropCoinProps {
-  onConfirm: () => void;
-  isSubmitting: boolean;
-  remainingDisplay?: string;
-}
+type SearchTab = 'all' | 'top10' | 'history';
 
-const SwipeToDropCoin: React.FC<SwipeToDropCoinProps> = ({
-  onConfirm,
-  isSubmitting,
-  remainingDisplay,
-}) => {
-  const [sliderWidth, setSliderWidth] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
+const TABS: { value: SearchTab; label: string }[] = [
+  { value: 'all', label: 'Trendler' },
+  { value: 'top10', label: 'Mekânın favorileri' },
+  { value: 'history', label: 'Son isteklerim' },
+];
 
-  useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setSliderWidth(containerRef.current.offsetWidth);
-      }
-    };
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
-  }, []);
+const trackDurationMs = (track: Track) =>
+  (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
 
-  const handleSize = 52;
-  const maxDrag = Math.max(sliderWidth - handleSize - 8, 120);
-
-  // Background fill width based on drag progress
-  const fillWidth = useTransform(x, [0, maxDrag], [handleSize, sliderWidth]);
-  const textOpacity = useTransform(x, [0, maxDrag * 0.45], [1, 0]);
-
-  const handleDragEnd = () => {
-    if (isSubmitting) return;
-    if (x.get() >= maxDrag * 0.72) {
-      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-        try { navigator.vibrate?.([40, 60]); } catch (_) {}
-      }
-      onConfirm();
-    } else {
-      x.set(0);
-    }
-  };
-
-  return (
-    <div className="space-y-2 mt-4 select-none">
-      <div
-        ref={containerRef}
-        className="relative h-15 w-full rounded-2xl bg-black/60 border border-white/10 p-1 flex items-center overflow-hidden shadow-inner touch-none"
-      >
-        {/* Dynamic Theme Fill Track */}
-        <motion.div
-          style={{ width: fillWidth }}
-          className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[var(--theme-primary)]/20 via-[var(--theme-primary)]/35 to-[var(--theme-primary)]/50 rounded-2xl pointer-events-none"
-        />
-
-        {/* Shimmer Hint Text */}
-        <motion.div
-          style={{ opacity: textOpacity }}
-          className="absolute inset-0 flex items-center justify-center pointer-events-none pl-12 pr-4"
-        >
-          <span className="text-xs font-bold text-white/80 tracking-wide flex items-center gap-2">
-            <span>Jetonu Sağa Kaydır</span>
-            <span className="text-[var(--theme-primary)] animate-pulse">➔</span>
-          </span>
-        </motion.div>
-
-        {/* Draggable Coin Handle */}
-        <motion.div
-          drag={isSubmitting ? false : "x"}
-          dragConstraints={{ left: 0, right: maxDrag }}
-          dragElastic={0.08}
-          dragMomentum={false}
-          style={{ x }}
-          onDragEnd={handleDragEnd}
-          className="relative z-10 w-13 h-13 rounded-xl bg-[var(--theme-primary)] text-black flex items-center justify-center font-black shadow-[0_4px_15px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing border border-white/20 active:scale-95 transition-transform"
-        >
-          {isSubmitting ? (
-            <Loader2 className="w-5 h-5 animate-spin text-black" />
-          ) : (
-            <div className="flex flex-col items-center justify-center">
-              <Coins className="w-5 h-5 text-black stroke-[2.5]" />
-              <span className="text-[8px] font-black uppercase tracking-tighter -mt-0.5">Jeton</span>
-            </div>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Fallback One-Tap Trigger for Accessibility */}
-      <div className="flex items-center justify-between px-2 text-[11px] text-neutral-400">
-        <button
-          type="button"
-          onClick={onConfirm}
-          disabled={isSubmitting}
-          className="hover:text-white underline underline-offset-4 decoration-white/20 hover:decoration-white transition-colors"
-        >
-          {isSubmitting ? 'İstek gönderiliyor...' : 'veya tek tıkla onayla'}
-        </button>
-        {remainingDisplay && (
-          <span className="font-semibold text-neutral-300">
-            {remainingDisplay}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-};
+/** Önizleme çalarken dönen küçük ekolayzer */
+const PlayingBars: React.FC = () => (
+  <span className="flex items-end gap-[2px] h-3" aria-hidden="true">
+    {[0, 1, 2].map((i) => (
+      <span key={i} className="eq-bar w-[2px] h-3 rounded-full bg-[var(--theme-primary)]" />
+    ))}
+  </span>
+);
 
 export const MusicSearchModal: React.FC = () => {
-  const {
-    activeModal,
-    closeModal,
-    requestTrack,
-    user,
-    activeVenue,
-    cooldown,
-    showToast,
-    registerBackHandler,
-  } = useApp();
+  const { activeModal, closeModal, requestTrack, user, activeVenue, cooldown, showToast, registerBackHandler } = useApp();
 
-  const songRights = getUserDailySongRights(user);
-  const remainingSongs = songRights.remainingSongs;
-  const maxDailySongs = songRights.baseMaxDailySongs;
+  const rights = getUserDailySongRights(user);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Track[]>([]);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const [showBlockedSongs, setShowBlockedSongs] = useState(false);
-  
-  const [activeTab, setActiveTab] = useState<'all' | 'top10' | 'history' | null>('all');
-  
-  const [isSearching, setIsSearching] = useState(false);
-  const [submittingTrackId, setSubmittingTrackId] = useState<string | null>(null);
+  const [showBlocked, setShowBlocked] = useState(false);
+  const [activeTab, setActiveTab] = useState<SearchTab | null>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [confirmingTrack, setConfirmingTrack] = useState<Track | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isBoosted, setIsBoosted] = useState(false);
   const [message, setMessage] = useState('');
-  const [estimatedWaitMs, setEstimatedWaitMs] = useState<number>(0);
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [estimatedWaitMs, setEstimatedWaitMs] = useState(0);
 
   const audioPreview = useAudioPreview();
-
-  const handleCloseModal = () => {
-    audioPreview.stopPreview();
-    closeModal();
-  };
+  const isOpen = activeModal === 'search';
+  const isPremium = Boolean(user?.isPremium);
+  const cooldownBlocks = cooldown.active && !isPremium && cooldown.remainingSeconds > 0;
 
   useEffect(() => {
-    if (activeModal !== 'search') {
+    if (!isOpen) audioPreview.stopPreview();
+  }, [isOpen, audioPreview]);
+
+  // Onay adımındayken Android geri tuşu arama listesine döner
+  useEffect(() => {
+    if (!confirmingTrack) return;
+    return registerBackHandler(() => {
       audioPreview.stopPreview();
-    }
-  }, [activeModal, audioPreview]);
-
-  useEffect(() => {
-    if (confirmingTrack) {
-      return registerBackHandler(() => {
-        audioPreview.stopPreview();
-        setConfirmingTrack(null);
-        return true;
-      });
-    }
+      setConfirmingTrack(null);
+      return true;
+    });
   }, [confirmingTrack, registerBackHandler, audioPreview]);
 
   const hasSpotify = Boolean(
-    activeVenue?.has_spotify ||
-    activeVenue?.current_track_info?.spotify_track_id ||
-    (activeVenue as any)?.spotify_refresh_token
+    activeVenue?.has_spotify || activeVenue?.current_track_info?.spotify_track_id || (activeVenue as any)?.spotify_refresh_token
   );
-
   const isExplicitFilterActive = activeVenue?.explicit_filter_enabled === true;
   const isVibeGuardActive = Array.isArray(activeVenue?.allowed_genres) && activeVenue.allowed_genres.length > 0;
 
-  const isTrackExplicit = (track: Track) => {
-    return (
-      track.explicit === true ||
-      (track as any).is_explicit === true ||
-      containsProfanity(track.title) ||
-      containsProfanity(track.artist)
-    );
-  };
+  const isTrackExplicit = (track: Track) =>
+    track.explicit === true || (track as any).is_explicit === true || containsProfanity(track.title) || containsProfanity(track.artist);
 
-  const getTrackBlockStatus = (track: Track): { isBlocked: boolean; reason?: string; type?: 'explicit' | 'vibe' } => {
+  const getBlockStatus = (track: Track): { blocked: boolean; reason?: string } => {
     if (isExplicitFilterActive && isTrackExplicit(track)) {
-      return { isBlocked: true, reason: 'Sansürsüz Şarkı (Küfürlü)', type: 'explicit' };
+      return { blocked: true, reason: 'Bu mekânda sansürsüz (küfürlü) şarkılar çalınmıyor.' };
     }
     if (isVibeGuardActive) {
-      const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue?.allowed_genres, searchQuery);
-      if (!vibeCheck.isAllowed) {
-        return { isBlocked: true, reason: vibeCheck.blockedReason || 'Mekân Tarzı Dışı', type: 'vibe' };
-      }
+      const vibe = isTrackAllowedByVibeGuard(track, activeVenue?.allowed_genres, searchQuery);
+      if (!vibe.isAllowed) return { blocked: true, reason: vibe.blockedReason ? `${vibe.blockedReason} bu mekânda çalınmıyor.` : 'Mekânın müzik tarzına uymuyor.' };
     }
-    return { isBlocked: false };
+    return { blocked: false };
   };
 
-  const allowedTracks = searchResults.filter(
-    (track) => !getTrackBlockStatus(track).isBlocked
-  );
+  const allowedTracks = searchResults.filter((t) => !getBlockStatus(t).blocked);
+  const blockedTracks = searchResults.filter((t) => getBlockStatus(t).blocked);
 
-  const blockedTracks = searchResults.filter(
-    (track) => getTrackBlockStatus(track).isBlocked
-  );
-
-  useEffect(() => {
-    if (allowedTracks.length > 0) {
-      if (!selectedTrack || !allowedTracks.some(t => t.id === selectedTrack.id)) {
-        setSelectedTrack(allowedTracks[0]);
-      }
-    } else {
-      setSelectedTrack(null);
-    }
-  }, [searchResults, searchQuery, activeVenue?.explicit_filter_enabled, activeVenue?.allowed_genres]);
-
-  // Auto-search real Spotify tracks on mount or query change
+  // Arama: boşken trendler / mekânın favorileri / geçmiş; yazarken 800 ms gecikmeyle Spotify
   useEffect(() => {
     const isDefaultSearch = searchQuery.trim() === '';
-    
-    let queryToFetch = searchQuery.trim();
-    if (isDefaultSearch) {
-      queryToFetch = 'yeni çıkanlar'; // all / default
-    }
+    const queryToFetch = isDefaultSearch ? 'yeni çıkanlar' : searchQuery.trim();
 
-    // Venue guard: if no venue selected, block search
     if (!activeVenue?.id) {
       setSearchResults([]);
       setIsLoading(false);
       return;
     }
-
-    // If venue doesn't have Spotify connected and not viewing history/top10
     if (!hasSpotify && activeTab !== 'history' && activeTab !== 'top10') {
       setSearchResults([]);
       setIsLoading(false);
@@ -251,16 +113,11 @@ export const MusicSearchModal: React.FC = () => {
     }
 
     setIsLoading(true);
-    
-    // Apply 800ms debounce for actual typing, but load default instantly
-    const delay = isDefaultSearch ? 10 : 800;
-    
     const timer = setTimeout(async () => {
       try {
         if (isDefaultSearch && activeTab === 'history') {
           if (!user?.id) {
             setSearchResults([]);
-            setIsLoading(false);
             return;
           }
           const { data: histData, error: histErr } = await supabase
@@ -270,870 +127,510 @@ export const MusicSearchModal: React.FC = () => {
             .order('created_at', { ascending: false })
             .limit(30);
 
-          if (!histErr && histData && histData.length > 0) {
-            const seen = new Set<string>();
-            const uniqueHistory: Array<any> = [];
-            for (const h of histData) {
-              const key = `${(h.song_name || '').trim().toLowerCase()}_${(h.artist_name || '').trim().toLowerCase()}`;
-              if (!seen.has(key) && h.song_name) {
-                seen.add(key);
-                uniqueHistory.push(h);
-              }
-            }
-
-            const rawTracks: Track[] = uniqueHistory.slice(0, 10).map((h) => {
-              const spotifyId = h.spotify_uri?.replace('spotify:track:', '') || '';
-              return {
-                id: spotifyId || `hist_${Math.random()}`,
-                title: h.song_name,
-                artist: h.artist_name,
-                albumCover: h.album_cover || '',
-                coverUrl: h.album_cover || '',
-                spotifyUri: h.spotify_uri || '',
-                durationMs: h.duration_ms || 210000,
-                requestedBy: 'Sen',
-                requestedAt: h.created_at,
-                votes: 0,
-              };
-            });
-
-            // Parallel Spotify metadata enrichment for any history song lacking Spotify URI or album cover
-            if (activeVenue?.id && hasSpotify) {
-              const enrichedTracks = await Promise.all(
-                rawTracks.map(async (track) => {
-                  if (track.spotifyUri && track.albumCover && !track.albumCover.includes('unsplash')) {
-                    return track;
-                  }
-                  try {
-                    const searchRes = await supabase.functions.invoke('spotify-search', {
-                      body: { q: `${track.title} ${track.artist}`, venueId: activeVenue.id }
-                    });
-                    const found = searchRes?.data?.tracks?.[0];
-                    if (found) {
-                      return {
-                        ...track,
-                        id: found.id || track.id,
-                        spotifyUri: found.spotifyUri || (found.id ? `spotify:track:${found.id}` : track.spotifyUri),
-                        albumCover: found.albumCover || found.coverUrl || track.albumCover,
-                        coverUrl: found.coverUrl || found.albumCover || track.coverUrl,
-                        durationMs: found.durationMs || track.durationMs,
-                      };
-                    }
-                  } catch (e) {
-                    console.warn('[History track Spotify enrichment warning]', e);
-                  }
-                  return track;
-                })
-              );
-
-              setSearchResults(enrichedTracks);
-              if (!selectedTrack && enrichedTracks.length > 0) setSelectedTrack(enrichedTracks[0]);
-              setIsLoading(false);
-              return;
-            }
-
-            setSearchResults(rawTracks);
-            if (!selectedTrack && rawTracks.length > 0) setSelectedTrack(rawTracks[0]);
-            setIsLoading(false);
+          if (histErr || !histData?.length) {
+            setSearchResults([]);
             return;
           }
-          setSearchResults([]);
-          setIsLoading(false);
+
+          const seen = new Set<string>();
+          const unique = histData.filter((h: any) => {
+            const key = `${(h.song_name || '').trim().toLowerCase()}_${(h.artist_name || '').trim().toLowerCase()}`;
+            if (!h.song_name || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+
+          const rawTracks: Track[] = unique.slice(0, 10).map((h: any) => ({
+            id: h.spotify_uri?.replace('spotify:track:', '') || `hist_${Math.random()}`,
+            title: h.song_name,
+            artist: h.artist_name,
+            albumCover: h.album_cover || '',
+            coverUrl: h.album_cover || '',
+            spotifyUri: h.spotify_uri || '',
+            durationMs: h.duration_ms || 210000,
+            requestedBy: 'Sen',
+            requestedAt: h.created_at,
+            votes: 0,
+          }));
+
+          if (hasSpotify) {
+            // Kapak veya Spotify bağlantısı eksik geçmiş şarkılar tamamlanır
+            const enriched = await Promise.all(
+              rawTracks.map(async (track) => {
+                if (track.spotifyUri && track.albumCover && !track.albumCover.includes('unsplash')) return track;
+                try {
+                  const res = await supabase.functions.invoke('spotify-search', {
+                    body: { q: `${track.title} ${track.artist}`, venueId: activeVenue.id },
+                  });
+                  const found = res?.data?.tracks?.[0];
+                  if (found) {
+                    return {
+                      ...track,
+                      id: found.id || track.id,
+                      spotifyUri: found.spotifyUri || (found.id ? `spotify:track:${found.id}` : track.spotifyUri),
+                      albumCover: found.albumCover || found.coverUrl || track.albumCover,
+                      coverUrl: found.coverUrl || found.albumCover || track.coverUrl,
+                      durationMs: found.durationMs || track.durationMs,
+                    };
+                  }
+                } catch (e) {
+                  console.warn('[History enrichment]', e);
+                }
+                return track;
+              })
+            );
+            setSearchResults(enriched);
+          } else {
+            setSearchResults(rawTracks);
+          }
           return;
         }
 
         if (isDefaultSearch && activeTab === 'top10') {
-          // TOP 10 ŞARKILAR: RPC üzerinden en çok istenenleri getir
           const { data: topData, error: topError } = await supabase.rpc('get_venue_top_tracks', { p_venue_id: Number(activeVenue.id) });
-          if (!topError && topData && topData.length > 0) {
-            const topTracks: Track[] = topData.map((t: any) => ({
-              id: t.track_id,
-              title: t.song_title,
-              artist: t.artist_name,
-              coverUrl: t.album_cover,
-              albumCover: t.album_cover,
-              spotifyUri: t.spotify_uri || (t.track_id?.startsWith('spotify:track:') ? t.track_id : ''),
-              durationMs: t.duration_ms || 210000,
-              requestedBy: `${t.request_count} kez istendi`,
-              votes: 0,
-            }));
-            setSearchResults(topTracks.slice(0, 10));
-            if (!selectedTrack) setSelectedTrack(topTracks[0]);
-            setIsLoading(false);
-            return;
+          if (!topError && topData?.length) {
+            setSearchResults(
+              topData.slice(0, 10).map((t: any) => ({
+                id: t.track_id,
+                title: t.song_title,
+                artist: t.artist_name,
+                coverUrl: t.album_cover,
+                albumCover: t.album_cover,
+                spotifyUri: t.spotify_uri || (t.track_id?.startsWith('spotify:track:') ? t.track_id : ''),
+                durationMs: t.duration_ms || 210000,
+                requestedBy: `${t.request_count} kez istendi`,
+                votes: 0,
+              }))
+            );
+          } else {
+            setSearchResults([]);
           }
-          // Eğer hiç şarkı istenmemişse veya hata varsa listeyi boşalt
-          setSearchResults([]);
-          setIsLoading(false);
           return;
         }
 
         if (!hasSpotify) {
           setSearchResults([]);
-          setIsLoading(false);
           return;
         }
 
-        console.log(`[MusicSearch] Invoking Edge Function spotify-search`);
         const { data: resData, error: invokeError } = await supabase.functions.invoke('spotify-search', {
-          body: { q: queryToFetch, venueId: activeVenue.id }
+          body: { q: queryToFetch, venueId: activeVenue.id },
         });
-
-        if (invokeError) {
-          throw new Error(invokeError.message || 'Arama işlemi başarısız');
-        }
-
+        if (invokeError) throw new Error(invokeError.message || 'Arama başarısız');
         const data: any = resData || {};
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        const tracks: Track[] = data.tracks ?? [];
-        console.log(`[MusicSearch] Got ${tracks.length} tracks for "${queryToFetch}"`);
-        const limitedTracks = tracks.slice(0, 10);
-        setSearchResults(limitedTracks);
-        if (limitedTracks.length > 0 && !selectedTrack) {
-          setSelectedTrack(limitedTracks[0]);
-        }
+        if (data.error) throw new Error(data.error);
+        setSearchResults((data.tracks ?? []).slice(0, 10));
       } catch (err: any) {
-        // Suppress expected 400 errors if venue hasn't connected Spotify
-        if (!err.message?.includes('non-2xx status code')) {
-          console.warn('[MusicSearch] Search info:', err.message);
-        }
+        if (!err?.message?.includes('non-2xx status code')) console.warn('[MusicSearch]', err?.message);
         setSearchResults([]);
       } finally {
         setIsLoading(false);
       }
-    }, delay);
+    }, isDefaultSearch ? 10 : 800);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, activeVenue?.id, hasSpotify]);
+  }, [searchQuery, activeTab, activeVenue?.id, hasSpotify]); // eslint-disable-line react-hooks/exhaustive-deps
 
-
-  
-
-  const formatCooldown = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const close = () => {
+    audioPreview.stopPreview();
+    setConfirmingTrack(null);
+    closeModal();
   };
 
-  const handleConfirmRequest = async (trackToRequest?: Track) => {
+  const backToSearch = () => {
     audioPreview.stopPreview();
-    const target = trackToRequest || selectedTrack;
-    if (target) {
-      const blockStatus = getTrackBlockStatus(target);
-      if (blockStatus.isBlocked) {
-        showToast(blockStatus.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.');
-        return;
-      }
+    setConfirmingTrack(null);
+  };
 
-      const durMs = (target as any).duration_ms || target.durationMs || (target.duration ? target.duration * 1000 : 0);
-      const formatted = formatDuration(durMs);
-
-      if (durMs > 420000) {
-        showToast(`Bu şarkı 7 dakikadan uzun (${formatted}). Mekan akışını korumak için en fazla 7 dakikalık şarkılar eklenebilir.`);
-        return;
-      }
-
-      if (!user?.isPremium && durMs > 240000) {
-        showToast(`Bu şarkı 4 dakikadan uzun (${formatted}). Standart üyelikte en fazla 4 dakikalık şarkılar eklenebilir. 7 dakikaya kadar şarkı çalmak için Premium'a geçebilirsiniz.`);
-        return;
-      }
-
-      setConfirmingTrack(target);
-      setIsAnonymous(false);
-      setIsBoosted(false);
-      setMessage('');
-      
-      // Calculate estimated wait time
-      if (activeVenue) {
-        try {
-          const { data, error } = await supabase
-            .from('queue')
-            .select('duration_ms')
-            .eq('venue_id', activeVenue.id)
-            .in('status', ['pending', 'queued', 'playing']);
-            
-          if (!error && data) {
-            const totalMs = data.reduce((acc, curr) => acc + (curr.duration_ms || 210000), 0);
-            setEstimatedWaitMs(totalMs);
-          }
-        } catch(e) {
-          console.error(e);
-        }
-      }
+  const selectTrack = async (track: Track) => {
+    audioPreview.stopPreview();
+    const block = getBlockStatus(track);
+    if (block.blocked) {
+      showToast(block.reason || 'Bu şarkı mekân kuralları nedeniyle çalınamıyor.');
+      return;
     }
-  };
+    const durMs = trackDurationMs(track);
+    if (durMs > 420000) {
+      showToast(`Bu şarkı 7 dakikadan uzun (${formatDuration(durMs)}). En fazla 7 dakikalık şarkılar eklenebilir.`);
+      return;
+    }
+    if (!isPremium && durMs > 240000) {
+      showToast(`Bu şarkı 4 dakikadan uzun (${formatDuration(durMs)}). 7 dakikaya kadar şarkılar VIP üyelere açık.`);
+      return;
+    }
 
-  const handleFinalRequest = async () => {
-    audioPreview.stopPreview();
-    if (confirmingTrack && !submittingTrackId) {
-      if (message.trim().length > 0 && containsProfanity(message)) {
-        showToast('Lütfen küfür veya argo içeren kelimeler kullanmayın.');
-        return;
-      }
-      const finalMessage = message.trim().length > 0 ? maskProfanity(message) : undefined;
-      setSubmittingTrackId(confirmingTrack.id);
+    setConfirmingTrack(track);
+    setIsAnonymous(false);
+    setIsBoosted(false);
+    setMessage('');
+    setEstimatedWaitMs(0);
+
+    if (activeVenue) {
       try {
-        const success = await requestTrack(confirmingTrack, isAnonymous, isBoosted, finalMessage);
-        if (success) {
-          setConfirmingTrack(null);
-          closeModal();
-        }
-      } finally {
-        setSubmittingTrackId(null);
+        const { data, error } = await supabase
+          .from('queue')
+          .select('duration_ms')
+          .eq('venue_id', activeVenue.id)
+          .in('status', ['pending', 'queued', 'playing']);
+        if (!error && data) setEstimatedWaitMs(data.reduce((acc, row) => acc + (row.duration_ms || 210000), 0));
+      } catch (e) {
+        console.error(e);
       }
     }
   };
+
+  const submit = async () => {
+    if (!confirmingTrack || submitting) return;
+    audioPreview.stopPreview();
+    if (message.trim() && containsProfanity(message)) {
+      showToast('Notunda küfür veya argo kullanma lütfen.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const ok = await requestTrack(confirmingTrack, isAnonymous, isBoosted, message.trim() ? maskProfanity(message) : undefined);
+      if (ok) setConfirmingTrack(null);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const togglePreview = (track: Track) =>
+    audioPreview.togglePreview(track, () => showToast('Bu şarkının önizlemesi bulunamadı.'));
+
+  const renderPreview = (track: Track, large = false) => {
+    const playing = audioPreview.isPlaying(track.id);
+    const loading = audioPreview.isLoading(track.id);
+    return (
+      <button
+        type="button"
+        onClick={() => togglePreview(track)}
+        aria-label={playing ? 'Önizlemeyi durdur' : '30 saniye önizle'}
+        className={`${large ? 'w-12 h-12' : 'w-11 h-11'} shrink-0 rounded-full grid place-items-center active:scale-90 transition-[transform,background-color] duration-150 ${
+          playing ? 'bg-[var(--theme-primary)] text-black' : 'bg-white/[0.07] text-white/80 hover:bg-white/[0.1]'
+        }`}
+      >
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : playing ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
+      </button>
+    );
+  };
+
+  const remainingLabel = `${rights.remainingSongs}/${rights.baseMaxDailySongs} hak`;
+  const cooldownText = `${Math.floor(cooldown.remainingSeconds / 60)}:${String(cooldown.remainingSeconds % 60).padStart(2, '0')}`;
+  const boostLeft = Math.max(0, 1 - (user?.daily_boosts_count || 0));
+
+  const toolbar = confirmingTrack ? undefined : (
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+        <input
+          id="tour-search-input"
+          type="search"
+          enterKeyHint="search"
+          value={searchQuery}
+          onChange={(e) => {
+            audioPreview.stopPreview();
+            setSearchQuery(e.target.value);
+            if (e.target.value.trim() !== '') setActiveTab(null);
+            else if (activeTab === null) setActiveTab('all');
+          }}
+          placeholder="Şarkı veya sanatçı ara"
+          className={`${inputBase} pl-11 pr-11`}
+        />
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 text-white/50 animate-spin absolute right-4 top-1/2 -translate-y-1/2" />
+        ) : searchQuery ? (
+          <button
+            type="button"
+            onClick={() => {
+              audioPreview.stopPreview();
+              setSearchQuery('');
+              setActiveTab('all');
+            }}
+            aria-label="Aramayı temizle"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center text-white/50"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5">
+        {TABS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => {
+              audioPreview.stopPreview();
+              setActiveTab(tab.value);
+              setSearchQuery('');
+            }}
+            className={`shrink-0 h-9 px-4 rounded-full text-[13px] font-semibold transition-colors duration-150 ${
+              activeTab === tab.value ? 'bg-white text-black' : 'bg-white/[0.06] text-white/65 hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {isVibeGuardActive && (
+        <p className="flex items-start gap-2 text-[12px] text-white/50 leading-snug px-1">
+          <ShieldCheck className="w-4 h-4 shrink-0 text-white/40" />
+          <span>Bu mekânda yalnızca {activeVenue?.allowed_genres?.join(', ')} çalınıyor.</span>
+        </p>
+      )}
+    </div>
+  );
+
+  const footer = confirmingTrack ? (
+    <button type="button" onClick={submit} disabled={submitting || cooldownBlocks} className={`${btn.primary} w-full`}>
+      {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : cooldownBlocks ? <Clock className="w-4 h-4" /> : <Plus className="w-5 h-5" strokeWidth={2.5} />}
+      <span>{cooldownBlocks ? `${cooldownText} sonra gönderebilirsin` : user ? 'Sıraya ekle' : 'Giriş yap ve gönder'}</span>
+      {user && !cooldownBlocks && <span className="ml-1 px-2 py-0.5 rounded-full bg-black/15 text-[12px] font-bold tabular-nums">{remainingLabel}</span>}
+    </button>
+  ) : cooldownBlocks ? (
+    <div className="flex items-center gap-3 min-h-[44px] text-[13px]">
+      <Clock className="w-4 h-4 text-white/50" />
+      <span className="flex-1 text-white/60">Bir sonraki isteğine kalan süre</span>
+      <span className="font-semibold tabular-nums">{cooldownText}</span>
+    </div>
+  ) : undefined;
 
   return (
-    <AnimatePresence>
-      {activeModal === 'search' && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center landscape:items-center landscape:justify-center landscape:p-2">
-          {/* Backdrop */}
+    <Sheet
+      open={isOpen}
+      onClose={close}
+      title={confirmingTrack ? 'İsteği gönder' : 'Şarkı iste'}
+      onBack={confirmingTrack ? backToSearch : undefined}
+      headerRight={
+        user && !confirmingTrack ? (
+          <span className="mr-1 px-2.5 h-7 rounded-full bg-white/[0.07] text-[12px] font-semibold text-white/80 grid place-items-center tabular-nums">
+            {remainingLabel}
+          </span>
+        ) : undefined
+      }
+      toolbar={toolbar}
+      footer={footer}
+      height="tall"
+      width="lg"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {confirmingTrack ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ willChange: 'opacity' }}
-            onClick={handleCloseModal}
-            className="fixed inset-0 bg-black/85"
-          />
-
-          {/* Bottom Sheet Container */}
-          <motion.div
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            style={{ willChange: 'transform' }}
-            className="relative w-full max-w-md landscape:max-w-4xl h-[92vh] landscape:h-[94vh] landscape:max-h-[440px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] landscape:rounded-2xl p-5 landscape:p-3.5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col justify-between overflow-hidden border-t sm:border landscape:border border-white/[0.1]"
+            key="confirm"
+            initial={{ opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0, transition: { duration: 0.3, ease: EASE_OUT } }}
+            exit={{ opacity: 0, x: 28, transition: { duration: 0.16 } }}
+            className="space-y-5 pb-2"
           >
-            {confirmingTrack ? (
-              <div className="flex-1 flex flex-col pt-2 overflow-y-auto custom-scrollbar h-full relative z-10 pb-20">
-                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-                  <div className="flex items-center gap-2">
-                    <Music className="w-4 h-4 text-[var(--theme-primary)]" />
-                    <span className="text-xs font-black text-white uppercase tracking-wider">İsteği Onayla</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      audioPreview.stopPreview();
-                      setConfirmingTrack(null);
-                    }}
-                    className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
-                    aria-label="Geri"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="space-y-4 pt-3 landscape:grid landscape:grid-cols-2 landscape:gap-3.5 landscape:space-y-0">
-                  {/* Left Column: Track Info & VIP Options */}
-                  <div className="space-y-3">
-                    {/* Track Info Box with Audio Preview */}
-                    <div className="flex items-center justify-between gap-3 bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] shadow-md">
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <div className="w-13 h-13 rounded-xl overflow-hidden border border-white/10 shadow-sm shrink-0">
-                          <img src={confirmingTrack.albumCover || confirmingTrack.coverUrl || confirmingTrack.album_art || '/logo.png'} className="w-full h-full object-cover" alt={confirmingTrack.title} />
-                        </div>
-                        <div className="truncate flex-1 min-w-0">
-                          <p className="text-sm font-black text-white truncate">{confirmingTrack.title}</p>
-                          <p className="text-xs font-semibold text-[var(--theme-primary-light)] truncate mt-0.5">{confirmingTrack.artist}</p>
-                        </div>
-                      </div>
-
-                      {/* 30s Audio Preview Play/Pause button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          audioPreview.togglePreview(confirmingTrack, () => {
-                            showToast('Bu şarkı için ses önizlemesi bulunamadı.');
-                          });
-                        }}
-                        aria-label={audioPreview.isPlaying(confirmingTrack.id) ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
-                          audioPreview.isPlaying(confirmingTrack.id)
-                            ? 'bg-[var(--theme-primary)] text-black shadow-md ring-2 ring-[var(--theme-primary)]/40'
-                            : 'bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border border-white/10'
-                        }`}
-                        title={audioPreview.isPlaying(confirmingTrack.id) ? 'Önizlemeyi durdur' : '30 sn Ses Önizlemesi'}
-                      >
-                        {audioPreview.isLoading(confirmingTrack.id) ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
-                        ) : audioPreview.isPlaying(confirmingTrack.id) ? (
-                          <Pause className="w-4 h-4 text-black fill-current" />
-                        ) : (
-                          <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Active preview indicator in confirmation screen */}
-                    {audioPreview.isPlaying(confirmingTrack.id) && (
-                      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[11px] text-[var(--theme-primary-light)]">
-                        <div className="flex items-center gap-2">
-                          <Volume2 className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-pulse" />
-                          <span className="font-semibold">30 sn Ses Önizlemesi Çalıyor</span>
-                        </div>
-                        <div className="flex items-end gap-0.5 h-3">
-                          <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
-                          <span className="w-0.5 h-2 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
-                          <span className="w-0.5 h-3.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Anonymous Toggle (VIP Feature) */}
-                    <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08]">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-white tracking-wide">Hayalet Modu</p>
-                          {!user?.isPremium && (
-                            <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">
-                          {user?.isPremium ? 'Sadece "Anonim" olarak görünürsün' : 'Sadece Premium üyeler için'}
-                        </p>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          if (!user?.isPremium) {
-                            showToast('Hayalet modu sadece Muzikors Premium üyeleri içindir.');
-                            return;
-                          }
-                          setIsAnonymous(!isAnonymous);
-                        }}
-                        className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
-                          !user?.isPremium ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
-                          isAnonymous ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isAnonymous && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
-                      </button>
-                    </div>
-
-                    {/* Priority / Boost Toggle (VIP Feature) */}
-                    <div className="flex items-center justify-between bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08]">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-white tracking-wide">Şarkıyı Üste Taşı</p>
-                          {!user?.isPremium && (
-                            <span className="text-[8px] font-black bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 px-1.5 py-0.5 rounded uppercase">VIP</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">
-                          {user?.isPremium ? `Kalan Hak: ${Math.max(1 - (user.daily_boosts_count || 0), 0)} (Sıranın başına geçer)` : 'Sadece Premium üyeler için'}
-                        </p>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          if (!user?.isPremium) {
-                            showToast('Üste taşıma sadece Muzikors Premium üyeleri içindir.');
-                            return;
-                          }
-                          if ((user?.daily_boosts_count || 0) >= 1 && !isBoosted) {
-                            showToast('Günlük üste taşıma limitinize ulaştınız.');
-                            return;
-                          }
-                          setIsBoosted(!isBoosted);
-                        }}
-                        className={`w-11 h-6 rounded-full p-0.5 transition-all flex items-center shadow-inner ${
-                          !user?.isPremium || (user?.daily_boosts_count || 0) >= 1 && !isBoosted ? 'bg-neutral-800 opacity-40 cursor-not-allowed' :
-                          isBoosted ? 'bg-[var(--theme-primary)]' : 'bg-neutral-700'
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${isBoosted && user?.isPremium ? 'translate-x-5' : 'translate-x-0'}`} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Note, Estimated Time, Consent */}
-                  <div className="space-y-3">
-                    {/* Message Input */}
-                    <div className="bg-[var(--theme-card-alt)] rounded-2xl p-3 border border-white/[0.08] space-y-1.5">
-                      <p className="text-xs font-bold text-white">Not Ekle <span className="text-[10px] text-neutral-400">(İsteğe bağlı)</span></p>
-                      <input 
-                        type="text" 
-                        placeholder="Örn: Masamıza gelsin..." 
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        maxLength={60}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-neutral-500 focus:border-[var(--theme-primary)] focus:outline-none transition-colors"
-                      />
-                    </div>
-
-                    {/* Estimated Time */}
-                    {estimatedWaitMs > 0 && (
-                      <div className="flex items-center gap-2 justify-center text-xs text-neutral-400 py-1">
-                        <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                        <span>Tahmini çalma: <strong className="text-white">~{Math.round(estimatedWaitMs / 60000)} dk sonra</strong></span>
-                      </div>
-                    )}
-
-                    {/* Consent Text */}
-                    <div className="bg-[var(--theme-primary)]/10 rounded-2xl p-2.5 border border-[var(--theme-primary)]/25 text-[11px] leading-relaxed text-[var(--theme-primary-light)] font-medium">
-                      {isAnonymous ? (
-                        <p>Şarkı isteğin <b className="text-white">Anonim</b> olarak yayınlanacaktır.</p>
-                      ) : (
-                        <p>Şarkı isteğin (<b className="text-white">{formatUserDisplayName(user?.username, user?.name)}</b>) olarak yayınlanacaktır.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tactile Swipe To Drop Coin Slider */}
-                <div className="mt-3">
-                  <SwipeToDropCoin
-                    onConfirm={handleFinalRequest}
-                    isSubmitting={submittingTrackId === confirmingTrack.id}
-                    remainingDisplay={user ? `${remainingSongs}/${maxDailySongs} Günlük Hak` : undefined}
-                  />
-                </div>
+            <div className="flex items-center gap-4 pt-1">
+              <img src={trackCover(confirmingTrack)} alt="" className="w-[72px] h-[72px] rounded-2xl object-cover bg-white/[0.06] shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[17px] font-bold truncate">{confirmingTrack.title}</p>
+                <p className="text-[14px] text-white/55 truncate">{confirmingTrack.artist}</p>
+                <p className="text-[12px] text-white/40 mt-0.5 flex items-center gap-2">
+                  {trackDurationMs(confirmingTrack) > 0 && <span>{formatDuration(trackDurationMs(confirmingTrack))}</span>}
+                  {audioPreview.isPlaying(confirmingTrack.id) && <PlayingBars />}
+                </p>
               </div>
+              {renderPreview(confirmingTrack, true)}
+            </div>
+
+            {estimatedWaitMs > 0 && (
+              <p className="flex items-center gap-2 text-[13px] text-white/55">
+                <Clock className="w-4 h-4 text-white/40" />
+                Yaklaşık {Math.max(1, Math.round(estimatedWaitMs / 60000))} dakika sonra çalar
+              </p>
+            )}
+
+            <div className={groupCard}>
+              <div className={groupRow}>
+                <Ghost className="w-[18px] h-[18px] text-white/55" />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[14px] font-semibold">Hayalet modu</span>
+                  <span className="block text-[12px] text-white/45">{isPremium ? 'Adın yerine "Anonim" görünür' : 'VIP üyelere özel'}</span>
+                </span>
+                <Switch
+                  checked={isAnonymous}
+                  dimmed={!isPremium}
+                  label="Hayalet modu"
+                  onChange={(next) => {
+                    if (!isPremium) {
+                      showToast('Hayalet modu VIP üyelere özel.');
+                      return;
+                    }
+                    setIsAnonymous(next);
+                  }}
+                />
+              </div>
+              <div className={groupRow}>
+                <ArrowUpToLine className="w-[18px] h-[18px] text-white/55" />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[14px] font-semibold">Sıranın başına taşı</span>
+                  <span className="block text-[12px] text-white/45">{isPremium ? `Bugün ${boostLeft} hakkın var` : 'VIP üyelere özel'}</span>
+                </span>
+                <Switch
+                  checked={isBoosted}
+                  dimmed={!isPremium || (boostLeft === 0 && !isBoosted)}
+                  label="Sıranın başına taşı"
+                  onChange={(next) => {
+                    if (!isPremium) {
+                      showToast('Sıranın başına taşıma VIP üyelere özel.');
+                      return;
+                    }
+                    if (next && boostLeft === 0) {
+                      showToast('Bugünkü öne taşıma hakkını kullandın.');
+                      return;
+                    }
+                    setIsBoosted(next);
+                  }}
+                />
+              </div>
+            </div>
+
+            <label className="block">
+              <span className={sectionLabel}>Not ekle (isteğe bağlı)</span>
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={60}
+                placeholder="Örn: 5 numaralı masadan sevgiler"
+                className={inputBase}
+              />
+            </label>
+
+            <p className="text-[12px] text-white/45 leading-relaxed">
+              {!user
+                ? 'Göndermek için giriş yapman istenecek.'
+                : isAnonymous
+                  ? 'İsteğin "Anonim" olarak görünecek.'
+                  : `İsteğin ${formatUserDisplayName(user.username, user.name)} adıyla görünecek.`}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="search"
+            initial={{ opacity: 0, x: -28 }}
+            animate={{ opacity: 1, x: 0, transition: { duration: 0.3, ease: EASE_OUT } }}
+            exit={{ opacity: 0, x: -28, transition: { duration: 0.16 } }}
+            className="pb-2"
+          >
+            {isLoading ? (
+              <SkeletonRows count={7} />
+            ) : !hasSpotify && activeTab !== 'history' && activeTab !== 'top10' ? (
+              <EmptyState
+                icon={<Music className="w-6 h-6" />}
+                title="Mekân müzik çaları bağlı değil"
+                text="Mekân Spotify bağlantısını tamamlayınca şarkı arayıp isteyebileceksin."
+              />
+            ) : searchResults.length === 0 ? (
+              <EmptyState
+                icon={<Search className="w-6 h-6" />}
+                title={activeTab === 'history' ? 'Henüz isteğin yok' : activeTab === 'top10' ? 'Henüz favori yok' : 'Sonuç bulunamadı'}
+                text={
+                  activeTab === 'history'
+                    ? 'İstediğin şarkılar burada görünecek.'
+                    : activeTab === 'top10'
+                      ? 'Bu mekânda en çok istenen şarkılar burada görünecek.'
+                      : 'Farklı bir şarkı veya sanatçı adı dene.'
+                }
+              />
             ) : (
               <>
-                {/* Header & Search Bar */}
-                <div className="shrink-0 space-y-3 relative z-10">
-                  <div className="w-10 h-1 rounded-full bg-white/20 mx-auto sm:hidden" />
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Music className="w-4 h-4 text-[var(--theme-primary)]" />
-                      <h2 className="text-base font-black text-white tracking-tight">Müzik Arama</h2>
-                      {user && (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${
-                          user.isPremium
-                            ? 'bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)] border-[var(--theme-primary)]/30'
-                            : 'bg-white/[0.04] text-neutral-300 border-white/10'
-                        }`}>
-                          {user.isPremium && <Crown className="w-2.5 h-2.5 text-[var(--theme-primary)]" />}
-                          {remainingSongs}/{maxDailySongs} Hak
-                        </span>
-                      )}
-                    </div>
+                {allowedTracks.length === 0 && (
+                  <p className="text-[13px] text-white/55 leading-relaxed py-3">
+                    Aramana uyan {blockedTracks.length} şarkı mekânın kurallarına takıldı. Başka bir şarkı dene.
+                  </p>
+                )}
 
-                    <button
-                      onClick={handleCloseModal}
-                      className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
-                      aria-label="Kapat"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Search Input */}
-                  <div className="relative group">
-                    <Search className="w-4 h-4 text-[var(--theme-primary)] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="tour-search-input"
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        audioPreview.stopPreview();
-                        setSearchQuery(e.target.value);
-                        if (e.target.value.trim() !== '') {
-                          setActiveTab(null);
-                        } else if (activeTab === null) {
-                          setActiveTab('all');
-                        }
-                      }}
-                      placeholder="Sanatçı veya şarkı adı..."
-                      className="w-full bg-[var(--theme-card-alt)] border border-white/10 rounded-2xl py-3 pl-10 pr-10 text-xs font-semibold text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--theme-primary)] transition-colors shadow-inner"
-                    />
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 text-[var(--theme-primary)] animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
-                    ) : searchQuery ? (
-                      <button
-                        onClick={() => {
-                          audioPreview.stopPreview();
-                          setSearchQuery('');
-                        }}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    ) : null}
-                  </div>
-
-                  {/* Vibe Guard Active Notice */}
-                  {isVibeGuardActive && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300">
-                      <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                      <p className="text-[11px] leading-tight font-medium">
-                        <strong className="font-bold">Mekân Tarzı (Vibe Guard):</strong> Bu mekanda yalnızca <span className="underline decoration-amber-500/40 font-bold text-white">{activeVenue.allowed_genres?.join(', ')}</span> şarkıları kabul edilmektedir.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Filter Tabs */}
-                  <div className="flex gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
-                    <button
-                      onClick={() => {
-                        audioPreview.stopPreview();
-                        setActiveTab('all');
-                        setSearchQuery('');
-                      }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                        activeTab === 'all'
-                          ? 'bg-[var(--theme-primary)] text-black font-black shadow-sm'
-                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Trendler
-                    </button>
-                    <button
-                      onClick={() => {
-                        audioPreview.stopPreview();
-                        setActiveTab('top10');
-                        setSearchQuery('');
-                      }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                        activeTab === 'top10'
-                          ? 'bg-[var(--theme-primary)] text-black font-black shadow-sm'
-                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Mekanın Tercihi
-                    </button>
-                    <button
-                      onClick={() => {
-                        audioPreview.stopPreview();
-                        setActiveTab('history');
-                        setSearchQuery('');
-                      }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                        activeTab === 'history'
-                          ? 'bg-[var(--theme-primary)] text-black font-black shadow-sm'
-                          : 'bg-white/[0.04] text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      <Clock className="w-3 h-3" />
-                      <span>Son İstediklerim</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Results List */}
-                <div className="flex-1 overflow-y-auto my-2 space-y-1.5 pr-1 custom-scrollbar relative z-10">
-                  {isLoading ? (
-                    <div className="text-center py-16 flex flex-col items-center justify-center space-y-3">
-                      <Loader2 className="w-8 h-8 text-[var(--theme-primary)] animate-spin" />
-                      <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                        {activeTab === 'history' ? 'Geçmiş İstekler Yükleniyor...' : 'Şarkılar Aranıyor...'}
-                      </p>
-                    </div>
-                  ) : !hasSpotify && activeTab !== 'history' && activeTab !== 'top10' ? (
-                    <div className="text-center py-16 px-4 text-neutral-400 space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto text-neutral-500">
-                        <Music className="w-6 h-6" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold text-white">Mekan Henüz Müzik Çalarını Bağlamadı</p>
-                        <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
-                          Mekan yetkilisi Spotify bağlantısını tamamladığında şarkı arama ve istek gönderme aktif olacaktır.
-                        </p>
-                      </div>
-                    </div>
-                  ) : allowedTracks.length === 0 && blockedTracks.length === 0 ? (
-                    <div className="text-center py-16 text-neutral-500">
-                      <Music className="w-10 h-10 mx-auto mb-2 opacity-30 text-[var(--theme-primary)]" />
-                      <p className="text-xs font-semibold">Sonuç bulunamadı</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Empty Allowed notice if only blocked tracks exist */}
-                      {allowedTracks.length === 0 && blockedTracks.length > 0 && (
-                        <div className="text-center py-6 px-4 text-neutral-300 space-y-2 bg-[var(--theme-primary)]/[0.04] border border-[var(--theme-primary)]/20 rounded-2xl my-2">
-                          <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 text-[var(--theme-primary)] flex items-center justify-center mx-auto">
-                            <ShieldAlert className="w-4 h-4" />
-                          </div>
-                          <p className="text-xs font-bold text-white">Mekana Uygun Şarkı Bulunamadı</p>
-                          <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
-                            Aramanızla eşleşen {blockedTracks.length} şarkı mekanın müzik tarzı (Vibe Guard) veya sansür kurallarına takıldı.
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Allowed Tracks Grid */}
-                      <div className="space-y-1.5 landscape:grid landscape:grid-cols-2 landscape:gap-2 landscape:space-y-0">
-                        {allowedTracks.map((track) => {
-                          const isSelected = selectedTrack?.id === track.id;
-                          const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                          const isExplicitTrack = isTrackExplicit(track);
-                          const isTooLongForFree = !user?.isPremium && durMs > 240000;
-                          const isTooLongOverall = durMs > 420000;
-                          const isAudioPlaying = audioPreview.isPlaying(track.id);
-                          const isAudioLoading = audioPreview.isLoading(track.id);
-
-                          return (
-                            <div
-                              key={track.id}
-                              onClick={() => {
-                                if ((cooldown.active && !user?.isPremium) || submittingTrackId === track.id) return;
-                                setSelectedTrack(track);
-                              }}
-                              className={`rounded-2xl p-2.5 flex items-center justify-between border transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'bg-[var(--theme-card-alt)] border-[var(--theme-primary)]/50 shadow-sm'
-                                  : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06]'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                                  <img
-                                    src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                                    alt={track.title}
-                                    className="w-full h-full object-cover"
-                                  />
-                                  {isSelected && (
-                                    <div className="absolute inset-0 bg-[var(--theme-primary)]/50 flex items-center justify-center backdrop-blur-xs">
-                                      <Check className="w-4 h-4 text-black stroke-[3]" />
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <h4 className={`text-xs font-bold truncate ${isSelected ? 'text-[var(--theme-primary-light)]' : 'text-white'}`}>
-                                      {track.title}
-                                    </h4>
-                                    {isAudioPlaying && (
-                                      <div className="flex items-end gap-0.5 h-2.5 shrink-0" title="Önizleme çalıyor">
-                                        <span className="w-0.5 h-2.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
-                                        <span className="w-0.5 h-1.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
-                                        <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
-                                      </div>
-                                    )}
-                                    {isExplicitTrack && (
-                                      <span className="text-[8px] font-black px-1 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 uppercase" title="Explicit (Sansürsüz İçerik)">
-                                        E
-                                      </span>
-                                    )}
-                                    {isTooLongOverall ? (
-                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
-                                        &gt;7 dk
-                                      </span>
-                                    ) : isTooLongForFree ? (
-                                      <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-[var(--theme-primary)]/15 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 uppercase">
-                                        VIP (4+ dk)
-                                      </span>
-                                    ) : null}
-                                  </div>
-                                  <p className="text-[10px] text-neutral-400 font-medium truncate mt-0.5">
-                                    {track.artist}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="shrink-0 pl-2 flex items-center gap-2">
-                                {durMs > 0 && (
-                                  <span className={`text-[10px] font-mono font-bold hidden sm:inline ${isTooLongOverall ? 'text-red-400' : isTooLongForFree ? 'text-[var(--theme-primary-light)]' : 'text-neutral-400'}`}>
-                                    {formatDuration(durMs)}
-                                  </span>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    audioPreview.togglePreview(track, () => {
-                                      showToast('Bu şarkı için 30 saniyelik ses önizlemesi bulunamadı.');
-                                    });
-                                  }}
-                                  aria-label={isAudioPlaying ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
-                                  className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
-                                    isAudioPlaying
-                                      ? 'bg-[var(--theme-primary)] text-black shadow-md ring-2 ring-[var(--theme-primary)]/40'
-                                      : 'bg-white/[0.04] hover:bg-white/[0.1] text-neutral-300 hover:text-white border border-white/[0.06]'
-                                  }`}
-                                  title={isAudioPlaying ? 'Önizlemeyi durdur' : '30 sn Önizleme Dinle'}
-                                >
-                                  {isAudioLoading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
-                                  ) : isAudioPlaying ? (
-                                    <Pause className="w-4 h-4 text-black fill-current" />
-                                  ) : (
-                                    <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Collapsible Blocked / Filtered Tracks Section */}
-                      {blockedTracks.length > 0 && (
-                        <div className="pt-2 pb-1 space-y-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowBlockedSongs(prev => !prev)}
-                            className="w-full py-2 px-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] flex items-center justify-between text-xs text-neutral-400 hover:text-neutral-200 transition-all active:scale-[0.99] cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)]" />
-                              <span className="font-bold text-[11px] text-neutral-300">
-                                Mekan Kısıtlamasına Takılanlar ({blockedTracks.length})
+                <ul className="landscape:grid landscape:grid-cols-2 landscape:gap-x-6">
+                  {allowedTracks.map((track) => {
+                    const durMs = trackDurationMs(track);
+                    const tooLongOverall = durMs > 420000;
+                    const tooLongForFree = !isPremium && durMs > 240000;
+                    return (
+                      <li key={track.id} className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => selectTrack(track)}
+                          className="flex-1 min-w-0 flex items-center gap-3 py-2 -ml-2 pl-2 rounded-2xl text-left active:bg-white/[0.05] transition-colors duration-150"
+                        >
+                          <img src={trackCover(track)} alt="" loading="lazy" className="w-12 h-12 rounded-xl object-cover bg-white/[0.06] shrink-0" />
+                          <span className="flex-1 min-w-0">
+                            <span className="flex items-center gap-1.5">
+                              <span className="text-[15px] font-semibold truncate">{track.title}</span>
+                              {isTrackExplicit(track) && (
+                                <span className="shrink-0 w-4 h-4 rounded-[4px] bg-white/[0.15] text-[9px] font-bold grid place-items-center text-white/70" title="Sansürsüz">
+                                  E
+                                </span>
+                              )}
+                              {audioPreview.isPlaying(track.id) && <PlayingBars />}
+                            </span>
+                            <span className="block text-[13px] text-white/50 truncate">
+                              {track.artist}
+                              {durMs > 0 && ` · ${formatDuration(durMs)}`}
+                            </span>
+                            {(tooLongOverall || tooLongForFree) && (
+                              <span className={`block text-[11px] font-semibold mt-0.5 ${tooLongOverall ? 'text-red-300/90' : 'text-[var(--theme-primary-light)]'}`}>
+                                {tooLongOverall ? '7 dakikadan uzun' : '4 dakikadan uzun · VIP'}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-[10px] text-neutral-500 font-medium">
-                              <span>{showBlockedSongs ? 'Gizle' : 'Göster'}</span>
-                              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showBlockedSongs ? 'rotate-180' : ''}`} />
-                            </div>
-                          </button>
-
-                          <AnimatePresence>
-                            {showBlockedSongs && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="space-y-1.5 overflow-hidden"
-                              >
-                                <div className="px-3 py-2 text-xs text-neutral-300 flex items-center gap-2 bg-[var(--theme-primary)]/[0.05] border border-[var(--theme-primary)]/20 rounded-xl font-medium">
-                                  <ShieldAlert className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
-                                  <span>Bu şarkılar mekanın müzik tarzı (Vibe Guard) veya sansür kuralları gereği çalınamaz.</span>
-                                </div>
-                                {blockedTracks.map((track) => {
-                                  const durMs = (track as any).duration_ms || track.durationMs || (track.duration ? track.duration * 1000 : 0);
-                                  const blockInfo = getTrackBlockStatus(track);
-                                  const isAudioPlaying = audioPreview.isPlaying(track.id);
-                                  const isAudioLoading = audioPreview.isLoading(track.id);
-
-                                  return (
-                                    <div
-                                      key={track.id}
-                                      onClick={() => showToast(blockInfo.reason || 'Bu şarkı mekan kuralları nedeniyle çalınamaz.')}
-                                      className="rounded-2xl p-2.5 flex items-center justify-between border border-[var(--theme-primary)]/15 bg-[var(--theme-primary)]/[0.02] hover:bg-[var(--theme-primary)]/[0.05] opacity-75 hover:opacity-100 transition-all cursor-not-allowed group"
-                                    >
-                                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-white/10 grayscale">
-                                          <img
-                                            src={track.albumCover || track.coverUrl || track.album_art || '/logo.png'}
-                                            alt={track.title}
-                                            className="w-full h-full object-cover"
-                                          />
-                                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                            {blockInfo.type === 'vibe' ? (
-                                              <ShieldAlert className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                                            ) : (
-                                              <Ban className="w-3.5 h-3.5 text-rose-400" />
-                                            )}
-                                          </div>
-                                        </div>
-
-                                        <div className="min-w-0 flex-1">
-                                          <div className="flex items-center gap-1.5 flex-wrap">
-                                            <h4 className="text-xs font-bold truncate text-neutral-300">
-                                              {track.title}
-                                            </h4>
-                                            {isAudioPlaying && (
-                                              <div className="flex items-end gap-0.5 h-2.5 shrink-0" title="Önizleme çalıyor">
-                                                <span className="w-0.5 h-2.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:0ms]" />
-                                                <span className="w-0.5 h-1.5 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:150ms]" />
-                                                <span className="w-0.5 h-3 bg-[var(--theme-primary)] rounded-full animate-bounce [animation-delay:300ms]" />
-                                              </div>
-                                            )}
-                                            {blockInfo.type === 'vibe' ? (
-                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-primary)]/20 text-[var(--theme-primary-light)] border border-[var(--theme-primary)]/30 uppercase flex items-center gap-0.5">
-                                                <ShieldAlert className="w-2.5 h-2.5" /> {blockInfo.reason}
-                                              </span>
-                                            ) : (
-                                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase flex items-center gap-0.5">
-                                                <Ban className="w-2.5 h-2.5" /> Sansürsüz Şarkı
-                                              </span>
-                                            )}
-                                          </div>
-                                          <p className="text-[10px] text-neutral-500 font-medium truncate mt-0.5">
-                                            {track.artist}
-                                          </p>
-                                        </div>
-                                      </div>
-
-                                      <div className="shrink-0 pl-2 flex items-center gap-2">
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            audioPreview.togglePreview(track, () => {
-                                              showToast('Bu şarkı için 30 saniyelik ses önizlemesi bulunamadı.');
-                                            });
-                                          }}
-                                          aria-label={isAudioPlaying ? 'Önizlemeyi durdur' : 'Önizlemeyi dinle'}
-                                          className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer ${
-                                            isAudioPlaying
-                                              ? 'bg-[var(--theme-primary)] text-black shadow-md'
-                                              : 'bg-white/[0.04] hover:bg-white/[0.08] text-neutral-400 hover:text-white border border-white/[0.06]'
-                                          }`}
-                                          title={isAudioPlaying ? 'Önizlemeyi durdur' : '30 sn Önizleme Dinle'}
-                                        >
-                                          {isAudioLoading ? (
-                                            <Loader2 className="w-4 h-4 animate-spin text-[var(--theme-primary)]" />
-                                          ) : isAudioPlaying ? (
-                                            <Pause className="w-4 h-4 text-black fill-current" />
-                                          ) : (
-                                            <Play className="w-4 h-4 ml-0.5 text-current fill-current" />
-                                          )}
-                                        </button>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </motion.div>
                             )}
-                          </AnimatePresence>
-                        </div>
+                          </span>
+                        </button>
+                        {renderPreview(track)}
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {blockedTracks.length > 0 && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowBlocked((v) => !v)}
+                      aria-expanded={showBlocked}
+                      className="w-full flex items-center gap-2 min-h-[44px] text-[13px] font-semibold text-white/50 hover:text-white/80"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      <span className="flex-1 text-left">Mekân kurallarına takılan {blockedTracks.length} şarkı</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showBlocked ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {showBlocked && (
+                        <motion.ul
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1, transition: { duration: 0.26, ease: EASE_OUT } }}
+                          exit={{ height: 0, opacity: 0, transition: { duration: 0.18 } }}
+                          className="overflow-hidden"
+                        >
+                          {blockedTracks.map((track) => (
+                            <li key={track.id} className="flex items-center gap-2 opacity-55">
+                              <button
+                                type="button"
+                                onClick={() => showToast(getBlockStatus(track).reason || 'Bu şarkı mekân kuralları nedeniyle çalınamıyor.')}
+                                className="flex-1 min-w-0 flex items-center gap-3 py-2 text-left"
+                              >
+                                <img src={trackCover(track)} alt="" loading="lazy" className="w-12 h-12 rounded-xl object-cover grayscale shrink-0" />
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-[15px] font-semibold truncate">{track.title}</span>
+                                  <span className="block text-[12px] text-white/50 truncate">{getBlockStatus(track).reason}</span>
+                                </span>
+                              </button>
+                              {renderPreview(track)}
+                            </li>
+                          ))}
+                        </motion.ul>
                       )}
-                    </>
-                  )}
-                </div>
-
-                {/* Bottom Bar */}
-                <div className="shrink-0 pt-3 border-t border-white/[0.08] space-y-2 relative z-10">
-                  {cooldown.active && !user?.isPremium && (
-                    <div className="bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 rounded-xl p-2.5 flex items-center justify-between text-xs text-[var(--theme-primary-light)]">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)] animate-spin" />
-                        <div>
-                          <span className="font-semibold text-xs block">Anti-Spam Bekleme Süresi</span>
-                          <span className="text-[9px] text-neutral-400 font-normal">Premium ile bekleme süresi 0 sn</span>
-                        </div>
-                      </div>
-                      <span className="font-mono font-bold text-[var(--theme-primary-light)] text-sm">
-                        {Math.floor(cooldown.remainingSeconds / 60)}:{(cooldown.remainingSeconds % 60).toString().padStart(2, '0')}
-                      </span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => handleConfirmRequest()}
-                    disabled={!selectedTrack || (cooldown.active && !user?.isPremium)}
-                    className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs flex items-center justify-between transition-all ${
-                      (cooldown.active && !user?.isPremium) || !selectedTrack
-                        ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                        : 'bg-[var(--theme-primary)] hover:brightness-110 text-black active:scale-95 shadow-md cursor-pointer'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Music className="w-4 h-4" />
-                      <span>{selectedTrack ? 'Seçili Şarkıyı İste' : 'Listeden Şarkı Seçin'}</span>
-                    </div>
-                    {(!cooldown.active || user?.isPremium) && selectedTrack && user && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-black/20 text-black">
-                        {remainingSongs}/{maxDailySongs} Hak
-                      </span>
-                    )}
-                  </button>
-                </div>
+                    </AnimatePresence>
+                  </div>
+                )}
               </>
             )}
           </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </Sheet>
   );
 };

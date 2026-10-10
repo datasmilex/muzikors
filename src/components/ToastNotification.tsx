@@ -1,30 +1,33 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { SPRING_SNAPPY } from '../lib/motion';
 
 export const ToastNotification: React.FC = () => {
   const { toastMessage } = useApp();
+  const reduceMotion = useReducedMotion();
 
   return (
-    <AnimatePresence>
-      {toastMessage && (
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 15, scale: 0.98 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] max-w-[92vw] sm:max-w-md pointer-events-none"
-        >
-          <div className="px-4 py-2.5 rounded-full bg-[#121118]/95 backdrop-blur-2xl border border-white/10 text-white shadow-[0_12px_36px_rgba(0,0,0,0.85)] flex items-center justify-center gap-2.5 text-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)] shrink-0" />
-            <span className="text-xs font-semibold tracking-tight text-neutral-100 leading-snug">
-              {toastMessage}
-            </span>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      role="status"
+      aria-live="polite"
+      className="toast-safe-top pointer-events-none fixed inset-x-0 z-[110] flex justify-center px-4"
+    >
+      <AnimatePresence mode="wait">
+        {toastMessage && (
+          <motion.div
+            key={toastMessage}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: reduceMotion ? { duration: 0.15 } : SPRING_SNAPPY }}
+            exit={{ opacity: 0, y: -10, scale: 0.98, transition: { duration: 0.16 } }}
+            className="max-w-[420px] px-4 py-3 rounded-2xl bg-[rgba(28,28,32,0.96)] border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.5)] text-[13px] font-medium text-white/90 leading-snug text-center"
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };

@@ -1,42 +1,33 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, 
-  Download, 
-  Copy, 
-  Check, 
-  Send,
-  Disc3
-} from 'lucide-react';
+import { Check, Copy, Download, Share2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName } from '../utils/formatters';
+import { Sheet } from './ui/Sheet';
+import { btn } from './ui/controls';
 
 export const StoryShareModal: React.FC = () => {
   const { activeModal, closeModal, nowPlaying, activeVenue, user, showToast } = useApp();
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  if (activeModal !== 'story_share' || !nowPlaying) {
-    return null;
-  }
+  const isOpen = activeModal === 'story_share' && Boolean(nowPlaying);
 
   const venueName = activeVenue?.name || activeVenue?.venue_name || 'Muzikors Mekânı';
   const venueId = activeVenue?.id || (activeVenue as any)?.kafe_id;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://muzikors.com.tr';
-  const shareUrl = venueId 
-    ? `${baseUrl}/?v=${venueId}` 
+  const shareUrl = venueId
+    ? `${baseUrl}/?v=${venueId}`
     : (typeof window !== 'undefined' ? window.location.href : 'https://muzikors.com.tr');
 
-  const trackTitle = nowPlaying.title || 'Bilinmeyen Şarkı';
-  const trackArtist = nowPlaying.artist || 'Bilinmeyen Sanatçı';
-  const albumSrc = nowPlaying.albumCover || nowPlaying.coverUrl || nowPlaying.album_art || '/logo.png';
+  const trackTitle = nowPlaying?.title || 'Bilinmeyen Şarkı';
+  const trackArtist = nowPlaying?.artist || 'Bilinmeyen Sanatçı';
+  const albumSrc = nowPlaying?.albumCover || nowPlaying?.coverUrl || nowPlaying?.album_art || '/logo.png';
 
-  const isMySong = user && nowPlaying.requestedByUserId === user.id;
-  const requesterText = isMySong 
-    ? 'Benim Seçimim' 
-    : nowPlaying.requestedBy 
+  const isMySong = Boolean(user && nowPlaying && nowPlaying.requestedByUserId === user.id);
+  const requesterText = isMySong
+    ? 'Benim Seçimim'
+    : nowPlaying?.requestedBy
       ? `İsteyen: ${formatUserDisplayName(null, nowPlaying.requestedBy.replace(' VIP', ''))}`
       : 'Mekân Seçimi';
 
@@ -304,7 +295,6 @@ export const StoryShareModal: React.FC = () => {
   // 1. Download HD Story PNG
   const handleDownload = async () => {
     setIsGenerating(true);
-    showToast('HD Hikaye kartı hazırlanıyor...');
     try {
       const dataUrl = await generateStoryCanvas();
       if (!dataUrl) {
@@ -323,18 +313,11 @@ export const StoryShareModal: React.FC = () => {
     }
   };
 
-  // 2. Instagram Stories
+  // 2. Hikayede paylaş: önce telefonun paylaşım menüsü (görselle), olmazsa indir + Instagram
   const handleInstagramShare = async () => {
     setIsGenerating(true);
-    showToast('Instagram için hikaye kartı oluşturuluyor...');
     try {
       const dataUrl = await generateStoryCanvas();
-      if (dataUrl) {
-        const link = document.createElement('a');
-        link.download = `muzikors-story-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.click();
-      }
 
       if (navigator.share && dataUrl) {
         try {
@@ -345,14 +328,22 @@ export const StoryShareModal: React.FC = () => {
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
               title: `${trackTitle} - ${trackArtist}`,
-              text: shareCaption,
+              text: `${shareCaption} ${shareUrl}`,
               files: [file],
             });
             return;
           }
-        } catch (err) {
-          // fallback
+        } catch (err: any) {
+          // Kullanıcı paylaşım menüsünü kapattıysa başka bir şey yapılmaz
+          if (err?.name === 'AbortError') return;
         }
+      }
+
+      if (dataUrl) {
+        const link = document.createElement('a');
+        link.download = `muzikors-story-${Date.now()}.png`;
+        link.href = dataUrl;
+        link.click();
       }
 
       await navigator.clipboard.writeText(`${shareCaption} ${shareUrl}`);
@@ -385,49 +376,6 @@ export const StoryShareModal: React.FC = () => {
     window.open(twitterUrl, '_blank');
   };
 
-  // 5. TikTok Share
-  const handleTikTokShare = async () => {
-    setIsGenerating(true);
-    showToast('TikTok için hikaye kartı indiriliyor...');
-    try {
-      const dataUrl = await generateStoryCanvas();
-      if (dataUrl) {
-        const link = document.createElement('a');
-        link.download = `muzikors-tiktok-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.click();
-      }
-      await navigator.clipboard.writeText(`${shareCaption} ${shareUrl}`);
-      showToast('Görsel indirildi! TikTok açılıyor...');
-      setTimeout(() => {
-        window.location.href = 'snssdk1233://';
-        setTimeout(() => {
-          window.open('https://www.tiktok.com', '_blank');
-        }, 1200);
-      }, 600);
-    } catch (e) {
-      showToast('TikTok paylaşımı başlatılamadı.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // 6. Generic System Share
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${trackTitle} - ${venueName}`,
-          text: shareCaption,
-          url: shareUrl,
-        });
-      } catch (e) {
-        // user cancelled
-      }
-    } else {
-      handleCopyLink();
-    }
-  };
 
   // 7. Copy Link
   const handleCopyLink = async () => {
@@ -441,259 +389,103 @@ export const StoryShareModal: React.FC = () => {
     }
   };
 
+  const secondary = [
+    {
+      label: 'WhatsApp',
+      onClick: handleWhatsAppShare,
+      icon: (
+        <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c.01 4.54-3.68 8.23-8.23 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.22-.08-.39-.12-.55.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.55-1.34-.76-1.83-.2-.48-.4-.42-.55-.42h-.47c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.39 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z" />
+        </svg>
+      ),
+    },
+    {
+      label: 'X',
+      onClick: handleTwitterShare,
+      icon: (
+        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
+    },
+    {
+      label: copied ? 'Kopyalandı' : 'Kopyala',
+      onClick: handleCopyLink,
+      icon: copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />,
+    },
+    {
+      label: 'İndir',
+      onClick: handleDownload,
+      icon: <Download className="w-5 h-5" />,
+    },
+  ];
+
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-lg overflow-y-auto">
-        {/* Backdrop */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={closeModal}
-          className="fixed inset-0"
-        />
-
-        {/* Modal Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 8 }}
-          transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 w-full max-w-2xl bg-[var(--theme-card)] border border-white/10 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:flex-row my-auto"
-        >
-          {/* Close Button */}
-          <button
-            onClick={closeModal}
-            aria-label="Kapat"
-            className="absolute top-3.5 right-3.5 z-30 w-9 h-9 rounded-full bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] flex items-center justify-center border border-white/10 active:scale-95 transition-all cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {/* LEFT: 9:16 Story Card Live Preview */}
-          <div className="w-full md:w-[280px] shrink-0 p-4 sm:p-5 flex flex-col items-center justify-center bg-[var(--theme-bg)]/80 border-b md:border-b-0 md:border-r border-white/[0.08] relative overflow-hidden">
-            
-            {/* Ambient Lighting */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center blur-3xl opacity-20 pointer-events-none scale-150"
-              style={{ backgroundImage: `url(${albumSrc})` }}
+    <Sheet
+      open={isOpen}
+      onClose={closeModal}
+      title={isMySong ? 'Şarkını paylaş' : 'Şarkıyı paylaş'}
+      subtitle={venueName}
+      width="lg"
+    >
+      <div className="landscape:grid landscape:grid-cols-[220px_1fr] landscape:gap-6 landscape:items-center pb-2">
+        {/* Hikaye kartı önizlemesi (oluşturulan görselle aynı düzen) */}
+        <div className="relative mx-auto w-[180px] landscape:w-[200px] aspect-[9/16] rounded-[22px] overflow-hidden bg-[#09080E] border border-white/10 p-3.5 flex flex-col justify-between text-left shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-0 bg-cover bg-center blur-2xl opacity-25 scale-150 pointer-events-none" style={{ backgroundImage: `url(${albumSrc})` }} />
+          <div className="relative flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <img src="/logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
+              <span className="text-[9px] font-bold tracking-wider">MUZIKORS</span>
+            </span>
+            <span className="flex items-center gap-1 text-[8px] font-bold text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              CANLI
+            </span>
+          </div>
+          <div className="relative">
+            <img
+              src={albumSrc}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/logo.png';
+              }}
+              className="w-[110px] h-[110px] mx-auto rounded-2xl object-cover border border-white/10 shadow-xl"
             />
-
-            {/* The 9:16 Card Shell (Exact 1:1 Parity with Generated HD Image) */}
-            <div className="relative z-10 w-full max-w-[230px] aspect-[9/16] rounded-2xl bg-[#09080E] border border-white/15 p-3 flex flex-col justify-between shadow-2xl overflow-hidden text-left">
-              
-              {/* Subtle Concentric Rings */}
-              <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full border border-amber-500/[0.07] pointer-events-none" />
-              <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full border border-amber-500/[0.04] pointer-events-none" />
-
-              {/* Story Header: Real Logo + Brand Wordmark & Clean Live Status */}
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-1.5">
-                  <img src="/logo.png" alt="Muzikors" className="w-4 h-4 rounded-md object-contain" />
-                  <span className="text-[10px] font-black text-white tracking-wider">MUZIKORS</span>
-                </div>
-                <div className="flex items-center gap-1 text-[8px] font-extrabold text-emerald-400 tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>CANLI</span>
-                </div>
-              </div>
-
-              {/* Venue Tag */}
-              <div className="flex items-center gap-2 p-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-                <div className="w-6 h-6 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                  <Disc3 className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-white truncate leading-tight">{venueName}</p>
-                  <p className="text-[8px] text-[#E6C88B] font-medium">Mekân Canlı Jukebox</p>
-                </div>
-              </div>
-
-              {/* Central Artwork */}
-              <div className="relative w-28 h-28 mx-auto rounded-2xl overflow-hidden border border-white/15 shadow-xl my-1">
-                <img 
-                  src={albumSrc} 
-                  alt={trackTitle}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/logo.png';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-              </div>
-
-              {/* Symmetrical Equalizer Waveform */}
-              <div className="flex items-center justify-center gap-[2.5px] h-3.5 my-0.5" aria-hidden="true">
-                {[5, 7, 10, 12, 14, 13, 11, 8, 6, 8, 11, 13, 14, 12, 10, 7, 5].map((h, idx) => (
-                  <span 
-                    key={idx} 
-                    className="w-[2px] bg-gradient-to-t from-amber-600 to-amber-400 rounded-full"
-                    style={{ height: `${h}px` }}
-                  />
-                ))}
-              </div>
-
-              {/* Track Info */}
-              <div className="text-center w-full min-w-0">
-                <h4 className="text-[11px] font-black text-white truncate leading-tight">{trackTitle}</h4>
-                <p className="text-[9px] font-medium text-[#E6C88B] truncate mt-0.5">{trackArtist}</p>
-                <div className={`inline-block px-2 py-0.5 mt-1 rounded-full text-[7.5px] font-medium border ${
-                  isMySong 
-                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-200' 
-                    : 'bg-white/[0.05] border-white/10 text-neutral-300'
-                }`}>
-                  {requesterText}
-                </div>
-              </div>
-
-              {/* Bottom Invitation Card (1:1 with Canvas) */}
-              <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-1.5 text-center mt-1">
-                <p className="text-[8.5px] font-black text-white leading-tight">Sıradaki Parçayı Sen Seç</p>
-                <p className="text-[7px] text-neutral-400 mt-0.5 leading-tight">Masanızdaki QR kodu okutun veya adrese gidin:</p>
-                <p className="text-[8px] font-extrabold text-amber-400 tracking-tight mt-0.5">
-                  {venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr'}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-[var(--theme-text-muted)] mt-2 font-medium">9:16 Hikaye Önizlemesi</p>
+            <p className="text-[11px] font-bold text-center truncate mt-3">{trackTitle}</p>
+            <p className="text-[9px] text-white/60 text-center truncate mt-0.5">{trackArtist}</p>
+            <p className="text-[8px] text-white/45 text-center mt-1.5">{requesterText}</p>
           </div>
-
-          {/* RIGHT: Multi-Platform Sharing Hub */}
-          <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between space-y-4 bg-[var(--theme-card)]">
-            
-            {/* Clean, Non-Kicker Header */}
-            <div>
-              <h3 className="text-xl font-black text-[var(--theme-text)] tracking-tight">
-                Şarkını Hikayende Paylaş
-              </h3>
-              <p className="text-xs text-[var(--theme-text-muted)] mt-1 leading-relaxed">
-                Şu an <span className="text-[var(--theme-text)] font-semibold">{venueName}</span> salonunda çalan parçanı tek tıkla hikayene ekle, masadaki herkesi sıraya davet et.
-              </p>
-            </div>
-
-            {/* Platform Grid (Clean Themed Cards with Real Vector Glyphs) */}
-            <div className="grid grid-cols-2 gap-2.5">
-              
-              {/* Instagram */}
-              <button
-                type="button"
-                onClick={handleInstagramShare}
-                disabled={isGenerating}
-                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 border border-[#DD2A7B]/30 flex items-center justify-center text-[#E1306C] shrink-0 group-hover:scale-105 transition-transform">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">Instagram</p>
-                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Hikaye Kartı</p>
-                </div>
-              </button>
-
-              {/* WhatsApp */}
-              <button
-                type="button"
-                onClick={handleWhatsAppShare}
-                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center text-[#25D366] shrink-0 group-hover:scale-105 transition-transform">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 20.15C10.57 20.15 9.12 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.98 3.8 13.47 3.8 11.91C3.8 7.37 7.5 3.67 12.05 3.67C14.25 3.67 16.32 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.59 20.15 12.05 20.15ZM16.57 14.39C16.32 14.26 15.1 13.66 14.87 13.58C14.65 13.5 14.48 13.46 14.32 13.71C14.15 13.96 13.68 14.51 13.53 14.68C13.39 14.85 13.24 14.87 12.99 14.75C12.74 14.62 11.94 14.36 10.99 13.52C10.25 12.86 9.75 12.04 9.61 11.79C9.46 11.54 9.59 11.41 9.72 11.28C9.83 11.17 9.97 10.99 10.1 10.84C10.22 10.69 10.26 10.59 10.34 10.42C10.43 10.25 10.39 10.11 10.32 9.98C10.26 9.86 9.77 8.65 9.56 8.16C9.37 7.68 9.17 7.74 9.02 7.73C8.88 7.73 8.71 7.72 8.54 7.72C8.37 7.72 8.1 7.78 7.87 8.03C7.65 8.28 7.02 8.87 7.02 10.07C7.02 11.27 7.89 12.43 8.02 12.59C8.14 12.76 9.74 15.23 12.2 16.29C12.78 16.54 13.24 16.69 13.59 16.81C14.18 16.99 14.71 16.97 15.14 16.9C15.61 16.83 16.59 16.31 16.79 15.72C17 15.13 17 14.63 16.93 14.52C16.87 14.41 16.72 14.35 16.57 14.39Z"/>
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">WhatsApp</p>
-                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Gruba Gönder</p>
-                </div>
-              </button>
-
-              {/* TikTok */}
-              <button
-                type="button"
-                onClick={handleTikTokShare}
-                disabled={isGenerating}
-                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-[var(--theme-text)] shrink-0 group-hover:scale-105 transition-transform">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.91-1.46c-.63-.64-1.03-1.48-1.13-2.38z"/>
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">TikTok</p>
-                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Video / Story</p>
-                </div>
-              </button>
-
-              {/* X (Twitter) */}
-              <button
-                type="button"
-                onClick={handleTwitterShare}
-                className="p-3 rounded-2xl bg-[var(--theme-card-alt)]/60 hover:bg-[var(--theme-card-alt)] border border-white/[0.08] hover:border-white/20 active:scale-[0.98] transition-all flex items-center gap-3 text-left group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center text-[var(--theme-text)] shrink-0 group-hover:scale-105 transition-transform">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-[var(--theme-text)] truncate">X / Twitter</p>
-                  <p className="text-[10px] text-[var(--theme-text-muted)] truncate">Tweet Paylaş</p>
-                </div>
-              </button>
-
-            </div>
-
-            {/* Action Row - UNIFIED SLEEK CARDS */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-white/[0.08]">
-              
-              {/* Primary CTA: Download HD Story (Unified with adjacent buttons) */}
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={isGenerating}
-                className="flex-1 py-3 px-4 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
-              >
-                <Download className="w-4 h-4 text-[var(--theme-primary)]" />
-                <span>{isGenerating ? 'Oluşturuluyor...' : 'HD Görseli İndir'}</span>
-              </button>
-
-              {/* Native System Share */}
-              <button
-                type="button"
-                onClick={handleNativeShare}
-                className="py-3 px-4 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text)] text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Send className="w-4 h-4 text-[var(--theme-primary)]" />
-                <span>Arkadaşlarına Gönder</span>
-              </button>
-
-              {/* Copy Link */}
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="py-3 px-3.5 rounded-xl bg-[var(--theme-card-alt)]/80 hover:bg-[var(--theme-card-alt)] active:bg-white/[0.12] border border-white/10 text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] text-xs font-medium active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                title="Bağlantıyı Kopyala"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                <span className="hidden sm:inline">{copied ? 'Kopyalandı' : 'Kopyala'}</span>
-              </button>
-
-            </div>
-
-            {/* Bottom Safe Note */}
-            <p className="text-[10px] text-[var(--theme-text-muted)] text-center">
-              Mekân ve çalan parçaya özel 1080x1920 HD dikey hikaye kartı olarak üretilir.
-            </p>
+          <div className="relative rounded-xl bg-white/[0.05] px-2 py-1.5 text-center">
+            <p className="text-[8px] font-bold">Sıradaki parçayı sen seç</p>
+            <p className="text-[7px] text-[#F59E0B] font-semibold mt-0.5 truncate">{venueId ? `muzikors.com.tr/?v=${venueId}` : 'muzikors.com.tr'}</p>
           </div>
-        </motion.div>
+        </div>
+
+        <div className="mt-6 landscape:mt-0 space-y-4">
+          <p className="text-[14px] text-white/60 leading-relaxed text-center landscape:text-left">
+            Çalan şarkıyı hikayende paylaş, masadakileri de sıraya davet et.
+          </p>
+          <button type="button" onClick={handleInstagramShare} disabled={isGenerating} className={`${btn.primary} w-full`}>
+            <Share2 className="w-4 h-4" />
+            <span>{isGenerating ? 'Hazırlanıyor…' : 'Hikayende paylaş'}</span>
+          </button>
+          <div className="grid grid-cols-4 gap-2">
+            {secondary.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                disabled={isGenerating}
+                className="flex flex-col items-center gap-1.5 py-1 active:scale-95 transition-transform duration-150 disabled:opacity-50"
+              >
+                <span className="w-12 h-12 rounded-full bg-white/[0.07] grid place-items-center text-white/85">{action.icon}</span>
+                <span className="text-[11px] text-white/60">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-    </AnimatePresence>
+    </Sheet>
   );
 };

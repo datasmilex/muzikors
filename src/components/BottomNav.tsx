@@ -1,102 +1,99 @@
 'use client';
 
 import React from 'react';
-import { Store, Map, Plus, Trophy, User as UserIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Compass, Menu, Plus, Store, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { getUserDailySongRights } from '../lib/timeHelpers';
+import { ModalType } from '../types';
+import { getUserDailySongRights, isClaimedTodayTR } from '../lib/timeHelpers';
+import { SPRING_SNAPPY } from '../lib/motion';
 
+type NavItem = { modal: ModalType; label: string; icon: React.ElementType; badge?: boolean };
+
+// Başparmakla ulaşılan alt çubuk: ortada "Şarkı iste", menü sağ altta.
 export const BottomNav: React.FC = () => {
-  const { openModal, isVenueBound, activeModal, user } = useApp();
-  const songRights = getUserDailySongRights(user);
-  const remainingSongs = songRights.remainingSongs;
-  const maxDailySongs = songRights.baseMaxDailySongs;
+  const { openModal, isVenueBound, isVenueActive, activeModal, user, showToast } = useApp();
+  const rights = getUserDailySongRights(user);
+  const rewardWaiting = Boolean(user) && !isClaimedTodayTR(user?.lastDailyClaim || null);
+
+  const leftItems: NavItem[] = [
+    { modal: 'venue_info', label: 'Mekân', icon: Store },
+    { modal: 'leaderboard', label: 'Sıralama', icon: Trophy },
+  ];
+  const rightItems: NavItem[] = [
+    { modal: 'map', label: 'Keşfet', icon: Compass },
+    { modal: 'drawer', label: 'Menü', icon: Menu, badge: rewardWaiting },
+  ];
+
+  const handleRequest = () => {
+    if (!isVenueBound) {
+      openModal('qr');
+      return;
+    }
+    if (!isVenueActive) {
+      showToast('Bu mekân şu an istek almıyor.');
+      return;
+    }
+    openModal('search');
+  };
+
+  const renderItem = (item: NavItem) => {
+    const active = activeModal === item.modal;
+    const Icon = item.icon;
+    return (
+      <button
+        key={item.modal}
+        type="button"
+        onClick={() => openModal(item.modal)}
+        aria-label={item.label}
+        aria-current={active ? 'page' : undefined}
+        className={`relative h-full min-w-0 flex flex-col items-center justify-center gap-1 rounded-2xl active:scale-95 transition-[transform,color] duration-150 ${
+          active ? 'text-white' : 'text-white/50 hover:text-white/80'
+        }`}
+      >
+        {active && (
+          <motion.span
+            layoutId="nav-active"
+            transition={SPRING_SNAPPY}
+            className="absolute inset-x-1 inset-y-1.5 rounded-2xl bg-white/[0.08]"
+          />
+        )}
+        <span className="relative">
+          <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.25 : 1.9} />
+          {item.badge && (
+            <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-[var(--theme-primary)] ring-2 ring-[var(--theme-card)]" />
+          )}
+        </span>
+        <span className="relative text-[11px] font-semibold">{item.label}</span>
+      </button>
+    );
+  };
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md z-50 pointer-events-none">
-      {/* Floating Island Container */}
-      <nav 
-        aria-label="Ana Menü Gezinme Çubuğu"
-        className="relative flex items-center justify-between bg-[var(--theme-card)]/95 backdrop-blur-2xl border border-white/[0.12] rounded-[2rem] px-3 sm:px-4 py-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.95)] pointer-events-auto transition-all duration-300"
-      >
-        {/* Kafe Bilgileri */}
-        <button
-          onClick={() => openModal('venue_info')}
-          disabled={!isVenueBound}
-          aria-label="Mekan Bilgileri"
-          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
-            activeModal === 'venue_info' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
-          } ${!isVenueBound ? 'opacity-30 cursor-not-allowed' : 'active:scale-95'}`}
-        >
-          <Store className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'venue_info' ? 2.5 : 2} />
-          <span className="text-[11px] font-bold tracking-tight">Mekan</span>
-          {activeModal === 'venue_info' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-        </button>
+    <nav aria-label="Ana menü" className="fixed nav-safe-bottom left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-[420px]">
+      <div className="grid grid-cols-5 items-stretch h-[68px] px-1 rounded-[24px] bg-[rgba(var(--theme-card-rgb),0.92)] backdrop-blur-xl border border-white/[0.07] shadow-[0_14px_36px_rgba(0,0,0,0.5)]">
+        {leftItems.map(renderItem)}
 
-        {/* Harita */}
-        <button
-          onClick={() => openModal('map')}
-          aria-label="Harita"
-          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
-            activeModal === 'map' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
-          } active:scale-95`}
-        >
-          <Map className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'map' ? 2.5 : 2} />
-          <span className="text-[11px] font-bold tracking-tight">Harita</span>
-          {activeModal === 'map' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-        </button>
-
-        {/* Center Primary Action Button: ŞARKI İSTE (FAB) */}
-        <div className="relative -top-5 flex flex-col items-center mx-1">
+        <div className="flex flex-col items-center justify-end pb-2">
           <button
             id="tour-add-song"
-            onClick={() => openModal('search')}
-            disabled={!isVenueBound}
-            aria-label="Şarkı İste"
-            className={`group relative flex items-center justify-center w-14 h-14 rounded-full theme-fab-gradient theme-glow-shadow border-4 border-[var(--theme-bg)] z-50 active:scale-95 transition-all duration-200 ${
-              !isVenueBound ? 'opacity-40 cursor-not-allowed grayscale' : 'hover:scale-105'
-            }`}
+            type="button"
+            onClick={handleRequest}
+            aria-label="Şarkı iste"
+            className="relative -mt-9 w-[58px] h-[58px] rounded-full bg-[var(--theme-primary)] text-black grid place-items-center shadow-[0_10px_24px_rgba(0,0,0,0.45)] ring-[5px] ring-[var(--theme-bg)] active:scale-90 transition-transform duration-150"
           >
-            <Plus className="w-7 h-7 text-black stroke-[3] group-hover:rotate-90 transition-transform duration-300" />
-
-            {/* Remaining Song Rights Badge */}
+            <Plus className="w-7 h-7" strokeWidth={2.75} />
             {user && isVenueBound && (
-              <span className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-[var(--theme-bg)] border border-[var(--theme-primary)]/60 text-[9px] font-black text-[var(--theme-primary-light)] shadow-md whitespace-nowrap">
-                {remainingSongs}/{maxDailySongs}
+              <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full bg-[var(--theme-bg)] text-[11px] font-bold text-white grid place-items-center tabular-nums ring-1 ring-white/10">
+                {rights.remainingSongs}
               </span>
             )}
           </button>
-          
-          <span className="text-[10px] font-black text-[var(--theme-primary)] tracking-wider uppercase drop-shadow-md mt-1 transition-colors duration-300">
-            İstek
-          </span>
+          <span className="mt-1 text-[11px] font-semibold text-white/80">Şarkı iste</span>
         </div>
 
-        {/* Sıralamalar */}
-        <button
-          onClick={() => openModal('leaderboard')}
-          aria-label="Liderlik Sıralaması"
-          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
-            activeModal === 'leaderboard' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
-          } active:scale-95`}
-        >
-          <Trophy className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'leaderboard' ? 2.5 : 2} />
-          <span className="text-[11px] font-bold tracking-tight">Sıralama</span>
-          {activeModal === 'leaderboard' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-        </button>
-
-        {/* Profil */}
-        <button
-          onClick={() => openModal(user ? 'profile' : 'login')}
-          aria-label="Profil"
-          className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-1 py-1 rounded-2xl transition-all ${
-            activeModal === 'profile' ? 'text-[var(--theme-primary)]' : 'text-neutral-400 hover:text-neutral-200'
-          } active:scale-95`}
-        >
-          <UserIcon className="w-5 h-5 mb-0.5" strokeWidth={activeModal === 'profile' ? 2.5 : 2} />
-          <span className="text-[11px] font-bold tracking-tight">Profil</span>
-          {activeModal === 'profile' && <span className="w-1 h-1 rounded-full bg-[var(--theme-primary)] mt-0.5" />}
-        </button>
-      </nav>
-    </div>
+        {rightItems.map(renderItem)}
+      </div>
+    </nav>
   );
 };

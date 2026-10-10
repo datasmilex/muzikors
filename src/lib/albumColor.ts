@@ -95,18 +95,22 @@ export function extractDominantColor(src: string): Promise<Rgb | null> {
   });
 }
 
-/** Koyu zemin üzerinde okunabilir kalacak şekilde, tek renkten tüm tema paletini üretir. */
+/**
+ * Koyu zemin üzerinde okunabilir kalacak şekilde, tek renkten tüm tema paletini üretir.
+ * Zeminler neredeyse nötrdür (yalnızca hafif bir renk tonu taşır); kapak rengi asıl
+ * olarak vurgu renginde görünür. Böylece canlı kapaklarda bile ekran göz yormaz.
+ */
 export function paletteFromColor(color: Rgb): LivePalette {
   const [h, s] = rgbToHsl(color);
-  const vivid = clamp(s, 0.55, 0.9);
+  const accent = clamp(s, 0.45, 0.72);
   return {
-    bg: hslToRgb(h, clamp(s, 0.25, 0.5), 0.055),
-    card: hslToRgb(h, clamp(s, 0.2, 0.4), 0.1),
-    cardAlt: hslToRgb(h, clamp(s, 0.18, 0.35), 0.145),
-    primary: hslToRgb(h, vivid, 0.62),
-    primaryLight: hslToRgb(h, clamp(s, 0.45, 0.8), 0.8),
-    primaryDark: hslToRgb(h, vivid, 0.45),
-    text: hslToRgb(h, 0.35, 0.97),
+    bg: hslToRgb(h, clamp(s * 0.35, 0.08, 0.2), 0.05),
+    card: hslToRgb(h, clamp(s * 0.3, 0.06, 0.16), 0.095),
+    cardAlt: hslToRgb(h, clamp(s * 0.28, 0.05, 0.14), 0.135),
+    primary: hslToRgb(h, accent, 0.64),
+    primaryLight: hslToRgb(h, clamp(s, 0.35, 0.6), 0.8),
+    primaryDark: hslToRgb(h, accent, 0.46),
+    text: hslToRgb(h, 0.12, 0.97),
   };
 }
 
@@ -137,7 +141,7 @@ export function applyLivePalette(palette: LivePalette | null) {
   root.setProperty('--theme-primary-rgb', triplet(palette.primary));
   root.setProperty('--theme-primary-light', hex(palette.primaryLight));
   root.setProperty('--theme-primary-dark', hex(palette.primaryDark));
-  root.setProperty('--theme-glow', `rgba(${triplet(palette.primary)}, 0.22)`);
+  root.setProperty('--theme-glow', `rgba(${triplet(palette.primary)}, 0.14)`);
   root.setProperty('--theme-text', hex(palette.text));
   root.setProperty('--theme-text-muted', `rgba(${triplet(palette.text)}, 0.7)`);
 }

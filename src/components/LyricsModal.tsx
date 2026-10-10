@@ -1,258 +1,125 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mic2, Search, ExternalLink, Loader2, Music } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import React, { useEffect, useState } from 'react';
+import { Mic2, Music, Search } from 'lucide-react';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
+import { useApp } from '../context/AppContext';
+import { Sheet } from './ui/Sheet';
+import { EmptyState, btn } from './ui/controls';
+
+const cleanString = (str: string) =>
+  str
+    .replace(/\(feat\..*?\)/gi, '')
+    .replace(/\(with.*?\)/gi, '')
+    .replace(/\[.*?\]/g, '')
+    .replace(/- .*?Remaster.*?/gi, '')
+    .replace(/- .*?Edit.*?/gi, '')
+    .replace(/- .*?Live.*?/gi, '')
+    .trim();
+
+const openExternal = async (url: string) => {
+  if (Capacitor.isNativePlatform()) {
+    await Browser.open({ url });
+  } else {
+    window.open(url, '_blank');
+  }
+};
 
 export const LyricsModal: React.FC = () => {
-  const { activeModal, closeModal, nowPlaying, showToast } = useApp();
+  const { activeModal, closeModal, nowPlaying } = useApp();
   const [lyrics, setLyrics] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInstrumental, setIsInstrumental] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
 
-  const cleanString = (str: string) => {
-    return str
-      .replace(/\(feat\..*?\)/gi, '')
-      .replace(/\(with.*?\)/gi, '')
-      .replace(/\[.*?\]/g, '')
-      .replace(/- .*?Remaster.*?/gi, '')
-      .replace(/- .*?Edit.*?/gi, '')
-      .replace(/- .*?Live.*?/gi, '')
-      .trim();
-  };
+  const isOpen = activeModal === 'lyrics';
 
   useEffect(() => {
-    if (activeModal !== 'lyrics' || !nowPlaying) return;
+    if (!isOpen || !nowPlaying) return;
+    let alive = true;
 
-    let isMounted = true;
-    const fetchLyrics = async () => {
+    const tryFetch = async (track: string, artist: string) => {
+      try {
+        const url = `https://lrclib.net/api/get?track_name=${encodeURIComponent(track)}&artist_name=${encodeURIComponent(artist)}`;
+        const res = await fetch(url);
+        if (res.ok) return await res.json();
+      } catch (e) {
+        console.warn('[LRCLIB fetch error]', e);
+      }
+      return null;
+    };
+
+    (async () => {
       setIsLoading(true);
       setLyrics(null);
       setIsInstrumental(false);
-      setFetchError(false);
 
-      const title = nowPlaying.title;
-      const artist = nowPlaying.artist;
-
-      const tryFetch = async (trackName: string, artistName: string) => {
-        try {
-          const url = `https://lrclib.net/api/get?track_name=${encodeURIComponent(trackName)}&artist_name=${encodeURIComponent(artistName)}`;
-          const res = await fetch(url, { headers: { 'User-Agent': 'Muzikors/1.0 (https://muzikors.com.tr)' } });
-          if (res.ok) {
-            const data = await res.json();
-            return data;
-          }
-        } catch (e) {
-          console.warn('[LRCLIB fetch error]', e);
-        }
-        return null;
-      };
-
-      // 1. Try exact match
+      const { title, artist } = nowPlaying;
       let data = await tryFetch(title, artist);
-
-      // 2. If not found, try cleaned title
       if (!data) {
-        const cleanedTitle = cleanString(title);
-        const cleanedArtist = cleanString(artist);
-        if (cleanedTitle !== title || cleanedArtist !== artist) {
-          data = await tryFetch(cleanedTitle, cleanedArtist);
-        }
+        const t = cleanString(title);
+        const a = cleanString(artist);
+        if (t !== title || a !== artist) data = await tryFetch(t, a);
       }
+      if (!alive) return;
 
-      if (!isMounted) return;
-
-      if (data) {
-        if (data.instrumental) {
-          setIsInstrumental(true);
-        } else if (data.plainLyrics) {
-          setLyrics(data.plainLyrics);
-        } else if (data.syncedLyrics) {
-          // Strip timestamp tags [00:12.34]
-          const plain = data.syncedLyrics
+      if (data?.instrumental) {
+        setIsInstrumental(true);
+      } else if (data?.plainLyrics) {
+        setLyrics(data.plainLyrics);
+      } else if (data?.syncedLyrics) {
+        setLyrics(
+          data.syncedLyrics
             .split('\n')
             .map((line: string) => line.replace(/\[\d+:\d+\.\d+\]/g, '').trim())
             .filter(Boolean)
-            .join('\n');
-          setLyrics(plain);
-        } else {
-          setFetchError(true);
-        }
-      } else {
-        setFetchError(true);
+            .join('\n')
+        );
       }
-
       setIsLoading(false);
-    };
-
-    fetchLyrics();
+    })();
 
     return () => {
-      isMounted = false;
+      alive = false;
     };
-  }, [activeModal, nowPlaying?.title, nowPlaying?.artist]);
+  }, [isOpen, nowPlaying?.title, nowPlaying?.artist]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (activeModal !== 'lyrics') return null;
-
-  const handleOpenSpotify = async () => {
+  const searchGoogle = () => {
     if (!nowPlaying) return;
-    const trackId = (nowPlaying.spotifyUri || nowPlaying.id || '').replace('spotify:track:', '');
-    const spotifyAppUrl = `spotify:track:${trackId}`;
-    const spotifyWebUrl = `https://open.spotify.com/track/${trackId}`;
-
-    showToast('Spotify açılıyor...');
-
-    try {
-      if (Capacitor.isNativePlatform()) {
-        window.location.href = spotifyAppUrl;
-        setTimeout(async () => {
-          await Browser.open({ url: spotifyWebUrl });
-        }, 800);
-      } else {
-        window.open(spotifyWebUrl, '_blank');
-      }
-    } catch (e) {
-      window.open(spotifyWebUrl, '_blank');
-    }
-  };
-
-  const handleSearchGoogle = async () => {
-    if (!nowPlaying) return;
-    const query = `${nowPlaying.artist} ${nowPlaying.title} şarkı sözleri`;
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    
-    if (Capacitor.isNativePlatform()) {
-      await Browser.open({ url: searchUrl });
-    } else {
-      window.open(searchUrl, '_blank');
-    }
+    openExternal(`https://www.google.com/search?q=${encodeURIComponent(`${nowPlaying.artist} ${nowPlaying.title} şarkı sözleri`)}`);
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[120] flex flex-col items-center justify-end sm:justify-center landscape:justify-center landscape:p-2">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ willChange: 'opacity' }}
-          onClick={closeModal}
-          className="absolute inset-0 bg-black/85"
-        />
-
-        {/* Modal Sheet */}
-        <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          style={{ willChange: 'transform' }}
-          className="relative w-full max-w-md landscape:max-w-2xl h-[86vh] landscape:h-[94vh] landscape:max-h-[420px] bg-[var(--theme-card)] sm:rounded-3xl rounded-t-[2.5rem] landscape:rounded-2xl p-5 landscape:p-3.5 z-10 shadow-[0_-20px_60px_rgba(0,0,0,0.95)] flex flex-col border-t sm:border landscape:border border-white/[0.1] overflow-hidden"
-        >
-          {/* Handle */}
-          <div className="flex justify-center pt-0 pb-2 shrink-0">
-            <div className="w-12 h-1 bg-white/20 rounded-full" />
-          </div>
-
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3 pt-1 border-b border-white/[0.08] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center text-[var(--theme-primary)]">
-                <Mic2 className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-sm font-black text-white tracking-tight">
-                  Şarkı Sözleri
-                </h2>
-                <p className="text-[10px] text-neutral-400 font-medium truncate">
-                  {nowPlaying?.title} • {nowPlaying?.artist}
-                </p>
-              </div>
-            </div>
-            
-            <button
-              onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-400 hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Content Area */}
-          <div className="flex-1 overflow-y-auto py-4 px-1 custom-scrollbar space-y-3">
-            {isLoading ? (
-              <div className="h-full flex flex-col items-center justify-center space-y-3 py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-[var(--theme-primary)]" />
-                <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Sözler aranıyor...</span>
-              </div>
-            ) : isInstrumental ? (
-              <div className="text-center py-16 space-y-2.5">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/25 flex items-center justify-center mx-auto text-[var(--theme-primary)]">
-                  <Music className="w-6 h-6" />
-                </div>
-                <h3 className="text-sm font-bold text-white">Enstrümantal Eser</h3>
-                <p className="text-xs text-neutral-400 max-w-xs mx-auto">
-                  Bu parça enstrümantal olarak işaretlenmiş, söz bulunmuyor.
-                </p>
-              </div>
-            ) : lyrics ? (
-              <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-[var(--theme-card-alt)] border border-white/[0.06]">
-                  <pre className="text-xs font-medium text-neutral-200 leading-relaxed whitespace-pre-wrap font-sans text-center tracking-wide">
-                    {lyrics}
-                  </pre>
-                </div>
-                <p className="text-[9px] text-center text-neutral-500">
-                  Şarkı sözleri LRCLIB açık veri tabanından sağlanmaktadır.
-                </p>
-              </div>
-            ) : (
-              <div className="text-center py-12 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-neutral-400">
-                  <Search className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white mb-0.5">Sözler Bulunamadı</h3>
-                  <p className="text-xs text-neutral-400 max-w-xs mx-auto">
-                    Bu şarkının sözleri otomatik veritabanında bulunamadı.
-                  </p>
-                </div>
-                <button
-                  onClick={handleSearchGoogle}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/30 text-amber-300 font-bold text-xs active:scale-95 transition-all shadow-sm"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  Google&apos;da Ara
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Footer Quick Actions */}
-          <div className="pt-3 border-t border-white/[0.08] flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleOpenSpotify}
-              className="flex-1 py-3 px-4 rounded-xl bg-[#1DB954]/15 hover:bg-[#1DB954]/25 border border-[#1DB954]/30 text-[#1DB954] font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Spotify&apos;da Aç</span>
-            </button>
-            <button
-              onClick={handleSearchGoogle}
-              className="py-3 px-4 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-neutral-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-              title="Google'da Ara"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+    <Sheet
+      open={isOpen && Boolean(nowPlaying)}
+      onClose={closeModal}
+      title={nowPlaying?.title || 'Şarkı sözleri'}
+      subtitle={nowPlaying?.artist}
+      height="tall"
+      width="md"
+      footer={
+        <button type="button" onClick={searchGoogle} className={`${btn.secondary} w-full`}>
+          <Search className="w-4 h-4 text-white/60" />
+          <span>Google&apos;da ara</span>
+        </button>
+      }
+    >
+      {isLoading ? (
+        <div className="space-y-3 pt-2" aria-label="Sözler yükleniyor">
+          {[70, 55, 80, 45, 65, 50, 75, 40].map((w, i) => (
+            <div key={i} className="h-4 rounded-full bg-white/[0.06] animate-pulse mx-auto" style={{ width: `${w}%` }} />
+          ))}
+        </div>
+      ) : isInstrumental ? (
+        <EmptyState icon={<Music className="w-6 h-6" />} title="Enstrümantal parça" text="Bu şarkının sözü yok." />
+      ) : lyrics ? (
+        <div className="pb-4">
+          <p className="whitespace-pre-wrap text-center text-[17px] leading-[1.75] font-medium text-white/85">{lyrics}</p>
+          <p className="text-[11px] text-center text-white/30 mt-6">Sözler LRCLIB açık veritabanından</p>
+        </div>
+      ) : (
+        <EmptyState icon={<Mic2 className="w-6 h-6" />} title="Sözler bulunamadı" text="Bu şarkının sözleri veritabanında yok. Google'da aramayı deneyebilirsin." />
+      )}
+    </Sheet>
   );
 };

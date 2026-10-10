@@ -147,10 +147,8 @@ export type ModalType =
   | 'premium'
   | 'venue_info'
   | 'leaderboard'
-  | 'rewarded_ad'
   | 'lyrics'
   | 'menu'
-  | 'venue_owner'
   | 'story_share';
 
 export interface CooldownState {

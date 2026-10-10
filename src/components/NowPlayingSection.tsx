@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Disc, Disc3, User, Volume2, Store, ExternalLink, Mic2, Share2, Search } from 'lucide-react';
+import { Disc, Disc3, User, Pause, Store, Mic2, Share2, Search } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatUserDisplayName, isVenueOrBackgroundRequester, isBackgroundMusicRequester } from '../utils/formatters';
 import { getUserDailySongRights } from '../lib/timeHelpers';
@@ -13,7 +13,7 @@ import { Capacitor } from '@capacitor/core';
 const DEFAULT_BG_TITLE = 'Mekan Fon Müziği';
 
 export const NowPlayingSection: React.FC = () => {
-  const { nowPlaying, audioProgress, isPlayingAudio, openProtectedModal, openModal, activeVenue, user, openProfile, showToast } = useApp();
+  const { nowPlaying, queue, audioProgress, isPlayingAudio, openModal, activeVenue, user, openProfile, showToast } = useApp();
   const reduceMotion = useReducedMotion();
 
   // "Senin şarkın çalıyor" kutlaması: kullanıcının şarkısı çalmaya başladığı an bir kez
@@ -64,22 +64,15 @@ export const NowPlayingSection: React.FC = () => {
   // If venue playback is paused by cafe admin
   if (isPaused) {
     return (
-      <div className="px-4 py-3">
-        <div className="rounded-3xl p-6 border border-[var(--theme-primary)]/30 bg-[var(--theme-card)]/90 backdrop-blur-xl relative overflow-hidden shadow-2xl text-center flex flex-col items-center justify-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 flex items-center justify-center text-[var(--theme-primary)] shadow-lg">
-            <Volume2 className="w-7 h-7" />
+      <div className="px-4 pt-2">
+        <div className="rounded-[28px] px-6 py-9 bg-[var(--theme-card)] text-center flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-white/[0.06] grid place-items-center text-white/70 mb-4">
+            <Pause className="w-6 h-6" />
           </div>
-          <div>
-            <span className="px-3 py-1 rounded-full bg-[var(--theme-primary)]/15 border border-[var(--theme-primary)]/30 text-[var(--theme-primary-light)] text-[10px] font-black uppercase tracking-wider">
-              Canlı Yayın Duraklatıldı
-            </span>
-            <h3 className="text-base font-bold text-white mt-2">
-              Müzik Yayıncı Tarafından Durduruldu
-            </h3>
-            <p className="text-xs text-neutral-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
-              Mekan yöneticisi yayını geçici olarak duraklattı. Akış başlatıldığında şarkınız çalmaya devam edecektir.
-            </p>
-          </div>
+          <h3 className="text-[17px] font-bold">Müzik kısa bir mola verdi</h3>
+          <p className="text-[13px] text-white/55 mt-1.5 max-w-[270px] leading-relaxed">
+            Mekân yayını geçici olarak durdurdu. Yayın başlayınca sıradaki şarkılar kaldığı yerden devam eder.
+          </p>
         </div>
       </div>
     );
@@ -94,28 +87,32 @@ export const NowPlayingSection: React.FC = () => {
   // Boş durum: sıraya ilk şarkıyı eklemeye davet
   if (!nowPlaying || !hasVisibleTrack) {
     return (
-      <div className="px-4 py-3">
-        <div className="rounded-3xl px-6 py-8 border border-[var(--theme-primary)]/15 bg-[var(--theme-card)] relative overflow-hidden text-center flex flex-col items-center">
+      <div className="px-4 pt-2">
+        <div className="rounded-[28px] px-6 py-9 bg-[var(--theme-card)] text-center flex flex-col items-center">
           <div className="relative w-24 h-24 mb-5" aria-hidden="true">
-            <span className="ring-out absolute inset-0 rounded-full border-2 border-[var(--theme-primary)]/50" />
-            <span className="ring-out-delayed absolute inset-0 rounded-full border-2 border-[var(--theme-primary)]/50" />
-            <div className="relative w-24 h-24 rounded-full bg-[var(--theme-primary)]/12 border border-[var(--theme-primary)]/30 flex items-center justify-center">
+            <span className="ring-out absolute inset-0 rounded-full border border-[var(--theme-primary)]/40" />
+            <span className="ring-out-delayed absolute inset-0 rounded-full border border-[var(--theme-primary)]/40" />
+            <div className="relative w-24 h-24 rounded-full bg-white/[0.05] grid place-items-center">
               <Disc3 className="spin-slow w-11 h-11 text-[var(--theme-primary)]" strokeWidth={1.5} />
             </div>
           </div>
-          <h3 className="text-lg font-black text-white tracking-tight">Sıranın ilk şarkısını sen seç</h3>
-          <p className="text-xs text-neutral-300 mt-1.5 max-w-[260px] leading-relaxed">
-            Seçtiğin şarkı mekânın hoparlörlerinden herkese çalar.
+          <h3 className="text-[19px] font-bold tracking-tight">
+            {queue.length > 0 ? 'Müzik birazdan başlıyor' : 'Sıranın ilk şarkısını sen seç'}
+          </h3>
+          <p className="text-[13px] text-white/55 mt-1.5 max-w-[260px] leading-relaxed">
+            {queue.length > 0
+              ? `Sırada ${queue.length} şarkı var. Sen de ekle, sıra sana gelsin.`
+              : 'Seçtiğin şarkı mekânın hoparlörlerinden herkese çalar.'}
           </p>
           <button
-            onClick={() => openProtectedModal('search', 'Şarkı eklemek için lütfen Google veya Spotify ile giriş yapın')}
-            className="mt-5 min-h-[48px] py-3 px-6 rounded-2xl bg-[var(--theme-primary)] hover:opacity-90 text-black font-black text-sm shadow-[0_10px_30px_-8px_var(--theme-glow)] active:scale-95 transition-all flex items-center gap-2"
+            onClick={() => openModal('search')}
+            className="mt-6 min-h-[48px] px-6 rounded-2xl bg-[var(--theme-primary)] text-black font-bold text-[15px] active:scale-[0.97] transition-transform duration-150 flex items-center gap-2"
           >
             <Search className="w-4 h-4" strokeWidth={2.5} />
             <span>Şarkı ara</span>
             {user && (
-              <span className="px-2 py-0.5 rounded-full bg-black/15 text-black text-[10px] font-black">
-                {songRights.display}
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-black/15 text-[11px] font-bold tabular-nums">
+                {songRights.remainingSongs} hak
               </span>
             )}
           </button>
@@ -134,18 +131,18 @@ export const NowPlayingSection: React.FC = () => {
       {/* Kapaktan taşan renk halesi */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 -top-6 h-[380px] bg-cover bg-center blur-3xl opacity-40 pointer-events-none scale-125 transition-[background-image,opacity] duration-1000 [mask-image:radial-gradient(ellipse_at_center,black_15%,transparent_65%)]"
+        className="absolute inset-x-0 -top-6 h-[380px] bg-cover bg-center blur-3xl opacity-25 pointer-events-none scale-125 transition-[background-image,opacity] duration-1000 [mask-image:radial-gradient(ellipse_at_center,black_15%,transparent_65%)]"
         style={{ backgroundImage: albumSrc ? `url(${albumSrc})` : undefined }}
       />
 
       {/* Main Elevated Player Card */}
-      <div className="relative z-10 w-full rounded-3xl bg-[var(--theme-card)]/75 backdrop-blur-xl border border-[var(--theme-primary)]/15 p-5 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.85)] flex flex-col items-center overflow-hidden">
+      <div className="relative z-10 w-full rounded-[28px] bg-[rgba(var(--theme-card-rgb),0.78)] backdrop-blur-xl border border-white/[0.06] p-5 shadow-[0_20px_50px_-16px_rgba(0,0,0,0.7)] flex flex-col items-center overflow-hidden">
 
         {/* Top Status Header */}
         <div className="w-full flex items-center justify-between mb-4">
           {!isMusicPlaying ? (
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-amber-300 tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-amber-300" />
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-white/60 tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-white/50" />
               <span>Duraklatıldı</span>
             </div>
           ) : isMyTrack ? (
@@ -176,7 +173,7 @@ export const NowPlayingSection: React.FC = () => {
         <div className="relative w-56 h-56 sm:w-60 sm:h-60 mb-5 shrink-0">
           <div
             aria-hidden="true"
-            className="absolute inset-3 rounded-3xl bg-[var(--theme-primary)] opacity-40 blur-2xl transition-colors duration-1000"
+            className="absolute inset-4 rounded-3xl bg-[var(--theme-primary)] opacity-25 blur-2xl transition-colors duration-1000"
           />
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
@@ -188,7 +185,7 @@ export const NowPlayingSection: React.FC = () => {
               className="absolute inset-0"
             >
               <div
-                className={`w-full h-full rounded-3xl overflow-hidden border border-white/15 shadow-[0_18px_40px_rgba(0,0,0,0.7)] transition-[transform,filter] duration-700 ${
+                className={`w-full h-full rounded-3xl overflow-hidden border border-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.6)] transition-[transform,filter] duration-700 ${
                   isMusicPlaying ? 'cover-breathe' : 'scale-[0.96] grayscale-[35%]'
                 }`}
               >
@@ -219,7 +216,7 @@ export const NowPlayingSection: React.FC = () => {
               <h2 className="text-2xl font-black text-white truncate tracking-tight leading-tight">
                 {nowPlaying.title}
               </h2>
-              <p className="text-sm text-[var(--theme-primary-light)] font-bold truncate mt-1">
+              <p className="text-[15px] text-white/65 font-medium truncate mt-1">
                 {nowPlaying.artist}
               </p>
             </motion.div>
@@ -232,16 +229,16 @@ export const NowPlayingSection: React.FC = () => {
 
             if (isVenue || isBgMusic) {
               return (
-                <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/[0.05] border border-white/10 text-[11px] text-neutral-300">
+                <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/[0.05] text-[12px] text-white/60">
                   {isBgMusic ? (
                     <>
-                      <Disc className="w-3.5 h-3.5 text-neutral-400" />
-                      <span className="font-medium tracking-wide">Mekan Fon Listesi</span>
+                      <Disc className="w-3.5 h-3.5 text-white/50" />
+                      <span className="font-medium tracking-wide">Mekânın fon listesi</span>
                     </>
                   ) : (
                     <>
-                      <Store className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                      <span className="font-semibold text-white tracking-wide">Mekan Sahibi</span>
+                      <Store className="w-3.5 h-3.5 text-white/50" />
+                      <span className="font-medium tracking-wide">Mekânın seçimi</span>
                     </>
                   )}
                 </div>
@@ -257,7 +254,7 @@ export const NowPlayingSection: React.FC = () => {
 
             return (
               <div
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/[0.05] border border-white/10 text-[11px] text-neutral-300 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-white/[0.05] text-[12px] text-white/60 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
                 onClick={() => {
                   if (isAnon) {
                     showToast('Bu profil gizlidir.');
@@ -268,7 +265,7 @@ export const NowPlayingSection: React.FC = () => {
                   }
                 }}
               >
-                <User className="w-3 h-3 text-[var(--theme-primary)]" />
+                <User className="w-3 h-3 text-white/45" />
                 <span className="truncate flex items-center gap-1">
                   İsteyen: <strong className="text-white font-semibold">
                     {(isMyTrack && !isAnon)
@@ -307,38 +304,34 @@ export const NowPlayingSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions Bar */}
-        <div className="w-full max-w-sm flex items-center gap-2">
-          {/* Spotify Direct Link */}
+        {/* Hızlı eylemler: eşit genişlikte, nötr */}
+        <div className="w-full max-w-sm grid grid-cols-3 gap-2">
           <button
             onClick={handleOpenSpotify}
-            className="flex-1 min-h-[44px] py-2 px-2 rounded-xl bg-[#1DB954]/10 hover:bg-[#1DB954]/20 active:bg-[#1DB954]/30 border border-[#1DB954]/30 text-[#1DB954] active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold"
+            className="min-h-[44px] rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] active:scale-[0.96] transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5 text-[13px] font-semibold text-white/85"
           >
-            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Spotify</span>
+            <svg className="w-4 h-4 shrink-0 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.52 17.34c-.24.36-.66.48-1.02.24-2.82-1.74-6.36-2.1-10.56-1.14-.42.12-.78-.18-.9-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.32.42.18.48.66.3 1.02zm1.44-3.3c-.3.42-.84.6-1.26.3-3.24-1.98-8.16-2.58-11.94-1.38-.48.12-1.02-.12-1.14-.6-.12-.48.12-1.02.6-1.14C9.6 9.9 15 10.56 18.72 12.84c.36.18.54.78.24 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.3c-.6.18-1.2-.18-1.38-.72-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.72 1.62.54.3.72 1.02.42 1.56-.3.42-1.02.6-1.56.3z" />
+            </svg>
+            <span>Spotify</span>
           </button>
-
-          {/* Lyrics Modal Trigger */}
           <button
             onClick={() => openModal('lyrics')}
-            className="flex-1 min-h-[44px] py-2 px-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.12] border border-white/10 text-neutral-200 active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold"
+            className="min-h-[44px] rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] active:scale-[0.96] transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5 text-[13px] font-semibold text-white/85"
           >
-            <Mic2 className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
-            <span className="truncate">Sözler</span>
+            <Mic2 className="w-4 h-4 shrink-0 text-white/60" />
+            <span>Sözler</span>
           </button>
-
-          {/* Story Share Trigger */}
           <button
             onClick={() => openModal('story_share')}
-            className={`flex-1 min-h-[44px] py-2 px-2 rounded-xl border active:scale-95 transition-all flex items-center justify-center gap-1 text-xs font-bold ${
+            className={`min-h-[44px] rounded-2xl active:scale-[0.96] transition-[transform,background-color] duration-150 flex items-center justify-center gap-1.5 text-[13px] font-semibold ${
               isMyTrack
-                ? 'bg-[var(--theme-primary)]/15 hover:bg-[var(--theme-primary)]/25 active:bg-[var(--theme-primary)]/30 border-[var(--theme-primary)]/40 text-[var(--theme-primary-light)]'
-                : 'bg-white/[0.05] hover:bg-white/[0.08] active:bg-white/[0.12] border-white/10 text-neutral-200'
+                ? 'bg-[rgba(var(--theme-primary-rgb),0.16)] text-[var(--theme-primary-light)]'
+                : 'bg-white/[0.06] hover:bg-white/[0.09] text-white/85'
             }`}
-            title="Şarkıyı Instagram, WhatsApp veya X'te Paylaş"
           >
-            <Share2 className="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
-            <span className="truncate">{isMyTrack ? 'Hikayen' : 'Paylaş'}</span>
+            <Share2 className={`w-4 h-4 shrink-0 ${isMyTrack ? '' : 'text-white/60'}`} />
+            <span>{isMyTrack ? 'Hikayen' : 'Paylaş'}</span>
           </button>
         </div>
 

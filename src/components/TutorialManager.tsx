@@ -4,11 +4,10 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useApp } from '../context/AppContext';
-import { supabase } from '../lib/supabaseClient';
 
+// İlk kullanımda üç adımlık kısa tanıtım (bir kez gösterilir).
 export const TutorialManager: React.FC = () => {
-  const { user, openModal, showToast, isVenueBound, hasEnteredGateway, activeModal } = useApp();
-  const driverRef = useRef<any>(null);
+  const { openModal, closeModal, isVenueBound, hasEnteredGateway, activeModal } = useApp();
   const isRunning = useRef(false);
 
   const startTutorial = useCallback(() => {
@@ -19,7 +18,12 @@ export const TutorialManager: React.FC = () => {
       showProgress: true,
       allowClose: true,
       animate: true,
-      doneBtnText: 'Bitir',
+      smoothScroll: true,
+      overlayOpacity: 0.65,
+      stagePadding: 6,
+      stageRadius: 18,
+      popoverClass: 'mk-tour',
+      doneBtnText: 'Tamam',
       nextBtnText: 'İleri',
       prevBtnText: 'Geri',
       progressText: '{{current}} / {{total}}',
@@ -30,137 +34,105 @@ export const TutorialManager: React.FC = () => {
       },
       steps: [
         {
-          element: '#tour-qr-button',
-          popover: {
-            title: 'Mekanlara Bağlan',
-            description: 'Kafeye bağlanmak için masandaki QR kodu okutabilir veya "Keşfet" menüsünden bulunduğun kafeyi bulabilirsin.',
-            side: 'top',
-            align: 'center'
-          }
-        },
-        {
-          element: '#tour-wallet-button',
-          popover: {
-            title: 'Kullanım Hakları',
-            description: '<div class="space-y-3"><p>Muzikors tamamen ücretsizdir!</p><p>Buradan kalan günlük şarkı açma, beğenme ve diğer etkileşim haklarını anlık olarak takip edebilirsin.</p><p class="text-[10px] text-[var(--theme-primary-light)]/70">Hakların her gece 00:00\'da sıfırlanır.</p></div>',
-            side: 'left',
-            align: 'start'
-          }
-        },
-        {
           element: '#tour-add-song',
           popover: {
-            title: 'Şarkı Ekle',
-            description: 'Mekana bağlandıktan sonra bu butona tıklayarak şarkı arama ekranını açabilirsin.',
+            title: 'Şarkını iste',
+            description: "Buradan şarkı arayıp sıraya eklersin. Üstteki sayı bugün kalan şarkı hakkın; hakların her gece 00:00'da yenilenir.",
             side: 'top',
             align: 'center',
             onNextClick: () => {
               openModal('search');
-              // Wait for modal animation before moving next
-              setTimeout(() => {
-                driverObj.moveNext();
-              }, 400);
-            }
-          }
+              // Pencere açılınca sonraki adıma geçilir
+              setTimeout(() => driverObj.moveNext(), 450);
+            },
+          },
         },
         {
           element: '#tour-search-input',
           popover: {
-            title: 'Şarkı Arama',
-            description: 'Dilediğin şarkıyı seç, sıraya ekle ve herkes dinlesin! (Şarkı seçmek zorunlu değil, tanıtımı burada bitirebilirsin)',
+            title: 'Ara ve dinle',
+            description: 'Şarkıya dokun, önizlemesini dinle ve sıraya ekle. Sıradaki şarkıları ana ekrandan oylayabilirsin.',
             side: 'bottom',
-            align: 'center'
-          }
-        }
-      ]
+            align: 'center',
+            onNextClick: () => {
+              closeModal();
+              setTimeout(() => driverObj.moveNext(), 350);
+            },
+            onPrevClick: () => {
+              closeModal();
+              setTimeout(() => driverObj.movePrevious(), 350);
+            },
+          },
+        },
+        {
+          element: '#tour-qr-button',
+          popover: {
+            title: 'Mekân değiştir',
+            description: 'Başka bir mekâna geçtiğinde masadaki QR kodu buradan okut.',
+            side: 'bottom',
+            align: 'end',
+          },
+        },
+      ],
     });
 
-    driverRef.current = driverObj;
     driverObj.drive();
-  }, [openModal]);
+  }, [openModal, closeModal]);
 
   useEffect(() => {
-    // Only run if the user has bound to a venue, entered gateway, AND no modal is open
+    // Yalnızca mekâna bağlıyken, karşılama ekranı geçildiyse ve açık pencere yokken
     if (!isVenueBound || !hasEnteredGateway || activeModal !== 'none') return;
+    if (localStorage.getItem('muzikors_tutorial_completed') || isRunning.current) return;
 
-    // Only run once per session/device if not completed
-    const hasCompleted = localStorage.getItem('muzikors_tutorial_completed');
-    if (hasCompleted || isRunning.current) return;
-
-    // Small delay to ensure DOM is ready and main screen is fully visible
-    const timer = setTimeout(() => {
-      startTutorial();
-    }, 1500);
-
+    const timer = setTimeout(startTutorial, 1500);
     return () => clearTimeout(timer);
-  }, [user, isVenueBound, hasEnteredGateway, activeModal, startTutorial]);
+  }, [isVenueBound, hasEnteredGateway, activeModal, startTutorial]);
 
   return (
-    <style dangerouslySetInnerHTML={{ __html: `
-      @keyframes slideFadeIn {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+    <style
+      dangerouslySetInnerHTML={{
+        __html: `
+      .driver-popover.mk-tour {
+        background: var(--theme-card);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+        padding: 18px;
+        max-width: 300px;
+        font-family: inherit;
       }
-      .driver-popover {
-        background-color: #120C08 !important;
-        color: #FCEFD5 !important;
-        border: 1px solid rgba(212, 175, 55, 0.2) !important;
-        border-radius: 1.5rem !important;
-        box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15) !important;
-        padding: 1.5rem !important;
-        animation: slideFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+      .driver-popover.mk-tour .driver-popover-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
       }
-      .driver-popover-title {
-        color: #D4AF37 !important;
-        font-weight: 900 !important;
-        font-size: 1.25rem !important;
-        margin-bottom: 0.5rem !important;
+      .driver-popover.mk-tour .driver-popover-description {
+        font-size: 14px;
+        line-height: 1.55;
+        color: rgba(255, 255, 255, 0.68);
       }
-      .driver-popover-description {
-        color: #FCEFD5 !important;
-        font-size: 0.95rem !important;
-        opacity: 0.9;
-        line-height: 1.5;
+      .driver-popover.mk-tour .driver-popover-footer { margin-top: 16px; }
+      .driver-popover.mk-tour .driver-popover-progress-text { color: rgba(255, 255, 255, 0.4); font-size: 12px; }
+      .driver-popover.mk-tour button.driver-popover-next-btn,
+      .driver-popover.mk-tour button.driver-popover-prev-btn {
+        border: none;
+        text-shadow: none;
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
       }
-      .driver-popover-footer {
-        margin-top: 1rem !important;
-      }
-      .driver-popover-next-btn, .driver-popover-prev-btn {
-        background-color: #D4AF37 !important;
-        color: #000 !important;
-        border-radius: 0.75rem !important;
-        font-weight: 800 !important;
-        text-shadow: none !important;
-        border: none !important;
-        padding: 0.5rem 1rem !important;
-      }
-      .driver-popover-prev-btn {
-        background-color: #1C130D !important;
-        color: #D4AF37 !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
-      }
-      .driver-popover-close-btn {
-        color: rgba(252, 239, 213, 0.5) !important;
-      }
-      .driver-popover-close-btn:hover {
-        color: #fff !important;
-      }
-      .driver-popover-progress-text {
-        color: rgba(212, 175, 55, 0.8) !important;
-        font-weight: bold !important;
-      }
-      div[class*="driver-popover-arrow-side-top"] {
-        border-top-color: #120C08 !important;
-      }
-      div[class*="driver-popover-arrow-side-bottom"] {
-        border-bottom-color: #120C08 !important;
-      }
-      div[class*="driver-popover-arrow-side-left"] {
-        border-left-color: #120C08 !important;
-      }
-      div[class*="driver-popover-arrow-side-right"] {
-        border-right-color: #120C08 !important;
-      }
-    `}} />
+      .driver-popover.mk-tour button.driver-popover-next-btn { background: var(--theme-primary); color: #000; }
+      .driver-popover.mk-tour button.driver-popover-prev-btn { background: rgba(255, 255, 255, 0.08); color: #fff; }
+      .driver-popover.mk-tour .driver-popover-close-btn { color: rgba(255, 255, 255, 0.45); }
+      .driver-popover.mk-tour .driver-popover-arrow-side-top { border-top-color: var(--theme-card); }
+      .driver-popover.mk-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--theme-card); }
+      .driver-popover.mk-tour .driver-popover-arrow-side-left { border-left-color: var(--theme-card); }
+      .driver-popover.mk-tour .driver-popover-arrow-side-right { border-right-color: var(--theme-card); }
+    `,
+      }}
+    />
   );
 };

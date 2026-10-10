@@ -134,17 +134,17 @@ function AuthCallback() {
   }, [router, searchParams]);
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center bg-[#120C08] text-white">
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-[var(--theme-bg)] text-white">
       {error ? (
         <div className="text-center space-y-4">
-          <p className="text-red-500 font-bold text-lg">Giriş Hatası</p>
-          <p className="text-sm text-gray-400">{error}</p>
-          <p className="text-xs text-gray-500">Ana sayfaya yönlendiriliyorsunuz...</p>
+          <p className="text-[17px] font-bold">Giriş yapılamadı</p>
+          <p className="text-[14px] text-white/55 max-w-[300px]">{error}</p>
+          <p className="text-[13px] text-white/40">Ana sayfaya yönlendiriliyorsun…</p>
         </div>
       ) : (
         <div className="text-center space-y-4 flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[#D4AF37] font-semibold tracking-wide">Oturum açılıyor...</p>
+          <div className="w-9 h-9 rounded-full border-2 border-white/15 border-t-[var(--theme-primary)] animate-spin"></div>
+          <p className="text-[14px] text-white/60">Giriş yapılıyor…</p>
         </div>
       )}
     </div>
@@ -154,8 +154,8 @@ function AuthCallback() {
 export default function AuthCallbackPage() {
   return (
     <React.Suspense fallback={
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#120C08] text-white">
-        <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-[var(--theme-bg)] text-white">
+        <div className="w-9 h-9 rounded-full border-2 border-white/15 border-t-[var(--theme-primary)] animate-spin"></div>
       </div>
     }>
       <AuthCallback />

@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { QrCode, X, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import jsQR from 'jsqr';
+import { Sheet } from './ui/Sheet';
+import { triggerHaptic } from '../../utils/haptics';
 
 export const QrScannerModal: React.FC = () => {
-  const { activeModal, closeModal, bindVenueById, showToast } = useApp();
+  const { activeModal, closeModal, bindVenueById } = useApp();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
@@ -128,9 +129,9 @@ export const QrScannerModal: React.FC = () => {
 
                 if (venueId) {
                   isScanningRef.current = false;
+                  triggerHaptic('success');
                   bindVenueById(venueId);
                   closeModal();
-                  showToast('Mekana başarıyla bağlandınız!');
                   return;
                 }
               }
@@ -158,126 +159,44 @@ export const QrScannerModal: React.FC = () => {
         mediaStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [activeModal, bindVenueById, closeModal, showToast]);
+  }, [activeModal, bindVenueById, closeModal]);
 
   
 
   return (
-    <AnimatePresence>
-      {activeModal === 'qr' && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 landscape:p-2">
-        {/* Cinematic Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          onClick={closeModal}
-          className="fixed inset-0 bg-black/85"
-          style={{ willChange: 'opacity' }}
-        />
+    <Sheet open={activeModal === 'qr'} onClose={closeModal} title="QR kodu okut" width="sm">
+      <div className="pb-2">
+        <div className="relative w-full max-w-[300px] aspect-square mx-auto rounded-[28px] overflow-hidden bg-black">
+          <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
 
-        {/* Premium Compact Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          style={{ willChange: 'transform' }}
-          className="relative w-full max-w-sm landscape:max-w-xl max-h-[96vh] bg-gradient-to-b from-[#1C130D] to-black border border-[#D4AF37]/20 rounded-[2rem] landscape:rounded-2xl p-6 landscape:p-4 z-10 shadow-[0_0_50px_rgba(212,175,55,0.1)] overflow-hidden flex flex-col"
-        >
-          {/* Header Row (Portrait) */}
-          <div className="flex items-center justify-between mb-4 landscape:hidden relative z-10">
-            <div className="flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-[#D4AF37]" />
-              <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] uppercase">QR Tarayıcı</span>
-            </div>
-            <button
-              onClick={closeModal}
-              className="p-1.5 rounded-full bg-white/5 active:bg-white/10 text-gray-400 active:text-white transition-all cursor-pointer"
-              aria-label="Kapat"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          {/* Vizör köşeleri */}
+          <div className="absolute inset-6 pointer-events-none" aria-hidden="true">
+            <span className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-white/85 rounded-tl-2xl" />
+            <span className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-white/85 rounded-tr-2xl" />
+            <span className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-white/85 rounded-bl-2xl" />
+            <span className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-white/85 rounded-br-2xl" />
           </div>
 
-          <div className="w-full landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-center">
-            {/* Direct Camera Video Stream Container */}
-            <div className="relative w-full max-w-[220px] landscape:max-w-[200px] aspect-square mx-auto rounded-2xl overflow-hidden bg-neutral-950 flex flex-col items-center justify-center shadow-inner mb-4 landscape:mb-0 z-10 border border-amber-500/20">
-              <video
-                ref={videoRef}
-                playsInline
-                muted
-                className="w-full h-full object-cover scale-105"
-              />
-
-              {/* Precision Minimal Reticle */}
-              <div className="absolute inset-3 rounded-xl border border-white/10 flex items-center justify-center pointer-events-none z-10">
-                <div className="w-6 h-6 border-t border-l border-amber-400/80 absolute top-1 left-1" />
-                <div className="w-6 h-6 border-t border-r border-amber-400/80 absolute top-1 right-1" />
-                <div className="w-6 h-6 border-b border-l border-amber-400/80 absolute bottom-1 left-1" />
-                <div className="w-6 h-6 border-b border-r border-amber-400/80 absolute bottom-1 right-1" />
-              </div>
-
-              {/* Laser scan line overlay */}
-              <div className="absolute left-4 right-4 h-[1px] bg-amber-400 shadow-[0_0_6px_#f59e0b] animate-[scan_1.8s_ease-in-out_infinite] top-0 pointer-events-none z-20" />
-              <style dangerouslySetInnerHTML={{__html: `
-                @keyframes scan {
-                  0% { top: 0%; opacity: 0; }
-                  10% { opacity: 1; }
-                  90% { opacity: 1; }
-                  100% { top: 100%; opacity: 0; }
-                }
-              `}} />
-
-              {!isCameraReady && !streamError && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white/50 z-20">
-                  <span className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mb-2" />
-                  <span className="text-[10px] font-bold tracking-widest uppercase">Kamera Başlatılıyor</span>
-                </div>
-              )}
+          {!isCameraReady && !streamError && (
+            <div className="absolute inset-0 grid place-items-center bg-black">
+              <span className="w-7 h-7 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" aria-label="Kamera açılıyor" />
             </div>
+          )}
+        </div>
 
-            {/* Right Column in Landscape */}
-            <div className="flex flex-col justify-center">
-              {/* Landscape Header */}
-              <div className="hidden landscape:flex items-center justify-between mb-3 relative z-10">
-                <div className="flex items-center gap-2">
-                  <QrCode className="w-5 h-5 text-[#D4AF37]" />
-                  <span className="text-[10px] font-black text-[#D4AF37] tracking-[0.2em] uppercase">QR Tarayıcı</span>
-                </div>
-                <button
-                  onClick={closeModal}
-                  className="p-1.5 rounded-full bg-white/5 active:bg-white/10 text-gray-400 active:text-white transition-all cursor-pointer"
-                  aria-label="Kapat"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {streamError ? (
-                <div className="text-center landscape:text-left relative z-10 mb-2">
-                  <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-2xl text-xs font-medium">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <span>{streamError}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center landscape:text-left relative z-10 mb-2 space-y-1">
-                  <h4 className="text-sm font-bold text-white hidden landscape:block">Mekân Masasına Bağlan</h4>
-                  <p className="text-xs font-medium text-gray-400 max-w-[220px] mx-auto landscape:mx-0 leading-relaxed">
-                    Mekanın QR kodunu kameraya okutarak masanıza bağlanın ve şarkı istemeye başlayın.
-                  </p>
-                </div>
-              )}
-            </div>
+        {streamError ? (
+          <div className="mt-5 flex items-start gap-3 rounded-2xl bg-red-500/[0.1] px-4 py-3 text-[13px] text-red-200">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <span>{streamError}</span>
           </div>
-
-          {/* Hidden Canvas for QR processing */}
-          <canvas ref={canvasRef} className="hidden" />
-        </motion.div>
+        ) : (
+          <p className="mt-5 text-center text-[14px] text-white/60 leading-relaxed max-w-[280px] mx-auto">
+            Masadaki QR kodu çerçevenin içine getir; otomatik olarak bağlanırsın.
+          </p>
+        )}
       </div>
-      )}
-    </AnimatePresence>
+
+      <canvas ref={canvasRef} className="hidden" />
+    </Sheet>
   );
 };

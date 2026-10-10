@@ -86,7 +86,7 @@ const FAQS = [
   },
   {
     q: 'Kafede şarkı istemek misafirler için ücretli mi?',
-    a: 'Hayır, misafirler için tamamen ücretsizdir! Masadaki QR kodu okutan her müşteri şarkı seçebilir, sıraya ekleyebilir ve sıradaki şarkılara oy verebilir. Bireysel VIP abonelik ise yalnızca ekstra ayrıcalıklar (reklamsız deneyim, öncelikli istekler) isteyen kullanıcılar içindir; sistemde jeton veya kredi satışı kesinlikle yoktur.'
+    a: 'Hayır, misafirler için tamamen ücretsizdir! Masadaki QR kodu okutan her müşteri şarkı seçebilir, sıraya ekleyebilir ve sıradaki şarkılara oy verebilir. Bireysel VIP abonelik ise yalnızca ekstra ayrıcalıklar (daha fazla günlük şarkı, beklemesiz ve öncelikli istekler) isteyen kullanıcılar içindir; sistemde jeton veya kredi satışı kesinlikle yoktur.'
   }
 ];
 

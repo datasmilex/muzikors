@@ -1,39 +1,52 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { ArrowUpToLine, Clock, Crown, Ghost, Loader2, Music, ThumbsUp, Timer, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import {
-  X,
-  Check,
-  Crown,
-  Ghost,
-  ThumbsUp,
-  Music,
-  ArrowUpCircle,
-  ShieldOff,
-  Loader2,
-  RefreshCw,
-  Zap,
-} from 'lucide-react';
-import { iapService } from '../services/iapService';
+import { iapService, PREMIUM_PRODUCT_ID } from '../services/iapService';
+import { Sheet } from './ui/Sheet';
+import { btn } from './ui/controls';
+
+// Yalnızca gerçekten çalışan ayrıcalıklar listelenir (limitler veritabanında uygulanır).
+const BENEFITS = [
+  { icon: Music, title: 'Günde 5 şarkı', text: 'Standart üyelikte günde 2 şarkı.' },
+  { icon: Clock, title: 'Beklemeden iste', text: 'İstekler arasında 4 dakika bekleme yok.' },
+  { icon: Timer, title: '7 dakikaya kadar şarkılar', text: 'Standart üyelikte en fazla 4 dakika.' },
+  { icon: ThumbsUp, title: 'Günde 15 oy', text: 'Standart üyelikte günde 5 oy.' },
+  { icon: ArrowUpToLine, title: 'Sıranın başına geç', text: 'Günde bir şarkını sıranın en önüne taşı.' },
+  { icon: Trash2, title: 'Sıradan şarkı kaldır', text: 'Günde bir şarkıyı sıradan çıkar (VIP istekleri hariç).' },
+  { icon: Ghost, title: 'Hayalet modu', text: 'İsteklerini adın görünmeden gönder.' },
+];
+
+const formatDate = (iso?: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
 export const PremiumModal: React.FC = () => {
   const { activeModal, closeModal, user, setUser, showToast } = useApp();
   const [isProcessing, setIsProcessing] = useState(false);
+  const isOpen = activeModal === 'premium';
 
   const refreshUser = async () => {
     if (!user?.id) return;
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_premium, premium_until, premium_activated_at')
+        .eq('id', user.id)
+        .single();
       if (data) {
-        setUser((prev: any) => ({
-          ...prev,
-          isPremium: data.is_premium === true,
-          premium_until: data.premium_until || null,
-          premium_activated_at: data.premium_activated_at || null,
-        }));
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                isPremium: data.is_premium === true,
+                premium_until: data.premium_until || null,
+                premium_activated_at: data.premium_activated_at || null,
+              }
+            : prev
+        );
       }
     } catch (e) {
       console.error('[PremiumModal refreshUser error]', e);
@@ -41,36 +54,31 @@ export const PremiumModal: React.FC = () => {
   };
 
   useEffect(() => {
-    if (activeModal === 'premium') {
-      iapService.initialize(
-        async () => {
-          showToast('Tebrikler! Satın alım başarıyla tamamlandı.');
-          await refreshUser();
-          closeModal();
-        },
-        (err) => {
-          showToast(err || 'Ödeme tamamlanamadı.');
-        }
-      );
-    }
-  }, [activeModal, closeModal, showToast]);
+    if (!isOpen) return;
+    iapService.initialize(
+      async () => {
+        showToast('VIP üyeliğin başladı.');
+        await refreshUser();
+        closeModal();
+      },
+      (err) => {
+        showToast(err || 'Ödeme tamamlanamadı.');
+      }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
-  if (activeModal !== 'premium') return null;
-
-  const handleSubscribeBireysel = async () => {
+  const handleSubscribe = async () => {
     if (!user) {
-      showToast('Abonelik başlatmak için lütfen önce giriş yapın.');
+      showToast('Abonelik için önce giriş yapman gerekiyor.');
       return;
     }
-
     setIsProcessing(true);
     try {
       const res = await iapService.subscribe();
-      if (!res.success && res.message) {
-        showToast(res.message);
-      }
+      if (!res.success && res.message) showToast(res.message);
     } catch (e: any) {
-      showToast(e.message || 'Ödeme başlatılamadı.');
+      showToast(e?.message || 'Ödeme başlatılamadı.');
     } finally {
       setIsProcessing(false);
     }
@@ -81,153 +89,81 @@ export const PremiumModal: React.FC = () => {
     try {
       await iapService.restore();
       await refreshUser();
-      showToast('Abonelikleriniz kontrol edildi.');
+      showToast('Satın alımların kontrol edildi.');
     } catch (e: any) {
-      showToast(e.message || 'Geri yükleme başarısız oldu.');
+      showToast(e?.message || 'Geri yükleme başarısız oldu.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const bireyselBenefits = [
-    {
-      icon: <ShieldOff className="w-5 h-5 text-amber-400" />,
-      title: "Reklamsız Kesintisiz Deneyim",
-      description: "Hiçbir video veya arayüz reklamı görmeden doğrudan müziğinize odaklanın."
-    },
-    {
-      icon: <Zap className="w-5 h-5 text-amber-400" />,
-      title: "Öncelikli İstek Sıralaması",
-      description: "Şarkı istekleriniz standart kullanıcıların önüne geçerek sırada öne çıkar."
-    },
-    {
-      icon: <Ghost className="w-5 h-5 text-amber-400" />,
-      title: "Hayalet Modu",
-      description: "Şarkı isteklerinizi ve oylarınızı isterseniz anonim olarak gönderin."
-    },
-    {
-      icon: <ThumbsUp className="w-5 h-5 text-amber-400" />,
-      title: "Çifte Oy Gücü",
-      description: "Sıradaki parçalara verdiğiniz her oy 2 katı ağırlıkla değerlendirilir."
-    },
-    {
-      icon: <Crown className="w-5 h-5 text-amber-400" />,
-      title: "Özel VIP Rozeti",
-      description: "Profilinizde ve mekan sıralamasında altın renkli VIP statüsüyle görünün."
-    }
-  ];
+  const manageUrl =
+    Capacitor.getPlatform() === 'ios'
+      ? 'https://apps.apple.com/account/subscriptions'
+      : `https://play.google.com/store/account/subscriptions?package=com.muzikors.app&sku=${PREMIUM_PRODUCT_ID}`;
+
+  const isVip = Boolean(user?.isPremium);
+  const until = formatDate(user?.premium_until);
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 landscape:p-2 selection:bg-amber-400 selection:text-black">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          className="absolute inset-0 bg-black/85 backdrop-blur-sm"
-          onClick={closeModal}
-        />
-
-        {/* Modal Container */}
-        <motion.div
-          initial={{ scale: 0.96, opacity: 0, y: 12 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.96, opacity: 0, y: 12 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-lg landscape:max-w-2xl bg-neutral-950 text-white rounded-xl overflow-hidden shadow-[0_25px_65px_rgba(0,0,0,0.95)] border border-white/10 flex flex-col max-h-[92vh]"
-        >
-          {/* Header */}
-          <div className="relative p-5 pb-4 border-b border-white/[0.08] bg-neutral-900/60">
-            <button 
-              onClick={closeModal}
-              className="absolute top-3 right-3 p-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              aria-label="Kapat"
-            >
-              <X className="w-4 h-4" />
+    <Sheet
+      open={isOpen}
+      onClose={closeModal}
+      width="md"
+      ariaLabel="Muzikors VIP"
+      footer={
+        isVip ? (
+          <a href={manageUrl} target="_blank" rel="noreferrer" className={`${btn.secondary} w-full`}>
+            Aboneliği yönet
+          </a>
+        ) : (
+          <div>
+            <button type="button" onClick={handleSubscribe} disabled={isProcessing} className={`${btn.primary} w-full`}>
+              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+              <span>{isProcessing ? 'Bekleniyor…' : '3 gün ücretsiz dene'}</span>
             </button>
-
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                <Crown className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-black text-white tracking-tight uppercase">
-                  Muzikors VIP
-                </h2>
-                <p className="text-[11px] text-neutral-400">
-                  Kafelerde ve mekanlarda müziği kontrol etmenin ayrıcalıklı yolu
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Modal Body */}
-          <div className="p-5 overflow-y-auto custom-scrollbar flex-1 space-y-4">
-            {/* Free Trial Badge */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-xs font-black text-amber-300 uppercase tracking-wider">
-                  İlk 3 Gün Ücretsiz Deneme
-                </span>
-              </div>
-              <span className="text-[11px] text-neutral-400">Sonrasında 60 TL / Ay</span>
-            </div>
-
-            {/* Benefits List */}
-            <div className="space-y-2">
-              {bireyselBenefits.map((b, idx) => (
-                <div
-                  key={idx}
-                  className="flex gap-3 items-start bg-neutral-900/40 p-2.5 rounded-lg border border-white/5"
-                >
-                  <div className="shrink-0 mt-0.5">{b.icon}</div>
-                  <div>
-                    <h3 className="text-xs font-bold text-white mb-0.5">{b.title}</h3>
-                    <p className="text-[11px] text-neutral-400 leading-snug">{b.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleSubscribeBireysel}
-                disabled={isProcessing}
-                className="w-full py-3 rounded-lg font-black text-xs bg-amber-400 text-black hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-lg shadow-amber-400/20"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-black" />
-                    <span>İşlem Yapılıyor...</span>
-                  </>
-                ) : (
-                  <>
-                    <Crown className="w-4 h-4 fill-black" />
-                    <span>3 Gün Ücretsiz Denemeyi Başlat</span>
-                  </>
-                )}
+            <div className="flex items-center justify-between mt-2 px-1 text-[12px] text-white/45">
+              <span>Sonra 60 TL / ay · istediğin an iptal</span>
+              <button type="button" onClick={handleRestore} className="min-h-[36px] font-semibold text-white/70 hover:text-white">
+                Geri yükle
               </button>
-
-              <div className="flex items-center justify-between mt-2.5 px-1 text-[10px] text-neutral-400">
-                <span>Google Play ile dilediğiniz an iptal</span>
-                <button
-                  type="button"
-                  onClick={handleRestore}
-                  className="text-amber-400 hover:underline flex items-center gap-1 cursor-pointer font-bold"
-                >
-                  <RefreshCw className="w-2.5 h-2.5" />
-                  Satın Alımı Geri Yükle
-                </button>
-              </div>
             </div>
           </div>
-        </motion.div>
+        )
+      }
+    >
+      <div className="text-center pt-1 pb-5">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-[rgba(var(--theme-primary-rgb),0.14)] text-[var(--theme-primary)] grid place-items-center mb-3">
+          <Crown className="w-7 h-7" />
+        </div>
+        <h2 className="text-[22px] font-bold tracking-tight">Muzikors VIP</h2>
+        <p className="text-[14px] text-white/55 mt-1">
+          {isVip ? (until ? `Üyeliğin aktif · ${until} tarihine kadar` : 'Üyeliğin aktif') : 'Mekânın müziğinde daha çok söz hakkı.'}
+        </p>
       </div>
-    </AnimatePresence>
+
+      <ul className="space-y-1 pb-2">
+        {BENEFITS.map(({ icon: Icon, title, text }) => (
+          <li key={title} className="flex items-start gap-3.5 py-2.5">
+            <span className="w-9 h-9 shrink-0 rounded-xl bg-white/[0.06] grid place-items-center text-white/75">
+              <Icon className="w-[18px] h-[18px]" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[14px] font-semibold">{title}</span>
+              <span className="block text-[13px] text-white/50 mt-0.5">{text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {!isVip && (
+        <p className="text-[11px] leading-relaxed text-white/35 pb-2">
+          Ödeme {Capacitor.getPlatform() === 'ios' ? 'App Store' : 'Google Play'} hesabından alınır. Deneme bitmeden iptal etmezsen abonelik aylık yenilenir.{' '}
+          <a href="/legal/sales" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            Abonelik koşulları
+          </a>
+        </p>
+      )}
+    </Sheet>
   );
 };

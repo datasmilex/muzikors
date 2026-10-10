@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ModalType } from '../types';
 import { useApp } from '../context/AppContext';
 import { Header } from './Header';
@@ -18,19 +19,18 @@ import { InfoModals } from './InfoModals';
 import { VenueInfoModal } from './VenueInfoModal';
 import { PremiumModal } from './PremiumModal';
 import { DailyRewardModal } from './DailyRewardModal';
-import { RewardedAdModal } from './RewardedAdModal';
 import { ToastNotification } from './ToastNotification';
 import { LeaderboardModal } from './LeaderboardModal';
 import { LyricsModal } from './LyricsModal';
 import { MenuModal } from './MenuModal';
 import { StoryShareModal } from './StoryShareModal';
-import { QuickActionsBanner } from './QuickActionsBanner';
 import { GatewayScreen } from './GatewayScreen';
 import { WelcomeScreen } from './WelcomeScreen';
 import { TutorialManager } from './TutorialManager';
 import { BetaTesterWelcomeModal } from './BetaTesterWelcomeModal';
 import { EntranceAnnouncementModal } from './EntranceAnnouncementModal';
 import { LandscapeNowPlaying, LandscapeQueue, LandscapeNavRail } from './LandscapeView';
+import { EASE_OUT } from '../lib/motion';
 
 interface JukeboxViewProps {
   initialModal?: ModalType;
@@ -38,6 +38,7 @@ interface JukeboxViewProps {
 
 export const JukeboxView: React.FC<JukeboxViewProps> = ({ initialModal }) => {
   const { isVenueBound, hasEnteredGateway, openModal } = useApp();
+  const reduceMotion = useReducedMotion();
   const showGateway = isVenueBound && !hasEnteredGateway;
 
   useEffect(() => {
@@ -50,41 +51,40 @@ export const JukeboxView: React.FC<JukeboxViewProps> = ({ initialModal }) => {
   }, [initialModal, openModal]);
 
   return (
-    <div className="w-full max-w-md landscape:max-w-none landscape:w-full min-h-screen landscape:min-h-0 landscape:h-screen landscape:h-[100dvh] bg-[var(--theme-bg)] flex flex-col relative shadow-[0_0_80px_rgba(0,0,0,0.9)] border-x border-white/[0.06] overflow-x-hidden landscape:overflow-hidden transition-colors duration-300">
+    <div className="w-full max-w-md landscape:max-w-none landscape:w-full min-h-screen landscape:min-h-0 landscape:h-screen landscape:h-[100dvh] bg-[var(--theme-bg)] flex flex-col relative overflow-x-hidden landscape:overflow-hidden">
       {!isVenueBound ? (
         <WelcomeScreen />
       ) : showGateway ? (
         <GatewayScreen />
       ) : (
         <>
-          {/* ── PORTRAIT MODE LAYOUT ──────────────────────────────────────── */}
+          {/* ── DİKEY EKRAN ─────────────────────────────────────────────── */}
           <div className="flex flex-col landscape:hidden w-full">
             <Header />
-            <QuickActionsBanner />
             <VenueGuard>
-              <NowPlayingSection />
-              <UpNextQueueSection />
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } }}
+              >
+                <NowPlayingSection />
+                <UpNextQueueSection />
+              </motion.div>
               <BottomNav />
             </VenueGuard>
           </div>
 
-          {/* ── LANDSCAPE MODE STUDIO LAYOUT ─────────────────────────────── */}
+          {/* ── YATAY EKRAN ─────────────────────────────────────────────── */}
           <div className="hidden landscape:flex flex-col w-full h-full min-h-0 overflow-hidden">
             <Header />
             <VenueGuard>
-              <div className="flex-1 min-h-0 flex flex-row overflow-hidden relative">
-                {/* Sol Taraf: Çalan Şarkı Ekranı */}
-                <div className="w-[40%] max-w-[440px] min-w-[300px] h-full p-2.5 overflow-hidden flex flex-col justify-center">
+              <div className="flex-1 min-h-0 flex flex-row gap-3 px-3 pb-3 overflow-hidden">
+                <div className="w-[40%] max-w-[440px] min-w-[300px] h-full overflow-hidden flex flex-col justify-center">
                   <LandscapeNowPlaying />
                 </div>
-
-                {/* Sağ Taraf: Sıradaki Şarkılar */}
-                <div className="flex-1 min-w-0 h-full p-2.5 overflow-hidden flex flex-col">
+                <div className="flex-1 min-w-0 h-full overflow-hidden flex flex-col">
                   <LandscapeQueue />
                 </div>
-
-                {/* En Sağ: 5'li Buton Grubu */}
-                <div className="w-[72px] shrink-0 h-full">
+                <div className="w-[76px] shrink-0 h-full">
                   <LandscapeNavRail />
                 </div>
               </div>
@@ -107,7 +107,6 @@ export const JukeboxView: React.FC<JukeboxViewProps> = ({ initialModal }) => {
       <MenuModal />
       <InfoModals />
       <DailyRewardModal />
-      <RewardedAdModal />
       <PremiumModal />
       <LyricsModal />
       <StoryShareModal />
