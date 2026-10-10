@@ -18,6 +18,14 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
+// Mekan fiyatlandırması (veritabanındaki app_settings.venue_pricing ile aynı tutulmalı)
+const SETUP_FEE_PER_TABLE = 125; // TL, KDV dahil, tek seferlik
+const TRIAL_MONTHS = 6;
+const ANNUAL_FEE = 5000; // TL / yıl
+const formatTL = (amount: number) => `₺${amount.toLocaleString('tr-TR')}`;
+
+type LicenseAnswer = '' | 'var' | 'surecte' | 'yok';
+
 // ── Statik içerik (her render'da yeniden oluşturulmasın diye modül seviyesinde) ──
 const SHOWCASE_SLIDES = [
   {
@@ -54,7 +62,7 @@ const FAQS = [
   },
   {
     q: 'Mekanım küçük veya 3. nesil kahveci, bize uyar mı?',
-    a: 'Müşterinin masada oturduğu her mekana uygundur: kafe, 3. nesil coffee shop, bar, pub, restoran, pastane, otel lobisi ve co-working alanları. Masa sayınız fiyatı değiştirmez; her masa için özel pleksi stant hazırlanır.'
+    a: `Müşterinin masada oturduğu her mekana uygundur: kafe, 3. nesil coffee shop, bar, pub, restoran, pastane, otel lobisi ve co-working alanları. Kurulum ücreti masa sayınıza göre hesaplanır (masa başı ${formatTL(SETUP_FEE_PER_TABLE)}); yıllık abonelik masa sayısından bağımsızdır, küçük mekanlar daha az öder.`
   },
   {
     q: 'Müşteriler mekanımızın havasına uymayan şarkılar açarsa ne olur? (Vibe Guard)',
@@ -62,7 +70,11 @@ const FAQS = [
   },
   {
     q: 'Fiyat ne kadar ve ödeme nasıl yapılır?',
-    a: 'Muzikors mekanlar için tek ve şeffaf bir başlangıç paketi sunar: 1 Yıllık Her Şey Dahil Kurulum & Pleksi Paketi: ₺5.000. Aylık aidat veya gizli abonelik ücreti KESİNLİKLE YOKTUR. 30 adede kadar lazer kesim akrilik QR pleksileri, Spotify ses sistemi entegrasyonu, Vibe Guard™ koruması ve 1 yıllık kesintisiz bulut sunucu altyapısı bu fiyata dahildir. Ödeme havale/EFT ile fatura karşılığı tek seferde alınır.'
+    a: `Tek seferlik kurulum masa başı ${formatTL(SETUP_FEE_PER_TABLE)}'dir (KDV dahil); masa sayınız kadar akrilik QR stant bu ücrete dahildir. Kurulumdan sonraki ilk ${TRIAL_MONTHS} ay abonelik ücreti alınmaz. ${TRIAL_MONTHS}. aydan itibaren abonelik yıllık ${formatTL(ANNUAL_FEE)}'dir; aylık aidat veya gizli ücret yoktur. Örneğin 20 masalı bir mekan kurulumda ${formatTL(20 * SETUP_FEE_PER_TABLE)} öder. Ödemeler havale/EFT ile alınır.`
+  },
+  {
+    q: 'Mekanımın müzik yayın lisansı olması gerekiyor mu?',
+    a: 'Evet. Mekanda halka açık müzik çalmak için meslek birliklerinden (eser sahipleri için MESAM/MSG, yapımcılar için MÜ-YAP, icracılar için MÜYORBİR) lisans alınması yasal zorunluluktur. Muzikors yalnızca lisanslı veya lisans başvurusu süren mekanlarla çalışır. Lisansınız yoksa başvuru sürecinde size yol gösteririz; TÜRES veya TURYİD üyesi işletmeler, 2025\'te imzalanan gastronomi protokolü kapsamındaki indirimli tarifelerden yararlanabilir.'
   },
   {
     q: 'Karekod pleksiler masamıza nasıl gelir?',
@@ -81,7 +93,7 @@ const FAQS = [
 const STEPS = [
   {
     title: 'Karekodların masana gelir',
-    body: 'Masa sayın kadar lazer kesim akrilik pleksi stant kargoyla kapına gelir. Kurulum ücreti yok, vidalama yok; masaya koyman yeter.'
+    body: 'Masa sayın kadar lazer kesim akrilik QR stant kargoyla kapına gelir. Vida, kablo, cihaz yok; masaya koyman yeter.'
   },
   {
     title: 'Müşterin okutur, parçayı seçer',
@@ -121,11 +133,11 @@ const FEATURES = [
 ];
 
 const PRICE_INCLUDES = [
-  '30 adede kadar lazer kazımalı akrilik QR pleksi stantları kapınıza teslim',
+  'Masa sayınız kadar lazer kazımalı akrilik QR stant (kurulum ücretine dahil), kapınıza teslim',
   'Spotify ses sistemi entegrasyonu ve sınırsız müşteri istek & oylama kuyruğu',
   'Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik filtreleme)',
   'Gelişmiş Kafe Yönetim Paneli (kafe.muzikors.com.tr) & Anlık Şarkı Atlama (Skip)',
-  '1 Yıl Kesintisiz Bulut Sunucu & Realtime Senkronizasyon Altyapısı (Aylık aidatsız)',
+  'Kesintisiz Bulut Sunucu & Anlık Senkronizasyon Altyapısı (aylık aidat yok)',
   'Dinamik QR Güvencesi (İstendiğinde kafenin dijital menüsüne anında yönlendirme)',
   '7/24 Doğrudan Kurumsal WhatsApp & E-posta Destek Hattı'
 ];
@@ -255,7 +267,17 @@ export const ShowcaseLanding: React.FC = () => {
     city: '',
     tableCount: '15',
     email: '',
+    license: '' as LicenseAnswer,
+    termsAccepted: false,
   });
+  const tableCountNum = Math.max(0, Math.floor(Number(partnerForm.tableCount) || 0));
+  const estimatedSetupFee = tableCountNum * SETUP_FEE_PER_TABLE;
+  const licenseLabel: Record<LicenseAnswer, string> = {
+    '': 'Belirtilmedi',
+    var: 'Var',
+    surecte: 'Başvuru sürüyor',
+    yok: 'Yok',
+  };
   const [submittingLead, setSubmittingLead] = useState(false);
   const [partnerSubmitted, setPartnerSubmitted] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
@@ -263,7 +285,7 @@ export const ShowcaseLanding: React.FC = () => {
 
   // Fallback durumunda işletme bilgilerini panoya kopyalama
   const copyLeadDetails = () => {
-    const text = `Muzikors İşletme Başvurusu:\nMekan Adı: ${partnerForm.venueName}\nYetkili: ${partnerForm.contactPerson}\nTelefon: ${partnerForm.phone}\nŞehir: ${partnerForm.city || 'Belirtilmedi'}\nMasa Sayısı: ${partnerForm.tableCount}\nE-posta: ${partnerForm.email || 'Belirtilmedi'}`;
+    const text = `Muzikors İşletme Başvurusu:\nMekan Adı: ${partnerForm.venueName}\nYetkili: ${partnerForm.contactPerson}\nTelefon: ${partnerForm.phone}\nŞehir: ${partnerForm.city || 'Belirtilmedi'}\nMasa Sayısı: ${partnerForm.tableCount}\nMüzik Yayın Lisansı: ${licenseLabel[partnerForm.license]}\nE-posta: ${partnerForm.email || 'Belirtilmedi'}`;
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);
       setLeadCopied(true);
@@ -273,7 +295,7 @@ export const ShowcaseLanding: React.FC = () => {
 
   // WhatsApp doğrudan başvuru bağlantısı
   const getWhatsAppLeadUrl = () => {
-    const text = `Merhaba Muzikors, web sitenizden işletme başvurumu iletiyorum:\n- Mekan: ${partnerForm.venueName}\n- Yetkili: ${partnerForm.contactPerson}\n- Telefon: ${partnerForm.phone}\n- Şehir: ${partnerForm.city || 'Belirtilmedi'}\n- Masa Sayısı: ${partnerForm.tableCount}${partnerForm.email ? `\n- E-posta: ${partnerForm.email}` : ''}`;
+    const text = `Merhaba Muzikors, web sitenizden işletme başvurumu iletiyorum:\n- Mekan: ${partnerForm.venueName}\n- Yetkili: ${partnerForm.contactPerson}\n- Telefon: ${partnerForm.phone}\n- Şehir: ${partnerForm.city || 'Belirtilmedi'}\n- Masa Sayısı: ${partnerForm.tableCount}\n- Müzik Yayın Lisansı: ${licenseLabel[partnerForm.license]}${partnerForm.email ? `\n- E-posta: ${partnerForm.email}` : ''}`;
     return `https://wa.me/905068638306?text=${encodeURIComponent(text)}`;
   };
 
@@ -296,26 +318,30 @@ export const ShowcaseLanding: React.FC = () => {
   const handlePartnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!partnerForm.venueName || !partnerForm.contactPerson || !partnerForm.phone) return;
+    if (partnerForm.license === 'yok' || !partnerForm.license || !partnerForm.termsAccepted) return;
 
     setSubmittingLead(true);
     setLeadError(null);
 
     try {
-      const { error } = await supabase.from('field_venues').insert({
-        name: partnerForm.venueName.trim(),
-        manager_name: partnerForm.contactPerson.trim(),
-        phone: partnerForm.phone.trim(),
-        city: partnerForm.city.trim() || 'Belirtilmedi',
-        address: partnerForm.email.trim() ? `E-posta: ${partnerForm.email.trim()} | Masa: ${partnerForm.tableCount}` : `Masa: ${partnerForm.tableCount} | Web Başvurusu`,
-        status: 'yeni_basvuru',
-        visit_notes: `Web sitesi (Açık Tema Vitrin) üzerinden B2B ortaklık başvurusu. Paket: 1 Yıllık Her Şey Dahil Kurulum & Pleksi (5.000 TL), Masa sayısı: ${partnerForm.tableCount}, E-posta: ${partnerForm.email || 'Belirtilmedi'}`,
-        package_price: 5000,
-        last_visited_at: new Date().toISOString()
+      const { data, error } = await supabase.rpc('submit_web_venue_application', {
+        p_venue_name: partnerForm.venueName.trim(),
+        p_manager_name: partnerForm.contactPerson.trim(),
+        p_phone: partnerForm.phone.trim(),
+        p_city: partnerForm.city.trim(),
+        p_table_count: tableCountNum,
+        p_email: partnerForm.email.trim(),
+        p_license_status: partnerForm.license,
+        p_terms_accepted: partnerForm.termsAccepted,
       });
 
       if (error) {
         console.error('Lead submission error:', error);
         setLeadError('Sunucu bağlantısı sırasında bir gecikme oluştu. Bilgileriniz kaybolmadı; tek tıkla WhatsApp üzerinden iletebilir veya tekrar gönderebilirsiniz.');
+        return;
+      }
+      if (!(data as any)?.success) {
+        setLeadError((data as any)?.error || 'Başvurunuz kaydedilemedi. WhatsApp hattımızdan tek tıkla iletebilirsiniz.');
         return;
       }
 
@@ -474,7 +500,7 @@ export const ShowcaseLanding: React.FC = () => {
             </h1>
 
             <p className="text-xs sm:text-sm text-[#635044] max-w-lg mx-auto leading-relaxed font-normal">
-              Milyonlarca Spotify şarkısı, masa oylaması ve Vibe Guard™ koruması; <strong>uygulama yok, kurulum yok.</strong>
+              Milyonlarca Spotify şarkısı, masa oylaması ve Vibe Guard™ koruması; <strong>uygulama indirme yok, cihaz yok.</strong>
             </p>
           </div>
 
@@ -691,46 +717,68 @@ export const ShowcaseLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* ── ŞEFFAF FİYATLANDIRMA (5000 TL 1 YILLIK HER ŞEY DAHİL PAKET) ──────── */}
+      {/* ── ŞEFFAF FİYATLANDIRMA (masa başı kurulum + 6 ay ücretsiz + yıllık abonelik) ── */}
       <section id="fiyat" className="py-14 sm:py-24 border-b border-[#E8DFD3] bg-[#FAF7F2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight text-balance">
-              1 Yıllık Her Şey Dahil Kurulum &amp; Pleksi Paketi
+              Şeffaf Fiyatlandırma
             </h2>
             <p className="text-sm text-[#635044] mt-2">
-              Aylık aidat yok. Gizli fatura yok. 1 yıl boyunca tüm özellikler ve masa pleksileri dahil.
+              Tek seferlik kurulum, ilk {TRIAL_MONTHS} ay ücretsiz, sonrasında yıllık sabit ücret. Aylık aidat yok.
             </p>
           </div>
 
           {/* Fiyat Kartı (Ilık Kahve & Crema Şablonu) */}
           <div className="max-w-xl mx-auto bg-[#F8F2EA] rounded-2xl border border-[#D8C7B5] p-6 sm:p-10 shadow-[0_8px_30px_rgba(36,26,20,0.06)] space-y-6">
 
-            {/* Üst Vurgu */}
-            <div className="flex items-end justify-between gap-4 pb-6 border-b border-[#E4D7C8]">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-[#26170F]">Muzikors Mekan Başlangıç Kiti</h3>
-                <span className="text-xs text-[#6B584C] font-semibold mt-1 block">1 Yıllık Kurumsal Lisans &amp; Pleksi Stand Paketi</span>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl sm:text-4xl font-black text-[#26170F] tracking-tight tabular-nums">
-                  ₺5.000
+            {/* Fiyat kalemleri */}
+            <dl className="divide-y divide-[#E4D7C8] border-b border-[#E4D7C8]">
+              <div className="flex items-end justify-between gap-4 pb-4">
+                <div>
+                  <dt className="text-base sm:text-lg font-black text-[#26170F]">Kurulum</dt>
+                  <span className="text-xs text-[#6B584C] font-semibold">Tek seferlik · KDV dahil · QR stantlar dahil</span>
                 </div>
-                <div className="text-xs text-[#6B584C] mt-0.5 font-bold">
-                  Aylık Aidat: ₺0 / Ay
-                </div>
+                <dd className="text-right">
+                  <span className="text-2xl sm:text-3xl font-black text-[#26170F] tracking-tight tabular-nums">{formatTL(SETUP_FEE_PER_TABLE)}</span>
+                  <span className="block text-xs text-[#6B584C] font-bold">masa başı</span>
+                </dd>
               </div>
-            </div>
+              <div className="flex items-end justify-between gap-4 py-4">
+                <div>
+                  <dt className="text-base sm:text-lg font-black text-[#26170F]">İlk {TRIAL_MONTHS} ay</dt>
+                  <span className="text-xs text-[#6B584C] font-semibold">Tüm özellikler açık</span>
+                </div>
+                <dd className="text-2xl sm:text-3xl font-black text-[#8C5226] tracking-tight">Ücretsiz</dd>
+              </div>
+              <div className="flex items-end justify-between gap-4 py-4">
+                <div>
+                  <dt className="text-base sm:text-lg font-black text-[#26170F]">Sonrasında</dt>
+                  <span className="text-xs text-[#6B584C] font-semibold">Aylık aidat yok</span>
+                </div>
+                <dd className="text-right">
+                  <span className="text-2xl sm:text-3xl font-black text-[#26170F] tracking-tight tabular-nums">{formatTL(ANNUAL_FEE)}</span>
+                  <span className="block text-xs text-[#6B584C] font-bold">yıllık</span>
+                </dd>
+              </div>
+            </dl>
 
-            {/* Tahsilat ve Koşul Notu */}
-            <div className="text-xs text-[#5C4A3E] space-y-1">
+            {/* Örnek hesap ve koşullar */}
+            <div className="text-xs text-[#5C4A3E] space-y-2">
               <div className="font-bold text-[#26170F] flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-[#8C5226]" />
-                <span>Tahsilat Kurumsal Havale / EFT ile Tek Seferde Alınır</span>
+                <span>
+                  {tableCountNum > 0
+                    ? `${tableCountNum} masalı bir mekan için kurulum: ${formatTL(estimatedSetupFee)}`
+                    : `Örnek: 20 masalı bir mekan için kurulum ${formatTL(20 * SETUP_FEE_PER_TABLE)}`}
+                </span>
               </div>
               <p className="text-[#6B584C] text-xs leading-relaxed pl-[22px]">
-                1 yıllık toplam ödeme: ₺5.000. Aylık aidat veya komisyon yoktur. 30 adede kadar mekana özel lazer kesim pleksi stantları, Spotify ses sistemi entegrasyonu, Vibe Guard™ ve 1 yıllık kesintisiz bulut sunucu altyapısı dahildir.
+                Ödemeler havale/EFT ile alınır. Kurulum ödemesinden sonra QR stantlarınız hazırlanıp kargolanır ve {TRIAL_MONTHS} aylık ücretsiz dönem başlar.
+              </p>
+              <p className="text-[#6B584C] text-xs leading-relaxed pl-[22px]">
+                Muzikors, müzik yayın lisansı (MESAM/MSG, MÜ-YAP, MÜYORBİR) olan mekanlarla çalışır.
               </p>
             </div>
 
@@ -751,11 +799,11 @@ export const ShowcaseLanding: React.FC = () => {
                 onClick={(e) => scrollToSection(e, 'hero-form')}
                 className="group w-full py-4 rounded-xl bg-[#241A14] hover:bg-[#150E0A] text-[#FAF6F0] font-black text-sm flex items-center justify-center gap-2 transition duration-150 active:scale-95 shadow-md cursor-pointer min-h-[48px]"
               >
-                <span>Mekanınızı Başlatın &amp; Kurulum Kitini Alın</span>
+                <span>Mekanınız İçin Başvurun</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
               </a>
               <p className="text-xs text-center text-[#6B584C] mt-2">
-                Ödeme sonrası pleksiler lazer kesime girer ve adresinize kargolanır.
+                Başvuru ücretsizdir; ödeme yalnızca onay ve lisans kontrolünden sonra alınır.
               </p>
             </div>
 
@@ -775,7 +823,7 @@ export const ShowcaseLanding: React.FC = () => {
                 Mekanınızı Muzikors ile Tanıştırın
               </h2>
               <p className="text-xs sm:text-sm text-[#635044] mt-1.5">
-                Bilgilerinizi bırakın, 1 yıllık kurulum kitinizi başlatalım ve akrilik pleksi stantlarınızı hazırlayalım.
+                Bilgilerinizi bırakın; lisans durumunuzu ve kurulum detaylarını görüşmek için 24 saat içinde sizi arayalım.
               </p>
             </div>
 
@@ -814,7 +862,7 @@ export const ShowcaseLanding: React.FC = () => {
                   Başvurunuz Başarıyla Kaydedildi!
                 </h3>
                 <p className="text-xs sm:text-sm text-[#635044] max-w-md mx-auto leading-relaxed">
-                  Talebiniz ekibimize ulaştı. 24 saat içinde sizinle iletişime geçip 1 yıllık pleksi kiti ve panel aktivasyonunuzu tamamlayacağız.
+                  Talebiniz ekibimize ulaştı. 24 saat içinde sizinle iletişime geçip müzik yayın lisansınızı kontrol edecek ve kurulumu ({tableCountNum > 0 ? `${tableCountNum} masa, ${formatTL(estimatedSetupFee)}` : `masa başı ${formatTL(SETUP_FEE_PER_TABLE)}`}) planlayacağız.
                 </p>
                 <div className="pt-3">
                   <a
@@ -901,21 +949,79 @@ export const ShowcaseLanding: React.FC = () => {
 
                   <div>
                     <label htmlFor="table-count" className={LABEL_CLASS}>
-                      Masa Sayısı (Pleksi İçin)
+                      Masa Sayısı *
                     </label>
                     <input
                       id="table-count"
                       type="number"
                       inputMode="numeric"
+                      required
                       min={1}
-                      max={200}
+                      max={500}
                       value={partnerForm.tableCount}
                       onChange={(e) => setPartnerForm({ ...partnerForm, tableCount: e.target.value })}
                       placeholder="15"
                       className={`${INPUT_CLASS} tabular-nums`}
+                      aria-describedby="table-fee-hint"
                     />
+                    <p id="table-fee-hint" className="text-xs text-[#6B584C] mt-1.5 font-semibold tabular-nums">
+                      {tableCountNum > 0
+                        ? `Kurulum: ${formatTL(estimatedSetupFee)} (KDV dahil)`
+                        : `Masa başı ${formatTL(SETUP_FEE_PER_TABLE)}`}
+                    </p>
                   </div>
                 </div>
+
+                <fieldset>
+                  <legend className={LABEL_CLASS}>Mekanınızın müzik yayın lisansı var mı? *</legend>
+                  <p className="text-xs text-[#6B584C] mb-2">MESAM/MSG, MÜ-YAP ve MÜYORBİR lisansları</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {([
+                      ['var', 'Evet, var'],
+                      ['surecte', 'Başvurum sürüyor'],
+                      ['yok', 'Hayır, yok'],
+                    ] as const).map(([value, label]) => (
+                      <label
+                        key={value}
+                        className={`flex items-center gap-2 px-3.5 rounded-xl border cursor-pointer min-h-[46px] text-xs sm:text-sm font-semibold transition-colors duration-150 ${
+                          partnerForm.license === value
+                            ? 'bg-white border-[#8C5226] text-[#26170F]'
+                            : 'bg-[#FAF6F1] border-[#DACDC0] text-[#4A3426] hover:bg-white'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="license"
+                          value={value}
+                          required
+                          checked={partnerForm.license === value}
+                          onChange={() => setPartnerForm({ ...partnerForm, license: value })}
+                          className="accent-[#8C5226]"
+                        />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {partnerForm.license === 'yok' && (
+                    <div role="note" className="sc-fade mt-3 p-4 rounded-xl bg-amber-50/90 border border-amber-300 text-xs text-[#362217] leading-relaxed space-y-2">
+                      <p className="font-bold text-amber-900">Muzikors yalnızca lisanslı mekanlarla çalışır.</p>
+                      <p>
+                        Mekanda müzik yayını için MESAM/MSG (eser sahipleri), MÜ-YAP (yapımcılar) ve MÜYORBİR (icracılar) lisansı yasal zorunluluktur.
+                        TÜRES veya TURYİD üyesi işletmeler, 2025 gastronomi protokolü kapsamındaki indirimli tarifelerden yararlanabilir.
+                        Lisans başvurunuzu başlattığınızda &ldquo;Başvurum sürüyor&rdquo; seçeneğiyle bize ulaşabilirsiniz; süreçte yol göstermekten memnuniyet duyarız.
+                      </p>
+                      <a
+                        href="https://wa.me/905068638306?text=Merhaba%20Muzikors,%20mekan%C4%B1m%20i%C3%A7in%20m%C3%BCzik%20yay%C4%B1n%20lisans%C4%B1%20alma%20s%C3%BCreci%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum."
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#241A14] hover:bg-black text-white font-bold text-xs transition duration-150 active:scale-95 min-h-[44px]"
+                      >
+                        <MessageCircle className="w-4 h-4 text-emerald-400" />
+                        <span>Lisans Süreci İçin Bilgi Al</span>
+                      </a>
+                    </div>
+                  )}
+                </fieldset>
 
                 <div>
                   <label htmlFor="email" className={LABEL_CLASS}>
@@ -932,10 +1038,26 @@ export const ShowcaseLanding: React.FC = () => {
                   />
                 </div>
 
+                <label className="flex items-start gap-2.5 text-xs text-[#4A3426] leading-relaxed cursor-pointer min-h-[44px]">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={partnerForm.termsAccepted}
+                    onChange={(e) => setPartnerForm({ ...partnerForm, termsAccepted: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 accent-[#8C5226] shrink-0"
+                  />
+                  <span>
+                    <Link href="/legal/venue" target="_blank" className="font-bold text-[#26170F] underline underline-offset-2">
+                      Mekan Hizmet Sözleşmesi
+                    </Link>
+                    &apos;ni okudum; müzik yayın lisansı ve telif yükümlülüklerinin mekana ait olduğunu kabul ediyorum.
+                  </span>
+                </label>
+
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={submittingLead}
+                    disabled={submittingLead || partnerForm.license === 'yok'}
                     aria-busy={submittingLead}
                     className="w-full py-3.5 rounded-xl bg-[#241A14] hover:bg-[#150E0A] disabled:opacity-60 disabled:cursor-wait text-[#FAF6F0] font-black text-sm transition duration-150 shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[46px]"
                   >
@@ -946,7 +1068,7 @@ export const ShowcaseLanding: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <span>Siparişi &amp; Başvuruyu Gönder</span>
+                        <span>Başvuruyu Gönder</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -1067,6 +1189,11 @@ export const ShowcaseLanding: React.FC = () => {
                 <li>
                   <Link href="/legal/refund" className="inline-flex items-center py-1.5 text-[#5C4A3E] hover:text-[#26170F] transition-colors duration-150">
                     Abonelik İptal &amp; İade Koşulları
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/venue" className="inline-flex items-center py-1.5 text-[#5C4A3E] hover:text-[#26170F] transition-colors duration-150">
+                    Mekan Hizmet Sözleşmesi
                   </Link>
                 </li>
                 <li>

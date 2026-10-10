@@ -1781,30 +1781,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const remainingVotes = maxDailyVotes - newDailyVotes;
 
       if (supabase) {
-        // 1. Increment queue votes
-        const { data: voteData } = await supabase.from('queue').select('votes').eq('id', trackId).single();
-        const updatedVotes = (voteData?.votes ?? 0) + 1;
-        await supabase.from('queue').update({ votes: updatedVotes }).eq('id', trackId);
-
-        // 2. Update user daily_votes_count in profiles
-        await supabase.from('profiles').update({ daily_votes_count: newDailyVotes }).eq('id', user.id);
-
-        // 3. Log user vote in song_user_votes
-        try {
-          const { data: existingVote } = await supabase
-            .from('song_user_votes')
-            .select('vote_count')
-            .eq('user_id', user.id)
-            .eq('song_id', trackId)
-            .maybeSingle();
-
-          const count = (existingVote?.vote_count ?? 0) + 1;
-          await supabase.from('song_user_votes').upsert(
-            { user_id: user.id, song_id: trackId, vote_count: count },
-            { onConflict: 'user_id,song_id' }
-          );
-        } catch (vErr) {
-          console.warn('[song_user_votes log]', vErr);
+        // 1-3. Oy, günlük limit ve oy kaydı sunucuda tek işlemde yapılır
+        // (limitler ve kendi şarkısına oy verme kontrolü istemciden atlatılamaz).
+        const { error: voteErr } = await supabase.rpc('vote_queue_track', { p_queue_id: trackId });
+        if (voteErr) {
+          showToast(voteErr.message || 'Oy verilemedi.');
+          return;
         }
 
         // 4. Award XP to the song requester (if they exist and haven't exceeded daily cap of 100 XP)

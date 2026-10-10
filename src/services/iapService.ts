@@ -49,16 +49,31 @@ class IAPService {
       // Set up transaction listeners
       store.when()
         .approved(async (transaction: any) => {
-          console.log('[IAPService] Transaction approved:', transaction);
+          console.log('[IAPService] Transaction approved:', transaction.transactionId);
           try {
-            // User VIP Premium
-            const { data, error } = await supabase.rpc('activate_subscription_self', {
-              p_product_id: PREMIUM_PRODUCT_ID,
-              p_order_id: transaction.transactionId || null,
-              p_purchase_token: transaction.purchaseToken || null,
+            // Satın alma, Google Play / App Store sunucularından doğrulanarak VIP'e çevrilir.
+            const { data, error } = await supabase.functions.invoke('verify-purchase', {
+              body: {
+                platform: isIos ? 'app_store' : 'google_play',
+                productId: PREMIUM_PRODUCT_ID,
+                purchaseToken:
+                  transaction.parentReceipt?.purchaseToken ||
+                  transaction.nativePurchase?.purchaseToken ||
+                  transaction.purchaseId ||
+                  null,
+                transactionId: transaction.transactionId || null,
+              },
             });
-            if (error) console.error('[IAPService] Error activating user premium in Supabase:', error);
-            else console.log('[IAPService] Premium activated successfully:', data);
+
+            if (error || !data?.success) {
+              // Doğrulanamayan işlem onaylanmaz (finish edilmez); uygulama bir sonraki
+              // açılışta tekrar dener. Google Play onaylanmayan alımı 3 gün içinde iade eder.
+              console.error('[IAPService] Purchase verification failed:', error || data?.error);
+              if (this.onPurchaseErrorCallback) {
+                this.onPurchaseErrorCallback(data?.error || 'Ödeme doğrulanamadı. Lütfen daha sonra tekrar deneyin.');
+              }
+              return;
+            }
 
             // Finish the transaction (Acknowledge)
             await transaction.finish();
@@ -84,9 +99,18 @@ class IAPService {
       await store.initialize([targetPlatform]);
       this.isInitialized = true;
       console.log(`[IAPService] In-App Purchase Store (${isIos ? 'Apple App Store' : 'Google Play'}) initialized successfully.`);
+
+      // Yenilenen veya iptal edilen aboneliklerin bitiş tarihini mağazadan tazele.
+      this.refreshEntitlement().catch(() => {});
     } catch (err: any) {
       console.error('[IAPService] Initialization error:', err);
     }
+  }
+
+  public async refreshEntitlement(): Promise<void> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    await supabase.functions.invoke('verify-purchase', { body: { action: 'refresh' } });
   }
 
   public async subscribe(): Promise<{ success: boolean; message?: string }> {

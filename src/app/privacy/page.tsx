@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 pl-2 text-neutral-300">
                 <li>
-                  Kimlik, cihaz, şarkı istek geçmişi ve VIP abonelik durum verilerimin, yurt dışında (Avrupa Birliği ve ABD sınırları içerisinde) barındırılan güvenli <strong className="text-white">Supabase (AWS)</strong> bulut veritabanlarında saklanmasına ve işlenmesine,
+                  Kimlik, cihaz, şarkı istek geçmişi ve VIP abonelik durum verilerimin, yurt dışında (Birleşik Krallık/Londra ve ABD sınırları içerisinde) barındırılan güvenli <strong className="text-white">Supabase (AWS)</strong> bulut veritabanlarında saklanmasına ve işlenmesine,
                 </li>
                 <li>
                   Uygulama içi şarkı sırası bildirimleri, şarkımın çalmaya başlaması ve mekana özel anonsların <strong className="text-white">Google Firebase Cloud Messaging (FCM)</strong> kanalıyla anlık mobil bildirim (Push Notification) olarak tarafıma iletilmesine,

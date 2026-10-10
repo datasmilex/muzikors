@@ -10,6 +10,20 @@ entrypoint = "./functions/spotify-search/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/spotify-search/*.html" ]
 
+[functions.verify-purchase]
+enabled = true
+# Kullanıcı JWT'si hem gateway'de hem fonksiyon içinde doğrulanır.
+verify_jwt = true
+import_map = "./functions/verify-purchase/deno.json"
+entrypoint = "./functions/verify-purchase/index.ts"
+
+[functions.send-fcm-push]
+enabled = true
+# Yetki fonksiyon içinde x-admin-token (admin_sessions) ile doğrulanır.
+verify_jwt = false
+import_map = "./functions/send-fcm-push/deno.json"
+entrypoint = "./functions/send-fcm-push/index.ts"
+
 [functions.revenuecat-webhook]
 enabled = true
 verify_jwt = false
