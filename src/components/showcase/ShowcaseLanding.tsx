@@ -66,7 +66,7 @@ const FAQS = [
   },
   {
     q: 'Müşteriler mekanımızın havasına uymayan şarkılar açarsa ne olur? (Vibe Guard)',
-    a: 'Vibe Guard™ teknolojisi mekanınızın atmosfer sigortasıdır. Çalınabilecek müzik türlerini, sanatçıları veya Spotify çalma listesi sınırlarını Kafe Panelinden siz belirlersiniz. Mekanınızın tarzına uymayan parçalar arama sonuçlarında filtrelenir; ayrıca istemediğiniz herhangi bir şarkıyı panelden tek tıkla sıradan atlayabilirsiniz.'
+    a: 'Vibe Guard™ mekanınızın atmosfer sigortasıdır. Kafe Panelinden kendi Spotify listelerinizi seçersiniz; müşteriler bu listelere uyan şarkıları hemen sıraya ekler. Listede olmayan istekler dilerseniz onayınıza düşer, dilerseniz hiç gönderilemez. İstemediğiniz sanatçıları, remix gibi sürümleri ve türleri de engelleyebilir, herhangi bir şarkıyı panelden tek dokunuşla sıradan çıkarabilirsiniz.'
   },
   {
     q: 'Fiyat ne kadar ve ödeme nasıl yapılır?',
@@ -101,7 +101,7 @@ const STEPS = [
   },
   {
     title: 'Sen panelden yönetirsin',
-    body: 'Vibe Guard™ ile uygunsuz türleri filtrelersin; hangi şarkıların sevildiğini görür, istenmeyen şarkıyı tek dokunuşla atlayıp kontrolü sağlarsın.'
+    body: 'Vibe Guard™ ile kendi listelerinin dışına çıkılmaz; hangi şarkıların sevildiğini görür, istenmeyen şarkıyı tek dokunuşla sıradan çıkarırsın.'
   }
 ];
 
@@ -120,7 +120,7 @@ const FEATURES = [
   },
   {
     title: 'Vibe Guard™ ile tarzın güvende',
-    body: 'Rock kafede arabesk, caz barda uygunsuz müzik çalmaz. İzin verilen türleri ve çalma listelerini siz belirlersiniz.'
+    body: 'Rock kafede arabesk, caz barda uygunsuz müzik çalmaz. Kendi Spotify listelerinizi seçersiniz; listede olmayan istekler isterseniz onayınıza düşer.'
   },
   {
     title: 'Senin mekanının adıyla açılır',
@@ -135,7 +135,7 @@ const FEATURES = [
 const PRICE_INCLUDES = [
   'Masa sayınız kadar lazer kazımalı akrilik QR stant (kurulum ücretine dahil), kapınıza teslim',
   'Spotify ses sistemi entegrasyonu ve sınırsız müşteri istek & oylama kuyruğu',
-  'Vibe Guard™ Müzik ve Tür Filtresi (Uygunsuz şarkıları otomatik filtreleme)',
+  'Vibe Guard™ tarz koruması: kendi Spotify listeleriniz, onay kuyruğu, sanatçı, tür ve sürüm filtreleri',
   'Gelişmiş Kafe Yönetim Paneli (kafe.muzikors.com.tr) & Anlık Şarkı Atlama (Skip)',
   'Kesintisiz Bulut Sunucu & Anlık Senkronizasyon Altyapısı (aylık aidat yok)',
   'Dinamik QR Güvencesi (İstendiğinde kafenin dijital menüsüne anında yönlendirme)',

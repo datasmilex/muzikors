@@ -5,6 +5,7 @@ import { BookOpen, Check, ChevronRight, Clock, Copy, ExternalLink, ShieldCheck, 
 import { useApp } from '../context/AppContext';
 import { Sheet } from './ui/Sheet';
 import { groupCard, groupRow, sectionLabel } from './ui/controls';
+import { useVibeInfo, vibeRuleSummary } from '../lib/vibe';
 
 const formatTime = (t?: string | null) => (t ? t.slice(0, 5) : null);
 
@@ -28,7 +29,8 @@ export const VenueInfoModal: React.FC = () => {
   const menuUrl: string = venue?.menu_link || venue?.menu_url || '';
   const isNativeMenu = venue?.menu_type === 'native';
   const hasMenu = isNativeMenu || Boolean(menuUrl.trim());
-  const genres: string[] = Array.isArray(venue?.allowed_genres) ? venue.allowed_genres : [];
+  const vibe = useVibeInfo(activeVenue?.id, activeModal === 'venue_info');
+  const styles: string[] = vibe?.enabled ? vibe.styles : [];
   const opening = formatTime(venue?.opening_time);
   const closing = formatTime(venue?.closing_time);
   const openNow = opening && closing ? isOpenNow(opening, closing) : null;
@@ -134,16 +136,15 @@ export const VenueInfoModal: React.FC = () => {
                 <ShieldCheck className="w-[18px] h-[18px] text-white/55 mt-0.5" />
                 <span className="flex-1 min-w-0">
                   <span className="block text-[15px] font-medium">Müzik tarzı</span>
-                  <span className="block text-[13px] text-white/50 mt-0.5 leading-relaxed">
-                    {genres.length > 0
-                      ? 'Mekânın atmosferini korumak için yalnızca bu türlerden istek alınır.'
-                      : 'Bu mekânda tüm müzik türlerinden şarkı isteyebilirsin.'}
-                  </span>
-                  {genres.length > 0 && (
+                  {vibe?.enabled && vibe.description && (
+                    <span className="block text-[13px] text-white/75 mt-0.5 leading-relaxed">{vibe.description}</span>
+                  )}
+                  <span className="block text-[13px] text-white/50 mt-0.5 leading-relaxed">{vibeRuleSummary(vibe)}</span>
+                  {styles.length > 0 && (
                     <span className="flex flex-wrap gap-1.5 mt-2.5">
-                      {genres.map((genre) => (
-                        <span key={genre} className="px-2.5 py-1 rounded-full bg-white/[0.07] text-[12px] font-medium text-white/80">
-                          {genre}
+                      {styles.map((style) => (
+                        <span key={style} className="px-2.5 py-1 rounded-full bg-white/[0.07] text-[12px] font-medium text-white/80">
+                          {style}
                         </span>
                       ))}
                     </span>

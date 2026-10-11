@@ -29,7 +29,7 @@ export default function VenueTermsPage() {
 
       <LegalSection title="2. Hizmetin Kapsamı">
         <p>
-          Muzikors; müşterilerin masadaki QR kod üzerinden şarkı istemesini ve oylamasını, Mekanın ise bu istekleri Kafe Panelinden yönetmesini (Vibe Guard tür filtresi, şarkı atlama, menü ve Wi-Fi ekranı) sağlayan bir yazılım hizmetidir.
+          Muzikors; müşterilerin masadaki QR kod üzerinden şarkı istemesini ve oylamasını, Mekanın ise bu istekleri Kafe Panelinden yönetmesini (Vibe Guard tarz koruması ve onay kuyruğu, şarkı atlama, menü ve Wi-Fi ekranı) sağlayan bir yazılım hizmetidir.
         </p>
         <p>
           <B>Muzikors bir müzik yayıncısı veya müzik akış (streaming) servisi değildir.</B> Müzik, Mekanın kendi ses sisteminde ve Mekanın bağladığı müzik hesabı üzerinden çalınır.

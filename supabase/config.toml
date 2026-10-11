@@ -10,6 +10,13 @@ entrypoint = "./functions/spotify-search/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/spotify-search/*.html" ]
 
+[functions.vibe-library]
+enabled = true
+# Kafe paneli çağırır; anon anahtarı gateway'de, mekân oturum tokenı fonksiyon içinde doğrulanır.
+verify_jwt = true
+import_map = "./functions/vibe-library/deno.json"
+entrypoint = "./functions/vibe-library/index.ts"
+
 [functions.verify-purchase]
 enabled = true
 # Kullanıcı JWT'si hem gateway'de hem fonksiyon içinde doğrulanır.

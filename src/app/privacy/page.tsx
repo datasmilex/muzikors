@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <li><B>Kimlik ve Hesap Verileri:</B> Google oturumu aracılığıyla elde edilen ad, soyad, e-posta adresi, profil fotoğrafı URI&apos;si ve benzersiz kullanıcı kimliği (User ID).</li>
           <li><B>Cihaz &amp; Ağ Bilgileri:</B> IP adresi, cihaz modeli, işletim sistemi sürümü ve Firebase Cloud Messaging (FCM) anlık bildirim belirteci (token).</li>
           <li><B>Uygulama İçi Etkileşim:</B> Bağlanılan mekan (check-in), şarkı arama ve kuyruğa ekleme geçmişi, şarkı oylama tercihleri ve favoriler.</li>
-          <li><B>Anlık Konum:</B> Yalnızca kullanıcının fiziksel olarak ilgili anlaşmalı kafede bulunduğunu doğrulamak (Vibe Guard menzil kontrolü) ve yakındaki mekanları listelemek amacıyla sorgulanır. Sürekli arka plan takibi kesinlikle yapılmaz.</li>
+          <li><B>Anlık Konum:</B> Yalnızca kullanıcının fiziksel olarak ilgili anlaşmalı kafede bulunduğunu doğrulamak (mekân menzil kontrolü) ve yakındaki mekanları listelemek amacıyla sorgulanır. Sürekli arka plan takibi kesinlikle yapılmaz.</li>
           <li><B>Abonelik Verisi:</B> Muzikors VIP / Premium abonelik statüsü, başlangıç/bitiş tarihi ve Google Play Sipariş Numarası.</li>
         </ul>
         <LegalNote title="Finansal Veri Güvenliği ve Kredi Satışı Bulunmaması">
@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
           <B>Kamera Erişimi:</B> Mobil uygulamamız yalnızca anlaşmalı kafelerdeki masalarda yer alan Muzikors QR kodlarını anlık taramak amacıyla kamera izni talep eder. Kamera görüntüsü kaydedilmez, fotoğraflanmaz veya hiçbir harici sunucuya iletilmez.
         </p>
         <p>
-          <B>Konum İzni:</B> Kullanıcının fiziksel olarak kafede bulunduğunu doğrulamak (Vibe Guard) ve yakındaki kafeleri listelemek için anlık olarak kullanılır. Arka planda konum takibi yapılmaz.
+          <B>Konum İzni:</B> Kullanıcının fiziksel olarak kafede bulunduğunu doğrulamak ve yakındaki kafeleri listelemek için anlık olarak kullanılır. Arka planda konum takibi yapılmaz.
         </p>
         <p>
           <B>Teknik Çerezler ve LocalStorage:</B> Oturum devamlılığı, seçilen tema ve kullanıcı tercihleri için zorunlu yerel depolama teknolojileri kullanılır. Reklam, profil çıkarma veya pazarlama amaçlı üçüncü taraf izleme çerezi kesinlikle kullanılmaz ve üçüncü şahıslara satılmaz.

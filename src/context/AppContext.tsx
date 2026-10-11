@@ -1,13 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { UserProfile, ModalType, Track, Venue, CooldownState } from '../types';
+import { UserProfile, ModalType, Track, Venue, CooldownState, PendingApproval } from '../types';
 import { supabase } from '../lib/supabaseClient';
 import { ThemeType, getStoredTheme, applyTheme, DEFAULT_THEME } from '../lib/theme';
 import { extractDominantColor, paletteFromColor, applyLivePalette } from '../lib/albumColor';
 import { formatUserDisplayName } from '../utils/formatters';
 import { containsProfanity } from '../utils/profanityFilter';
-import { isTrackAllowedByVibeGuard } from '../utils/genreMatcher';
 import { getLevelDetails, XP_REWARDS } from '../utils/levelSystem';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -31,6 +30,8 @@ interface AppContextType {
   setHasEnteredGateway: (val: boolean) => void;
   nowPlaying: Track | null;
   queue: Track[];
+  /** Kullanıcının bu mekânda onay bekleyen istekleri */
+  pendingApprovals: PendingApproval[];
   cooldown: CooldownState;
   toastMessage: string | null;
   loginPromptReason: string | null;
@@ -93,6 +94,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [kafeIdParam, setKafeIdParam] = useState<string | null>(null);
   const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [viewingProfileId, setViewingProfileId] = useState<string | null>(null);
   const [hasEnteredGateway, setHasEnteredGateway] = useState<boolean>(false);
@@ -1394,16 +1396,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    const isExplicit = track.explicit === true || (track as any).is_explicit === true || containsProfanity(track.title) || containsProfanity(track.artist);
+    // Sunucu kararı varsa küfür kontrolü orada yapıldı (Spotify'ın sansürsüz etiketi)
+    const isExplicit = track.vibe
+      ? false
+      : track.explicit === true || (track as any).is_explicit === true || containsProfanity(track.title);
     if (activeVenue.explicit_filter_enabled === true && isExplicit) {
       showToast('Bu mekanda küfürlü / sansürsüz şarkı talebi engellenmiştir.');
       return false;
     }
 
-    // Vibe Guard check
-    const vibeCheck = isTrackAllowedByVibeGuard(track, activeVenue.allowed_genres);
-    if (!vibeCheck.isAllowed) {
-      showToast(`Bu mekanda ${vibeCheck.blockedReason || 'bu müzik tarzı'} kısıtlanmıştır.`);
+    // Vibe Guard: arama sonucu sunucunun kararıyla gelir; istekte sunucu yeniden doğrular
+    if (track.vibe?.verdict === 'block') {
+      showToast(track.vibe.message || 'Bu şarkı mekânın müzik tarzına uymuyor.');
       return false;
     }
 
@@ -1472,11 +1476,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .select('id, status')
         .eq('venue_id', venueId)
         .eq('spotify_uri', targetSpotifyUri)
-        .in('status', ['pending', 'queued', 'playing'])
+        .in('status', ['pending', 'queued', 'playing', 'awaiting_approval'])
+        .limit(1)
         .maybeSingle();
 
       if (existingTrack) {
-        showToast('Bu şarkı şu an zaten sırada veya çalıyor!');
+        showToast(existingTrack.status === 'awaiting_approval' ? 'Bu şarkı mekân onayı bekliyor.' : 'Bu şarkı şu an zaten sırada veya çalıyor!');
         return false;
       }
 
@@ -1572,6 +1577,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       requestedByName += ' VIP';
     }
 
+    let requestStatus: string = 'pending';
+    let queueId: string | null = null;
     try {
       if (supabase && user) {
         const { data, error: rpcErr } = await supabase.rpc('request_track_acid', {
@@ -1603,11 +1610,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           return false;
         }
+        requestStatus = (data as any)?.status || 'pending';
+        queueId = (data as any)?.queue_id || null;
       }
     } catch (err: any) {
       console.error('[requestTrack Catch Error]', err);
       showToast(err?.message || 'Bir hata oluştu.');
       return false;
+    }
+
+    if (requestStatus === 'awaiting_approval') {
+      const minutes = 10;
+      setPendingApprovals((prev) =>
+        queueId && prev.some((p) => p.id === queueId)
+          ? prev
+          : [
+              ...prev,
+              {
+                id: queueId || `pending-${Date.now()}`,
+                title: track.title,
+                artist: track.artist,
+                cover: track.albumCover || track.coverUrl || track.album_art || '',
+                expiresAt: new Date(Date.now() + minutes * 60_000).toISOString(),
+              },
+            ],
+      );
+      setUser((prev) => {
+        if (!prev) return null;
+        const baseDailyLimit = prev.isPremium ? 5 : 2;
+        const willUseDaily = (prev.daily_songs_count || 0) < baseDailyLimit;
+        return {
+          ...prev,
+          totalSongsRequested: (prev.totalSongsRequested || 0) + 1,
+          daily_songs_count: willUseDaily ? (prev.daily_songs_count || 0) + 1 : prev.daily_songs_count,
+          extra_song_credits: !willUseDaily ? Math.max(0, (prev.extra_song_credits || 1) - 1) : (prev.extra_song_credits || 0),
+          daily_boosts_count: isBoosted ? (prev.daily_boosts_count || 0) + 1 : (prev.daily_boosts_count || 0),
+        };
+      });
+      triggerHaptic('success');
+      showToast(`"${track.title}" mekânın onayına gönderildi. Onaylanırsa sıraya girer; onaylanmazsa hakkın iade edilir.`);
+      closeModal();
+      return true;
     }
 
     const newTrack: Track = {
@@ -1873,13 +1916,122 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   }, [user, addXp, openProtectedModal, showToast, supabase]);
 
+  // ── Onay bekleyen isteklerim: mekânın kararı anında bildirilir ─────────────
+  const pendingIdsRef = useRef<Set<string>>(new Set());
+  const decidedRef = useRef<Set<string>>(new Set());
+  const vibeCallbacksRef = useRef({ showToast, addXp });
+  vibeCallbacksRef.current = { showToast, addXp };
+
+  useEffect(() => {
+    pendingIdsRef.current = new Set(pendingApprovals.map((p) => p.id));
+  }, [pendingApprovals]);
+
+  useEffect(() => {
+    const userId = user?.id;
+    const venueId = activeVenue?.id;
+    if (!userId || !venueId) {
+      setPendingApprovals([]);
+      return;
+    }
+    let cancelled = false;
+
+    const toPending = (r: any): PendingApproval => ({
+      id: r.id,
+      title: r.song_name || '',
+      artist: r.artist_name || '',
+      cover: r.album_cover || '',
+      expiresAt: r.approval_expires_at || null,
+    });
+
+    const load = async () => {
+      const { data } = await supabase
+        .from('queue')
+        .select('id, song_name, artist_name, album_cover, approval_expires_at')
+        .eq('venue_id', venueId)
+        .eq('requested_by_user_id', userId)
+        .eq('status', 'awaiting_approval')
+        .order('created_at', { ascending: true });
+      if (!cancelled) setPendingApprovals((data ?? []).map(toPending));
+    };
+
+    // Reddedilen ya da sıradan çıkarılan istekte hak sunucuda iade edilir; sayaç güncellenir
+    const refreshRights = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('daily_songs_count, extra_song_credits, daily_boosts_count, total_songs_requested')
+        .eq('id', userId)
+        .maybeSingle();
+      if (!data || cancelled) return;
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              daily_songs_count: data.daily_songs_count ?? prev.daily_songs_count,
+              extra_song_credits: data.extra_song_credits ?? prev.extra_song_credits,
+              daily_boosts_count: data.daily_boosts_count ?? prev.daily_boosts_count,
+              totalSongsRequested: data.total_songs_requested ?? prev.totalSongsRequested,
+            }
+          : prev,
+      );
+    };
+
+    load();
+
+    const channel = supabase
+      .channel(`my_requests_${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue', filter: `requested_by_user_id=eq.${userId}` },
+        (payload) => {
+          const row = payload.new as any;
+          if (!row?.id) return;
+          const { showToast: toast, addXp: xp } = vibeCallbacksRef.current;
+          const title = row.song_name ? `"${row.song_name}"` : 'İsteğin';
+
+          if (row.status === 'awaiting_approval') {
+            if (String(row.venue_id) !== String(venueId)) return;
+            setPendingApprovals((prev) =>
+              prev.some((p) => p.id === row.id) ? prev.map((p) => (p.id === row.id ? toPending(row) : p)) : [...prev, toPending(row)],
+            );
+            return;
+          }
+
+          if (row.status === 'pending' && pendingIdsRef.current.has(row.id)) {
+            setPendingApprovals((prev) => prev.filter((p) => p.id !== row.id));
+            if (!decidedRef.current.has(row.id)) {
+              decidedRef.current.add(row.id);
+              toast(`Mekân onayladı: ${title} sıraya girdi.`);
+              triggerHaptic('success');
+              xp(XP_REWARDS.REQUEST_SONG, 'Şarkı İsteği');
+            }
+            return;
+          }
+
+          if (row.status === 'rejected' && !decidedRef.current.has(row.id)) {
+            decidedRef.current.add(row.id);
+            setPendingApprovals((prev) => prev.filter((p) => p.id !== row.id));
+            if (row.vibe_reason === 'expired') toast(`Mekân ${title} için zamanında karar veremedi; şarkı hakkın iade edildi.`);
+            else if (row.vibe_reason === 'removed') toast(`${title} mekân tarafından sıradan çıkarıldı; şarkı hakkın iade edildi.`);
+            else toast(`Mekân ${title} isteğini onaylamadı; şarkı hakkın iade edildi.`);
+            refreshRights();
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, activeVenue?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const toggleAudioPlay = useCallback(() => setIsPlayingAudio((p) => !p), []);
 
   return (
     <AppContext.Provider value={{
       user, setUser, activeModal, theme, setTheme, activeVenue, kafeIdParam,
       isVenueBound, isVenueActive,
-      nowPlaying, queue,
+      nowPlaying, queue, pendingApprovals,
       cooldown, toastMessage, loginPromptReason, audioProgress, isPlayingAudio,
       openModal, openProtectedModal, closeModal, viewingProfileId, openProfile, loginWithProvider, logout,
       requestTrack, vetoTrack, voteTrack, addXp, bindVenueById, deleteAccount, showToast, toggleAudioPlay,

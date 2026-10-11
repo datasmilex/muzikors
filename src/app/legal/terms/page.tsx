@@ -33,7 +33,7 @@ export default function TermsPage() {
 
       <LegalSection title={'4. Mekanın Yetkisi ve "Vibe Guard" (Tarz Koruması)'}>
         <p>
-          Her mekan işletmecisi; mekan konseptini, akustik dengesini ve müşteri profilini korumak adına kuyruğa eklenen şarkı isteklerini kabul etme, reddetme veya çalmakta olan bir şarkıyı atlama (skip) mutlak yetkisine sahiptir. Kullanıcı, gönderdiği şarkının mekan yetkilisi tarafından reddedilebileceğini veya atlanabileceğini bilerek sisteme istek gönderir.
+          Her mekan işletmecisi; mekan konseptini, akustik dengesini ve müşteri profilini korumak adına kuyruğa eklenen şarkı isteklerini kabul etme, reddetme veya çalmakta olan bir şarkıyı atlama (skip) mutlak yetkisine sahiptir. Kullanıcı, gönderdiği şarkının mekan yetkilisi tarafından reddedilebileceğini veya atlanabileceğini bilerek sisteme istek gönderir. Mekanın tarzı dışında kalan istekler mekan onayına düşebilir; mekanın onaylamadığı, süresi içinde karar vermediği veya sıradan çıkardığı istekler için kullanıcının şarkı hakkı iade edilir.
         </p>
       </LegalSection>
 

@@ -25,6 +25,25 @@ export interface Track {
   message?: string;
   preview_url?: string | null;
   previewUrl?: string | null;
+  /** Spotify sanatçı kimlikleri (arama sonuçlarında gelir) */
+  artistIds?: string[];
+  /** Mekânın Vibe Guard kararı; sunucu her aramada döner, istekte yeniden doğrular */
+  vibe?: VibeVerdict | null;
+}
+
+export interface VibeVerdict {
+  verdict: 'allow' | 'approval' | 'block';
+  reason: string;
+  message?: string;
+}
+
+/** Kullanıcının mekân onayı bekleyen isteği */
+export interface PendingApproval {
+  id: string;
+  title: string;
+  artist: string;
+  cover: string;
+  expiresAt: string | null;
 }
 
 export interface Venue {

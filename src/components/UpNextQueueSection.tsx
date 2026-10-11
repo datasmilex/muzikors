@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Hourglass, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Track } from '../types';
 import { getUpcomingTracks } from '../utils/queueLabels';
@@ -15,7 +15,7 @@ import { EASE_OUT } from '../lib/motion';
 const INLINE_COUNT = 5;
 
 export const UpNextQueueSection: React.FC = () => {
-  const { queue, nowPlaying, user, openModal, audioProgress, registerBackHandler } = useApp();
+  const { queue, nowPlaying, user, openModal, audioProgress, registerBackHandler, pendingApprovals } = useApp();
   const [showAll, setShowAll] = useState(false);
   const [vetoTarget, setVetoTarget] = useState<Track | null>(null);
 
@@ -43,12 +43,48 @@ export const UpNextQueueSection: React.FC = () => {
     waitMinutes = Math.max(1, Math.round((remainingNowMs + aheadMs) / 60000));
   }
 
-  if (!nowPlaying && upcoming.length === 0) {
+  if (!nowPlaying && upcoming.length === 0 && pendingApprovals.length === 0) {
     return <div className="pb-36" />;
   }
 
+  // Ekran zaten her saniye yenileniyor (çalma ilerlemesi); geri sayım buradan hesaplanır
+  const remaining = (iso: string | null) => {
+    if (!iso) return null;
+    const sec = Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 1000));
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  };
+
   return (
     <section className="px-4 pt-5 pb-36" aria-label="Sıradaki şarkılar">
+      <AnimatePresence initial={false}>
+        {pendingApprovals.map((p) => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto', transition: { duration: 0.3, ease: EASE_OUT } }}
+            exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
+            className="overflow-hidden"
+          >
+            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-white/[0.04] px-4 py-3">
+              {p.cover ? (
+                <img src={p.cover} alt="" className="w-9 h-9 shrink-0 rounded-lg object-cover bg-white/[0.06]" />
+              ) : (
+                <span className="w-9 h-9 shrink-0 rounded-lg bg-white/[0.06] grid place-items-center">
+                  <Hourglass className="w-4 h-4 text-white/50" />
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] text-white/50 flex items-center gap-1">
+                  <Hourglass className="w-3 h-3" /> Mekân onayı bekleniyor
+                </p>
+                <p className="text-[14px] font-semibold truncate">{p.title}</p>
+              </div>
+              {remaining(p.expiresAt) && <span className="text-[12px] text-white/50 shrink-0 tabular-nums">{remaining(p.expiresAt)}</span>}
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       <AnimatePresence initial={false}>
         {myIndex >= 0 && (
           <motion.div

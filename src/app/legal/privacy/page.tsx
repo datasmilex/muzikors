@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <li><B>Kimlik/Oturum:</B> Google ile oturum açma kapsamında ad, soyad, e-posta adresi ve profil resmi URI&apos;si.</li>
           <li><B>Cihaz/Ağ:</B> IP adresi, cihaz modeli, OS sürümü ve Firebase bildirim belirteci (FCM token).</li>
           <li><B>Mekan &amp; İstek Geçmişi:</B> Bağlanılan mekan (check-in), şarkı arama ve istek geçmişi, oylama tercihleri.</li>
-          <li><B>Anlık Konum:</B> Yalnızca kullanıcının kafede olup olmadığını doğrulamak (Vibe Guard) ve yakındaki kafeleri listelemek için anlık sorgulanır. Sürekli arka plan takibi yapılmaz.</li>
+          <li><B>Anlık Konum:</B> Yalnızca kullanıcının kafede olup olmadığını doğrulamak ve yakındaki kafeleri listelemek için anlık sorgulanır. Sürekli arka plan takibi yapılmaz.</li>
           <li><B>Abonelik Durumu:</B> Muzikors VIP / Premium abonelik statüsü ve Google Play Sipariş Numarası.</li>
         </ul>
         <LegalNote title="Abonelik & Ödeme Güvencesi">

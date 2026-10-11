@@ -1,275 +1,199 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+// Şarkı arama + Vibe Guard kararı.
+//
+// { q, venueId }      → Spotify araması (en fazla 10 sonuç)
+// { ids, venueId }    → Bilinen şarkı kimlikleri (geçmiş / favoriler listeleri için)
+//
+// Her sonuç kataloğa yazılır, yeni ya da bilgisi eskimiş sanatçıların türü
+// Spotify'dan sorulur ve mekânın kararı (`vibe`) sonuçla birlikte döner.
+// Şarkı isteğinde aynı karar request_track_acid içinde yeniden verilir.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import {
+  adminClient,
+  aiTagArtists,
+  CatalogTrack,
+  corsHeaders,
+  enrichArtistGenres,
+  forgetVenueToken,
+  getVenueAccessToken,
+  HttpError,
+  ingest,
+  json,
+  runInBackground,
+  SPOTIFY_ID,
+  spotifyGet,
+  toCatalogTrack,
+  trackArtists,
+} from '../_shared/vibe.ts';
 
-// Per-venue token cache: venueId -> { token, expiresAt }
-// This stays warm while the Edge Function isolate is alive
-const tokenCache = new Map<string, { token: string; expiresAt: number }>();
-
-async function getAccessTokenForVenue(venueId: string, supabaseAdmin: any): Promise<string> {
-  const cached = tokenCache.get(venueId);
-  if (cached && Date.now() < cached.expiresAt) {
-    return cached.token;
-  }
-
-  const numericVenueId = Number(venueId);
-
-  // 1. Try venue_secrets first (secure store)
-  let spotify_client_id: string | null = null;
-  let spotify_client_secret: string | null = null;
-  let spotify_refresh_token: string | null = null;
-
-  const { data: sec } = await supabaseAdmin
-    .from('venue_secrets')
-    .select('spotify_client_id, spotify_client_secret, spotify_refresh_token')
-    .eq('venue_id', numericVenueId)
-    .maybeSingle();
-
-  if (sec?.spotify_client_id && sec?.spotify_client_secret && sec?.spotify_refresh_token) {
-    spotify_client_id = sec.spotify_client_id;
-    spotify_client_secret = sec.spotify_client_secret;
-    spotify_refresh_token = sec.spotify_refresh_token;
-  } else {
-    // 2. Fallback to venues table
-    const { data: venue, error } = await supabaseAdmin
-      .from('venues')
-      .select('spotify_client_id, spotify_client_secret, spotify_refresh_token')
-      .eq('id', numericVenueId)
-      .maybeSingle();
-
-    if (error || !venue) {
-      throw new Error(`Mekan bulunamadı veya Supabase hatası: ${error?.message || 'Mekan kaydı yok'}`);
-    }
-
-    spotify_client_id = venue.spotify_client_id || sec?.spotify_client_id || null;
-    spotify_client_secret = venue.spotify_client_secret || sec?.spotify_client_secret || null;
-    spotify_refresh_token = venue.spotify_refresh_token || sec?.spotify_refresh_token || null;
-  }
-
-  if (!spotify_client_id || !spotify_client_secret || !spotify_refresh_token) {
-    const err = new Error('Mekan Spotify bağlantısını henüz kurmamış');
-    (err as any).status = 400;
-    throw err;
-  }
-
-  // Exchange refresh_token for access_token
-  const authHeader = btoa(`${spotify_client_id}:${spotify_client_secret}`);
-
-  const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${authHeader}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: spotify_refresh_token,
-    }),
-  });
-
-  if (!tokenRes.ok) {
-    const errText = await tokenRes.text();
-    // If token is invalid, clear the refresh_token from DB so venue shows as disconnected
-    if (tokenRes.status === 400 || tokenRes.status === 401) {
-      await supabaseAdmin
-        .from('venues')
-        .update({ spotify_refresh_token: null, has_spotify: false })
-        .eq('id', numericVenueId);
-      await supabaseAdmin
-        .from('venue_secrets')
-        .update({ spotify_refresh_token: null })
-        .eq('venue_id', numericVenueId);
-    }
-    throw new Error(`Spotify token yenilenemedi (${tokenRes.status}): ${errText}`);
-  }
-
-  const tokenData = await tokenRes.json();
-  if (!tokenData.access_token) {
-    throw new Error('Spotify token yanıtında access_token yok');
-  }
-
-  // Update cache
-  const expiresIn = (tokenData.expires_in ?? 3600) - 60;
-  const accessToken = tokenData.access_token;
-  tokenCache.set(venueId, { token: accessToken, expiresAt: Date.now() + expiresIn * 1000 });
-
-  // If Spotify returned a new refresh_token, persist it to both tables
-  if (tokenData.refresh_token) {
-    await supabaseAdmin
-      .from('venue_secrets')
-      .update({ spotify_refresh_token: tokenData.refresh_token })
-      .eq('venue_id', numericVenueId);
-  }
-
-  return accessToken;
+interface OutTrack extends CatalogTrack {
+  preview_url: string | null;
+  spotify_url: string;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+function present(t: OutTrack, vibe: unknown) {
+  const artist = t.artist_names.join(', ') || 'Bilinmeyen Sanatçı';
+  const cover = t.cover ?? '';
+  const durMs = t.duration_ms ?? 180000;
+  return {
+    id: t.id,
+    title: t.name,
+    name: t.name,
+    artist,
+    artistIds: t.artist_ids,
+    album: t.album ?? '',
+    albumCover: cover,
+    album_cover: cover,
+    coverUrl: cover,
+    album_art: cover,
+    spotifyUri: `spotify:track:${t.id}`,
+    uri: `spotify:track:${t.id}`,
+    duration_ms: durMs,
+    durationMs: durMs,
+    duration: Math.round(durMs / 1000),
+    votes: 1,
+    requestedBy: '',
+    requestedAt: '',
+    spotifyUrl: t.spotify_url,
+    year: t.year,
+    explicit: t.explicit,
+    preview_url: t.preview_url,
+    previewUrl: t.preview_url,
+    vibe: vibe ?? null,
+  };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
+  // deno-lint-ignore no-explicit-any
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: 'Geçersiz istek' }, 400);
+  }
+
+  const venueId = Number(body?.venueId);
+  if (!Number.isInteger(venueId) || venueId <= 0) return json({ error: 'venueId parametresi zorunludur' }, 400);
+
+  const q = typeof body?.q === 'string' ? body.q.trim().slice(0, 120) : '';
+  const ids: string[] = Array.isArray(body?.ids)
+    ? Array.from(new Set<string>(body.ids.map((x: unknown) => String(x).replace('spotify:track:', '')).filter((x: string) => SPOTIFY_ID.test(x)))).slice(0, 20)
+    : [];
+  if (!q && ids.length === 0) return json({ tracks: [] });
+
+  const admin = adminClient();
+
+  let token: string;
+  try {
+    token = await getVenueAccessToken(admin, venueId);
+  } catch (err) {
+    const e = err as HttpError;
+    console.error('[Spotify Search] Token hatası:', e.message);
+    return json({ error: e.message || 'Spotify bağlantısı kurulamadı' }, e.status || 400);
   }
 
   try {
-    if (req.method !== 'POST') {
-      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 405,
-      });
-    }
+    // deno-lint-ignore no-explicit-any
+    let items: any[] = [];
+    const fromCatalog: OutTrack[] = [];
 
-    const body = await req.json();
-    const q = body.q?.trim();
-    const venueId = body.venueId !== undefined && body.venueId !== null ? String(body.venueId).trim() : '';
-
-    if (!q) {
-      return new Response(JSON.stringify({ tracks: [] }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    }
-
-    if (!venueId) {
-      return new Response(JSON.stringify({ error: 'venueId parametresi zorunludur' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      });
-    }
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    let accessToken: string;
-    try {
-      accessToken = await getAccessTokenForVenue(venueId, supabaseAdmin);
-    } catch (err: any) {
-      console.error('[Spotify Search] Token hatası:', err.message);
-      return new Response(JSON.stringify({ error: err.message || 'Spotify bağlantısı kurulamadı' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: err.status || 400,
-      });
-    }
-
-    const spotifyParams = new URLSearchParams();
-    spotifyParams.append('q', q);
-    spotifyParams.append('type', 'track');
-    spotifyParams.append('market', 'TR');
-    spotifyParams.append('limit', '10');
-    
-    const searchUrl = 'https://api.spotify.com/v1/search?' + spotifyParams.toString();
-
-    const searchRes = await fetch(searchUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken.trim()}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-    });
-
-    if (!searchRes.ok) {
-      let spotifyErrorPayload: any;
-      try { spotifyErrorPayload = await searchRes.json(); }
-      catch { spotifyErrorPayload = await searchRes.text(); }
-      console.error('[Spotify Search Failed]', searchRes.status, spotifyErrorPayload);
-
-      if (searchRes.status === 401 || searchRes.status === 400) {
-        tokenCache.delete(venueId);
+    if (q) {
+      const params = new URLSearchParams({ q, type: 'track', market: 'TR', limit: '10' });
+      const res = await spotifyGet(token, `/search?${params.toString()}`);
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 400) forgetVenueToken(venueId);
+        let details: unknown;
+        try {
+          details = await res.json();
+        } catch {
+          details = await res.text();
+        }
+        console.error('[Spotify Search Failed]', res.status, details);
+        return json({ error: 'Spotify arama başarısız', details }, res.status);
       }
-
-      return new Response(JSON.stringify({ error: 'Spotify arama başarısız', details: spotifyErrorPayload }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: searchRes.status,
-      });
-    }
-
-    const data = await searchRes.json();
-    const items: any[] = data.tracks?.items ?? [];
-
-    // --- VIBE GUARD: Fetch artist genres ---
-    const artistIds = new Set<string>();
-    items.forEach((item: any) => {
-      item.artists?.forEach((a: any) => artistIds.add(a.id));
-    });
-    
-    const artistGenresMap: Record<string, string[]> = {};
-    const artistIdArray = Array.from(artistIds).slice(0, 50);
-
-    if (artistIdArray.length > 0) {
-      try {
-        const artistsRes = await fetch(
-          `https://api.spotify.com/v1/artists?ids=${artistIdArray.join(',')}`,
-          {
-            headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
+      const data = await res.json();
+      items = data?.tracks?.items ?? [];
+    } else {
+      // Önce katalog; bilinmeyenler Spotify'dan tek tek alınır
+      const { data: known } = await admin
+        .from('vibe_tracks')
+        .select('track_id, name, artist_ids, artist_names, album_name, album_cover, duration_ms, explicit, release_year')
+        .in('track_id', ids);
+      const knownIds = new Set<string>();
+      for (const row of known ?? []) {
+        knownIds.add(row.track_id);
+        fromCatalog.push({
+          id: row.track_id,
+          name: row.name,
+          artist_ids: row.artist_ids ?? [],
+          artist_names: row.artist_names ?? [],
+          album: row.album_name,
+          cover: row.album_cover,
+          duration_ms: row.duration_ms,
+          explicit: row.explicit,
+          year: row.release_year ? String(row.release_year) : null,
+          preview_url: null,
+          spotify_url: `https://open.spotify.com/track/${row.track_id}`,
+        });
+      }
+      const missing = ids.filter((id) => !knownIds.has(id));
+      const fetched = await Promise.all(
+        missing.map(async (id) => {
+          try {
+            const res = await spotifyGet(token, `/tracks/${id}?market=TR`);
+            return res.ok ? await res.json() : null;
+          } catch {
+            return null;
           }
-        );
-        if (artistsRes.ok) {
-          const artistsData = await artistsRes.json();
-          artistsData.artists?.forEach((artist: any) => {
-            if (artist?.id) artistGenresMap[artist.id] = artist.genres || [];
-          });
-        }
-      } catch (err) {
-        console.warn('[Vibe Guard] Genre fetch failed:', err);
-      }
+        }),
+      );
+      items = fetched.filter(Boolean);
     }
 
-    const tracks = items.map((item: any) => {
-      const images: any[] = item.album?.images ?? [];
-      const cover = images[1]?.url ?? images[0]?.url ?? images[2]?.url ?? '';
-      const durMs = item.duration_ms ?? 180000;
+    const fresh: OutTrack[] = [];
+    for (const item of items) {
+      const t = toCatalogTrack(item);
+      if (!t) continue;
+      fresh.push({ ...t, preview_url: item.preview_url ?? null, spotify_url: item.external_urls?.spotify ?? `https://open.spotify.com/track/${t.id}` });
+    }
 
-      const trackGenres = new Set<string>();
-      (item.artists ?? []).forEach((a: any) => {
-        if (a.id && artistGenresMap[a.id]) {
-          artistGenresMap[a.id].forEach(g => trackGenres.add(g.toLowerCase()));
-        }
-      });
+    // Kataloğa yaz. Yeni sanatçıların türü arka planda sorulur: Spotify geliştirici
+    // modunda tür listesi çoğunlukla boş döndüğü için aramayı bekletmeye değmez;
+    // kararda küratörlü sözlük ve (varsa) yapay zekâ etiketleri kullanılır.
+    const artists = trackArtists(items);
+    await ingest(admin, fresh, artists);
+    const artistIds = Array.from(new Set([...fresh, ...fromCatalog].flatMap((t) => t.artist_ids)));
+    if (artistIds.length > 0) {
+      runInBackground(enrichArtistGenres(admin, token, { ids: artistIds, limit: 10 }));
+    }
 
-      return {
-        id:           item.id,
-        title:        item.name,
-        name:         item.name,
-        artist:       (item.artists ?? []).map((a: any) => a.name).join(', ') || 'Bilinmeyen Sanatçı',
-        album:        item.album?.name ?? '',
-        albumCover:   cover,
-        album_cover:  cover,
-        coverUrl:     cover,
-        album_art:    cover,
-        spotifyUri:   item.uri ?? `spotify:track:${item.id}`,
-        uri:          item.uri ?? `spotify:track:${item.id}`,
-        duration_ms:  durMs,
-        durationMs:   durMs,
-        duration:     Math.round(durMs / 1000),
-        creditCost:   10,
-        votes:        1,
-        requestedBy:  '',
-        requestedAt:  '',
-        spotifyUrl:   item.external_urls?.spotify ?? '',
-        genres:       Array.from(trackGenres),
-        explicit:     item.explicit ?? false,
-        preview_url:  item.preview_url ?? null,
-        previewUrl:   item.preview_url ?? null,
-      };
+    // Sıralama: aramada Spotify'ın sırası, kimlik modunda istenen sıra
+    const all = [...fresh, ...fromCatalog];
+    const ordered = q ? all : (ids.map((id) => all.find((t) => t.id === id)).filter(Boolean) as OutTrack[]);
+
+    const { data: verdicts, error: evalErr } = await admin.rpc('vibe_evaluate_many', {
+      p_venue_id: venueId,
+      p_track_ids: ordered.map((t) => t.id),
     });
+    if (evalErr) console.warn('[vibe] karar alınamadı:', evalErr.message);
 
-    const finalTracks = tracks.slice(0, 10);
+    // Tür bazlı engel ya da "benzer tarz" kullanan mekânlarda, türü bulunamayan
+    // sanatçılar arka planda (anahtar tanımlıysa) yapay zekâya sorulur
+    const { data: cfg } = await admin
+      .from('venue_vibe')
+      .select('enabled, similar_enabled, blocked_categories')
+      .eq('venue_id', venueId)
+      .maybeSingle();
+    if (cfg?.enabled && (cfg.similar_enabled || (cfg.blocked_categories ?? []).length > 0) && artistIds.length > 0) {
+      runInBackground(aiTagArtists(admin, { ids: artistIds, limit: 25 }));
+    }
 
-    return new Response(JSON.stringify({ tracks: finalTracks, total: data.tracks?.total ?? finalTracks.length }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-
+    const tracks = ordered.slice(0, q ? 10 : 20).map((t) => present(t, verdicts?.[t.id]));
+    return json({ tracks, total: tracks.length });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error('[Spotify Search] Beklenmeyen hata:', (error as Error)?.message);
+    return json({ error: (error as Error)?.message || 'Arama başarısız' }, 500);
   }
 });
